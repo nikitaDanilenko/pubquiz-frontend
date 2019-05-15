@@ -53,6 +53,7 @@ type Msg = GetAll
          | SetPoints String
          | LocationChange
          | Updated (Result Http.Error ())
+         | Locked (Result Http.Error ())
 
 type alias User = String 
 type alias Password = String
@@ -61,20 +62,30 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = case msg of 
     SetUser u               -> ({ model | user = u }, Cmd.none)
     SetPassword p           -> ({ model | password = p}, Cmd.none)
-    GetAll                  -> ({ model | displayState = Authenticating }, getAll)
+    GetAll                  -> ({ model | displayState = Authenticating,
+                                          currentPoints = "",
+                                          editing = "" }, 
+                                 getAll)
+
     -- todo: Pretty-print the actual error.
     GotAll (Err err)        -> ({ model | errorMsg = "An error occurred"}, Cmd.none)
     GotAll (Ok text)        -> ({ model | quizzes = String.lines text, displayState = Selecting }, 
                                 Cmd.none)
-    GetSingle qName         -> ({ model | editing = qName }, 
-                                 getSingle qName)
+    
+    GetSingle qName         -> ({ model | editing = qName }, getSingle qName)
     -- todo: Pretty-print the actual error.
     GotSingle (Err err)     -> ({ model | errorMsg = "An error occurred"}, Cmd.none)
     GotSingle (Ok text)     -> ({ model | currentPoints = text,
                                           displayState = Editing }, Cmd.none)
-    AcknowledgeLock         -> ({ model | displayState = ConfirmingLock}, Cmd.none)
+    
     SetPoints points        -> ({ model | currentPoints = points}, Cmd.none)
     PostUpdate qName points -> (model, postUpdate qName points)
+    
+    AcknowledgeLock         -> ({ model | displayState = ConfirmingLock}, Cmd.none)
+    Lock qName              -> (model, postLock qName)
+    -- todo: Pretty-print the actual error.
+    Locked (Err err)        -> ({ model | errorMsg = "An error occurred"}, Cmd.none)
+    Locked (Ok ok)          -> (model, getAll)
     _                       -> (model, Cmd.none)
 
 view : Model -> Html Msg
@@ -150,12 +161,20 @@ postUpdate : QuizName -> String -> Cmd Msg
 postUpdate quizName points = 
     Http.post {
         url = mkFullPath "update",
-        body = Http.stringBody "application/x-www-form-urlencoded"  
-                               (String.concat [
+        body = encodeBody (String.concat [
                                 "quiz=", quizName, "&rounds=", (String.replace "\n" "%0A" points)
                                 ]),
         expect = Http.expectWhatever Updated
     }
+postLock : QuizName -> Cmd Msg
+postLock quizName = Http.post {
+    url = mkFullPath "lock",
+    body = encodeBody (String.concat ["quiz=", quizName]),
+    expect = Http.expectWhatever Locked
+  }
+
+encodeBody : String -> Http.Body
+encodeBody = Http.stringBody "application/x-www-form-urlencoded"
 
 type alias QuizName = String
 
