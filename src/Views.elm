@@ -1,7 +1,7 @@
 module Views exposing ( .. )
 
 import Html exposing              ( Html, div, text, input, button, textarea )
-import Html.Attributes exposing   ( id, autocomplete, class )            
+import Html.Attributes exposing   ( id, autocomplete, class, type_ )            
 import Html.Events exposing       ( onInput, onClick )
 import Html.Events.Extra exposing ( onEnter )
 
@@ -12,15 +12,15 @@ authenticationView md =
     div [ id "initialMain"]
         [ div [ id "userField" ] 
               [   text "User name"
-                , input [ autocomplete True, onInput SetUser, onEnter GetAll ] []
+                , input [ autocomplete True, onInput SetUser, onEnter Login ] []
               ],
           div [ id "passwordField" ]
               [
                   text "Password"
-                , input [ autocomplete True, onInput SetPassword, onEnter GetAll ] []
+                , input [ type_ "password", autocomplete True, onInput SetPassword, onEnter Login ] []
               ],
           div [ id "fetchButton" ]
-              [ button [ class "button", onClick GetAll ] [ text "Login" ] ],
+              [ button [ class "button", onClick Login ] [ text "Login" ] ],
           div [ id "errorLabel" ] [ text md.errorMsg ]
         ]
 
@@ -30,8 +30,12 @@ selectionView md =
         mkButton name = button [ class "quizButton", 
                                  onClick (GetSingle name) ] 
                                [ text name ]
-    in div [ id "allQuizzesMain" ]
-           (List.map mkButton (List.filter (\q -> not (String.isEmpty q)) md.quizzes))
+    in div [ id "quizSelectionMain"]
+           [ div [ id "selectExistingQuizzesMain" ]
+                 (List.map mkButton (List.filter (\q -> not (String.isEmpty q)) md.quizzes)),
+             div [ id "createNewQuiz" ]
+                 [ button [ class "newQuizButton", onClick StartCreating ] [ text "New quiz"] ] 
+           ]
 
 editingView : Model -> Html Msg
 editingView md =
@@ -55,4 +59,6 @@ confirmView md =
         ]
 
 creatingView : Model -> Html Msg
-creatingView md = confirmView md
+creatingView md = 
+  div [ id "creatingView" ]
+      [  ]
