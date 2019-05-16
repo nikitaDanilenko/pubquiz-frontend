@@ -6,7 +6,7 @@ import Html exposing         ( Html )
 import Http
 import Http exposing         ( get, emptyBody, post )
 import Json.Encode as Encode
-
+-- todo Write all out.
 import Constants exposing    ( .. )
 import Model exposing        ( .. )
 import Views exposing        ( .. )
@@ -48,6 +48,11 @@ update msg model = case msg of
     -- todo: Pretty-print the actual error.
     Locked (Err err)        -> ({ model | errorMsg = "An error occurred"}, Cmd.none)
     Locked (Ok ok)          -> (model, getAll)
+
+    Login                   -> ({ model | displayState = Authenticating }, login)
+
+    StartCreating           -> ({ model | displayState = Creating }, Cmd.none)
+
     _                       -> (model, Cmd.none)
 
 view : Model -> Html Msg
@@ -62,7 +67,14 @@ view model =
      in currentView model
 
 mkFullPath : String -> String
-mkFullPath str = String.concat [serverLocation, str]
+mkFullPath str = String.concat [apiLocation, str]
+
+login : User -> Password -> Cmd Msg
+login user password = Http.post {
+        url = mkFullPath loginApi,
+        expect = Http.expectString Logged,
+        body = encodeBody (mkParams [ (userParam, user), (passwordParam, password) )])
+    }
 
 getAll : Cmd Msg
 getAll = Http.get { 
@@ -95,7 +107,7 @@ createNew : QuizName -> Cmd Msg
 createNew quizName = Http.post {
     url = mkFullPath newApi,
     body = encodeBody (mkParam quizParam quizName),
-    expect = Http.expectWhatever Locked
+    expect = Http.expectWhatever Created
   }
 
 type alias RestParam = String
