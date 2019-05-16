@@ -1,6 +1,6 @@
 module Model exposing ( .. )
 
-import Http exposing ( Error )
+import Http exposing ( Error ( .. ) )
 
 type alias Model = 
     {
@@ -67,3 +67,11 @@ type Msg = GetAll
          | Created (Result Http.Error ())
          | Login
          | Logged (Result Http.Error String)
+
+errorToString : Http.Error -> String
+errorToString err = case err of
+     BadUrl url   -> String.concat [ "Bad URL: ", url ]
+     Timeout      -> "Timeout"
+     NetworkError -> "Network error"
+     BadStatus s  -> String.concat [ "Bad status: ", String.fromInt s ]
+     BadBody str  -> String.concat [ "Bad body: ", str ]
