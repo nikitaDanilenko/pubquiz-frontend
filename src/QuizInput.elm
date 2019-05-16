@@ -1,7 +1,6 @@
 module QuizInput exposing ( main )
 
 import Browser
-
 import Html exposing         ( Html )
 import Http
 import Http exposing         ( get, emptyBody, post )
@@ -30,13 +29,13 @@ update msg model = case msg of
                                  getAll)
 
     -- todo: Pretty-print the actual error.
-    GotAll (Err err)        -> ({ model | errorMsg = "An error occurred"}, Cmd.none)
+    GotAll (Err err)        -> ({ model | errorMsg = errorToString err}, Cmd.none)
     GotAll (Ok text)        -> ({ model | quizzes = String.lines text, displayState = Selecting }, 
                                 Cmd.none)
     
     GetSingle qName         -> ({ model | editing = qName }, getSingle qName)
     -- todo: Pretty-print the actual error.
-    GotSingle (Err err)     -> ({ model | errorMsg = "An error occurred"}, Cmd.none)
+    GotSingle (Err err)     -> ({ model | errorMsg = errorToString err}, Cmd.none)
     GotSingle (Ok text)     -> ({ model | currentPoints = text,
                                           displayState = Editing }, Cmd.none)
     
@@ -46,10 +45,12 @@ update msg model = case msg of
     AcknowledgeLock         -> ({ model | displayState = ConfirmingLock}, Cmd.none)
     Lock qName              -> (model, postLock qName)
     -- todo: Pretty-print the actual error.
-    Locked (Err err)        -> ({ model | errorMsg = "An error occurred"}, Cmd.none)
+    Locked (Err err)        -> ({ model | errorMsg = errorToString err}, Cmd.none)
     Locked (Ok ok)          -> (model, getAll)
 
-    Login                   -> ({ model | displayState = Authenticating }, login)
+    Login                   -> ({ model | displayState = Authenticating }, 
+                                login model.user model.password)
+    Logged (Err err)        -> ({ model | errorMsg = errorToString err}, Cmd.none)
 
     StartCreating           -> ({ model | displayState = Creating }, Cmd.none)
 
@@ -66,46 +67,45 @@ view model =
             Creating -> creatingView
      in currentView model
 
-mkFullPath : String -> String
-mkFullPath str = String.concat [apiLocation, str]
+
 
 login : User -> Password -> Cmd Msg
 login user password = Http.post {
-        url = mkFullPath loginApi,
+        url = loginApi,
         expect = Http.expectString Logged,
-        body = encodeBody (mkParams [ (userParam, user), (passwordParam, password) )])
+        body = encodeBody (mkParams [ (userParam, user), (passwordParam, password) ])
     }
 
 getAll : Cmd Msg
 getAll = Http.get { 
-    url = mkFullPath allApi, 
+    url = allApi, 
     expect = Http.expectString GotAll 
   }
 
 getSingle : String -> Cmd Msg
 getSingle quizName = Http.get { 
-        url = mkFullPath (String.concat [ "getQuizData?", mkParam quizParam quizName ]),
+        url = mkPath [quizApi, (String.concat [ "getQuizData?", mkParam quizParam quizName ])],
         expect = Http.expectString GotSingle
     }
 
 postUpdate : QuizName -> String -> Cmd Msg
 postUpdate quizName points = 
     Http.post {
-        url = mkFullPath updateApi,
+        url = updateApi,
         body = encodeBody (mkParams [(quizParam, quizName), 
                                      (roundsParam, String.replace "\n" "%0A" points)]),
         expect = Http.expectWhatever Updated
     }
 postLock : QuizName -> Cmd Msg
 postLock quizName = Http.post {
-    url = mkFullPath lockApi,
+    url = lockApi,
     body = encodeBody (mkParam quizParam quizName),
     expect = Http.expectWhatever Locked
   }
 
 createNew : QuizName -> Cmd Msg
 createNew quizName = Http.post {
-    url = mkFullPath newApi,
+    url = newApi,
     body = encodeBody (mkParam quizParam quizName),
     expect = Http.expectWhatever Created
   }
