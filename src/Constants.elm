@@ -35,4 +35,4 @@ allApi : String
 allApi = mkPath [quizApi, "all"]
 
 loginApi : String
-loginApi = mkPath [apiLocation, "secret"]
+loginApi = mkPath [apiLocation, "secrets"]
