@@ -1,8 +1,8 @@
 module Constants exposing ( .. )
 
-serverLocation : String
---serverLocation = "https://www.danilenko.io:8000/api/quiz/"
-serverLocation = "http://localhost:9000/api/quiz/"
+apiLocation : String
+--apiLocation = "https://www.danilenko.io:8000/api/"
+apiLocation = "http://localhost:9000/api/"
 
 quizParam : String
 quizParam = "quiz"
@@ -16,6 +16,9 @@ userParam = "user"
 passwordParam : String
 passwordParam = "pass"
 
+quizApi : String
+quizApi = String.concat [ apiLocation, "quiz"]
+
 newApi : String
 newApi = "create"
 
@@ -27,3 +30,6 @@ updateApi = "update"
 
 allApi : String
 allApi = "all"
+
+loginApi : String
+loginApi = 
