@@ -115,10 +115,10 @@ type alias RestValue = String
 type alias RestKey = String
 
 mkParam : RestKey -> RestValue -> RestParam
-mkParam key value = String.concat [key, "=", value]
+mkParam key value = String.join "=" [key, value]
 
 mkParams : List (RestKey, RestValue) -> RestParam
-mkParams kvs = String.concat (List.intersperse "&" (List.map (\(k, v) -> mkParam k v) kvs))
+mkParams kvs = String.join "&" (List.map (\(k, v) -> mkParam k v) kvs)
 
 encodeBody : String -> Http.Body
 encodeBody = Http.stringBody "application/x-www-form-urlencoded"
