@@ -10,6 +10,12 @@ quizParam = "quiz"
 roundsParam : String
 roundsParam = "rounds"
 
+userParam : String
+userParam = "user"
+
+passwordParam : String
+passwordParam = "pass"
+
 newApi : String
 newApi = "create"
 
