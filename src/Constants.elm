@@ -1,8 +1,8 @@
 module Constants exposing ( .. )
 
 apiLocation : String
---apiLocation = "https://www.danilenko.io:8000/api/"
-apiLocation = "http://localhost:9000/api/"
+--apiLocation = "https://www.danilenko.io:8000/api"
+apiLocation = "http://localhost:9000/api"
 
 quizParam : String
 quizParam = "quiz"
@@ -16,20 +16,23 @@ userParam = "user"
 passwordParam : String
 passwordParam = "pass"
 
+mkPath : List String -> String
+mkPath = String.join "/"
+
 quizApi : String
-quizApi = String.concat [ apiLocation, "quiz"]
+quizApi = mkPath [apiLocation, "quiz"]
 
 newApi : String
-newApi = "create"
+newApi = mkPath [quizApi, "create"]
 
 lockApi : String
-lockApi = "lock"
+lockApi = mkPath [quizApi, "lock"]
 
 updateApi : String
-updateApi = "update"
+updateApi = mkPath [quizApi, "update"]
 
 allApi : String
-allApi = "all"
+allApi = mkPath [quizApi, "all"]
 
 loginApi : String
-loginApi = 
+loginApi = mkPath [apiLocation, "secret"]
