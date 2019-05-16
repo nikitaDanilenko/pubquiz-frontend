@@ -62,3 +62,8 @@ type Msg = GetAll
          | LocationChange
          | Updated (Result Http.Error ())
          | Locked (Result Http.Error ())
+         | StartCreating
+         | Create QuizName
+         | Created (Result Http.Error ())
+         | Login
+         | Logged (Result Http.Error String)
