@@ -28,13 +28,12 @@ update msg model = case msg of
                                           editing = "" }, 
                                  getAll)
 
-    -- todo: Pretty-print the actual error.
     GotAll (Err err)        -> ({ model | errorMsg = errorToString err}, Cmd.none)
     GotAll (Ok text)        -> ({ model | quizzes = String.lines text, displayState = Selecting }, 
                                 Cmd.none)
     
     GetSingle qName         -> ({ model | editing = qName }, getSingle qName)
-    -- todo: Pretty-print the actual error.
+    
     GotSingle (Err err)     -> ({ model | errorMsg = errorToString err}, Cmd.none)
     GotSingle (Ok text)     -> ({ model | currentPoints = text,
                                           displayState = Editing }, Cmd.none)
@@ -44,13 +43,14 @@ update msg model = case msg of
     
     AcknowledgeLock         -> ({ model | displayState = ConfirmingLock}, Cmd.none)
     Lock qName              -> (model, postLock qName)
-    -- todo: Pretty-print the actual error.
+    
     Locked (Err err)        -> ({ model | errorMsg = errorToString err}, Cmd.none)
     Locked (Ok ok)          -> (model, getAll)
 
     Login                   -> ({ model | displayState = Authenticating }, 
                                 login model.user model.password)
     Logged (Err err)        -> ({ model | errorMsg = errorToString err}, Cmd.none)
+    Logged (Ok text)        -> (model, getAll)
 
     StartCreating           -> ({ model | displayState = Creating }, Cmd.none)
 
@@ -66,8 +66,6 @@ view model =
             ConfirmingLock -> confirmView
             Creating -> creatingView
      in currentView model
-
-
 
 login : User -> Password -> Cmd Msg
 login user password = Http.post {
