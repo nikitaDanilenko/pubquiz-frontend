@@ -1,14 +1,15 @@
 module QuizInput exposing ( main )
 
 import Browser
-import Html exposing         ( Html )
+import Html exposing            ( Html, div, node )
+import Html.Attributes exposing ( rel, type_, href, id )
 import Http
-import Http exposing         ( get, emptyBody, post )
+import Http exposing            ( get, emptyBody, post )
 import Json.Encode as Encode
 -- todo Write all out.
-import Constants exposing    ( .. )
-import Model exposing        ( .. )
-import Views exposing        ( .. )
+import Constants exposing       ( .. )
+import Model exposing           ( .. )
+import Views exposing           ( .. )
 
 main : Program () Model Msg
 main =
@@ -28,32 +29,42 @@ update msg model = case msg of
                                           editing = "" }, 
                                  getAll)
 
-    GotAll (Err err)        -> ({ model | errorMsg = errorToString err}, Cmd.none)
-    GotAll (Ok text)        -> ({ model | quizzes = String.lines text, displayState = Selecting }, 
+    GotAll (Err err)        -> ({ model | feedback = errorToString err}, Cmd.none)
+    GotAll (Ok text)        -> ({ model | quizzes = String.lines text, 
+                                          displayState = Selecting }, 
                                 Cmd.none)
     
-    GetSingle qName         -> ({ model | editing = qName }, getSingle qName)
+    GetSingle qName         -> ({ model | editing = qName, feedback = "" }, getSingle qName)
     
-    GotSingle (Err err)     -> ({ model | errorMsg = errorToString err}, Cmd.none)
+    GotSingle (Err err)     -> ({ model | feedback = errorToString err}, Cmd.none)
     GotSingle (Ok text)     -> ({ model | currentPoints = text,
-                                          displayState = Editing }, Cmd.none)
+                                          displayState = Editing,
+                                          feedback = "" }, Cmd.none)
     
     SetPoints points        -> ({ model | currentPoints = points}, Cmd.none)
     PostUpdate qName points -> (model, postUpdate qName points)
+    Updated (Err err)       -> ({ model | feedback = errorToString err }, Cmd.none)
+    Updated (Ok _)          -> ({ model | feedback = "Update successful"}, Cmd.none)
     
-    AcknowledgeLock         -> ({ model | displayState = ConfirmingLock}, Cmd.none)
+    AcknowledgeLock         -> ({ model | displayState = ConfirmingLock }, Cmd.none)
     Lock qName              -> (model, postLock qName)
     
-    Locked (Err err)        -> ({ model | errorMsg = errorToString err}, Cmd.none)
-    Locked (Ok ok)          -> (model, getAll)
+    Locked (Err err)        -> ({ model | feedback = errorToString err}, Cmd.none)
+    Locked (Ok ok)          -> ({ model | feedback = String.concat ["Locked ", model.editing] }, 
+                                getAll)
 
     Login                   -> ({ model | displayState = Authenticating }, 
                                 login model.user model.password)
-    Logged (Err err)        -> ({ model | errorMsg = errorToString err}, Cmd.none)
-    Logged (Ok text)        -> (model, getAll)
+    Logged (Err err)        -> ({ model | feedback = errorToString err}, Cmd.none)
+    Logged (Ok text)        -> ({ model | feedback = "" }, getAll)
 
     StartCreating           -> ({ model | displayState = Creating }, Cmd.none)
-
+    SetNewQuizName name     -> ({ model | createName = name }, Cmd.none)
+    Create name             -> if String.isEmpty (model.createName) 
+                                then ({ model | feedback = "Empty quiz name" }, Cmd.none)
+                                else (model, createNew model.createName)
+    Created (Err err)       -> ({ model | feedback = errorToString err }, Cmd.none)
+    Created (Ok ok)         -> ({ model | editing = model.createName }, getSingle model.createName)
     _                       -> (model, Cmd.none)
 
 view : Model -> Html Msg
@@ -65,7 +76,7 @@ view model =
             Selecting -> selectionView
             ConfirmingLock -> confirmView
             Creating -> creatingView
-     in currentView model
+     in wrapView currentView model 
 
 login : User -> Password -> Cmd Msg
 login user password = Http.post {
