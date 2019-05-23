@@ -1,6 +1,8 @@
 module Model exposing ( .. )
 
-import Http exposing ( Error ( .. ) )
+import Http exposing   ( Error ( .. ) )
+
+import Labels exposing ( Labels, defaultLabels )
 
 type alias Model = 
     {
@@ -11,6 +13,7 @@ type alias Model =
         currentPoints : String,
         displayState : DisplayState,
         createName : QuizName,
+        labels : Labels,
         feedback : String
     }
 
@@ -22,6 +25,7 @@ initialModel () = ({ user = "",
                      currentPoints = "",
                      displayState = Initial, 
                      createName = "",
+                     labels = defaultLabels,
                      feedback = "" 
                      }, Cmd.none)
 
@@ -70,6 +74,16 @@ type Msg = GetAll
          | SetNewQuizName QuizName
          | Login
          | Logged (Result Http.Error String)
+         | LabelsUpdate LabelsField String
+
+type LabelsField = RoundField
+                 | GroupField
+                 | OwnPointsField
+                 | MaxReachedField
+                 | MaxReachableField
+                 | BackField
+                 | MainField
+                 | OwnPageField
 
 errorToString : Http.Error -> String
 errorToString err = case err of
