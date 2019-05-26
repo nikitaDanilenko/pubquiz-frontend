@@ -1,7 +1,7 @@
 module Views exposing ( .. )
 
-import Html exposing              ( Html, div, text, input, button, textarea )
-import Html.Attributes exposing   ( id, autocomplete, class, type_ )            
+import Html exposing              ( Html, div, text, input, button, textarea, node )
+import Html.Attributes exposing   ( id, autocomplete, class, type_, disabled, rel, href )            
 import Html.Events exposing       ( onInput, onClick )
 import Html.Events.Extra exposing ( onEnter )
 
@@ -21,7 +21,7 @@ authenticationView md =
               ],
           div [ id "fetchButton" ]
               [ button [ class "button", onClick Login ] [ text "Login" ] ],
-          div [ id "errorLabel" ] [ text md.errorMsg ]
+          addFeedbackLabel md
         ]
 
 selectionView : Model -> Html Msg
@@ -34,18 +34,21 @@ selectionView md =
            [ div [ id "selectExistingQuizzesMain" ]
                  (List.map mkButton (List.filter (\q -> not (String.isEmpty q)) md.quizzes)),
              div [ id "createNewQuiz" ]
-                 [ button [ class "newQuizButton", onClick StartCreating ] [ text "New quiz"] ] 
+                 [ button [ class "newQuizButton", onClick StartCreating ] [ text "New quiz"] ] ,
+             addFeedbackLabel md
            ]
 
 editingView : Model -> Html Msg
 editingView md =
     div [ id "singleQuiz" ]
-        [ textarea [ id "singleQuizArea", onInput SetPoints ] [ text md.currentPoints ],
+        [ text (String.concat ["Editing ", md.editing]),
+          textarea [ id "singleQuizArea", onInput SetPoints ] [ text md.currentPoints ],
           button [ class "button", onClick GetAll ] [ text "Back" ],
           button [ class "button", onClick AcknowledgeLock ] [ text "Lock" ],
           button [ class "button", onClick (PostUpdate md.editing md.currentPoints) ]
-                 [ text "Update" ]
-                  ]
+                 [ text "Update" ],
+          addFeedbackLabel md
+        ]
 
 confirmView : Model -> Html Msg
 confirmView md =
@@ -61,4 +64,24 @@ confirmView md =
 creatingView : Model -> Html Msg
 creatingView md = 
   div [ id "creatingView" ]
-      [  ]
+      [ text "Quiz name",
+        input [ onInput SetNewQuizName, onEnter (Create md.createName) ] [],
+        button [ class "button", 
+                 onClick (Create md.createName), 
+                 disabled (String.isEmpty md.createName) 
+               ] 
+               [ text "Create" ] ,
+        button [ class "button", onClick GetAll ] [ text "Back" ],
+        addFeedbackLabel md
+      ]
+
+addFeedbackLabel : Model -> Html Msg
+addFeedbackLabel model = div [ id "feedbackLabel" ] [ text model.feedback ]
+
+wrapView : (Model -> Html Msg) -> Model -> Html Msg
+wrapView viewOf model = 
+  div [ id "mainPage"]
+      [
+        node "link" [ rel "stylesheet", type_ "text/css", href "style.css" ] [],
+        viewOf model 
+      ]

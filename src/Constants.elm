@@ -23,7 +23,7 @@ quizApi : String
 quizApi = mkPath [apiLocation, "quiz"]
 
 newApi : String
-newApi = mkPath [quizApi, "create"]
+newApi = mkPath [quizApi, "new"]
 
 lockApi : String
 lockApi = mkPath [quizApi, "lock"]

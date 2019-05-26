@@ -10,7 +10,8 @@ type alias Model =
         editing : QuizName,
         currentPoints : String,
         displayState : DisplayState,
-        errorMsg : String
+        createName : QuizName,
+        feedback : String
     }
 
 initialModel : () -> (Model, Cmd Msg)
@@ -20,7 +21,8 @@ initialModel () = ({ user = "",
                      editing = "",
                      currentPoints = "",
                      displayState = Initial, 
-                     errorMsg = "" 
+                     createName = "",
+                     feedback = "" 
                      }, Cmd.none)
 
 {- The different types of possible states the page can transition. -}
@@ -65,6 +67,7 @@ type Msg = GetAll
          | StartCreating
          | Create QuizName
          | Created (Result Http.Error ())
+         | SetNewQuizName QuizName
          | Login
          | Logged (Result Http.Error String)
 
