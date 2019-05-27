@@ -52,7 +52,10 @@ editingView md =
                  [ text "Update" ],
           div [ id "answerSheet" ]
               [ a [ class "link",
-                    href (mkPath [ sheetPDFPrefix, md.editing, sheetPDFFile ]),
+                    href (mkPath [ sheetPDFPrefix, 
+                                   md.editing, 
+                                   String.concat [md.editing, "-", sheetPDFFile ]
+                                 ]),
                     target "_blank"
                   ] 
                   [ text "Get quiz sheet" ] ],
