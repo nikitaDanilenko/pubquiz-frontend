@@ -1,8 +1,15 @@
 module Constants exposing ( .. )
 
+serverLocation : String
+-- serverLocation = "https://www.danilenko.io"
+serverLocation = "http://localhost"
+
+serverPort : String
+-- serverPort = "8000"
+serverPort = "9000"
+
 apiLocation : String
---apiLocation = "https://www.danilenko.io:8000/api"
-apiLocation = "http://localhost:9000/api"
+apiLocation = mkPath [ String.concat [serverLocation, ":", serverPort], "api" ]
 
 quizParam : String
 quizParam = "quiz"
@@ -36,3 +43,10 @@ allApi = mkPath [quizApi, "all"]
 
 loginApi : String
 loginApi = mkPath [apiLocation, "secrets"]
+
+sheetPDFPrefix : String
+--sheetPDFPrefix = mkPath [ serverLocation, "quizzes" ]
+sheetPDFPrefix = mkPath ["file://", "media", "nda", "DATA", "Programme", "pubquiz-server", "quizzes"]
+
+sheetPDFFile : String
+sheetPDFFile = "Sheet.pdf"
