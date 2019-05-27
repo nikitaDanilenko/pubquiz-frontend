@@ -1,10 +1,13 @@
 module Views exposing ( .. )
 
-import Html exposing              ( Html, div, text, input, button, textarea, node )
-import Html.Attributes exposing   ( id, autocomplete, class, type_, disabled, rel, href )            
+import Html exposing              ( Html, div, text, input, button, textarea, node, a )
+import Html.Attributes exposing   ( id, autocomplete, class, type_, disabled, rel, href,
+                                    placeholder, download, target )            
 import Html.Events exposing       ( onInput, onClick )
 import Html.Events.Extra exposing ( onEnter )
 
+import Constants exposing         ( sheetPDFPrefix, sheetPDFFile, mkPath )
+import Labels exposing            ( Labels )
 import Model exposing             ( .. )
 
 authenticationView : Model -> Html Msg
@@ -47,6 +50,15 @@ editingView md =
           button [ class "button", onClick AcknowledgeLock ] [ text "Lock" ],
           button [ class "button", onClick (PostUpdate md.editing md.currentPoints) ]
                  [ text "Update" ],
+          div [ id "answerSheet" ]
+              [ a [ class "link",
+                    href (mkPath [ sheetPDFPrefix, 
+                                   md.editing, 
+                                   String.concat [md.editing, "-", sheetPDFFile ]
+                                 ]),
+                    target "_blank"
+                  ] 
+                  [ text "Get quiz sheet" ] ],
           addFeedbackLabel md
         ]
 
@@ -63,17 +75,32 @@ confirmView md =
 
 creatingView : Model -> Html Msg
 creatingView md = 
-  div [ id "creatingView" ]
-      [ text "Quiz name",
-        input [ onInput SetNewQuizName, onEnter (Create md.createName) ] [],
-        button [ class "button", 
-                 onClick (Create md.createName), 
-                 disabled (String.isEmpty md.createName) 
-               ] 
-               [ text "Create" ] ,
-        button [ class "button", onClick GetAll ] [ text "Back" ],
-        addFeedbackLabel md
-      ]
+  let createOnEnter = onEnter (Create md.createName)
+  in div [ id "creatingView" ]
+         [ text "Quiz name (internal)", input [ onInput SetNewQuizName, createOnEnter ] [],
+           mkCreationForm createOnEnter md.labels,
+           button [ class "button", onClick (Create md.createName), 
+                    disabled (String.isEmpty md.createName) ] [ text "Create" ] ,
+           button [ class "button", onClick GetAll ] [ text "Back" ],
+           addFeedbackLabel md
+          ]
+
+mkCreationForm : Html.Attribute Msg -> Labels -> Html Msg
+mkCreationForm createOnEnter labels = 
+  let associations = [("Description (external)", MainField, labels.mainLabel),
+                      ("Label for rounds", RoundField, labels.roundLabel),
+                      ("Label for groups", GroupField, labels.groupLabel),
+                      ("Label for own points", OwnPointsField, labels.ownPointsLabel),
+                      ("Label for maximum reached points", MaxReachedField, labels.maxReachedLabel),
+                      ("Label for maximum reachable points", MaxReachableField, labels.maxReachableLabel),
+                      ("Label for 'back to chart'", BackField, labels.backToChartView),
+                      ("Label for own page", OwnPageField, labels.ownPageLabel)
+                     ]
+      mkInput : String -> LabelsField -> String -> List (Html Msg)
+      mkInput lbl fld dft = 
+        [ text lbl, input [ onInput (LabelsUpdate fld), placeholder dft, createOnEnter ] [] ]
+  in div [ id "labelsForm" ]
+         (List.concatMap (\(lbl, fld, dft) -> mkInput lbl fld dft) associations)
 
 addFeedbackLabel : Model -> Html Msg
 addFeedbackLabel model = div [ id "feedbackLabel" ] [ text model.feedback ]

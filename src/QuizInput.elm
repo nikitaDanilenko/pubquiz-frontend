@@ -8,6 +8,7 @@ import Http exposing            ( get, emptyBody, post )
 import Json.Encode as Encode
 -- todo Write all out.
 import Constants exposing       ( .. )
+import Labels exposing          ( Labels )
 import Model exposing           ( .. )
 import Views exposing           ( .. )
 
@@ -62,9 +63,10 @@ update msg model = case msg of
     SetNewQuizName name     -> ({ model | createName = name }, Cmd.none)
     Create name             -> if String.isEmpty (model.createName) 
                                 then ({ model | feedback = "Empty quiz name" }, Cmd.none)
-                                else (model, createNew model.createName)
+                                else (model, createNew model.createName model.labels)
     Created (Err err)       -> ({ model | feedback = errorToString err }, Cmd.none)
     Created (Ok ok)         -> ({ model | editing = model.createName }, getSingle model.createName)
+    LabelsUpdate fld text   -> ({ model | labels = updateLabels fld text model.labels }, Cmd.none)
     _                       -> (model, Cmd.none)
 
 view : Model -> Html Msg
@@ -112,13 +114,25 @@ postLock quizName = Http.post {
     expect = Http.expectWhatever Locked
   }
 
-createNew : QuizName -> Cmd Msg
-createNew quizName = Http.post {
+createNew : QuizName -> Labels -> Cmd Msg
+createNew quizName labels = Http.post {
     url = newApi,
-    body = encodeBody (mkParam quizParam quizName),
+    body = encodeBody (mkParams ((quizParam, quizName) :: Labels.toParams labels)),
     expect = Http.expectWhatever Created
   }
 
+updateLabels : LabelsField -> String -> Labels -> Labels
+updateLabels field text lbls = 
+    case field of
+        RoundField -> { lbls | roundLabel = text }
+        GroupField -> { lbls | groupLabel = text }
+        OwnPointsField -> { lbls | ownPointsLabel = text }
+        MaxReachedField -> { lbls | maxReachedLabel = text }
+        MaxReachableField -> { lbls | maxReachableLabel = text }
+        BackField -> { lbls | backToChartView = text }
+        MainField -> { lbls | mainLabel = text }
+        OwnPageField -> { lbls | ownPageLabel = text }
+    
 type alias RestParam = String
 type alias RestValue = String
 type alias RestKey = String
