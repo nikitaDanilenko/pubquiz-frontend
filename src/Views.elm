@@ -1,11 +1,12 @@
 module Views exposing ( .. )
 
-import Html exposing              ( Html, div, text, input, button, textarea, node )
+import Html exposing              ( Html, div, text, input, button, textarea, node, a )
 import Html.Attributes exposing   ( id, autocomplete, class, type_, disabled, rel, href,
-                                    placeholder )            
+                                    placeholder, download, target )            
 import Html.Events exposing       ( onInput, onClick )
 import Html.Events.Extra exposing ( onEnter )
 
+import Constants exposing         ( sheetPDFPrefix, sheetPDFFile, mkPath )
 import Labels exposing            ( Labels )
 import Model exposing             ( .. )
 
@@ -49,6 +50,12 @@ editingView md =
           button [ class "button", onClick AcknowledgeLock ] [ text "Lock" ],
           button [ class "button", onClick (PostUpdate md.editing md.currentPoints) ]
                  [ text "Update" ],
+          div [ id "answerSheet" ]
+              [ a [ class "link",
+                    href (mkPath [ sheetPDFPrefix, md.editing, sheetPDFFile ]),
+                    target "_blank"
+                  ] 
+                  [ text "Get quiz sheet" ] ],
           addFeedbackLabel md
         ]
 
