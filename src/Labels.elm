@@ -23,17 +23,29 @@ emptyLabels = {
       ownPageLabel = ""   
     }
 
+mkLabels : String -> String -> String -> String -> String -> String -> String -> String -> Labels
+mkLabels roundLbl groupLbl ownPointsLbl maxReachedLbl maxReachableLbl backToChartLbl mainLbl ownPageLbl =
+  {
+    roundLabel = roundLbl,
+    groupLabel = groupLbl,
+    ownPointsLabel = ownPointsLbl,
+    maxReachedLabel = maxReachedLbl,
+    maxReachableLabel = maxReachableLbl,
+    backToChartView = backToChartLbl,
+    mainLabel = mainLbl,
+    ownPageLabel = ownPageLbl
+  }
+
 defaultLabels : Labels
-defaultLabels = {
-      roundLabel = "Runde", 
-      groupLabel = "Gruppe", 
-      ownPointsLabel = "Erreichte Punkte", 
-      maxReachedLabel = "Erreichte Höchstpunktzahl", 
-      maxReachableLabel = "Erreichbare Punkte", 
-      backToChartView = "Gesamtwertung", 
-      mainLabel = "Quiz", 
-      ownPageLabel = "Eigene Punkte"
-    }
+defaultLabels = mkLabels 
+    "Runde"
+    "Gruppe"
+    "Erreichte Punkte"
+    "Erreichte Höchstpunktzahl"
+    "Erreichbare Punkte"
+    "Gesamtwertung"
+    "Quiz"
+    "Eigene Punkte"
 
 toParams : Labels -> List (String, String)
 toParams labels = [
