@@ -54,7 +54,7 @@ toParams labels = [
   ("ownPointsLabel", labels.ownPointsLabel),
   ("maxReachedLabel", labels.maxReachedLabel),
   ("maxReachableLabel", labels.maxReachableLabel),
-  ("backToChartView", labels.backToChartView),
+  ("backToChartViewLabel", labels.backToChartView),
   ("mainLabel", labels.mainLabel),
   ("ownPageLabel", labels.ownPageLabel)
   ]
