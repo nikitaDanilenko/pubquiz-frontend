@@ -7,9 +7,11 @@ import Http
 import Http exposing            ( get, emptyBody, post )
 import Json.Encode as Encode
 -- todo Write all out.
+import Base exposing            ( User, Password )
 import Constants exposing       ( .. )
 import Labels exposing          ( Labels )
 import Model exposing           ( .. )
+import NewUser exposing         ( NewUser )
 import Views exposing           ( .. )
 
 main : Program () Model Msg
@@ -59,14 +61,30 @@ update msg model = case msg of
     Logged (Err err)        -> ({ model | feedback = errorToString err}, Cmd.none)
     Logged (Ok text)        -> ({ model | feedback = "" }, getAll)
 
-    StartCreating           -> ({ model | displayState = Creating }, Cmd.none)
+    StartCreatingQuiz       -> ({ model | displayState = CreatingQuiz }, Cmd.none)
     SetNewQuizName name     -> ({ model | createName = name }, Cmd.none)
-    Create name             -> if String.isEmpty (model.createName) 
+    CreateQuiz              -> if String.isEmpty (model.createName) 
                                 then ({ model | feedback = "Empty quiz name" }, Cmd.none)
-                                else (model, createNew model.createName model.labels)
+                                else (model, createNewQuiz model.createName model.labels)
     Created (Err err)       -> ({ model | feedback = errorToString err }, Cmd.none)
     Created (Ok ok)         -> ({ model | editing = model.createName }, getSingle model.createName)
-    LabelsUpdate fld text   -> ({ model | labels = updateLabels fld text model.labels }, Cmd.none)
+
+    
+    StartCreatingUser       -> ({ model | newUser = NewUser.emptyUser, displayState = CreatingUser},
+                                Cmd.none)
+    SetNewUserParam fld txt -> let nu = NewUser.update fld txt model.newUser
+                               in ({ model | newUser =  nu}, 
+                                Cmd.none)
+
+    CreateUser              -> (model, createNewUser model.newUser)
+    CreatedUser (Ok ok)     -> ({ model | newUser = NewUser.emptyUser, 
+                                          feedback = String.join " " [ "Created user", 
+                                                                       model.newUser.user ] 
+                                }, getAll)
+    CreatedUser (Err err)   -> ({ model | feedback = errorToString err }, Cmd.none)
+
+    LabelsUpdate fld text   -> let lbls = updateLabels fld text model.labels
+                               in ({ model | labels = lbls }, Cmd.none)
     _                       -> (model, Cmd.none)
 
 view : Model -> Html Msg
@@ -77,8 +95,9 @@ view model =
             Editing -> editingView
             Selecting -> selectionView
             ConfirmingLock -> confirmView
-            Creating -> creatingView
-     in wrapView currentView model 
+            CreatingQuiz -> creatingQuizView
+            CreatingUser -> creatingUserView
+     in wrapView currentView model
 
 login : User -> Password -> Cmd Msg
 login user password = Http.post {
@@ -114,11 +133,18 @@ postLock quizName = Http.post {
     expect = Http.expectWhatever Locked
   }
 
-createNew : QuizName -> Labels -> Cmd Msg
-createNew quizName labels = Http.post {
+createNewQuiz : QuizName -> Labels -> Cmd Msg
+createNewQuiz quizName labels = Http.post {
     url = newApi,
     body = encodeBody (mkParams ((quizParam, quizName) :: Labels.toParams labels)),
     expect = Http.expectWhatever Created
+  }
+
+createNewUser : NewUser -> Cmd Msg
+createNewUser newUser = Http.post {
+    url = newUserApi,
+    body = encodeBody (mkParams [(userParam, newUser.user), (passwordParam, newUser.password1)]),
+    expect = Http.expectWhatever CreatedUser
   }
 
 updateLabels : LabelsField -> String -> Labels -> Labels
