@@ -14,33 +14,42 @@
   color: white;
 }
 
-.button {
-position: absolute;
-     left: 20px;
-     top: 80px;
-		}
+/*.button {
+  position: absolute;
+  left: 20px;
+  top: 80px;
+}*/
 
+label, input {
+  padding-right: 5px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  text-align: left;
+}
 
+label {
+  text-align: left;
+}
+
+input {
+  align-self: right;
+}
 		
-#passwordField {
-	
-	 position: absolute;
-     left: 20px;
-     top: 50px;
-	}
+/*#passwordField {	
+	position: absolute;
+  left: 20px;
+  top: 50px;
+}
 
 #userField {
-	
 	position: absolute;
-     left: 20px;
-     top: 20px;
-	}
+  left: 20px;
+  top: 20px;
+}*/
 	
 #passwordField, #userField {
-   	font-size: 16px;
-	color: rgb(0, 0, 0);
+  font-size: 16px;
+  color: rgb(0, 0, 0);
 	width: 500px;
-	
-
 }
 
