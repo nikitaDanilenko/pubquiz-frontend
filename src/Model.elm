@@ -1,8 +1,10 @@
 module Model exposing ( .. )
 
-import Http exposing   ( Error ( .. ) )
+import Http exposing    ( Error ( .. ) )
 
-import Labels exposing ( Labels, defaultLabels )
+import Base   exposing  ( User, Password )
+import Labels exposing  ( Labels, defaultLabels )
+import NewUser exposing ( NewUser, NewUserField )
 
 type alias Model = 
     {
@@ -14,6 +16,7 @@ type alias Model =
         displayState : DisplayState,
         createName : QuizName,
         labels : Labels,
+        newUser : NewUser,
         feedback : String
     }
 
@@ -26,6 +29,7 @@ initialModel () = ({ user = "",
                      displayState = Initial, 
                      createName = "",
                      labels = defaultLabels,
+                     newUser = NewUser.emptyUser,
                      feedback = "" 
                      }, Cmd.none)
 
@@ -35,7 +39,8 @@ type DisplayState = Initial -- The state at the beginning of the application.
                   | Authenticating -- The view presented for the authentication of a user.
                   | Selecting -- In this view you see all available quizzes.
                   | ConfirmingLock
-                  | Creating
+                  | CreatingQuiz
+                  | CreatingUser
 
 type alias QuizName = String
 
@@ -45,15 +50,11 @@ type alias Quiz =
         rounds : List Round
     }
 
-
 type alias Round = 
     {
         maxPoints : Float,
         teamPoints : List Float
     }
-
-type alias User = String 
-type alias Password = String
 
 type Msg = GetAll 
          | GotAll (Result Http.Error String)
@@ -68,10 +69,14 @@ type Msg = GetAll
          | LocationChange
          | Updated (Result Http.Error ())
          | Locked (Result Http.Error ())
-         | StartCreating
-         | Create QuizName
+         | StartCreatingQuiz
+         | StartCreatingUser
+         | CreateQuiz
          | Created (Result Http.Error ())
+         | CreateUser
+         | CreatedUser (Result Http.Error ())
          | SetNewQuizName QuizName
+         | SetNewUserParam NewUserField String
          | Login
          | Logged (Result Http.Error String)
          | LabelsUpdate LabelsField String
