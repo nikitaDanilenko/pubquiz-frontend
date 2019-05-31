@@ -1,8 +1,9 @@
 module Views exposing ( .. )
 
-import Html exposing              ( Html, div, text, input, button, textarea, node, a )
+import Html exposing              ( Html, div, text, input, button, textarea, node, a, table, 
+                                    tr, td, label )
 import Html.Attributes exposing   ( id, autocomplete, class, type_, disabled, rel, href,
-                                    placeholder, download, target )            
+                                    placeholder, download, target, for )            
 import Html.Events exposing       ( onInput, onClick )
 import Html.Events.Extra exposing ( onEnter )
 
@@ -14,12 +15,12 @@ authenticationView : Model -> Html Msg
 authenticationView md = 
     div [ id "initialMain"]
         [ div [ id "userField" ] 
-              [   text "User name"
+              [   label [ for "user" ] [ text "User name" ]
                 , input [ autocomplete True, onInput SetUser, onEnter Login ] []
               ],
           div [ id "passwordField" ]
               [
-                  text "Password"
+                  label [ for "password" ] [ text "Password" ]
                 , input [ type_ "password", autocomplete True, onInput SetPassword, onEnter Login ] []
               ],
           div [ id "fetchButton" ]
@@ -65,8 +66,9 @@ editingView md =
 confirmView : Model -> Html Msg
 confirmView md =
     div [ id "confirmView" ]
-        [ text (String.concat ["You are about to lock ", md.editing, ". ",
-                               "This cannot be undone. Please confirm. "]),
+        [ label [ for "lockWarning"] 
+                [ text (String.concat ["You are about to lock ", md.editing, ". ",
+                                       "This cannot be undone. Please confirm. "]) ],
           button [ class "button", onClick (GetSingle md.editing) ]
                  [ text "Abort" ],
           button [ class "button", onClick (Lock md.editing) ]
@@ -77,7 +79,8 @@ creatingView : Model -> Html Msg
 creatingView md = 
   let createOnEnter = onEnter (Create md.createName)
   in div [ id "creatingView" ]
-         [ text "Quiz name (internal)", input [ onInput SetNewQuizName, createOnEnter ] [],
+         [ label [ for "internalQuizName" ] [ text "Quiz name (internal)" ], 
+           input [ onInput SetNewQuizName, createOnEnter ] [],
            mkCreationForm createOnEnter md.labels,
            button [ class "button", onClick (Create md.createName), 
                     disabled (String.isEmpty md.createName) ] [ text "Create" ] ,
@@ -96,11 +99,13 @@ mkCreationForm createOnEnter labels =
                       ("Label for 'back to chart'", BackField, labels.backToChartView),
                       ("Label for own page", OwnPageField, labels.ownPageLabel)
                      ]
-      mkInput : String -> LabelsField -> String -> List (Html Msg)
+      mkInput : String -> LabelsField -> String -> Html Msg
       mkInput lbl fld dft = 
-        [ text lbl, input [ onInput (LabelsUpdate fld), placeholder dft, createOnEnter ] [] ]
+        div [ id (createIdByField fld) ] 
+            [ label [] [ text lbl ], 
+              input [ onInput (LabelsUpdate fld), placeholder dft, createOnEnter ] [] ]
   in div [ id "labelsForm" ]
-         (List.concatMap (\(lbl, fld, dft) -> mkInput lbl fld dft) associations)
+         (List.map (\(lbl, fld, dft) -> mkInput lbl fld dft) associations)
 
 addFeedbackLabel : Model -> Html Msg
 addFeedbackLabel model = div [ id "feedbackLabel" ] [ text model.feedback ]
@@ -112,3 +117,20 @@ wrapView viewOf model =
         node "link" [ rel "stylesheet", type_ "text/css", href "style.css" ] [],
         viewOf model 
       ]
+
+createIdByField : LabelsField -> String
+createIdByField fld = case fld of
+  RoundField -> "roundField"
+  GroupField -> "groupField"
+  OwnPointsField -> "ownPointsField"
+  MaxReachedField -> "MaxReachedField"
+  MaxReachableField -> "MaxReachableField"
+  BackField -> "BackField"
+  MainField -> "MainField"
+  OwnPageField -> "OwnPageField"
+
+toCell : String -> Html Msg
+toCell str = td [] [ text str ]
+
+toTable : List (List String) -> Html Msg
+toTable = table [] << List.map (tr [] << List.map toCell)
