@@ -51,7 +51,7 @@ editingView md =
         [ text (String.concat ["Editing ", md.editing]),
           textarea [ id "singleQuizArea", onInput SetPoints ] [ text md.currentPoints ],
           button [ class "button", onClick GetAll ] [ text "Back" ],
-          button [ class "button", onClick AcknowledgeLock ] [ text "Lock" ],
+          button [ class "lockButton", onClick AcknowledgeLock ] [ text "Lock" ],
           button [ class "button", onClick (PostUpdate md.editing md.currentPoints) ]
                  [ text "Update" ],
           div [ id "answerSheet" ]
