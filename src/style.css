@@ -26,14 +26,6 @@ label, input {
   padding-bottom: 2px;
   text-align: left;
 }
-
-label {
-  text-align: left;
-}
-
-input {
-  align-self: right;
-}
 		
 /*#passwordField {	
 	position: absolute;
