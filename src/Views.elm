@@ -11,7 +11,6 @@ import Constants exposing         ( sheetPDFPrefix, sheetPDFFile, mkPath )
 import Labels exposing            ( Labels )
 import Model exposing             ( .. )
 import NewUser exposing           ( NewUserField ( .. ), isValid )
-import Util exposing              ( foldMaybe )
 
 authenticationView : Model -> Html Msg
 authenticationView md = 
