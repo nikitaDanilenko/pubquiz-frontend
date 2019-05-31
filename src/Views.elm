@@ -10,6 +10,8 @@ import Html.Events.Extra exposing ( onEnter )
 import Constants exposing         ( sheetPDFPrefix, sheetPDFFile, mkPath )
 import Labels exposing            ( Labels )
 import Model exposing             ( .. )
+import NewUser exposing           ( NewUserField ( .. ), isValid )
+import Util exposing              ( foldMaybe )
 
 authenticationView : Model -> Html Msg
 authenticationView md = 
@@ -38,7 +40,9 @@ selectionView md =
            [ div [ id "selectExistingQuizzesMain" ]
                  (List.map mkButton (List.filter (\q -> not (String.isEmpty q)) md.quizzes)),
              div [ id "createNewQuiz" ]
-                 [ button [ class "newQuizButton", onClick StartCreating ] [ text "New quiz"] ] ,
+                 [ button [ class "newQuizButton", onClick StartCreatingQuiz ] [ text "New quiz"] ],
+             div [ id "createNewUser" ]
+                 [ button [ class "newUserButton", onClick StartCreatingUser ] [ text "New user" ] ],
              addFeedbackLabel md
            ]
 
@@ -75,18 +79,41 @@ confirmView md =
                  [ text "Yes, lock" ]
         ]
 
-creatingView : Model -> Html Msg
-creatingView md = 
-  let createOnEnter = onEnter (Create md.createName)
-  in div [ id "creatingView" ]
+creatingQuizView : Model -> Html Msg
+creatingQuizView md = 
+  let createOnEnter = onEnter CreateQuiz
+  in div [ id "creatingQuizView" ]
          [ label [ for "internalQuizName" ] [ text "Quiz name (internal)" ], 
            input [ onInput SetNewQuizName, createOnEnter ] [],
            mkCreationForm createOnEnter md.labels,
-           button [ class "button", onClick (Create md.createName), 
+           button [ class "button", onClick CreateQuiz, 
                     disabled (String.isEmpty md.createName) ] [ text "Create" ] ,
            button [ class "button", onClick GetAll ] [ text "Back" ],
            addFeedbackLabel md
           ]
+
+creatingUserView : Model -> Html Msg
+creatingUserView md =
+  let createOnEnter = onEnter CreateUser
+  in div [ id "creatingUserView" ]
+      [ div [ id "creatingUser"] 
+            [ label [ for "username" ] [ text "User name" ],
+              input [ onInput (SetNewUserParam UserField), createOnEnter ] []
+            ],
+        div [ id "creatingPassword1" ]
+            [ label [ for "password1" ] [ text "Password" ],
+              input [ onInput (SetNewUserParam PasswordField1), type_ "password", createOnEnter ] []
+            ],
+        div [ id "creatingPassword2" ]
+            [ label [ for "password2" ] [ text "Repeat password" ],
+              input [ onInput (SetNewUserParam PasswordField2), type_ "password", createOnEnter ] []
+            ],
+        button [ class "button", onClick CreateUser, 
+                 disabled (not (isValid md.newUser)) ]
+               [ text "Create" ],
+        button [ class "button", onClick GetAll ] [ text "Back" ],
+        addFeedbackLabel md
+      ]
 
 mkCreationForm : Html.Attribute Msg -> Labels -> Html Msg
 mkCreationForm createOnEnter labels = 
