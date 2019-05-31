@@ -29,8 +29,14 @@ mkPath = String.join "/"
 quizApi : String
 quizApi = mkPath [apiLocation, "quiz"]
 
+userApi : String
+userApi = mkPath [apiLocation, "users"]
+
 newApi : String
 newApi = mkPath [quizApi, "new"]
+
+newUserApi : String
+newUserApi = mkPath [userApi, "createUser"]
 
 lockApi : String
 lockApi = mkPath [quizApi, "lock"]
