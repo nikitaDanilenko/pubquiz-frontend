@@ -1,13 +1,14 @@
 module QuizInput exposing ( main )
 
 import Browser
+import Crypto.Hash exposing     ( sha512 )
 import Html exposing            ( Html, div, node )
 import Html.Attributes exposing ( rel, type_, href, id )
 import Http
 import Http exposing            ( get, emptyBody, post )
 import Json.Encode as Encode
 -- todo Write all out.
-import Base exposing            ( User, Password )
+import Base exposing            ( User, Password, SessionKey )
 import Constants exposing       ( .. )
 import Labels exposing          ( Labels )
 import Model exposing           ( .. )
@@ -45,7 +46,7 @@ update msg model = case msg of
                                           feedback = "" }, Cmd.none)
     
     SetPoints points        -> ({ model | currentPoints = points}, Cmd.none)
-    PostUpdate qName points -> (model, postUpdate qName points)
+    PostUpdate qName points -> (model, postUpdate model.user model.oneWayHash qName points)
     Updated (Err err)       -> ({ model | feedback = errorToString err }, Cmd.none)
     Updated (Ok _)          -> ({ model | feedback = "Update successful"}, Cmd.none)
     
@@ -59,13 +60,17 @@ update msg model = case msg of
     Login                   -> ({ model | displayState = Authenticating }, 
                                 login model.user model.password)
     Logged (Err err)        -> ({ model | feedback = errorToString err}, Cmd.none)
-    Logged (Ok text)        -> ({ model | feedback = "" }, getAll)
+    Logged (Ok text)        -> ({ model | feedback = "", oneWayHash = text }, getAll)
 
     StartCreatingQuiz       -> ({ model | displayState = CreatingQuiz }, Cmd.none)
     SetNewQuizName name     -> ({ model | createName = name }, Cmd.none)
     CreateQuiz              -> if String.isEmpty (model.createName) 
                                 then ({ model | feedback = "Empty quiz name" }, Cmd.none)
-                                else (model, createNewQuiz model.createName model.labels)
+                                else (model, 
+                                      createNewQuiz model.user 
+                                                    model.oneWayHash 
+                                                    model.createName 
+                                                    model.labels)
     Created (Err err)       -> ({ model | feedback = errorToString err }, Cmd.none)
     Created (Ok ok)         -> ({ model | editing = model.createName }, getSingle model.createName)
 
@@ -118,14 +123,16 @@ getSingle quizName = Http.get {
         expect = Http.expectString GotSingle
     }
 
-postUpdate : QuizName -> String -> Cmd Msg
-postUpdate quizName points = 
-    Http.post {
+postUpdate : User -> SessionKey -> QuizName -> String -> Cmd Msg
+postUpdate u sk quizName points = 
+    let params = mkParamsWithSignature u sk [(quizParam, quizName), 
+                                             (roundsParam, points)]
+    in Http.post {
         url = updateApi,
-        body = encodeBody (mkParams [(quizParam, quizName), 
-                                     (roundsParam, String.replace "\n" "%0A" points)]),
+        body = encodeBody params,
         expect = Http.expectWhatever Updated
     }
+
 postLock : QuizName -> Cmd Msg
 postLock quizName = Http.post {
     url = lockApi,
@@ -133,12 +140,14 @@ postLock quizName = Http.post {
     expect = Http.expectWhatever Locked
   }
 
-createNewQuiz : QuizName -> Labels -> Cmd Msg
-createNewQuiz quizName labels = Http.post {
-    url = newApi,
-    body = encodeBody (mkParams ((quizParam, quizName) :: Labels.toParams labels)),
-    expect = Http.expectWhatever Created
-  }
+createNewQuiz : User -> SessionKey -> QuizName -> Labels -> Cmd Msg
+createNewQuiz u sk quizName labels = 
+    let params = mkWithSignature u sk [(quizParam, quizName)]
+    in Http.post {
+        url = newApi,
+        body = encodeBody (mkParams (List.concat [params, Labels.toParams labels])),
+        expect = Http.expectWhatever Created
+    }
 
 createNewUser : NewUser -> Cmd Msg
 createNewUser newUser = Http.post {
@@ -168,6 +177,15 @@ mkParam key value = String.join "=" [key, value]
 
 mkParams : List (RestKey, RestValue) -> RestParam
 mkParams kvs = String.join "&" (List.map (\(k, v) -> mkParam k v) kvs)
+
+mkWithSignature : User -> SessionKey -> List (RestKey, RestValue) -> List (RestKey, RestValue)
+mkWithSignature u key kvs = 
+    let allParams = (userParam, u) :: kvs
+        sig = sha512 (String.concat [key, mkParams allParams])
+    in (signatureParam, sig) :: allParams
+
+mkParamsWithSignature : User -> SessionKey -> List (RestKey, RestValue) -> RestParam
+mkParamsWithSignature u key kvs = mkParams (mkWithSignature u key kvs)
 
 encodeBody : String -> Http.Body
 encodeBody = Http.stringBody "application/x-www-form-urlencoded"
