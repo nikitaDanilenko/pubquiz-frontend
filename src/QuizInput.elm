@@ -64,10 +64,13 @@ update msg model = case msg of
 
     StartCreatingQuiz       -> ({ model | displayState = CreatingQuiz }, Cmd.none)
     SetNewQuizName name     -> ({ model | createName = name }, Cmd.none)
+    SetRoundsNumber rs      -> let roundNumber = Maybe.withDefault 4 (String.toInt rs)
+                               in ({ model | numberOfRounds = roundNumber }, Cmd.none)
     CreateQuiz              -> if String.isEmpty (model.createName) 
                                 then ({ model | feedback = "Empty quiz name" }, Cmd.none)
                                 else (model, 
-                                      createNewQuiz model.user 
+                                      createNewQuiz (String.fromInt model.numberOfRounds)
+                                                    model.user 
                                                     model.oneWayHash 
                                                     model.createName 
                                                     model.labels)
@@ -142,12 +145,12 @@ postLock u sk quizName =
         expect = Http.expectWhatever Locked
     }
 
-createNewQuiz : User -> SessionKey -> QuizName -> Labels -> Cmd Msg
-createNewQuiz u sk quizName labels = 
+createNewQuiz : String -> User -> SessionKey -> QuizName -> Labels -> Cmd Msg
+createNewQuiz rs u sk quizName labels = 
     let params = mkWithSignature u sk [(quizParam, quizName), (actionParam, createQuiz)]
     in Http.post {
         url = newApi,
-        body = encodeBody (mkParams (List.concat [params, Labels.toParams labels])),
+        body = encodeBody (mkParams ((roundsNumberParam, rs) :: List.concat [params, Labels.toParams labels])),
         expect = Http.expectWhatever Created
     }
 
