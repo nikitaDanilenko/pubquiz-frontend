@@ -3,7 +3,7 @@ module Views exposing ( .. )
 import Html exposing              ( Html, div, text, input, button, textarea, node, a, table, 
                                     tr, td, label )
 import Html.Attributes exposing   ( id, autocomplete, class, type_, disabled, rel, href,
-                                    placeholder, download, target, for )            
+                                    placeholder, download, target, for, min )            
 import Html.Events exposing       ( onInput, onClick )
 import Html.Events.Extra exposing ( onEnter )
 
@@ -84,6 +84,9 @@ creatingQuizView md =
   in div [ id "creatingQuizView" ]
          [ label [ for "internalQuizName" ] [ text "Quiz name (internal)" ], 
            input [ onInput SetNewQuizName, createOnEnter ] [],
+           div [ id "roundsNumberDiv"] 
+               [ label [ for "roundsNumber", type_ "number", min "1" ] [ text "Number of rounds" ],
+                 input [ onInput SetRoundsNumber, createOnEnter ] [] ], 
            mkCreationForm createOnEnter md.labels,
            button [ class "button", onClick CreateQuiz, 
                     disabled (String.isEmpty md.createName) ] [ text "Create" ] ,
