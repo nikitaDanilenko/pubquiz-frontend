@@ -23,6 +23,9 @@ userParam = "user"
 passwordParam : String
 passwordParam = "pass"
 
+signatureParam : String
+signatureParam = "signature"
+
 mkPath : List String -> String
 mkPath = String.join "/"
 
