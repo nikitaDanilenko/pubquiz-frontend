@@ -85,8 +85,11 @@ creatingQuizView md =
          [ label [ for "internalQuizName" ] [ text "Quiz name (internal)" ], 
            input [ onInput SetNewQuizName, createOnEnter ] [],
            div [ id "roundsNumberDiv"] 
-               [ label [ for "roundsNumber", type_ "number", min "1" ] [ text "Number of rounds" ],
-                 input [ onInput SetRoundsNumber, createOnEnter ] [] ], 
+               [ label [ for "roundsNumber", type_ "number", min "1" ]
+                       [ text "Number of rounds" ],
+                 input [ onInput SetRoundsNumber, 
+                         createOnEnter,
+                         placeholder (String.fromInt md.numberOfRounds) ] [] ], 
            mkCreationForm createOnEnter md.labels,
            button [ class "button", onClick CreateQuiz, 
                     disabled (String.isEmpty md.createName) ] [ text "Create" ] ,
