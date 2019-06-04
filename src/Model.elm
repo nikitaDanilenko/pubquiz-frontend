@@ -10,6 +10,7 @@ type alias Model =
     {
         user : User,
         password : Password,
+        oneWayHash : String,
         quizzes : List QuizName,
         editing : QuizName,
         currentPoints : String,
@@ -22,7 +23,8 @@ type alias Model =
 
 initialModel : () -> (Model, Cmd Msg)
 initialModel () = ({ user = "",
-                     password = "", 
+                     password = "",
+                     oneWayHash = "", 
                      quizzes = [], 
                      editing = "",
                      currentPoints = "",
