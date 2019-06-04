@@ -14,6 +14,7 @@ type alias Model =
         quizzes : List QuizName,
         editing : QuizName,
         currentPoints : String,
+        numberOfRounds : Int,
         displayState : DisplayState,
         createName : QuizName,
         labels : Labels,
@@ -28,6 +29,7 @@ initialModel () = ({ user = "",
                      quizzes = [], 
                      editing = "",
                      currentPoints = "",
+                     numberOfRounds = 4,
                      displayState = Initial, 
                      createName = "",
                      labels = defaultLabels,
@@ -68,6 +70,7 @@ type Msg = GetAll
          | SetUser User
          | SetPassword Password
          | SetPoints String
+         | SetRoundsNumber String
          | LocationChange
          | Updated (Result Http.Error ())
          | Locked (Result Http.Error ())
