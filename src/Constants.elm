@@ -26,6 +26,9 @@ quizParam = "quiz"
 roundsParam : String
 roundsParam = "rounds"
 
+roundsNumberParam : String
+roundsNumberParam = "roundsNumber"
+
 newUserParam : String
 newUserParam = "newUser"
 
