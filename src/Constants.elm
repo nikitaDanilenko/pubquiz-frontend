@@ -11,11 +11,23 @@ serverPort = "9000"
 apiLocation : String
 apiLocation = mkPath [ String.concat [serverLocation, ":", serverPort], "api" ]
 
+actionParam : String
+actionParam = "action"
+
+createQuiz : String
+createQuiz = "createQuiz"
+
+lockQuiz : String
+lockQuiz = "lock"
+
 quizParam : String
 quizParam = "quiz"
 
 roundsParam : String
 roundsParam = "rounds"
+
+newUserParam : String
+newUserParam = "newUser"
 
 userParam : String
 userParam = "user"
