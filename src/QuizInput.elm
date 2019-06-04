@@ -51,7 +51,7 @@ update msg model = case msg of
     Updated (Ok _)          -> ({ model | feedback = "Update successful"}, Cmd.none)
     
     AcknowledgeLock         -> ({ model | displayState = ConfirmingLock }, Cmd.none)
-    Lock qName              -> (model, postLock qName)
+    Lock qName              -> (model, postLock model.user model.oneWayHash qName)
     
     Locked (Err err)        -> ({ model | feedback = errorToString err}, Cmd.none)
     Locked (Ok ok)          -> ({ model | feedback = String.concat ["Locked ", model.editing] }, 
@@ -81,7 +81,7 @@ update msg model = case msg of
                                in ({ model | newUser =  nu}, 
                                 Cmd.none)
 
-    CreateUser              -> (model, createNewUser model.newUser)
+    CreateUser              -> (model, createNewUser model.user model.oneWayHash model.newUser)
     CreatedUser (Ok ok)     -> ({ model | newUser = NewUser.emptyUser, 
                                           feedback = String.join " " [ "Created user", 
                                                                        model.newUser.user ] 
@@ -133,28 +133,33 @@ postUpdate u sk quizName points =
         expect = Http.expectWhatever Updated
     }
 
-postLock : QuizName -> Cmd Msg
-postLock quizName = Http.post {
-    url = lockApi,
-    body = encodeBody (mkParam quizParam quizName),
-    expect = Http.expectWhatever Locked
-  }
+postLock : User -> SessionKey -> QuizName -> Cmd Msg
+postLock u sk quizName = 
+    let params = mkParamsWithSignature u sk [(quizParam, quizName), (actionParam, lockQuiz)]
+    in Http.post {
+        url = lockApi,
+        body = encodeBody params,
+        expect = Http.expectWhatever Locked
+    }
 
 createNewQuiz : User -> SessionKey -> QuizName -> Labels -> Cmd Msg
 createNewQuiz u sk quizName labels = 
-    let params = mkWithSignature u sk [(quizParam, quizName)]
+    let params = mkWithSignature u sk [(quizParam, quizName), (actionParam, createQuiz)]
     in Http.post {
         url = newApi,
         body = encodeBody (mkParams (List.concat [params, Labels.toParams labels])),
         expect = Http.expectWhatever Created
     }
 
-createNewUser : NewUser -> Cmd Msg
-createNewUser newUser = Http.post {
-    url = newUserApi,
-    body = encodeBody (mkParams [(userParam, newUser.user), (passwordParam, newUser.password1)]),
-    expect = Http.expectWhatever CreatedUser
-  }
+createNewUser : User -> SessionKey -> NewUser -> Cmd Msg
+createNewUser u sk newUser = 
+    let params = mkParamsWithSignature u sk [(newUserParam, newUser.user), 
+                                             (passwordParam, newUser.password1)]
+    in Http.post {
+        url = newUserApi,
+        body = encodeBody params,
+        expect = Http.expectWhatever CreatedUser
+    }
 
 updateLabels : LabelsField -> String -> Labels -> Labels
 updateLabels field text lbls = 
