@@ -13,8 +13,13 @@
   background-color: rgb(228, 47, 12);
 }
 
-.button:hover {
+.button:enabled:hover {
   background-color: rgb(50, 180, 50);
+}
+
+.button:disabled {
+  background-color: rgb(125, 125, 125);
+  color: rgb(25, 25, 25);
 }
 
 .quizButton {
