@@ -103,10 +103,10 @@ creatingQuizView md =
                          type_ "number", 
                          min "1",
                          createOnEnter,
-                         placeholder (String.fromInt md.numberOfRounds) ] [] ], 
+                         placeholder md.numberOfRounds ] [] ], 
            mkCreationForm createOnEnter md.labels,
            button [ class "button", onClick CreateQuiz, 
-                    disabled (String.isEmpty md.createName) ] [ text "Create" ] ,
+                    disabled (not (isValidNewQuiz md)) ] [ text "Create" ] ,
            button [ class "button", onClick GetAll ] [ text "Back" ],
            addFeedbackLabel md
           ]
@@ -186,6 +186,9 @@ splitFirstLast text =
   case String.lines text of
     []      -> ("", [])
     l :: ls -> (l, ls)
+
+isValidNewQuiz : Model -> Bool
+isValidNewQuiz md = not (String.isEmpty md.createName) && isValidInt md.numberOfRounds
 
 isParserSuccess : Parser a -> String -> Bool
 isParserSuccess p text = case run p text of

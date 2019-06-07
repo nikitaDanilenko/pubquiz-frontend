@@ -64,12 +64,11 @@ update msg model = case msg of
 
     StartCreatingQuiz       -> ({ model | displayState = CreatingQuiz }, Cmd.none)
     SetNewQuizName name     -> ({ model | createName = name }, Cmd.none)
-    SetRoundsNumber rs      -> let roundNumber = Maybe.withDefault 4 (String.toInt rs)
-                               in ({ model | numberOfRounds = roundNumber }, Cmd.none)
+    SetRoundsNumber rs      -> ({ model | numberOfRounds = rs }, Cmd.none)
     CreateQuiz              -> if String.isEmpty (model.createName) 
                                 then ({ model | feedback = "Empty quiz name" }, Cmd.none)
                                 else (model, 
-                                      createNewQuiz (String.fromInt model.numberOfRounds)
+                                      createNewQuiz model.numberOfRounds
                                                     model.user 
                                                     model.oneWayHash 
                                                     model.createName 
