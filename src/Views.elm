@@ -3,9 +3,11 @@ module Views exposing ( .. )
 import Html exposing              ( Html, div, text, input, button, textarea, node, a, table, 
                                     tr, td, label )
 import Html.Attributes exposing   ( id, autocomplete, class, type_, disabled, rel, href,
-                                    placeholder, download, target, for, min )            
+                                    placeholder, download, target, for, min, acceptCharset )            
 import Html.Events exposing       ( onInput, onClick )
 import Html.Events.Extra exposing ( onEnter )
+import Parser exposing            ( run, int, float, spaces, sequence, Trailing ( .. ),
+                                    Parser, succeed, (|.), (|=), symbol )
 
 import Constants exposing         ( sheetPDFPrefix, sheetPDFFile, mkPath )
 import Labels exposing            ( Labels )
@@ -48,23 +50,32 @@ selectionView md =
 editingView : Model -> Html Msg
 editingView md =
     div [ id "singleQuiz" ]
-        [ text (String.concat ["Editing ", md.editing]),
+        [ div [ id "editingLabel"] 
+              [ label [ for "editingQuiz" ]
+                      [ text (String.join " " ["Editing", md.editing]) ] ],
           textarea [ id "singleQuizArea", onInput SetPoints ] [ text md.currentPoints ],
           button [ class "button", onClick GetAll ] [ text "Back" ],
           button [ class "lockButton", onClick AcknowledgeLock ] [ text "Lock" ],
-          button [ class "button", onClick (PostUpdate md.editing md.currentPoints) ]
+          button [ class "button", 
+                   onClick (PostUpdate md.editing md.currentPoints),
+                   disabled (isInvalidRoundsText md.currentPoints) ]
                  [ text "Update" ],
           div [ id "answerSheet" ]
               [ a [ class "link",
                     href (mkPath [ sheetPDFPrefix, 
                                    md.editing, 
-                                   String.concat [md.editing, "-", sheetPDFFile ]
+                                   String.join "-" [ md.editing, sheetPDFFile ]
                                  ]),
                     target "_blank"
                   ] 
                   [ text "Get quiz sheet" ] ],
           addFeedbackLabel md
         ]
+
+convenientPointEditingView : Model -> Html Msg
+convenientPointEditingView md =
+  let (header, rounds) = splitFirstLast md.currentPoints
+  in div [] []
 
 confirmView : Model -> Html Msg
 confirmView md =
@@ -85,9 +96,12 @@ creatingQuizView md =
          [ label [ for "internalQuizName" ] [ text "Quiz name (internal)" ], 
            input [ onInput SetNewQuizName, createOnEnter ] [],
            div [ id "roundsNumberDiv"] 
-               [ label [ for "roundsNumber", type_ "number", min "1" ]
+               [ label [ for "roundsNumber" ]
                        [ text "Number of rounds" ],
-                 input [ onInput SetRoundsNumber, 
+                 input [ onInput SetRoundsNumber,
+                         class "roundsSpinner",
+                         type_ "number", 
+                         min "1",
                          createOnEnter,
                          placeholder (String.fromInt md.numberOfRounds) ] [] ], 
            mkCreationForm createOnEnter md.labels,
@@ -166,3 +180,41 @@ toCell str = td [] [ text str ]
 
 toTable : List (List String) -> Html Msg
 toTable = table [] << List.map (tr [] << List.map toCell)
+
+splitFirstLast : String -> (String, List String)
+splitFirstLast text = 
+  case String.lines text of
+    []      -> ("", [])
+    l :: ls -> (l, ls)
+
+isParserSuccess : Parser a -> String -> Bool
+isParserSuccess p text = case run p text of
+                          Ok _ -> True
+                          Err _ -> False
+
+isValidInt : String -> Bool
+isValidInt = isParserSuccess int
+
+isValidFloat : String -> Bool
+isValidFloat = isParserSuccess float
+
+pointsPerRoundParser : Parser Round
+pointsPerRoundParser = succeed Round 
+                         |. spaces 
+                         |= float
+                         |. spaces
+                         |. symbol ":"
+                         |= sequence {
+                              start = "",
+                              separator = "",
+                              end = "",
+                              spaces = spaces,
+                              item = float,
+                              trailing = Optional
+                            }
+
+
+isInvalidRoundsText : String -> Bool
+isInvalidRoundsText text = 
+  let (header, rounds) = splitFirstLast text
+  in True
