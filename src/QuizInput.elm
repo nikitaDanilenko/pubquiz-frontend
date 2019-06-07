@@ -80,7 +80,7 @@ update msg model = case msg of
     StartCreatingUser       -> ({ model | newUser = NewUser.emptyUser, displayState = CreatingUser},
                                 Cmd.none)
     SetNewUserParam fld txt -> let nu = NewUser.update fld txt model.newUser
-                               in ({ model | newUser =  nu}, 
+                               in ({ model | newUser =  nu }, 
                                 Cmd.none)
 
     CreateUser              -> (model, createNewUser model.user model.oneWayHash model.newUser)
