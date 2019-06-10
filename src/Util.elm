@@ -1,6 +1,6 @@
 module Util exposing ( .. )
 
-import Parser exposing ( Parser, run )
+import Parser exposing ( Parser, run, chompWhile )
 
 escapeHTML : String -> String
 escapeHTML str = case String.uncons str of
@@ -29,3 +29,6 @@ splitFirstLast text =
 
 isParserSuccess : Parser a -> String -> Bool
 isParserSuccess p text = foldMaybe False (\_ -> True) (Result.toMaybe (run p text))
+
+blanks : Parser ()
+blanks = chompWhile (\c -> c == ' ' || c == '\r')
