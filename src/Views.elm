@@ -59,10 +59,17 @@ editingView md =
               ],
           div [ id "groupsInQuiz" ]
               [ label [ for "groupInQuizLabel" ] [ text "Groups in the current quiz" ],
-                input [ value "0", type_ "number", min "1", max "20", step "1" ] []
+                input [ value (String.fromInt md.groupsInQuiz), 
+                        type_ "number", 
+                        min "1", 
+                        max "20", 
+                        step "1", 
+                        onInput SetGroupsInQuiz 
+                      ] 
+                      []
               ]
          ] ++
-         List.indexedMap (\i rd -> mkRoundForm (1 + i) md.groupsInQuiz rd)
+         List.indexedMap (\i rd -> mkRoundForm i md.groupsInQuiz rd)
                          md.currentQuiz.rounds
           ++ 
          [
@@ -173,16 +180,18 @@ addFeedbackLabel model = div [ id "feedbackLabel" ] [ text model.feedback ]
 mkRoundForm : Int -> Int -> Round -> Html Msg
 mkRoundForm number gs rd = 
   div [ id "roundPoints" ]
-      ( label [ for "roundNumber" ] [ text (String.join " " [ "Round", String.fromInt number ]) ] ::
-        label [ for "maxPoints" ] [ text (String.join " " [ "Obtainable" ])] ::
-        input (onInput (SetMaxPoints number) :: 
-               value (String.fromFloat rd.maxPoints) :: 
+      ( label [ for "roundNumber" ] 
+              [ text (String.join " " [ "Round", String.fromInt (1 + number) ]) ] ::
+        label [ for "maxPoints" ] [ text "Obtainable" ] ::
+        input (value (String.fromFloat rd.maxPoints) :: 
+               onInput (SetMaxPoints number) :: 
                pointInputAttributes) 
               [] ::
         List.concatMap (\(i, ps) -> [ label [ for "pointsPerGroupLabel" ] 
-                                            [ text (String.join " " ["Group", String.fromInt i]) ],
-                                      input (onInput (UpdatePoint number i) :: 
-                                             value (String.fromFloat ps) ::
+                                            [ text (String.join " " ["Group", 
+                                                                     String.fromInt (1 + i)]) ],
+                                      input (value (String.fromFloat ps) ::
+                                             onInput (UpdatePoints number i) :: 
                                              pointInputAttributes) 
                                             []
                                     ])
