@@ -2,8 +2,8 @@ module Views exposing ( .. )
 
 import Html exposing              ( Html, div, text, input, button, textarea, node, a, table, 
                                     tr, td, label )
-import Html.Attributes exposing   ( id, autocomplete, class, type_, disabled, rel, href,
-                                    placeholder, download, target, for, min, acceptCharset )            
+import Html.Attributes exposing   ( id, autocomplete, class, type_, disabled, rel, href, value, max,
+                                    placeholder, download, target, for, min, acceptCharset, step )            
 import Html.Events exposing       ( onInput, onClick )
 import Html.Events.Extra exposing ( onEnter )
 import Parser exposing            ( int, float )
@@ -13,8 +13,8 @@ import Labels exposing            ( Labels )
 import Model exposing             ( .. )
 import NewUser exposing           ( NewUserField ( .. ), isValid )
 import Quiz exposing              ( isValidRoundsText, toEditableString )
-import Round exposing             ( isValidRound )
-import Util exposing              ( isParserSuccess, splitFirstLast )
+import Round exposing             ( isValidRound, Round )
+import Util exposing              ( isParserSuccess, splitFirstLast, adjustToSize )
 
 authenticationView : Model -> Html Msg
 authenticationView md = 
@@ -52,12 +52,31 @@ selectionView md =
 editingView : Model -> Html Msg
 editingView md =
     div [ id "singleQuiz" ]
-        [ div [ id "editingLabel"] 
+        ([ 
+          div [ id "editingLabel"] 
               [ label [ for "editingQuiz" ]
-                      [ text (String.join " " ["Editing", md.editing]) ] ],
-          textarea [ id "singleQuizArea", onInput (SetPoints (Quiz.headerToString md.currentQuiz)) ] 
-                   [ text (toEditableString md.currentQuiz) ],
-          button [ class "button", onClick GetAll ] [ text "Back" ],
+                      [ text (String.join " " ["Editing", md.editing]) ] 
+              ],
+          div [ id "groupsInQuiz" ]
+              [ label [ for "groupInQuizLabel" ] [ text "Groups in the current quiz" ],
+                input [ value (String.fromInt md.groupsInQuiz), 
+                        type_ "number", 
+                        min "1", 
+                        max "20", 
+                        step "1", 
+                        onInput SetGroupsInQuiz 
+                      ] 
+                      []
+              ]
+         ] ++
+         List.indexedMap (\i rd -> mkRoundForm i md.groupsInQuiz rd)
+                         md.currentQuiz.rounds
+          ++ 
+         [
+          button [ class "button", onClick AddRound ] [ text "Add round" ],
+          {-textarea [ id "singleQuizArea", onInput (SetPoints (Quiz.headerToString md.currentQuiz)) ] 
+                   [ text (toEditableString md.currentQuiz) ],-}
+          button [ class "backButton", onClick GetAll ] [ text "Back" ],
           button [ class "lockButton", onClick AcknowledgeLock ] [ text "Lock" ],
           button [ class "button", 
                    onClick (PostUpdate md.editing (Quiz.toString md.currentQuiz)),
@@ -73,7 +92,7 @@ editingView md =
                   ] 
                   [ text "Get quiz sheet" ] ],
           addFeedbackLabel md
-        ]
+         ])
 
 convenientPointEditingView : Model -> Html Msg
 convenientPointEditingView md =
@@ -83,12 +102,12 @@ convenientPointEditingView md =
 confirmView : Model -> Html Msg
 confirmView md =
     div [ id "confirmView" ]
-        [ label [ for "lockWarning"] 
+        [ label [ for "lockWarning" ]
                 [ text (String.concat ["You are about to lock ", md.editing, ". ",
                                        "This cannot be undone. Please confirm. "]) ],
-          button [ class "button", onClick (GetSingle md.editing) ]
-                 [ text "Abort" ],
-          button [ class "button", onClick (Lock md.editing) ]
+          button [ class "backButton", onClick (GetSingle md.editing) ]
+                 [ text "Back" ],
+          button [ class "lockButton", onClick (Lock md.editing) ]
                  [ text "Yes, lock" ]
         ]
 
@@ -110,7 +129,7 @@ creatingQuizView md =
            mkCreationForm createOnEnter md.labels,
            button [ class "button", onClick CreateQuiz, 
                     disabled (not (isValidNewQuiz md)) ] [ text "Create" ] ,
-           button [ class "button", onClick GetAll ] [ text "Back" ],
+           button [ class "backButton", onClick GetAll ] [ text "Back" ],
            addFeedbackLabel md
           ]
 
@@ -133,7 +152,7 @@ creatingUserView md =
         button [ class "button", onClick CreateUser, 
                  disabled (not (isValid md.newUser)) ]
                [ text "Create" ],
-        button [ class "button", onClick GetAll ] [ text "Back" ],
+        button [ class "backButton", onClick GetAll ] [ text "Back" ],
         addFeedbackLabel md
       ]
 
@@ -158,6 +177,31 @@ mkCreationForm createOnEnter labels =
 
 addFeedbackLabel : Model -> Html Msg
 addFeedbackLabel model = div [ id "feedbackLabel" ] [ text model.feedback ]
+
+mkRoundForm : Int -> Int -> Round -> Html Msg
+mkRoundForm number gs rd = 
+  div [ id "roundPoints" ]
+      ( label [ for "roundNumber" ] 
+              [ text (String.join " " [ "Round", String.fromInt (1 + number) ]) ] ::
+        label [ for "maxPoints" ] [ text "Obtainable" ] ::
+        input (value (String.fromFloat rd.maxPoints) :: 
+               onInput (SetMaxPoints number) :: 
+               pointInputAttributes) 
+              [] ::
+        List.concatMap (\(i, ps) -> [ label [ for "pointsPerGroupLabel" ] 
+                                            [ text (String.join " " ["Group", 
+                                                                     String.fromInt (1 + i)]) ],
+                                      input (value (String.fromFloat ps) ::
+                                             onInput (UpdatePoints number i) :: 
+                                             pointInputAttributes) 
+                                            []
+                                    ])
+                       (List.map2 Tuple.pair (List.range 0 (gs - 1)) 
+                                             (adjustToSize gs rd.teamPoints))
+      )
+
+pointInputAttributes : List (Html.Attribute Msg)
+pointInputAttributes = [ type_ "number", min "0", step "0.5" ]
 
 wrapView : (Model -> Html Msg) -> Model -> Html Msg
 wrapView viewOf model = 

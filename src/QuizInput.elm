@@ -13,8 +13,9 @@ import Constants exposing       ( .. )
 import Labels exposing          ( Labels )
 import Model exposing           ( .. )
 import NewUser exposing         ( NewUser )
-import Parser
+import Parser exposing          ( int, float, run )
 import Quiz
+import Round
 import Views exposing           ( .. )
 
 main : Program () Model Msg
@@ -46,6 +47,39 @@ update msg model = case msg of
     GotSingle (Ok text)     -> let updatedModel = updateQuizByText text model
                                in ({ updatedModel | displayState = Editing }, Cmd.none)
 
+    SetGroupsInQuiz text    -> let (groups, response) = 
+                                    case run int text of
+                                     Ok n -> (n, "")
+                                     Err _ -> (0, "Invalid group number. Substituting 0.")
+                                   newQuiz = Quiz.adjustTo groups model.currentQuiz
+                               in ({ model | groupsInQuiz = groups,
+                                             currentQuiz = newQuiz,
+                                             feedback = response }, Cmd.none)
+    UpdatePoints r g ps     -> let (np, response) =
+                                    case run float ps of
+                                     Ok p -> (p, "")
+                                     Err _ -> (0, 
+                                               String.join " " 
+                                                           ["Invalid decimal point number",
+                                                            "at round =", 
+                                                            String.fromInt (1 + r),
+                                                            "and group =",
+                                                            String.concat [String.fromInt (1 + g), 
+                                                                           "."],
+                                                            "Substituting 0."])
+                               in ({ model | currentQuiz = Quiz.update r g np model.currentQuiz,
+                                             feedback = response },
+                                   Cmd.none)
+    AddRound                -> let newQuiz = Quiz.addRound (Round.emptyOfSize model.groupsInQuiz) 
+                                                           model.currentQuiz
+                               in ({ model | currentQuiz = newQuiz }, Cmd.none)
+    SetMaxPoints rd ps      -> let newModel =
+                                    case run float ps of
+                                      Ok p -> 
+                                        let newQuiz = Quiz.updateMax rd p model.currentQuiz
+                                        in { model | currentQuiz = newQuiz }
+                                      Err _ -> { model | feedback = "Not a decimal point number."}
+                               in (newModel, Cmd.none)
     SetPoints header points -> (updateQuizByText (String.join "\n" [ header, points ]) model, 
                                 Cmd.none)
     PostUpdate qName points -> (model, postUpdate model.user model.oneWayHash qName points)
@@ -181,6 +215,7 @@ updateQuizByText : String -> Model -> Model
 updateQuizByText text model = 
     case Quiz.parseQuiz text of
         Ok quiz -> { model | currentQuiz = quiz, 
+                             groupsInQuiz = Quiz.numberOfGroups quiz,
                              isValidQuizUpdate = True,
                              feedback = ""
                    }

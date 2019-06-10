@@ -1,6 +1,6 @@
 module Util exposing ( .. )
 
-import Parser exposing ( Parser, run )
+import Parser exposing ( Parser, run, chompWhile )
 
 escapeHTML : String -> String
 escapeHTML str = case String.uncons str of
@@ -29,3 +29,13 @@ splitFirstLast text =
 
 isParserSuccess : Parser a -> String -> Bool
 isParserSuccess p text = foldMaybe False (\_ -> True) (Result.toMaybe (run p text))
+
+blanks : Parser ()
+blanks = chompWhile (\c -> c == ' ' || c == '\r')
+
+{- Fills a list with zeroes in the back if the list is not long enough, 
+   otherwise return the prefix of the list with the given length. -}
+adjustToSize : Int -> List Float -> List Float
+adjustToSize n fs = 
+    let fsLength = List.length fs
+    in if fsLength > n then List.take n fs else fs ++ List.repeat (n - fsLength) 0
