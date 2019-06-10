@@ -2,7 +2,7 @@ module Views exposing ( .. )
 
 import Html exposing              ( Html, div, text, input, button, textarea, node, a, table, 
                                     tr, td, label )
-import Html.Attributes exposing   ( id, autocomplete, class, type_, disabled, rel, href, value,
+import Html.Attributes exposing   ( id, autocomplete, class, type_, disabled, rel, href, value, max,
                                     placeholder, download, target, for, min, acceptCharset, step )            
 import Html.Events exposing       ( onInput, onClick )
 import Html.Events.Extra exposing ( onEnter )
@@ -13,7 +13,7 @@ import Labels exposing            ( Labels )
 import Model exposing             ( .. )
 import NewUser exposing           ( NewUserField ( .. ), isValid )
 import Quiz exposing              ( isValidRoundsText, toEditableString )
-import Round exposing             ( isValidRound )
+import Round exposing             ( isValidRound, Round )
 import Util exposing              ( isParserSuccess, splitFirstLast )
 
 authenticationView : Model -> Html Msg
@@ -58,7 +58,7 @@ editingView md =
               ],
           div [ id "groupsInQuiz" ]
               [ label [ for "groupInQuizLabel" ] [ text "Groups in the current quiz" ],
-                input [ value "0", type_ "number", min "0", step "1" ] []
+                input [ value "0", type_ "number", min "1", max "20", step "1" ] []
               ]
           ,
 
@@ -166,20 +166,26 @@ mkCreationForm createOnEnter labels =
 addFeedbackLabel : Model -> Html Msg
 addFeedbackLabel model = div [ id "feedbackLabel" ] [ text model.feedback ]
 
-newRoundForm : Int -> Int -> Html Msg
-newRoundForm number gs = 
+mkRoundForm : Int -> Int -> Round -> Html Msg
+mkRoundForm number gs rd = 
   div [ id "roundPoints" ]
       ( label [ for "roundNumber" ] [ text (String.join " " [ "Round", String.fromInt number ]) ] ::
-        input (onInput (SetMaxPoints number) :: pointInputAttributes) [] ::
-        List.concatMap (\i -> [ label [ for "pointsPerGroupLabel" ] 
-                                      [ text (String.join " " ["Group", String.fromInt i]) ],
-                                input (onInput (UpdatePoint number i) :: pointInputAttributes) []
-                              ]) 
-                       (List.range 0 (gs - 1))
+        input (onInput (SetMaxPoints number) :: 
+               value (String.fromFloat rd.maxPoints) :: 
+               pointInputAttributes) 
+              [] ::
+        List.concatMap (\(i, ps) -> [ label [ for "pointsPerGroupLabel" ] 
+                                            [ text (String.join " " ["Group", String.fromInt i]) ],
+                                      input (onInput (UpdatePoint number i) :: 
+                                             value (String.fromFloat ps) ::
+                                             pointInputAttributes) 
+                                            []
+                                    ])
+                       (List.map2 Tuple.pair (List.range 0 (gs - 1)) rd.teamPoints)
       )
 
 pointInputAttributes : List (Html.Attribute Msg)
-pointInputAttributes = [ value "0", type_ "number", min "0", step "0.5" ]
+pointInputAttributes = [ type_ "number", min "0", step "0.5" ]
 
 wrapView : (Model -> Html Msg) -> Model -> Html Msg
 wrapView viewOf model = 
