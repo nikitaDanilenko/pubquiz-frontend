@@ -1,4 +1,4 @@
-.button, .lockButton, .quizButton, .newQuizButton, .newUserButton {
+.button, .lockButton, .quizButton, .newQuizButton, .newUserButton, .backButton {
   background-color: rgb(150, 150, 150);
   border: none;
   border-radius: 4px;
@@ -14,7 +14,7 @@
 }
 
 .backButton:hover {
-  background-color: rgb(60, 73, 65);
+  background-color: rgb(60, 102, 65);
 }
  
 .lockButton:hover {
@@ -50,7 +50,7 @@ label, input {
   margin-bottom: 10px;
 }
 
-.button, .lockButton, .quizButton, .newQuizButton, .newUserButton {
+.button, .lockButton, .quizButton, .newQuizButton, .newUserButton, .backButton {
 	margin-top: 10px;
 	margin-bottom: 10px;
 	margin-right: 10px;
