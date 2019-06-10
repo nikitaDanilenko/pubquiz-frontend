@@ -13,6 +13,8 @@ import Constants exposing       ( .. )
 import Labels exposing          ( Labels )
 import Model exposing           ( .. )
 import NewUser exposing         ( NewUser )
+import Parser
+import Quiz
 import Views exposing           ( .. )
 
 main : Program () Model Msg
@@ -29,7 +31,7 @@ update msg model = case msg of
     SetUser u               -> ({ model | user = u }, Cmd.none)
     SetPassword p           -> ({ model | password = p}, Cmd.none)
     GetAll                  -> ({ model | displayState = Authenticating,
-                                          currentPoints = "",
+                                          currentQuiz = Quiz.empty,
                                           editing = "" }, 
                                  getAll)
 
@@ -41,11 +43,11 @@ update msg model = case msg of
     GetSingle qName         -> ({ model | editing = qName, feedback = "" }, getSingle qName)
     
     GotSingle (Err err)     -> ({ model | feedback = errorToString err}, Cmd.none)
-    GotSingle (Ok text)     -> ({ model | currentPoints = text,
-                                          displayState = Editing,
-                                          feedback = "" }, Cmd.none)
-    
-    SetPoints points        -> ({ model | currentPoints = points}, Cmd.none)
+    GotSingle (Ok text)     -> let updatedModel = updateQuizByText text model
+                               in ({ updatedModel | displayState = Editing }, Cmd.none)
+
+    SetPoints header points -> (updateQuizByText (String.join "\n" [ header, points ]) model, 
+                                Cmd.none)
     PostUpdate qName points -> (model, postUpdate model.user model.oneWayHash qName points)
     Updated (Err err)       -> ({ model | feedback = errorToString err }, Cmd.none)
     Updated (Ok _)          -> ({ model | feedback = "Update successful"}, Cmd.none)
@@ -175,6 +177,17 @@ updateLabels field text lbls =
         MainField -> { lbls | mainLabel = text }
         OwnPageField -> { lbls | ownPageLabel = text }
     
+updateQuizByText : String -> Model -> Model
+updateQuizByText text model = 
+    case Quiz.parseQuiz text of
+        Ok quiz -> { model | currentQuiz = quiz, 
+                             isValidQuizUpdate = True,
+                             feedback = ""
+                   }
+        Err des -> { model | isValidQuizUpdate = False, 
+                             feedback = "Parsing error"
+                   }
+
 type alias RestParam = String
 type alias RestValue = String
 type alias RestKey = String
