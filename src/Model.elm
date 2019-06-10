@@ -15,6 +15,7 @@ type alias Model =
         quizzes : List QuizName,
         editing : QuizName,
         currentQuiz : Quiz,
+        groupsInQuiz : Int,
         isValidQuizUpdate : Bool,
         numberOfRounds : String,
         displayState : DisplayState,
@@ -31,6 +32,7 @@ initialModel () = ({ user = "",
                      quizzes = [], 
                      editing = "",
                      currentQuiz = Quiz.empty,
+                     groupsInQuiz = 0,
                      isValidQuizUpdate = False,
                      numberOfRounds = "",
                      displayState = Initial, 
@@ -61,7 +63,8 @@ type Msg = GetAll
          | SetUser User
          | SetPassword Password
          | SetPoints String String
-         | UpdatePoint Int Int String
+         | UpdatePoint Int Int String -- Points for round, group, value.
+         | SetMaxPoints Int String    -- Points for round, value
          | SetRoundsNumber String
          | LocationChange
          | Updated (Result Http.Error ())
