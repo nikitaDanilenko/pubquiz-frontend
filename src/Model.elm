@@ -63,7 +63,8 @@ type Msg = GetAll
          | SetUser User
          | SetPassword Password
          | SetPoints String String
-         | UpdatePoint Int Int String -- Points for round, group, value.
+         | SetGroupsInQuiz String
+         | UpdatePoints Int Int String -- Points for round, group, value.
          | SetMaxPoints Int String    -- Points for round, value
          | SetRoundsNumber String
          | LocationChange
