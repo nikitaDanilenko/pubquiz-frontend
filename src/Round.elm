@@ -1,8 +1,8 @@
 module Round exposing ( .. )
 
-import Parser exposing ( succeed, spaces, float, symbol, sequence, Trailing ( .. ), Parser, (|.),
+import Parser exposing ( succeed, float, symbol, sequence, Trailing ( .. ), Parser, (|.),
                          (|=), end )
-import Util exposing   ( isParserSuccess )
+import Util exposing   ( isParserSuccess, blanks )
 
 type alias Round = 
     {
@@ -18,19 +18,19 @@ toString rd = String.join " " (String.fromFloat rd.maxPoints ::
 
 roundParser : Parser Round
 roundParser = succeed Round 
-                         |. spaces 
+                         |. blanks 
                          |= float
-                         |. spaces
+                         |. blanks
                          |. symbol ":"
+                         |. blanks
                          |= sequence {
                               start = "",
                               separator = "",
                               end = "",
-                              spaces = spaces,
+                              spaces = blanks,
                               item = float,
                               trailing = Optional
                             }
-                         |. end
 
 isValidRound : String -> Bool
 isValidRound = isParserSuccess roundParser

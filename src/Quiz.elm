@@ -1,10 +1,10 @@
 module Quiz exposing ( .. )
 
-import Parser exposing ( succeed, spaces, sequence, Trailing ( .. ), Parser, (|.), DeadEnd,
+import Parser exposing ( succeed, sequence, Trailing ( .. ), Parser, (|.), DeadEnd,
                          (|=), end, run )
 
 import Round exposing  ( Round, isValidRound, roundParser )
-import Util exposing   ( splitFirstLast, isParserSuccess )
+import Util exposing   ( splitFirstLast, isParserSuccess, blanks )
 
 type alias Quiz = 
     {
@@ -40,12 +40,12 @@ parseQuiz text =
 
 quizParser : String -> Parser Quiz
 quizParser header = succeed (Quiz (String.words header))
-                      |. spaces
+                      |. blanks
                       |= sequence {
                            start = "", 
-                           separator = "",
+                           separator = "\n",
                            end = "",
-                           spaces = spaces,
+                           spaces = blanks,
                            item = roundParser,
                            trailing = Optional
                          }
