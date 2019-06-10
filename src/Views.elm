@@ -2,8 +2,8 @@ module Views exposing ( .. )
 
 import Html exposing              ( Html, div, text, input, button, textarea, node, a, table, 
                                     tr, td, label )
-import Html.Attributes exposing   ( id, autocomplete, class, type_, disabled, rel, href,
-                                    placeholder, download, target, for, min, acceptCharset )            
+import Html.Attributes exposing   ( id, autocomplete, class, type_, disabled, rel, href, value,
+                                    placeholder, download, target, for, min, acceptCharset, step )            
 import Html.Events exposing       ( onInput, onClick )
 import Html.Events.Extra exposing ( onEnter )
 import Parser exposing            ( int, float )
@@ -158,6 +158,18 @@ mkCreationForm createOnEnter labels =
 
 addFeedbackLabel : Model -> Html Msg
 addFeedbackLabel model = div [ id "feedbackLabel" ] [ text model.feedback ]
+
+newRoundForm : Int -> Int -> Html Msg
+newRoundForm number gs = 
+  div [ id "roundPoints" ]
+      ( label [ for "roundNumber" ] [ text (String.join " " [ "Round", String.fromInt number ]) ] ::
+        List.map (\i -> input [ onInput (UpdatePoint number i), 
+                                value "0", 
+                                type_ "number", 
+                                min "0",
+                                step "0.5"
+                              ] []) (List.range 0 (gs - 1))
+        )
 
 wrapView : (Model -> Html Msg) -> Model -> Html Msg
 wrapView viewOf model = 
