@@ -15,6 +15,7 @@ import Model exposing           ( .. )
 import NewUser exposing         ( NewUser )
 import Parser exposing          ( int, float, run )
 import Quiz
+import Round
 import Views exposing           ( .. )
 
 main : Program () Model Msg
@@ -50,7 +51,10 @@ update msg model = case msg of
                                     case run int text of
                                      Ok n -> (n, "")
                                      Err _ -> (0, "Invalid group number. Substituting 0.")
-                               in ({ model | groupsInQuiz = groups, feedback = response }, Cmd.none)
+                                   newQuiz = Quiz.adjustTo groups model.currentQuiz
+                               in ({ model | groupsInQuiz = groups,
+                                             currentQuiz = newQuiz,
+                                             feedback = response }, Cmd.none)
     UpdatePoints r g ps     -> let (np, response) =
                                     case run float ps of
                                      Ok p -> (p, "")
@@ -66,6 +70,8 @@ update msg model = case msg of
                                in ({ model | currentQuiz = Quiz.update r g np model.currentQuiz,
                                              feedback = response },
                                    Cmd.none)
+    AddRound                -> let newQuiz = Quiz.addRound Round.empty model.currentQuiz
+                               in ({ model | currentQuiz = newQuiz }, Cmd.none)
     SetMaxPoints rd ps      -> let newModel =
                                     case run float ps of
                                       Ok p -> 
@@ -208,6 +214,7 @@ updateQuizByText : String -> Model -> Model
 updateQuizByText text model = 
     case Quiz.parseQuiz text of
         Ok quiz -> { model | currentQuiz = quiz, 
+                             groupsInQuiz = Quiz.numberOfGroups quiz,
                              isValidQuizUpdate = True,
                              feedback = ""
                    }
