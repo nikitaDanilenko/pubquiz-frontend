@@ -18,6 +18,23 @@ empty = {
     rounds = []
   }
 
+update : Int -> Int -> Float -> Quiz -> Quiz
+update round group points quiz =
+  let change : Int -> Round -> Round
+      change i r = if i == round then Round.update group points r else r
+      
+      updatedRounds = List.indexedMap change quiz.rounds
+  in { quiz | rounds = updatedRounds }
+
+updateMax : Int -> Float -> Quiz -> Quiz
+updateMax rd m quiz =
+  let updatedRounds = List.indexedMap (\i r -> if i == rd then { r | maxPoints = m } else r) 
+                                      quiz.rounds
+  in { quiz | rounds = updatedRounds }
+
+addRound : Round -> Quiz -> Quiz
+addRound r q = { q | rounds = q.rounds ++ [r] }
+
 toString : Quiz -> String
 toString quiz = String.join "\n" (headerToString quiz :: roundsToStrings quiz)
 

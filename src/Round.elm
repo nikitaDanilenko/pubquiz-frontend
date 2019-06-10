@@ -10,6 +10,11 @@ type alias Round =
         teamPoints : List Float
     }
 
+update : Int -> Float -> Round -> Round
+update i ps rd = 
+  let newPoints = List.indexedMap (\j p -> if i == j then ps else p) rd.teamPoints
+  in { rd | teamPoints = newPoints }
+
 toString : Round -> String
 toString rd = String.join " " (String.fromFloat rd.maxPoints :: 
                                ":" :: 
