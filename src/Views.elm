@@ -54,7 +54,14 @@ editingView md =
     div [ id "singleQuiz" ]
         [ div [ id "editingLabel"] 
               [ label [ for "editingQuiz" ]
-                      [ text (String.join " " ["Editing", md.editing]) ] ],
+                      [ text (String.join " " ["Editing", md.editing]) ] 
+              ],
+          div [ id "groupsInQuiz" ]
+              [ label [ for "groupInQuizLabel" ] [ text "Groups in the current quiz" ],
+                input [ value "0", type_ "number", min "0", step "1" ] []
+              ]
+          ,
+
           textarea [ id "singleQuizArea", onInput (SetPoints (Quiz.headerToString md.currentQuiz)) ] 
                    [ text (toEditableString md.currentQuiz) ],
           button [ class "button", onClick GetAll ] [ text "Back" ],
@@ -163,13 +170,16 @@ newRoundForm : Int -> Int -> Html Msg
 newRoundForm number gs = 
   div [ id "roundPoints" ]
       ( label [ for "roundNumber" ] [ text (String.join " " [ "Round", String.fromInt number ]) ] ::
-        List.map (\i -> input [ onInput (UpdatePoint number i), 
-                                value "0", 
-                                type_ "number", 
-                                min "0",
-                                step "0.5"
-                              ] []) (List.range 0 (gs - 1))
-        )
+        input (onInput (SetMaxPoints number) :: pointInputAttributes) [] ::
+        List.concatMap (\i -> [ label [ for "pointsPerGroupLabel" ] 
+                                      [ text (String.join " " ["Group", String.fromInt i]) ],
+                                input (onInput (UpdatePoint number i) :: pointInputAttributes) []
+                              ]) 
+                       (List.range 0 (gs - 1))
+      )
+
+pointInputAttributes : List (Html.Attribute Msg)
+pointInputAttributes = [ value "0", type_ "number", min "0", step "0.5" ]
 
 wrapView : (Model -> Html Msg) -> Model -> Html Msg
 wrapView viewOf model = 
