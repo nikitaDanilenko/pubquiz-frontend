@@ -18,6 +18,9 @@ empty = {
     rounds = []
   }
 
+adjustTo : Int -> Quiz -> Quiz
+adjustTo n quiz = { quiz | rounds = List.map (Round.adjustTo n) quiz.rounds }
+
 update : Int -> Int -> Float -> Quiz -> Quiz
 update round group points quiz =
   let change : Int -> Round -> Round
@@ -34,6 +37,10 @@ updateMax rd m quiz =
 
 addRound : Round -> Quiz -> Quiz
 addRound r q = { q | rounds = q.rounds ++ [r] }
+
+numberOfGroups : Quiz -> Int
+numberOfGroups quiz = 
+  Maybe.withDefault 0 (List.maximum (List.map (\r -> List.length r.teamPoints) quiz.rounds))
 
 toString : Quiz -> String
 toString quiz = String.join "\n" (headerToString quiz :: roundsToStrings quiz)

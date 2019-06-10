@@ -2,13 +2,19 @@ module Round exposing ( .. )
 
 import Parser exposing ( succeed, float, symbol, sequence, Trailing ( .. ), Parser, (|.),
                          (|=), end )
-import Util exposing   ( isParserSuccess, blanks )
+import Util exposing   ( isParserSuccess, blanks, adjustToSize )
 
 type alias Round = 
     {
         maxPoints : Float,
         teamPoints : List Float
     }
+
+empty : Round
+empty = { maxPoints = 0, teamPoints = [] }
+
+adjustTo : Int -> Round -> Round
+adjustTo n rd = { rd | teamPoints = adjustToSize n rd.teamPoints }
 
 update : Int -> Float -> Round -> Round
 update i ps rd = 
