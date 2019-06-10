@@ -1,4 +1,4 @@
-.button, .lockButton, .quizButton {
+.button, .lockButton, .quizButton, .newQuizButton, .newUserButton {
   background-color: rgb(150, 150, 150);
   border: none;
   border-radius: 4px;
@@ -9,6 +9,14 @@
   font-size: 15px;
 }
 
+.quizButton:hover, .newQuizButton:hover, .newUserButton:hover {
+  background-color: rgb(100, 149, 237);
+}
+
+.backButton:hover {
+  background-color: rgb(60, 73, 65);
+}
+ 
 .lockButton:hover {
   background-color: rgb(228, 47, 12);
 }
@@ -18,23 +26,16 @@
 }
 
 .button:disabled {
-  background-color: rgb(125, 125, 125);
-  color: rgb(25, 25, 25);
+  color: rgb(100, 100, 100);
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .quizButton {
   display: block;
 }
 
-.quizButton:hover {
-  background-color: rgb(100, 149, 237);
-}
 
-/*.button {
-  position: absolute;
-  left: 20px;
-  top: 80px;
-}*/
 
 label, input {
   padding-right: 5px;
@@ -42,22 +43,34 @@ label, input {
   padding-bottom: 2px;
   text-align: left;
 }
+
 		
-/*#passwordField {	
-	position: absolute;
-  left: 20px;
-  top: 50px;
+#passwordField, #userField, #creatingUser, #creatingPassword1, #creatingPassword2, #creatingQuizView {
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
-#userField {
-	position: absolute;
-  left: 20px;
-  top: 20px;
-}*/
+.button, .lockButton, .quizButton, .newQuizButton, .newUserButton {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	margin-right: 10px;
+}
 	
 #passwordField, #userField {
   font-size: 16px;
   color: rgb(0, 0, 0);
-	width: 500px;
+  width: 500px;
 }
 
+.link {
+  font-size: 16px;
+  color: rgb(100, 149, 237);
+  text-decoration: none;
+  
+}
+
+.link:hover {
+ text-decoration: underline;
+ color: rgb(0, 0, 0);
+}
+	
