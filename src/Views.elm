@@ -52,7 +52,8 @@ selectionView md =
 editingView : Model -> Html Msg
 editingView md =
     div [ id "singleQuiz" ]
-        [ div [ id "editingLabel"] 
+        ([ 
+          div [ id "editingLabel"] 
               [ label [ for "editingQuiz" ]
                       [ text (String.join " " ["Editing", md.editing]) ] 
               ],
@@ -60,8 +61,11 @@ editingView md =
               [ label [ for "groupInQuizLabel" ] [ text "Groups in the current quiz" ],
                 input [ value "0", type_ "number", min "1", max "20", step "1" ] []
               ]
-          ,
-
+         ] ++
+         List.indexedMap (\i rd -> mkRoundForm (1 + i) md.groupsInQuiz rd)
+                         md.currentQuiz.rounds
+          ++ 
+         [
           textarea [ id "singleQuizArea", onInput (SetPoints (Quiz.headerToString md.currentQuiz)) ] 
                    [ text (toEditableString md.currentQuiz) ],
           button [ class "button", onClick GetAll ] [ text "Back" ],
@@ -80,7 +84,7 @@ editingView md =
                   ] 
                   [ text "Get quiz sheet" ] ],
           addFeedbackLabel md
-        ]
+         ])
 
 convenientPointEditingView : Model -> Html Msg
 convenientPointEditingView md =
@@ -170,6 +174,7 @@ mkRoundForm : Int -> Int -> Round -> Html Msg
 mkRoundForm number gs rd = 
   div [ id "roundPoints" ]
       ( label [ for "roundNumber" ] [ text (String.join " " [ "Round", String.fromInt number ]) ] ::
+        label [ for "maxPoints" ] [ text (String.join " " [ "Obtainable" ])] ::
         input (onInput (SetMaxPoints number) :: 
                value (String.fromFloat rd.maxPoints) :: 
                pointInputAttributes) 
