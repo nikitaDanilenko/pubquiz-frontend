@@ -66,6 +66,7 @@ type Msg = GetAll
          | SetGroupsInQuiz String
          | UpdatePoints Int Int String -- Points for round, group, value.
          | SetMaxPoints Int String    -- Points for round, value
+         | AddRound
          | SetRoundsNumber String
          | LocationChange
          | Updated (Result Http.Error ())
