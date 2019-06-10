@@ -36,7 +36,7 @@ updateHeader text q = { q | header = String.words text }
 parseQuiz : String -> Result (List DeadEnd) Quiz
 parseQuiz text = 
     let (header, rs) = splitFirstLast text
-    in run (quizParser header) (String.join "\n" rs)
+    in run (quizParser header) (String.replace "," "." (String.join "\n" rs))
 
 quizParser : String -> Parser Quiz
 quizParser header = succeed (Quiz (String.words header))
