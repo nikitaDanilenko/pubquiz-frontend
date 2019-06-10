@@ -1,6 +1,6 @@
 module Quiz exposing ( .. )
 
-import Parser exposing ( succeed, spaces, sequence, Trailing ( .. ), Parser, (|.),
+import Parser exposing ( succeed, spaces, sequence, Trailing ( .. ), Parser, (|.), DeadEnd,
                          (|=), end, run )
 
 import Round exposing  ( Round, isValidRound, roundParser )
@@ -19,17 +19,21 @@ empty = {
   }
 
 toString : Quiz -> String
-toString quiz = String.join "\n" (String.join " " quiz.header ::
-                                   List.map Round.toString quiz.rounds 
-                                 )
+toString quiz = String.join "\n" (headerToString quiz :: roundsToStrings quiz)
 
 toEditableString : Quiz -> String
-toEditableString quiz = String.join "\n" (List.map Round.toString quiz.rounds)
+toEditableString quiz = String.join "\n" (roundsToStrings quiz)
+
+headerToString : Quiz -> String
+headerToString quiz = String.join " " quiz.header
+
+roundsToStrings : Quiz -> List String
+roundsToStrings quiz = List.map Round.toString quiz.rounds
 
 updateHeader : String -> Quiz -> Quiz
 updateHeader text q = { q | header = String.words text }
 
-parseQuiz : String -> Result Quiz
+parseQuiz : String -> Result (List DeadEnd) Quiz
 parseQuiz text = 
     let (header, rs) = splitFirstLast text
     in run (quizParser header) (String.join "\n" rs)
