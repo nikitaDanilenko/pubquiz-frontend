@@ -76,7 +76,7 @@ editingView md =
           button [ class "button", onClick AddRound ] [ text "Add round" ],
           textarea [ id "singleQuizArea", onInput (SetPoints (Quiz.headerToString md.currentQuiz)) ] 
                    [ text (toEditableString md.currentQuiz) ],
-          button [ class "button", onClick GetAll ] [ text "Back" ],
+          button [ class "backButton", onClick GetAll ] [ text "Back" ],
           button [ class "lockButton", onClick AcknowledgeLock ] [ text "Lock" ],
           button [ class "button", 
                    onClick (PostUpdate md.editing (Quiz.toString md.currentQuiz)),
@@ -102,12 +102,12 @@ convenientPointEditingView md =
 confirmView : Model -> Html Msg
 confirmView md =
     div [ id "confirmView" ]
-        [ label [ for "lockWarning"]
+        [ label [ for "lockWarning" ]
                 [ text (String.concat ["You are about to lock ", md.editing, ". ",
                                        "This cannot be undone. Please confirm. "]) ],
-          button [ class "button", onClick (GetSingle md.editing) ]
-                 [ text "Abort" ],
-          button [ class "button", onClick (Lock md.editing) ]
+          button [ class "backButton", onClick (GetSingle md.editing) ]
+                 [ text "Back" ],
+          button [ class "lockButton", onClick (Lock md.editing) ]
                  [ text "Yes, lock" ]
         ]
 
@@ -129,7 +129,7 @@ creatingQuizView md =
            mkCreationForm createOnEnter md.labels,
            button [ class "button", onClick CreateQuiz, 
                     disabled (not (isValidNewQuiz md)) ] [ text "Create" ] ,
-           button [ class "button", onClick GetAll ] [ text "Back" ],
+           button [ class "backButton", onClick GetAll ] [ text "Back" ],
            addFeedbackLabel md
           ]
 
@@ -152,7 +152,7 @@ creatingUserView md =
         button [ class "button", onClick CreateUser, 
                  disabled (not (isValid md.newUser)) ]
                [ text "Create" ],
-        button [ class "button", onClick GetAll ] [ text "Back" ],
+        button [ class "backButton", onClick GetAll ] [ text "Back" ],
         addFeedbackLabel md
       ]
 
