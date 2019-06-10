@@ -61,6 +61,7 @@ type Msg = GetAll
          | SetUser User
          | SetPassword Password
          | SetPoints String String
+         | UpdatePoint Int Int String
          | SetRoundsNumber String
          | LocationChange
          | Updated (Result Http.Error ())
