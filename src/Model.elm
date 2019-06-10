@@ -5,6 +5,7 @@ import Http exposing    ( Error ( .. ) )
 import Base   exposing  ( User, Password )
 import Labels exposing  ( Labels, defaultLabels )
 import NewUser exposing ( NewUser, NewUserField )
+import Quiz exposing    ( Quiz, empty )
 
 type alias Model = 
     {
@@ -13,7 +14,8 @@ type alias Model =
         oneWayHash : String,
         quizzes : List QuizName,
         editing : QuizName,
-        currentPoints : String,
+        currentQuiz : Quiz,
+        isValidQuizUpdate : Bool,
         numberOfRounds : String,
         displayState : DisplayState,
         createName : QuizName,
@@ -28,7 +30,8 @@ initialModel () = ({ user = "",
                      oneWayHash = "", 
                      quizzes = [], 
                      editing = "",
-                     currentPoints = "",
+                     currentQuiz = Quiz.empty,
+                     isValidQuizUpdate = False,
                      numberOfRounds = "",
                      displayState = Initial, 
                      createName = "",
@@ -48,18 +51,6 @@ type DisplayState = Initial -- The state at the beginning of the application.
 
 type alias QuizName = String
 
-type alias Quiz = 
-    {
-        name : String,
-        rounds : List Round
-    }
-
-type alias Round = 
-    {
-        maxPoints : Float,
-        teamPoints : List Float
-    }
-
 type Msg = GetAll 
          | GotAll (Result Http.Error String)
          | GetSingle QuizName
@@ -69,7 +60,7 @@ type Msg = GetAll
          | Lock QuizName
          | SetUser User
          | SetPassword Password
-         | SetPoints String
+         | SetPoints String String
          | SetRoundsNumber String
          | LocationChange
          | Updated (Result Http.Error ())
