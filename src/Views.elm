@@ -176,7 +176,8 @@ mkCreationForm createOnEnter labels =
          (List.map (\(lbl, fld, dft) -> mkInput lbl fld dft) associations)
 
 addFeedbackLabel : Model -> Html Msg
-addFeedbackLabel model = div [ id "feedbackLabel" ] [ text model.feedback ]
+addFeedbackLabel model = div [ id "feedbackArea" ] 
+                             [ label [ for "feedbackLabel" ] [ text model.feedback ] ]
 
 mkRoundForm : Int -> Int -> Round -> Html Msg
 mkRoundForm number gs rd = 
