@@ -13,6 +13,9 @@ type alias Round =
 empty : Round
 empty = { maxPoints = 0, teamPoints = [] }
 
+emptyOfSize : Int -> Round
+emptyOfSize n = { maxPoints = 0, teamPoints = List.repeat n 0 }
+
 adjustTo : Int -> Round -> Round
 adjustTo n rd = { rd | teamPoints = adjustToSize n rd.teamPoints }
 
