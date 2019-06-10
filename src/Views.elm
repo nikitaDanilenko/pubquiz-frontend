@@ -14,7 +14,7 @@ import Model exposing             ( .. )
 import NewUser exposing           ( NewUserField ( .. ), isValid )
 import Quiz exposing              ( isValidRoundsText, toEditableString )
 import Round exposing             ( isValidRound, Round )
-import Util exposing              ( isParserSuccess, splitFirstLast )
+import Util exposing              ( isParserSuccess, splitFirstLast, adjustToSize )
 
 authenticationView : Model -> Html Msg
 authenticationView md = 
@@ -73,6 +73,7 @@ editingView md =
                          md.currentQuiz.rounds
           ++ 
          [
+          button [ class "button", onClick AddRound ] [ text "Add round" ],
           textarea [ id "singleQuizArea", onInput (SetPoints (Quiz.headerToString md.currentQuiz)) ] 
                    [ text (toEditableString md.currentQuiz) ],
           button [ class "button", onClick GetAll ] [ text "Back" ],
@@ -101,7 +102,7 @@ convenientPointEditingView md =
 confirmView : Model -> Html Msg
 confirmView md =
     div [ id "confirmView" ]
-        [ label [ for "lockWarning"] 
+        [ label [ for "lockWarning"]
                 [ text (String.concat ["You are about to lock ", md.editing, ". ",
                                        "This cannot be undone. Please confirm. "]) ],
           button [ class "button", onClick (GetSingle md.editing) ]
@@ -195,7 +196,8 @@ mkRoundForm number gs rd =
                                              pointInputAttributes) 
                                             []
                                     ])
-                       (List.map2 Tuple.pair (List.range 0 (gs - 1)) rd.teamPoints)
+                       (List.map2 Tuple.pair (List.range 0 (gs - 1)) 
+                                             (adjustToSize gs rd.teamPoints))
       )
 
 pointInputAttributes : List (Html.Attribute Msg)
