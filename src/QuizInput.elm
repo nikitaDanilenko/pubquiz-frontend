@@ -70,7 +70,8 @@ update msg model = case msg of
                                in ({ model | currentQuiz = Quiz.update r g np model.currentQuiz,
                                              feedback = response },
                                    Cmd.none)
-    AddRound                -> let newQuiz = Quiz.addRound Round.empty model.currentQuiz
+    AddRound                -> let newQuiz = Quiz.addRound (Round.emptyOfSize model.groupsInQuiz) 
+                                                           model.currentQuiz
                                in ({ model | currentQuiz = newQuiz }, Cmd.none)
     SetMaxPoints rd ps      -> let newModel =
                                     case run float ps of
