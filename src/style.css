@@ -99,4 +99,18 @@ label, input {
 	bottom: 1%;
 }
 
-		
+.groupPointsArea {
+  display: inline-block;
+  padding: 5pt;
+}
+
+.groupPointsArea > .label > .pointsPerGroupLabel,
+ .groupPointsArea > .input > .labeledInput,
+ #maxPointsArea > .maxPoints, 
+ #maxPointsArea > .labeledInput {
+  font-size: 10pt;
+}
+
+.groupPointsArea > .input > .labeledInput {
+  max-width: 32pt;
+}
