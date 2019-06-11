@@ -58,7 +58,7 @@ editingView md =
                       [ text (String.join " " ["Editing", md.editing]) ] 
               ],
           div [ id "groupsInQuiz" ]
-              [ label [ for "groupInQuizLabel" ] [ text "Groups in the current quiz" ],
+              [ label [ for "groupInQuizLabel" ] [ text "Groups in the quiz" ],
                 input [ value (String.fromInt md.groupsInQuiz), 
                         type_ "number", 
                         min "1", 
