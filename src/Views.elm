@@ -177,27 +177,34 @@ addFeedbackLabel model = div [ id "feedbackArea" ]
 mkRoundForm : Int -> Int -> Round -> Html Msg
 mkRoundForm number gs rd = 
   div [ id "roundPoints" ]
-      ( label [ for "roundNumber" ] 
+      ( label [ class "roundNumber" ] 
               [ text (String.join " " [ "Round", String.fromInt (1 + number) ]) ] ::
-        label [ for "maxPoints" ] [ text "Obtainable" ] ::
-        input (value (String.fromFloat rd.maxPoints) :: 
-               onInput (SetMaxPoints number) :: 
-               pointInputAttributes) 
-              [] ::
-        List.concatMap (\(i, ps) -> [ label [ for "pointsPerGroupLabel" ] 
-                                            [ text (String.join " " ["Group", 
-                                                                     String.fromInt (1 + i)]) ],
-                                      input (value (String.fromFloat ps) ::
-                                             onInput (UpdatePoints number i) :: 
-                                             pointInputAttributes) 
-                                            []
-                                    ])
-                       (List.map2 Tuple.pair (List.range 0 (gs - 1)) 
-                                             (adjustToSize gs rd.teamPoints))
-      )
+        div [ id "maxPointsArea" ] 
+            [ label [ class "maxPoints" ] [ text "Obtainable" ], 
+              input (value (String.fromFloat rd.maxPoints) :: 
+                     onInput (SetMaxPoints number) :: 
+                     pointInputAttributes) 
+                     []
+            ] ::
+        List.indexedMap (\i ps -> div [ class "groupPointsArea"]
+                                      [ div [ class "label" ]
+                                            [ label [ class "pointsPerGroupLabel" ] 
+                                                    [ text (String.join " " 
+                                                                        ["Group", 
+                                                                         String.fromInt (1 + i)]) ]
+                                            ],
+                                        div [ class "input" ]
+                                            [ input (value (String.fromFloat ps) ::
+                                                     onInput (UpdatePoints number i) :: 
+                                                     pointInputAttributes) 
+                                                    []
+
+                                            ]
+                                      ])
+                        (adjustToSize gs rd.teamPoints))
 
 pointInputAttributes : List (Html.Attribute Msg)
-pointInputAttributes = [ type_ "number", min "0", step "0.5" ]
+pointInputAttributes = [ class "labeledInput", type_ "number", min "0", step "0.5" ]
 
 wrapView : (Model -> Html Msg) -> Model -> Html Msg
 wrapView viewOf model = 
