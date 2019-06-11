@@ -97,7 +97,7 @@ label, input {
 	bottom: 1%;
 }
 
-.groupPointsArea {
+.groupPointsArea, #maxPointsArea > .maxPoints {
   display: inline-block;
   padding: 5pt;
 }
@@ -109,7 +109,9 @@ label, input {
   font-size: 10pt;
 }
 
-.groupPointsArea > .input > .labeledInput {
+.groupPointsArea > .input > .labeledInput,
+#maxPointsArea > .labeledInput,
+#groupsInQuiz > input   {
   max-width: 32pt;
 }
 
@@ -117,8 +119,27 @@ label, input {
   color: rgb(100, 149, 237);
 }
 
+#editingLabel, #groupsInQuiz > label, .roundNumber, #maxPointsArea, .groupPointsArea, .link {
+  font-family: arial;
+}
+
 #editingLabel {
   font-size: 24pt;
-  font-family: arial;
   font-style: italic;
+}
+
+.roundNumber {
+  display: inline-block;
+  padding: 5pt;
+}
+
+#groupsInQuiz > label {
+  font-size: 16pt;
+  margin-top: 5pt;
+  margin-bottom: 5pt;
+  display: inline-block;
+}
+
+.roundNumber {
+  font-size: 12pt;
 }
