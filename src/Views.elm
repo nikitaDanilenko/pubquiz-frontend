@@ -94,11 +94,6 @@ editingView md =
           addFeedbackLabel md
          ])
 
-convenientPointEditingView : Model -> Html Msg
-convenientPointEditingView md =
-  let (header, rounds) = (md.currentQuiz.header, md.currentQuiz.rounds)
-  in div [] []
-
 confirmView : Model -> Html Msg
 confirmView md =
     div [ id "confirmView" ]
