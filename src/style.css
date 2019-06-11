@@ -83,9 +83,7 @@ label, input {
 
 .link {
   font-size: 16px;
-  color: rgb(100, 149, 237);
   text-decoration: none;
-  
 }
 
 .link:hover {
@@ -113,4 +111,14 @@ label, input {
 
 .groupPointsArea > .input > .labeledInput {
   max-width: 32pt;
+}
+
+#editingLabel, .link {
+  color: rgb(100, 149, 237);
+}
+
+#editingLabel {
+  font-size: 24pt;
+  font-family: arial;
+  font-style: italic;
 }
