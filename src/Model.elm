@@ -25,14 +25,14 @@ type alias Model =
         feedback : String
     }
 
-initialModel : () -> (Model, Cmd Msg)
-initialModel () = ({ user = "",
+initialModelFunction : () -> (Model, Cmd Msg)
+initialModelFunction () = ({ user = "",
                      password = "",
                      oneWayHash = "", 
                      quizzes = [], 
                      editing = "",
                      currentQuiz = Quiz.empty,
-                     groupsInQuiz = 0,
+                     groupsInQuiz = 8,
                      isValidQuizUpdate = False,
                      numberOfRounds = "",
                      displayState = Initial, 
@@ -41,6 +41,9 @@ initialModel () = ({ user = "",
                      newUser = NewUser.emptyUser,
                      feedback = "" 
                      }, Cmd.none)
+
+initialModel : Model
+initialModel = Tuple.first (initialModelFunction ())
 
 {- The different types of possible states the page can transition. -}
 type DisplayState = Initial -- The state at the beginning of the application.
