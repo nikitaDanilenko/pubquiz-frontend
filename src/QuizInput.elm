@@ -21,7 +21,7 @@ import Views exposing           ( .. )
 main : Program () Model Msg
 main =
   Browser.document
-    { init          = initialModel
+    { init          = initialModelFunction
     , view          = \model -> { title = "Quiz Interface", body = [ view model ] }
     , update        = update
     , subscriptions = \_ -> Sub.none
@@ -33,7 +33,8 @@ update msg model = case msg of
     SetPassword p           -> ({ model | password = p}, Cmd.none)
     GetAll                  -> ({ model | displayState = Authenticating,
                                           currentQuiz = Quiz.empty,
-                                          editing = "" }, 
+                                          editing = "",
+                                          groupsInQuiz = initialModel.groupsInQuiz }, 
                                  getAll)
 
     GotAll (Err err)        -> ({ model | feedback = errorToString err}, Cmd.none)
@@ -105,6 +106,7 @@ update msg model = case msg of
                                 then ({ model | feedback = "Empty quiz name" }, Cmd.none)
                                 else (model, 
                                       createNewQuiz model.numberOfRounds
+                                                    model.groupsInQuiz
                                                     model.user 
                                                     model.oneWayHash 
                                                     model.createName 
@@ -180,12 +182,14 @@ postLock u sk quizName =
         expect = Http.expectWhatever Locked
     }
 
-createNewQuiz : String -> User -> SessionKey -> QuizName -> Labels -> Cmd Msg
-createNewQuiz rs u sk quizName labels = 
+createNewQuiz : String -> Int -> User -> SessionKey -> QuizName -> Labels -> Cmd Msg
+createNewQuiz rs gs u sk quizName labels = 
     let params = mkWithSignature u sk [(quizParam, quizName), (actionParam, createQuiz)]
     in Http.post {
         url = newApi,
-        body = encodeBody (mkParams ((roundsNumberParam, rs) :: List.concat [params, Labels.toParams labels])),
+        body = encodeBody (mkParams ((roundsNumberParam, rs) :: 
+                                     (numberOfGroupsParam, String.fromInt gs) :: 
+                                     List.concat [params, Labels.toParams labels])),
         expect = Http.expectWhatever Created
     }
 
