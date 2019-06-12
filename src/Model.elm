@@ -26,24 +26,24 @@ type alias Model =
     }
 
 initialModelFunction : () -> (Model, Cmd Msg)
-initialModelFunction () = ({ user = "",
-                     password = "",
-                     oneWayHash = "", 
-                     quizzes = [], 
-                     editing = "",
-                     currentQuiz = Quiz.empty,
-                     groupsInQuiz = 8,
-                     isValidQuizUpdate = False,
-                     numberOfRounds = "",
-                     displayState = Initial, 
-                     createName = "",
-                     labels = defaultLabels,
-                     newUser = NewUser.emptyUser,
-                     feedback = "" 
-                     }, Cmd.none)
+initialModelFunction () = (initialModel, Cmd.none)
 
 initialModel : Model
-initialModel = Tuple.first (initialModelFunction ())
+initialModel = { user = "",
+                 password = "",
+                 oneWayHash = "", 
+                 quizzes = [], 
+                 editing = "",
+                 currentQuiz = Quiz.empty,
+                 groupsInQuiz = 8,
+                 isValidQuizUpdate = False,
+                 numberOfRounds = "",
+                 displayState = Initial, 
+                 createName = "",
+                 labels = defaultLabels,
+                 newUser = NewUser.emptyUser,
+                 feedback = "" 
+               }
 
 {- The different types of possible states the page can transition. -}
 type DisplayState = Initial -- The state at the beginning of the application.
