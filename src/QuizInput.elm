@@ -7,6 +7,7 @@ import Html.Attributes exposing ( rel, type_, href, id )
 import Http
 import Http exposing            ( get, emptyBody, post )
 import Json.Encode as Encode
+import Url.Builder exposing     ( string )
 -- todo Write all out.
 import Base exposing            ( User, Password, SessionKey )
 import Constants exposing       ( .. )
@@ -169,7 +170,7 @@ getAll = Http.get {
 
 getSingle : String -> Cmd Msg
 getSingle quizName = Http.get { 
-        url = mkPath [quizApi, (String.concat [ "getQuizData?", mkParam quizParam quizName ])],
+        url = Url.Builder.relative [ quizApi, "getQuizData"] [ string quizParam quizName ],
         expect = Http.expectString GotSingle
     }
 
@@ -243,16 +244,21 @@ type alias RestParam = String
 type alias RestValue = String
 type alias RestKey = String
 
-mkParam : RestKey -> RestValue -> RestParam
-mkParam key value = String.join "=" [key, value]
+mkParamPure : RestKey -> RestValue -> RestParam
+mkParamPure key value = String.join "=" [key, value]
+
+mkParamsPure : List (RestKey, RestValue) -> RestParam
+mkParamsPure kvs = String.join "&" (List.map (\(k, v) -> mkParamPure k v) kvs)
 
 mkParams : List (RestKey, RestValue) -> RestParam
-mkParams kvs = String.join "&" (List.map (\(k, v) -> mkParam k v) kvs)
+mkParams kvs = 
+    let done = Url.Builder.relative [] (List.map (\(k, v) -> string k v) kvs)
+    in String.dropLeft 1 done
 
 mkWithSignature : User -> SessionKey -> List (RestKey, RestValue) -> List (RestKey, RestValue)
 mkWithSignature u key kvs = 
     let allParams = (userParam, u) :: kvs
-        sig = sha512 (String.concat [key, mkParams allParams])
+        sig = sha512 (String.concat [key, mkParamsPure allParams])
     in (signatureParam, sig) :: allParams
 
 mkParamsWithSignature : User -> SessionKey -> List (RestKey, RestValue) -> RestParam
