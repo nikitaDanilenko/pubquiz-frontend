@@ -62,7 +62,6 @@ editingView md =
                 input [ value (String.fromInt md.groupsInQuiz), 
                         type_ "number", 
                         min "1", 
-                        max "20", 
                         step "1", 
                         onInput SetGroupsInQuiz 
                       ] 
@@ -119,8 +118,9 @@ creatingQuizView md =
                          class "roundsSpinner",
                          type_ "number", 
                          min "1",
+                         step "1",
                          createOnEnter,
-                         placeholder md.numberOfRounds ] [] ], 
+                         value (String.fromInt md.numberOfRounds) ] [] ], 
            div [ id "groupNumberArea" ]
                [ label [ for "groupNumber" ] [ text "Number of groups" ],
                  input [ onInput SetGroupsInQuiz,
@@ -240,7 +240,7 @@ toTable : List (List String) -> Html Msg
 toTable = table [] << List.map (tr [] << List.map toCell)
 
 isValidNewQuiz : Model -> Bool
-isValidNewQuiz md = not (String.isEmpty md.createName) && isValidInt md.numberOfRounds
+isValidNewQuiz md = not (String.isEmpty md.createName)
 
 isValidInt : String -> Bool
 isValidInt = isParserSuccess int
