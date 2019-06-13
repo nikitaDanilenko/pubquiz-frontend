@@ -14,7 +14,8 @@ import Model exposing             ( .. )
 import NewUser exposing           ( NewUserField ( .. ), isValid )
 import Quiz exposing              ( isValidRoundsText, toEditableString )
 import Round exposing             ( isValidRound, Round )
-import Util exposing              ( isParserSuccess, splitFirstLast, adjustToSize )
+import Util exposing              ( isParserSuccess, splitFirstLast, adjustToSize, 
+                                    isValidInternalQuizName )
 
 authenticationView : Model -> Html Msg
 authenticationView md = 
@@ -110,7 +111,9 @@ creatingQuizView md =
   let createOnEnter = onEnter CreateQuiz
   in div [ id "creatingQuizView" ]
          [ label [ for "internalQuizName" ] [ text "Quiz name (internal)" ], 
-           input [ onInput SetNewQuizName, createOnEnter ] [],
+           input [ onInput SetNewQuizName,
+                   type_ "text",
+                   createOnEnter ] [],
            div [ id "roundsNumberDiv"] 
                [ label [ for "roundsNumber" ]
                        [ text "Number of rounds" ],
@@ -174,7 +177,7 @@ mkCreationForm createOnEnter labels =
       mkInput lbl fld dft = 
         div [ id (createIdByField fld) ] 
             [ label [] [ text lbl ], 
-              input [ onInput (LabelsUpdate fld), placeholder dft, createOnEnter ] [] ]
+              input [ onInput (LabelsUpdate fld), type_ "text", value dft, createOnEnter ] [] ]
   in div [ id "labelsForm" ]
          (List.map (\(lbl, fld, dft) -> mkInput lbl fld dft) associations)
 
@@ -240,7 +243,7 @@ toTable : List (List String) -> Html Msg
 toTable = table [] << List.map (tr [] << List.map toCell)
 
 isValidNewQuiz : Model -> Bool
-isValidNewQuiz md = not (String.isEmpty md.createName)
+isValidNewQuiz md = not (String.isEmpty md.createName) && isValidInternalQuizName md.createName
 
 isValidInt : String -> Bool
 isValidInt = isParserSuccess int
