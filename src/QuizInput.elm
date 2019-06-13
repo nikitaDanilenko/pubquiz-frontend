@@ -101,7 +101,11 @@ update msg model = case msg of
 
     StartCreatingQuiz       -> ({ model | displayState = CreatingQuiz }, Cmd.none)
     SetNewQuizName name     -> ({ model | createName = name }, Cmd.none)
-    SetRoundsNumber rs      -> ({ model | numberOfRounds = rs }, Cmd.none)
+    SetRoundsNumber rs      -> let newModel =
+                                    case run int rs of
+                                     Ok r -> { model | numberOfRounds = r, feedback = "" }
+                                     Err _ -> { model | feedback = "Not a valid number of groups." }
+                               in (newModel, Cmd.none)
     CreateQuiz              -> if String.isEmpty (model.createName) 
                                 then ({ model | feedback = "Empty quiz name" }, Cmd.none)
                                 else (model, 
@@ -182,12 +186,12 @@ postLock u sk quizName =
         expect = Http.expectWhatever Locked
     }
 
-createNewQuiz : String -> Int -> User -> SessionKey -> QuizName -> Labels -> Cmd Msg
+createNewQuiz : Int -> Int -> User -> SessionKey -> QuizName -> Labels -> Cmd Msg
 createNewQuiz rs gs u sk quizName labels = 
     let params = mkWithSignature u sk [(quizParam, quizName), (actionParam, createQuiz)]
     in Http.post {
         url = newApi,
-        body = encodeBody (mkParams ((roundsNumberParam, rs) :: 
+        body = encodeBody (mkParams ((roundsNumberParam, String.fromInt rs) :: 
                                      (numberOfGroupsParam, String.fromInt gs) :: 
                                      List.concat [params, Labels.toParams labels])),
         expect = Http.expectWhatever Created
@@ -218,8 +222,10 @@ updateLabels field text lbls =
 updateQuizByText : String -> Model -> Model
 updateQuizByText text model = 
     case Quiz.parseQuiz text of
-        Ok quiz -> { model | currentQuiz = quiz, 
-                             groupsInQuiz = Quiz.numberOfGroups quiz,
+        Ok quiz -> let guess = Quiz.numberOfGroups quiz
+                       actual = if guess == 0 then model.groupsInQuiz else guess
+                   in { model | currentQuiz = quiz, 
+                             groupsInQuiz = actual,
                              isValidQuizUpdate = True,
                              feedback = ""
                    }
