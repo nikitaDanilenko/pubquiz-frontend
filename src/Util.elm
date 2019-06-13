@@ -39,3 +39,9 @@ adjustToSize : Int -> List Float -> List Float
 adjustToSize n fs = 
     let fsLength = List.length fs
     in if fsLength > n then List.take n fs else fs ++ List.repeat (n - fsLength) 0
+
+isValidInternalQuizChar : Char -> Bool
+isValidInternalQuizChar c = Char.isAlphaNum c || List.member c ['_', '-']
+
+isValidInternalQuizName : String -> Bool
+isValidInternalQuizName = String.all isValidInternalQuizChar
