@@ -16,6 +16,7 @@ import NewUser exposing         ( NewUser )
 import Parser exposing          ( int, float, run )
 import Quiz
 import Round
+import Util exposing            ( isValidInternalQuizName )
 import Views exposing           ( .. )
 
 main : Program () Model Msg
@@ -100,7 +101,12 @@ update msg model = case msg of
     Logged (Ok text)        -> ({ model | feedback = "", oneWayHash = text }, getAll)
 
     StartCreatingQuiz       -> ({ model | displayState = CreatingQuiz }, Cmd.none)
-    SetNewQuizName name     -> ({ model | createName = name }, Cmd.none)
+    SetNewQuizName name     -> let feedback = 
+                                    if isValidInternalQuizName name then "" 
+                                    else String.join " " ["Internal name contains invalid symbols:",
+                                                          "only characters, numbers",
+                                                          "_ and - are allowed."]
+                               in ({ model | createName = name, feedback = feedback }, Cmd.none)
     SetRoundsNumber rs      -> let newModel =
                                     case run int rs of
                                      Ok r -> { model | numberOfRounds = r, feedback = "" }
