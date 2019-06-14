@@ -41,7 +41,7 @@ defaultLabels = mkLabels
     "Runde"
     "Gruppe"
     "Erreichte Punkte"
-    "Erreichte Höchstpunktzahl"
+    (String.concat ["Erreichte H", String.fromChar (Char.fromCode 246), "chstpunktzahl"])
     "Erreichbare Punkte"
     "Gesamtwertung"
     "Quiz"
