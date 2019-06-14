@@ -94,12 +94,6 @@ label, input {
  text-decoration: underline;
  color: rgb(0, 0, 0);
 }
-	
-#feedbackArea {
-	position: fixed;
-	left: 1%;
-	bottom: 1%;
-}
 
 .groupPointsArea, #maxPointsArea > .maxPoints {
   display: inline-block;
@@ -162,9 +156,22 @@ body {
   display: inline-block;
 }
 
+#creatingQuizView {
+  text-align: center;
+}
+
 #creatingQuizView label, #creatingQuizView input {
-  width: 30%;
+  width: 20%;
   display: inline-block;
+  vertical-align: center;
+}
+
+#creatingQuizView label {
+  text-align: left;
+}
+
+#creatingQuizView input {
+  text-align: right;
 }
 
 #creatingUserView label {
@@ -175,4 +182,21 @@ body {
 #creatingUserView input {
   width: 40%;
   display: inline-block;
+}
+
+html, head, body {
+  height: 100%;
+  width: 100%;
+}
+
+
+#feedbackArea {
+  position: fixed;
+  left: 1%;
+  bottom: 1%;
+  width: 100%;
+}
+
+#feedbackArea label {
+  width: 75%;
 }
