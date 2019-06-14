@@ -11,7 +11,7 @@ import Url.Builder exposing     ( string )
 -- todo Write all out.
 import Base exposing            ( User, Password, SessionKey )
 import Constants exposing       ( .. )
-import Labels exposing          ( Labels )
+import Labels exposing          ( Labels, defaultLabels )
 import Model exposing           ( .. )
 import NewUser exposing         ( NewUser )
 import Parser exposing          ( int, float, run )
@@ -123,7 +123,9 @@ update msg model = case msg of
                                                     model.createName 
                                                     model.labels)
     Created (Err err)       -> ({ model | feedback = errorToString err }, Cmd.none)
-    Created (Ok ok)         -> ({ model | editing = model.createName }, getSingle model.createName)
+    Created (Ok ok)         -> ({ model | editing = model.createName,
+                                          labels = defaultLabels }, 
+                                getSingle model.createName)
 
     
     StartCreatingUser       -> ({ model | newUser = NewUser.emptyUser, displayState = CreatingUser},
