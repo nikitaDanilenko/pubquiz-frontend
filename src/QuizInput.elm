@@ -41,7 +41,8 @@ update msg model = case msg of
 
     GotAll (Err err)        -> ({ model | feedback = errorToString err}, Cmd.none)
     GotAll (Ok text)        -> ({ model | quizzes = String.lines text, 
-                                          displayState = Selecting }, 
+                                          displayState = Selecting,
+                                          feedback = "" }, 
                                 Cmd.none)
     
     GetSingle qName         -> ({ model | editing = qName, feedback = "" }, getSingle qName)
