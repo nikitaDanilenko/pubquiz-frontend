@@ -113,7 +113,8 @@ creatingQuizView md =
          [ label [ for "internalQuizName" ] [ text "Quiz name (internal)" ], 
            input [ onInput SetNewQuizName,
                    type_ "text",
-                   createOnEnter ] [],
+                   createOnEnter,
+                   placeholder "e.g. some-quiz-yyyy-mm-dd" ] [],
            div [ id "roundsNumberDiv"] 
                [ label [ for "roundsNumber" ]
                        [ text "Number of rounds" ],
