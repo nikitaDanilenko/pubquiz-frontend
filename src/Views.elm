@@ -91,6 +91,12 @@ editingView md =
                     target "_blank"
                   ] 
                   [ text "Get quiz sheet" ] ],
+          div [ id "mainGraphPage" ]
+              [ a [ class "link",
+                    href (mkPath [ sheetPDFPrefix, md.editing, "" ]),
+                    target "_blank"
+                  ] 
+                  [ text "View main graph page" ] ],
           addFeedbackLabel md
          ])
 
@@ -172,7 +178,11 @@ mkCreationForm createOnEnter labels =
                       ("Label for maximum reached points", MaxReachedField, labels.maxReachedLabel),
                       ("Label for maximum reachable points", MaxReachableField, labels.maxReachableLabel),
                       ("Label for 'back to chart'", BackField, labels.backToChartView),
-                      ("Label for own page", OwnPageField, labels.ownPageLabel)
+                      ("Label for own page", OwnPageField, labels.ownPageLabel),
+                      ("Label for 'view quizzes' button", ViewQuizzesField, labels.viewQuizzesLabel),
+                      ("Label for cumulative points", CumulativeField, labels.cumulativeLabel),
+                      ("Label for individual points", IndividualField, labels.individualLabel),
+                      ("Label for progression", ProgressionField, labels.progressionLabel)
                      ]
       mkInput : String -> LabelsField -> String -> Html Msg
       mkInput lbl fld dft = 
@@ -231,11 +241,15 @@ createIdByField fld = case fld of
   RoundField -> "roundField"
   GroupField -> "groupField"
   OwnPointsField -> "ownPointsField"
-  MaxReachedField -> "MaxReachedField"
-  MaxReachableField -> "MaxReachableField"
-  BackField -> "BackField"
-  MainField -> "MainField"
-  OwnPageField -> "OwnPageField"
+  MaxReachedField -> "maxReachedField"
+  MaxReachableField -> "maxReachableField"
+  BackField -> "backField"
+  MainField -> "mainField"
+  OwnPageField -> "ownPageField"
+  ViewQuizzesField -> "viewQuizzesField"
+  CumulativeField -> "cumulativeField"
+  IndividualField -> "individualField"
+  ProgressionField -> "progressionField"
 
 toCell : String -> Html Msg
 toCell str = td [] [ text str ]

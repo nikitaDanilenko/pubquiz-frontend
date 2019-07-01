@@ -94,6 +94,10 @@ type LabelsField = RoundField
                  | BackField
                  | MainField
                  | OwnPageField
+                 | ViewQuizzesField
+                 | CumulativeField
+                 | IndividualField
+                 | ProgressionField
 
 errorToString : Http.Error -> String
 errorToString err = case err of

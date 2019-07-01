@@ -228,6 +228,10 @@ updateLabels field text lbls =
         BackField -> { lbls | backToChartView = text }
         MainField -> { lbls | mainLabel = text }
         OwnPageField -> { lbls | ownPageLabel = text }
+        ViewQuizzesField -> { lbls | viewQuizzesLabel = text }
+        CumulativeField -> { lbls | cumulativeLabel = text }
+        IndividualField -> { lbls | individualLabel = text }
+        ProgressionField -> { lbls | progressionLabel = text }
     
 updateQuizByText : String -> Model -> Model
 updateQuizByText text model = 

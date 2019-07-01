@@ -8,7 +8,11 @@ type alias Labels = {
       maxReachableLabel : String,
       backToChartView : String,
       mainLabel : String,
-      ownPageLabel : String
+      ownPageLabel : String,
+      viewQuizzesLabel : String,
+      cumulativeLabel : String,
+      individualLabel : String,
+      progressionLabel : String
     }
 
 emptyLabels : Labels
@@ -20,11 +24,28 @@ emptyLabels = {
       maxReachableLabel = "",
       backToChartView = "",
       mainLabel = "",
-      ownPageLabel = ""   
+      ownPageLabel = "",
+      viewQuizzesLabel = "",
+      cumulativeLabel = "",
+      individualLabel = "",
+      progressionLabel = ""
     }
 
-mkLabels : String -> String -> String -> String -> String -> String -> String -> String -> Labels
-mkLabels roundLbl groupLbl ownPointsLbl maxReachedLbl maxReachableLbl backToChartLbl mainLbl ownPageLbl =
+mkLabels : String 
+        -> String 
+        -> String
+        -> String
+        -> String
+        -> String
+        -> String
+        -> String
+        -> String
+        -> String
+        -> String
+        -> String
+        -> Labels
+mkLabels roundLbl groupLbl ownPointsLbl maxReachedLbl maxReachableLbl backToChartLbl mainLbl
+         ownPageLbl viewQuizzesLbl cumulativeLbl individualLbl progressionLbl =
   {
     roundLabel = roundLbl,
     groupLabel = groupLbl,
@@ -33,7 +54,11 @@ mkLabels roundLbl groupLbl ownPointsLbl maxReachedLbl maxReachableLbl backToChar
     maxReachableLabel = maxReachableLbl,
     backToChartView = backToChartLbl,
     mainLabel = mainLbl,
-    ownPageLabel = ownPageLbl
+    ownPageLabel = ownPageLbl,
+    viewQuizzesLabel = viewQuizzesLbl,
+    cumulativeLabel = cumulativeLbl,
+    individualLabel = individualLbl,
+    progressionLabel = progressionLbl
   }
 
 defaultLabels : Labels
@@ -46,6 +71,10 @@ defaultLabels = mkLabels
     "Gesamtwertung"
     "Quiz"
     "Eigene Punkte"
+    "Alle Quizzes"
+    "Gesamtpunktzahl"
+    "Punkte pro Runde"
+    "Verlauf"
 
 toParams : Labels -> List (String, String)
 toParams labels = [
@@ -56,5 +85,9 @@ toParams labels = [
   ("maxReachableLabel", labels.maxReachableLabel),
   ("backToChartViewLabel", labels.backToChartView),
   ("mainLabel", labels.mainLabel),
-  ("ownPageLabel", labels.ownPageLabel)
+  ("ownPageLabel", labels.ownPageLabel),
+  ("viewQuizzesLabel", labels.viewQuizzesLabel),
+  ("cumulativeLabel", labels.cumulativeLabel),
+  ("individualLabel", labels.individualLabel),
+  ("progressionLabel", labels.progressionLabel)
   ]
