@@ -1,14 +1,20 @@
 module Quiz exposing ( .. )
 
 import Parser exposing ( succeed, sequence, Trailing ( .. ), Parser, (|.), DeadEnd,
-                         (|=), end, run )
+                         (|=), end, run, symbol , chompWhile, oneOf, variable, chompIf,
+                         getChompedString )
+import Result exposing ( andThen )
+import Set
 
 import Round exposing  ( Round, isValidRound, roundParser )
 import Util exposing   ( splitFirstLast, isParserSuccess, blanks )
 
+type alias TeamWithOptionalName = (String, Maybe String)
+type alias Header = List TeamWithOptionalName
+
 type alias Quiz = 
     {
-        header : List String,
+        header : Header,
         rounds : List Round
     }
 
@@ -49,31 +55,105 @@ toEditableString : Quiz -> String
 toEditableString quiz = String.join "\n" (roundsToStrings quiz)
 
 headerToString : Quiz -> String
-headerToString quiz = String.join " " quiz.header
+headerToString quiz = 
+  let sep = String.fromChar teamNameSeparator
+
+      withMaybeName : String -> Maybe String -> String
+      withMaybeName c mn = case mn of
+        Nothing -> c
+        Just n  -> String.concat ["(", c, "|", sep, n, sep, ")"]
+  in String.join " " (List.map (\(c, mn) -> withMaybeName c mn) quiz.header)
 
 roundsToStrings : Quiz -> List String
 roundsToStrings quiz = List.map Round.toString quiz.rounds
 
-updateHeader : String -> Quiz -> Quiz
-updateHeader text q = { q | header = String.words text }
+updateHeader : Header -> Quiz -> Quiz
+updateHeader h q = { q | header = h }
 
 parseQuiz : String -> Result (List DeadEnd) Quiz
 parseQuiz text = 
     let (header, rs) = splitFirstLast text
-    in run (quizParser header) (String.replace "," "." (String.join "\n" rs))
+        headerResult = run headerParser header
+    in andThen (\h -> run (quizParser h) (String.replace "," "." (String.join "\n" rs)))
+               (run headerParser header)
 
-quizParser : String -> Parser Quiz
-quizParser header = succeed (Quiz (String.words header))
-                      |. blanks
-                      |= sequence {
-                           start = "", 
-                           separator = "\n",
-                           end = "",
-                           spaces = blanks,
-                           item = roundParser,
-                           trailing = Optional
-                         }
-                      |. end
+alphaNumericParser : Parser String
+alphaNumericParser = getChompedString (chompIf Char.isAlphaNum)
+
+codeParser : Parser String
+codeParser = 
+  succeed (\c cs -> String.concat (c :: cs))
+    |= alphaNumericParser
+    |= sequence {
+        start = "",
+        separator = "",
+        end = "",
+        spaces = chompWhile (\_ -> False),
+        item = alphaNumericParser,
+        trailing = Optional
+       }
+
+teamNameSeparator : Char
+teamNameSeparator = '\\'
+
+notSeparator : Char -> Bool
+notSeparator c = c /= teamNameSeparator
+
+separatorParser : Parser String
+separatorParser = getChompedString (chompIf (\c -> c == teamNameSeparator))
+
+codeWithNameParser : Parser (String, String)
+codeWithNameParser = 
+  succeed Tuple.pair
+    |. blanks
+    |. symbol "("
+    |. blanks
+    |= codeParser
+    |. blanks
+    |. symbol "|"
+    |. blanks
+    |. separatorParser
+    |= variable {
+         start = notSeparator,
+         inner = notSeparator,
+         reserved = Set.empty
+       }
+    |. separatorParser
+    |. blanks
+    |. symbol ")"
+
+codeWithMaybeNameParser : Parser TeamWithOptionalName
+codeWithMaybeNameParser = oneOf [
+    Parser.map (\s -> (s, Nothing)) codeParser,
+    Parser.map (\(c, n) -> (c, Just n)) codeWithNameParser
+  ]
+
+headerParser : Parser Header
+headerParser = 
+  succeed identity 
+    |= sequence {
+         start = "", 
+         separator = " ",
+         end = "",
+         spaces = chompWhile (\_ -> False),
+         item = codeWithMaybeNameParser,
+         trailing = Optional
+       } 
+    |. end
+
+quizParser : List (String, Maybe String) -> Parser Quiz
+quizParser header = 
+  succeed (Quiz header)
+    |. blanks
+    |= sequence {
+         start = "", 
+         separator = "\n",
+         end = "",
+         spaces = blanks,
+         item = roundParser,
+         trailing = Optional
+       }
+    |. end
 
 isValidRoundsText : String -> Bool
 isValidRoundsText text = 
