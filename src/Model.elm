@@ -15,7 +15,7 @@ type alias Model =
         quizzes : List QuizName,
         editing : QuizName,
         currentQuiz : Quiz,
-        groupsInQuiz : Int,
+        teamsInQuiz : Int,
         isValidQuizUpdate : Bool,
         numberOfRounds : Int,
         displayState : DisplayState,
@@ -35,7 +35,7 @@ initialModel = { user = "",
                  quizzes = [], 
                  editing = "",
                  currentQuiz = Quiz.empty,
-                 groupsInQuiz = 8,
+                 teamsInQuiz = 8,
                  isValidQuizUpdate = False,
                  numberOfRounds = 4,
                  displayState = Initial, 
@@ -66,8 +66,8 @@ type Msg = GetAll
          | SetUser User
          | SetPassword Password
          | SetPoints String String
-         | SetGroupsInQuiz String
-         | UpdatePoints Int Int String -- Points for round, group, value.
+         | SetTeamsInQuiz String
+         | UpdatePoints Int Int String -- Points for round, team, value.
          | SetMaxPoints Int String    -- Points for round, value
          | AddRound
          | SetRoundsNumber String
@@ -85,9 +85,10 @@ type Msg = GetAll
          | Login
          | Logged (Result Http.Error String)
          | LabelsUpdate LabelsField String
+         | SetTeamName Int String
 
 type LabelsField = RoundField
-                 | GroupField
+                 | TeamField
                  | OwnPointsField
                  | MaxReachedField
                  | MaxReachableField

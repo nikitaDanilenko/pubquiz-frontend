@@ -41,8 +41,8 @@ passwordParam = "pass"
 signatureParam : String
 signatureParam = "signature"
 
-numberOfGroupsParam : String
-numberOfGroupsParam = "numberOfGroups"
+numberOfTeamsParam : String
+numberOfTeamsParam = "numberOfTeams"
 
 mkPath : List String -> String
 mkPath = String.join "/"

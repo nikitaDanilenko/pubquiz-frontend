@@ -28,9 +28,9 @@ adjustTo : Int -> Quiz -> Quiz
 adjustTo n quiz = { quiz | rounds = List.map (Round.adjustTo n) quiz.rounds }
 
 update : Int -> Int -> Float -> Quiz -> Quiz
-update round group points quiz =
+update round team points quiz =
   let change : Int -> Round -> Round
-      change i r = if i == round then Round.update group points r else r
+      change i r = if i == round then Round.update team points r else r
       
       updatedRounds = List.indexedMap change quiz.rounds
   in { quiz | rounds = updatedRounds }
@@ -41,11 +41,21 @@ updateMax rd m quiz =
                                       quiz.rounds
   in { quiz | rounds = updatedRounds }
 
+updateTeamName : Int -> String -> Quiz -> Quiz
+updateTeamName i newName quiz =
+  let inTWON : String -> TeamWithOptionalName -> TeamWithOptionalName
+      inTWON name (code, _) = (code, Just name)
+
+      inHeader : Int -> String -> Header -> Header
+      inHeader pos name =  
+        List.indexedMap (\k twon -> if k == pos then inTWON name twon else twon) 
+  in { quiz | header = inHeader i newName quiz.header }
+
 addRound : Round -> Quiz -> Quiz
 addRound r q = { q | rounds = q.rounds ++ [r] }
 
-numberOfGroups : Quiz -> Int
-numberOfGroups quiz = 
+numberOfTeams : Quiz -> Int
+numberOfTeams quiz = 
   Maybe.withDefault 0 (List.maximum (List.map (\r -> List.length r.teamPoints) quiz.rounds))
 
 toString : Quiz -> String

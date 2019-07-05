@@ -12,7 +12,7 @@ import Constants exposing         ( sheetPDFPrefix, sheetPDFFile, mkPath )
 import Labels exposing            ( Labels )
 import Model exposing             ( .. )
 import NewUser exposing           ( NewUserField ( .. ), isValid )
-import Quiz exposing              ( isValidRoundsText, toEditableString )
+import Quiz exposing              ( isValidRoundsText, toEditableString, Header )
 import Round exposing             ( isValidRound, Round )
 import Util exposing              ( isParserSuccess, splitFirstLast, adjustToSize, 
                                     isValidInternalQuizName )
@@ -58,18 +58,21 @@ editingView md =
               [ label [ for "editingQuiz" ]
                       [ text (String.join " " ["Editing", md.editing]) ] 
               ],
-          div [ id "groupsInQuiz" ]
-              [ label [ for "groupInQuizLabel" ] [ text "Groups in the quiz" ],
-                input [ value (String.fromInt md.groupsInQuiz), 
+          div [ id "teamsInQuiz" ]
+              [ label [ for "teamInQuizLabel" ] [ text "Teams in the quiz" ],
+                input [ value (String.fromInt md.teamsInQuiz), 
                         type_ "number", 
                         min "1", 
                         step "1", 
-                        onInput SetGroupsInQuiz 
+                        onInput SetTeamsInQuiz 
                       ] 
                       []
-              ]
+              ],
+          div [ id "teamNames" ]
+              (label [ for "teamNamesLabel" ] [ text "Team names"] :: 
+                mkTeamNameInput md.currentQuiz.header)
          ] ++
-         List.indexedMap (\i rd -> mkRoundForm i md.groupsInQuiz rd)
+         List.indexedMap (\i rd -> mkRoundForm i md.teamsInQuiz rd)
                          md.currentQuiz.rounds
           ++ 
          [
@@ -131,14 +134,14 @@ creatingQuizView md =
                          step "1",
                          createOnEnter,
                          value (String.fromInt md.numberOfRounds) ] [] ], 
-           div [ id "groupNumberArea" ]
-               [ label [ for "groupNumber" ] [ text "Number of groups" ],
-                 input [ onInput SetGroupsInQuiz,
-                         class "groupsSpinner",
+           div [ id "teamNumberArea" ]
+               [ label [ for "teamNumber" ] [ text "Number of teams" ],
+                 input [ onInput SetTeamsInQuiz,
+                         class "teamsSpinner",
                          type_ "number", 
                          min "1",
                          createOnEnter,
-                         value (String.fromInt md.groupsInQuiz) ] [] ],
+                         value (String.fromInt md.teamsInQuiz) ] [] ],
            mkCreationForm createOnEnter md.labels,
            button [ class "button", onClick CreateQuiz, 
                     disabled (not (isValidNewQuiz md)) ] [ text "Create" ] ,
@@ -173,7 +176,7 @@ mkCreationForm : Html.Attribute Msg -> Labels -> Html Msg
 mkCreationForm createOnEnter labels = 
   let associations = [("Description (external)", MainField, labels.mainLabel),
                       ("Label for rounds", RoundField, labels.roundLabel),
-                      ("Label for groups", GroupField, labels.groupLabel),
+                      ("Label for teams", TeamField, labels.teamLabel),
                       ("Label for own points", OwnPointsField, labels.ownPointsLabel),
                       ("Label for maximum reached points", MaxReachedField, labels.maxReachedLabel),
                       ("Label for maximum reachable points", MaxReachableField, labels.maxReachableLabel),
@@ -208,11 +211,11 @@ mkRoundForm number gs rd =
                      pointInputAttributes) 
                      []
             ] ::
-        List.indexedMap (\i ps -> div [ class "groupPointsArea"]
+        List.indexedMap (\i ps -> div [ class "teamPointsArea"]
                                       [ div [ class "label" ]
-                                            [ label [ class "pointsPerGroupLabel" ] 
+                                            [ label [ class "pointsPerTeamLabel" ] 
                                                     [ text (String.join " " 
-                                                                        ["Group", 
+                                                                        ["Team", 
                                                                          String.fromInt (1 + i)]) ]
                                             ],
                                         div [ class "input" ]
@@ -224,6 +227,23 @@ mkRoundForm number gs rd =
                                             ]
                                       ])
                         (adjustToSize gs rd.teamPoints))
+
+mkTeamNumber : Int -> String -> String
+mkTeamNumber i wordForTeam = (String.join " " [wordForTeam, String.fromInt i])
+
+mkSingleTeamName : Int -> String -> Maybe String -> String
+mkSingleTeamName i wordForTeam = Maybe.withDefault (mkTeamNumber i wordForTeam)
+
+mkSingleTeamNameInput : Int -> String -> Maybe String -> Html Msg
+mkSingleTeamNameInput i wordForTeam mn =
+  div [ class "teamNameInputArea" ]
+      [ label [ for "teamName" ] [ text (mkTeamNumber (1 + i) "Team") ],
+        input [ value (mkSingleTeamName (1 + i) wordForTeam mn),
+                onInput (SetTeamName i) ] [ ]
+       ]
+
+mkTeamNameInput : Header -> List (Html Msg)
+mkTeamNameInput = List.indexedMap (\i (_, mn) -> mkSingleTeamNameInput i "Gruppe" mn)
 
 pointInputAttributes : List (Html.Attribute Msg)
 pointInputAttributes = [ class "labeledInput", type_ "number", min "0", step "0.5" ]
@@ -239,7 +259,7 @@ wrapView viewOf model =
 createIdByField : LabelsField -> String
 createIdByField fld = case fld of
   RoundField -> "roundField"
-  GroupField -> "groupField"
+  TeamField -> "teamField"
   OwnPointsField -> "ownPointsField"
   MaxReachedField -> "maxReachedField"
   MaxReachableField -> "maxReachableField"

@@ -2,7 +2,7 @@ module Labels exposing ( .. )
 
 type alias Labels = {
       roundLabel : String,
-      groupLabel : String,
+      teamLabel : String,
       ownPointsLabel : String, 
       maxReachedLabel : String,
       maxReachableLabel : String,
@@ -18,7 +18,7 @@ type alias Labels = {
 emptyLabels : Labels
 emptyLabels = {
       roundLabel = "",
-      groupLabel = "",
+      teamLabel = "",
       ownPointsLabel = "", 
       maxReachedLabel = "",
       maxReachableLabel = "",
@@ -44,11 +44,11 @@ mkLabels : String
         -> String
         -> String
         -> Labels
-mkLabels roundLbl groupLbl ownPointsLbl maxReachedLbl maxReachableLbl backToChartLbl mainLbl
+mkLabels roundLbl teamLbl ownPointsLbl maxReachedLbl maxReachableLbl backToChartLbl mainLbl
          ownPageLbl viewQuizzesLbl cumulativeLbl individualLbl progressionLbl =
   {
     roundLabel = roundLbl,
-    groupLabel = groupLbl,
+    teamLabel = teamLbl,
     ownPointsLabel = ownPointsLbl,
     maxReachedLabel = maxReachedLbl,
     maxReachableLabel = maxReachableLbl,
@@ -79,7 +79,7 @@ defaultLabels = mkLabels
 toParams : Labels -> List (String, String)
 toParams labels = [
   ("roundLabel", labels.roundLabel),
-  ("groupLabel", labels.groupLabel),
+  ("teamLabel", labels.teamLabel),
   ("ownPointsLabel", labels.ownPointsLabel),
   ("maxReachedLabel", labels.maxReachedLabel),
   ("maxReachableLabel", labels.maxReachableLabel),

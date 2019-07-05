@@ -31,12 +31,6 @@
   cursor: not-allowed;
 }
 
-.quizButton {
-  display: block;
-}
-
-
-
 label, input {
   padding-right: 5px;
   padding-top: 2px;
@@ -56,6 +50,11 @@ label, input {
 	margin-right: 0.7%;
 }
 
+#quizSelectionMain {
+  text-align: center;
+  width: 100%;
+}
+
 .quizButton{
   display: block;
   float: center;
@@ -63,7 +62,6 @@ label, input {
   width: 30%;
 	margin-top: 0.7%;
 	margin-bottom: 0.7%;
-	margin-right: 0.7%;
 }
 
 .newQuizButton {
@@ -78,15 +76,18 @@ label, input {
 	margin-top: 1%;
 }
 
+#initialMain {
+  width: 90%;
+  text-align: center;
+}
 	
 #passwordField, #userField {
-  font-size: 16px;
+  font-size: 16pt;
   color: rgb(0, 0, 0);
-  width: 500px;
 }
 
 .link {
-  font-size: 16px;
+  font-size: 16pt;
   text-decoration: none;
 }
 
@@ -95,21 +96,21 @@ label, input {
  color: rgb(0, 0, 0);
 }
 
-.groupPointsArea, #maxPointsArea > .maxPoints {
+.teamPointsArea, #maxPointsArea > .maxPoints {
   display: inline-block;
   padding: 5pt;
 }
 
-.groupPointsArea > .label > .pointsPerGroupLabel,
- .groupPointsArea > .input > .labeledInput,
+.teamPointsArea > .label > .pointsPerTeamLabel,
+ .teamPointsArea > .input > .labeledInput,
  #maxPointsArea > .maxPoints, 
  #maxPointsArea > .labeledInput {
   font-size: 10pt;
 }
 
-.groupPointsArea > .input > .labeledInput,
+.teamPointsArea > .input > .labeledInput,
 #maxPointsArea > .labeledInput,
-#groupsInQuiz > input   {
+#teamsInQuiz > input   {
   max-width: 32pt;
 }
 
@@ -131,7 +132,7 @@ body {
   padding: 5pt;
 }
 
-#groupsInQuiz > label {
+#teamsInQuiz > label {
   font-size: 16pt;
   margin-top: 5pt;
   margin-bottom: 5pt;
@@ -189,7 +190,6 @@ html, head, body {
   width: 100%;
 }
 
-
 #feedbackArea {
   position: fixed;
   left: 1%;
@@ -199,4 +199,38 @@ html, head, body {
 
 #feedbackArea label {
   width: 75%;
+}
+
+@media screen and (orientation: portrait) {
+  
+  #initialMain {
+    width: 95%;
+  }
+
+
+
+  #userField, #passwordField {
+    /*display: block;*/
+    /*display: inline-table;*/
+    /*float: top;*/
+    /*width: 100%;*/
+  }
+
+  #initialMain label {
+    width: 100%;
+    display: block;
+    /*float: top;*/
+  }
+
+  #userField input, #passwordField input {
+    font-size: 32pt;
+    float: bottom;
+    /*width: 100%;*/
+  }
+
+  #initialMain .button {
+    width: 100%;
+    background: green;
+  }
+
 }

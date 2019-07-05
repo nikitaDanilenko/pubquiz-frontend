@@ -36,7 +36,7 @@ update msg model = case msg of
     GetAll                  -> ({ model | displayState = Authenticating,
                                           currentQuiz = Quiz.empty,
                                           editing = "",
-                                          groupsInQuiz = initialModel.groupsInQuiz }, 
+                                          teamsInQuiz = initialModel.teamsInQuiz }, 
                                  getAll)
 
     GotAll (Err err)        -> ({ model | feedback = errorToString err}, Cmd.none)
@@ -51,12 +51,12 @@ update msg model = case msg of
     GotSingle (Ok text)     -> let updatedModel = updateQuizByText text model
                                in ({ updatedModel | displayState = Editing }, Cmd.none)
 
-    SetGroupsInQuiz text    -> let (groups, response) = 
+    SetTeamsInQuiz text    -> let (teams, response) = 
                                     case run int text of
                                      Ok n -> (n, "")
-                                     Err _ -> (0, "Invalid group number. Substituting 0.")
-                                   newQuiz = Quiz.adjustTo groups model.currentQuiz
-                               in ({ model | groupsInQuiz = groups,
+                                     Err _ -> (0, "Invalid team number. Substituting 0.")
+                                  newQuiz = Quiz.adjustTo teams model.currentQuiz
+                               in ({ model | teamsInQuiz = teams,
                                              currentQuiz = newQuiz,
                                              feedback = response }, Cmd.none)
     UpdatePoints r g ps     -> let (np, response) =
@@ -67,14 +67,14 @@ update msg model = case msg of
                                                            ["Invalid decimal point number",
                                                             "at round =", 
                                                             String.fromInt (1 + r),
-                                                            "and group =",
+                                                            "and team =",
                                                             String.concat [String.fromInt (1 + g), 
                                                                            "."],
                                                             "Substituting 0."])
                                in ({ model | currentQuiz = Quiz.update r g np model.currentQuiz,
                                              feedback = response },
                                    Cmd.none)
-    AddRound                -> let newQuiz = Quiz.addRound (Round.emptyOfSize model.groupsInQuiz) 
+    AddRound                -> let newQuiz = Quiz.addRound (Round.emptyOfSize model.teamsInQuiz) 
                                                            model.currentQuiz
                                in ({ model | currentQuiz = newQuiz }, Cmd.none)
     SetMaxPoints rd ps      -> let newModel =
@@ -112,13 +112,13 @@ update msg model = case msg of
     SetRoundsNumber rs      -> let newModel =
                                     case run int rs of
                                      Ok r -> { model | numberOfRounds = r, feedback = "" }
-                                     Err _ -> { model | feedback = "Not a valid number of groups." }
+                                     Err _ -> { model | feedback = "Not a valid number of teams." }
                                in (newModel, Cmd.none)
     CreateQuiz              -> if String.isEmpty (model.createName) 
                                 then ({ model | feedback = "Empty quiz name" }, Cmd.none)
                                 else (model, 
                                       createNewQuiz model.numberOfRounds
-                                                    model.groupsInQuiz
+                                                    model.teamsInQuiz
                                                     model.user 
                                                     model.oneWayHash 
                                                     model.createName 
@@ -144,6 +144,8 @@ update msg model = case msg of
 
     LabelsUpdate fld text   -> let lbls = updateLabels fld text model.labels
                                in ({ model | labels = lbls }, Cmd.none)
+    SetTeamName i teamName  -> let newQuiz = Quiz.updateTeamName i teamName model.currentQuiz
+                               in ({ model | currentQuiz = newQuiz }, Cmd.none)
     _                       -> (model, Cmd.none)
 
 view : Model -> Html Msg
@@ -202,7 +204,7 @@ createNewQuiz rs gs u sk quizName labels =
     in Http.post {
         url = newApi,
         body = encodeBody (mkParams ((roundsNumberParam, String.fromInt rs) :: 
-                                     (numberOfGroupsParam, String.fromInt gs) :: 
+                                     (numberOfTeamsParam, String.fromInt gs) :: 
                                      List.concat [params, Labels.toParams labels])),
         expect = Http.expectWhatever Created
     }
@@ -221,7 +223,7 @@ updateLabels : LabelsField -> String -> Labels -> Labels
 updateLabels field text lbls = 
     case field of
         RoundField -> { lbls | roundLabel = text }
-        GroupField -> { lbls | groupLabel = text }
+        TeamField -> { lbls | teamLabel = text }
         OwnPointsField -> { lbls | ownPointsLabel = text }
         MaxReachedField -> { lbls | maxReachedLabel = text }
         MaxReachableField -> { lbls | maxReachableLabel = text }
@@ -236,10 +238,10 @@ updateLabels field text lbls =
 updateQuizByText : String -> Model -> Model
 updateQuizByText text model = 
     case Quiz.parseQuiz text of
-        Ok quiz -> let guess = Quiz.numberOfGroups quiz
-                       actual = if guess == 0 then model.groupsInQuiz else guess
+        Ok quiz -> let guess = Quiz.numberOfTeams quiz
+                       actual = if guess == 0 then model.teamsInQuiz else guess
                    in { model | currentQuiz = quiz, 
-                             groupsInQuiz = actual,
+                             teamsInQuiz = actual,
                              isValidQuizUpdate = True,
                              feedback = ""
                    }
