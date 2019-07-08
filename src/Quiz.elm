@@ -1,8 +1,8 @@
 module Quiz exposing ( .. )
 
 import Parser exposing ( succeed, sequence, Trailing ( .. ), Parser, (|.), DeadEnd,
-                         (|=), end, run, symbol , chompWhile, oneOf, variable, chompIf,
-                         getChompedString )
+                         (|=), end, run, symbol, chompWhile, oneOf, variable, getChompedString,
+                         chompIf )
 import Result exposing ( andThen )
 import Set
 
@@ -88,7 +88,7 @@ parseQuiz text =
                (run headerParser header)
 
 alphaNumericParser : Parser String
-alphaNumericParser = getChompedString (chompIf Char.isAlphaNum)
+alphaNumericParser = parseIf Char.isAlphaNum
 
 codeParser : Parser String
 codeParser = 
@@ -109,8 +109,17 @@ teamNameSeparator = '\\'
 notSeparator : Char -> Bool
 notSeparator c = c /= teamNameSeparator
 
+parseIf : (Char -> Bool) -> Parser String
+parseIf p = getChompedString (chompIf p)
+
+parseWhile : (Char -> Bool) -> Parser String
+parseWhile p = getChompedString (chompWhile p)
+
 separatorParser : Parser String
-separatorParser = getChompedString (chompIf (\c -> c == teamNameSeparator))
+separatorParser = parseIf (\c -> c == teamNameSeparator)
+
+anyNonSeparatorParser : Parser String
+anyNonSeparatorParser = parseWhile notSeparator
 
 codeWithNameParser : Parser (String, String)
 codeWithNameParser = 
@@ -123,11 +132,7 @@ codeWithNameParser =
     |. symbol "|"
     |. blanks
     |. separatorParser
-    |= variable {
-         start = notSeparator,
-         inner = notSeparator,
-         reserved = Set.empty
-       }
+    |= anyNonSeparatorParser
     |. separatorParser
     |. blanks
     |. symbol ")"
