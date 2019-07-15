@@ -185,7 +185,11 @@ mkCreationForm createOnEnter labels =
                       ("Label for 'view quizzes' button", ViewQuizzesField, labels.viewQuizzesLabel),
                       ("Label for cumulative points", CumulativeField, labels.cumulativeLabel),
                       ("Label for individual points", IndividualField, labels.individualLabel),
-                      ("Label for progression", ProgressionField, labels.progressionLabel)
+                      ("Label for progression", ProgressionField, labels.progressionLabel),
+                      ("Label for placement", PlacementField, labels.placementLabel),
+                      ("Label for place", PlaceField, labels.placeLabel),
+                      ("Label for points", PointsField, labels.pointsLabel),
+                      ("Label for round winner", RoundWinnerField, labels.roundWinnerLabel)
                      ]
       mkInput : String -> LabelsField -> String -> Html Msg
       mkInput lbl fld dft = 
@@ -270,6 +274,10 @@ createIdByField fld = case fld of
   CumulativeField -> "cumulativeField"
   IndividualField -> "individualField"
   ProgressionField -> "progressionField"
+  PlacementField -> "placementField"
+  PlaceField -> "placeField"
+  PointsField -> "pointsField"
+  RoundWinnerField -> "roundWinnerField"
 
 toCell : String -> Html Msg
 toCell str = td [] [ text str ]
