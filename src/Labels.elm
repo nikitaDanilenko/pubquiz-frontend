@@ -12,7 +12,11 @@ type alias Labels = {
       viewQuizzesLabel : String,
       cumulativeLabel : String,
       individualLabel : String,
-      progressionLabel : String
+      progressionLabel : String,
+      placementLabel : String,
+      placeLabel : String,
+      pointsLabel : String,
+      roundWinnerLabel : String
     }
 
 emptyLabels : Labels
@@ -28,7 +32,11 @@ emptyLabels = {
       viewQuizzesLabel = "",
       cumulativeLabel = "",
       individualLabel = "",
-      progressionLabel = ""
+      progressionLabel = "",
+      placementLabel = "",
+      placeLabel = "",
+      pointsLabel = "",
+      roundWinnerLabel = ""
     }
 
 mkLabels : String 
@@ -43,9 +51,14 @@ mkLabels : String
         -> String
         -> String
         -> String
+        -> String
+        -> String
+        -> String
+        -> String
         -> Labels
 mkLabels roundLbl teamLbl ownPointsLbl maxReachedLbl maxReachableLbl backToChartLbl mainLbl
-         ownPageLbl viewQuizzesLbl cumulativeLbl individualLbl progressionLbl =
+         ownPageLbl viewQuizzesLbl cumulativeLbl individualLbl progressionLbl
+         placementLbl placeLbl pointsLbl roundWinnerLbl =
   {
     roundLabel = roundLbl,
     teamLabel = teamLbl,
@@ -58,7 +71,11 @@ mkLabels roundLbl teamLbl ownPointsLbl maxReachedLbl maxReachableLbl backToChart
     viewQuizzesLabel = viewQuizzesLbl,
     cumulativeLabel = cumulativeLbl,
     individualLabel = individualLbl,
-    progressionLabel = progressionLbl
+    progressionLabel = progressionLbl,
+    placementLabel = placementLbl,
+    placeLabel = placeLbl,
+    pointsLabel = pointsLbl,
+    roundWinnerLabel = roundWinnerLbl
   }
 
 defaultLabels : Labels
@@ -75,6 +92,10 @@ defaultLabels = mkLabels
     "Gesamtpunktzahl"
     "Punkte pro Runde"
     "Verlauf"
+    "Platzierung"
+    "Platz"
+    "Punkte"
+    "Rundensieger"
 
 toParams : Labels -> List (String, String)
 toParams labels = [
@@ -89,5 +110,9 @@ toParams labels = [
   ("viewQuizzesLabel", labels.viewQuizzesLabel),
   ("cumulativeLabel", labels.cumulativeLabel),
   ("individualLabel", labels.individualLabel),
-  ("progressionLabel", labels.progressionLabel)
+  ("progressionLabel", labels.progressionLabel),
+  ("placementLabel", labels.placementLabel),
+  ("placeLabel", labels.placeLabel),
+  ("pointsLabel", labels.pointsLabel),
+  ("roundWinnerLabel", labels.roundWinnerLabel)
   ]
