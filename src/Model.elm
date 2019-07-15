@@ -99,6 +99,10 @@ type LabelsField = RoundField
                  | CumulativeField
                  | IndividualField
                  | ProgressionField
+                 | PlacementField
+                 | PlaceField
+                 | PointsField
+                 | RoundWinnerField
 
 errorToString : Http.Error -> String
 errorToString err = case err of
