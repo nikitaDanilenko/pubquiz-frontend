@@ -234,6 +234,10 @@ updateLabels field text lbls =
         CumulativeField -> { lbls | cumulativeLabel = text }
         IndividualField -> { lbls | individualLabel = text }
         ProgressionField -> { lbls | progressionLabel = text }
+        PlacementField -> { lbls | placementLabel = text }
+        PlaceField -> { lbls | placeLabel = text }
+        PointsField -> { lbls | pointsLabel = text }
+        RoundWinnerField -> { lbls | roundWinnerLabel = text }
     
 updateQuizByText : String -> Model -> Model
 updateQuizByText text model = 
