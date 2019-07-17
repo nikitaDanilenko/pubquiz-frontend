@@ -63,7 +63,8 @@ editingView md =
                 input [ value (String.fromInt md.teamsInQuiz), 
                         type_ "number", 
                         min "1", 
-                        step "1", 
+                        step "1",
+                        max (String.fromInt (Quiz.maxNumberOfTeams md.currentQuiz)) ,
                         onInput SetTeamsInQuiz 
                       ] 
                       []
