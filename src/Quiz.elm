@@ -54,9 +54,13 @@ updateTeamName i newName quiz =
 addRound : Round -> Quiz -> Quiz
 addRound r q = { q | rounds = q.rounds ++ [r] }
 
+maxNumberOfTeams : Quiz -> Int
+maxNumberOfTeams quiz = List.length quiz.header
+
 numberOfTeams : Quiz -> Int
 numberOfTeams quiz = 
-  Maybe.withDefault 0 (List.maximum (List.map (\r -> List.length r.teamPoints) quiz.rounds))
+  let max = maxNumberOfTeams quiz
+  in Maybe.withDefault max (List.maximum (List.map (\r -> List.length r.teamPoints) quiz.rounds))
 
 toString : Quiz -> String
 toString quiz = String.join "\n" (headerToString quiz :: roundsToStrings quiz)
