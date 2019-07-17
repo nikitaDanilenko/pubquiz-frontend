@@ -71,7 +71,7 @@ editingView md =
               ],
           div [ id "teamNames" ]
               (label [ for "teamNamesLabel" ] [ text "Team names"] :: 
-                mkTeamNameInput md.currentQuiz.header)
+                mkTeamNameInput (List.take md.teamsInQuiz md.currentQuiz.header))
          ] ++
          List.indexedMap (\i rd -> mkRoundForm i md.teamsInQuiz rd)
                          md.currentQuiz.rounds
