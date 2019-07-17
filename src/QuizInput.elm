@@ -246,9 +246,9 @@ updateQuizByText text model =
         Ok quiz -> let guess = Quiz.numberOfTeams quiz
                        actual = if guess == 0 then model.teamsInQuiz else guess
                    in { model | currentQuiz = quiz, 
-                             teamsInQuiz = actual,
-                             isValidQuizUpdate = True,
-                             feedback = ""
+                                teamsInQuiz = actual,
+                                isValidQuizUpdate = True,
+                                feedback = ""
                    }
         Err des -> { model | isValidQuizUpdate = False, 
                              feedback = "Parsing error"
