@@ -80,6 +80,7 @@ editingView md =
           button [ class "button", onClick AddRound ] [ text "Add round" ],
           {-textarea [ id "singleQuizArea", onInput (SetPoints (Quiz.headerToString md.currentQuiz)) ] 
                    [ text (toEditableString md.currentQuiz) ],-}
+          button [ class "button", onClick EditLabels ] [ text "Edit labels" ],
           button [ class "backButton", onClick GetAll ] [ text "Back" ],
           button [ class "lockButton", onClick AcknowledgeLock ] [ text "Lock" ],
           button [ class "button", 
@@ -149,6 +150,14 @@ creatingQuizView md =
            button [ class "backButton", onClick GetAll ] [ text "Back" ],
            addFeedbackLabel md
           ]
+
+editingLabelsView : Model -> Html Msg
+editingLabelsView md = 
+  div [ id "editingLabelsView" ]
+      [ mkCreationForm (onEnter UpdateLabels) md.labels,
+        button [ class "button", onClick UpdateLabels ] [ text "Update" ] ,
+        button [ class "backButton", onClick (GetSingle md.editing) ] [ text "Back" ]
+      ]
 
 creatingUserView : Model -> Html Msg
 creatingUserView md =
@@ -226,6 +235,7 @@ mkRoundForm number gs rd =
                                         div [ class "input" ]
                                             [ input (value (String.fromFloat ps) ::
                                                      onInput (UpdatePoints number i) :: 
+                                                     max (String.fromFloat rd.maxPoints) :: 
                                                      pointInputAttributes) 
                                                     []
 

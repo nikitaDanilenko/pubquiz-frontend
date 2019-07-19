@@ -161,7 +161,7 @@ body {
   text-align: center;
 }
 
-#creatingQuizView label, #creatingQuizView input {
+#creatingQuizView label, #creatingQuizView input, #editingLabelsView label, #editingLabelsView input {
   width: 20%;
   display: inline-block;
   vertical-align: center;
