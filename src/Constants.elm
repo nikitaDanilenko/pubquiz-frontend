@@ -17,6 +17,9 @@ actionParam = "action"
 createQuiz : String
 createQuiz = "createQuiz"
 
+labelUpdate : String
+labelUpdate = "labelUpdate"
+
 lockQuiz : String
 lockQuiz = "lock"
 
