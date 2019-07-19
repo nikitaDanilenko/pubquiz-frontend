@@ -43,18 +43,24 @@ update msg model = case msg of
     GotAll (Ok text)        -> ({ model | quizzes = String.lines text, 
                                           displayState = Selecting,
                                           feedback = "",
-                                          createName = "" }, 
+                                          createName = "" },
                                 Cmd.none)
     
     GetSingle qName         -> ({ model | editing = qName, feedback = "" }, getSingle qName)
     
     GotSingle (Err err)     -> ({ model | feedback = errorToString err}, Cmd.none)
     GotSingle (Ok text)     -> let updatedModel = updateQuizByText text model
-                               in ({ updatedModel | displayState = Editing }, Cmd.none)
+                               in ({ updatedModel | displayState = Editing ContentsE }, Cmd.none)
 
     SetTeamsInQuiz text    -> let (teams, response) = 
                                     case run int text of
-                                     Ok n -> (n, "")
+                                     Ok n -> 
+                                      let maxTeams = Quiz.maxNumberOfTeams model.currentQuiz
+                                      in if n <= maxTeams then (n, "")
+                                         else (maxTeams, 
+                                               String.concat ["Quiz supports only ", 
+                                                              String.fromInt maxTeams,
+                                                              " teams."])
                                      Err _ -> (0, "Invalid team number. Substituting 0.")
                                   newQuiz = Quiz.adjustTo teams model.currentQuiz
                                in ({ model | teamsInQuiz = teams,
@@ -62,7 +68,13 @@ update msg model = case msg of
                                              feedback = response }, Cmd.none)
     UpdatePoints r g ps     -> let (np, response) =
                                     case run float ps of
-                                     Ok p -> (p, "")
+                                     Ok p -> 
+                                      let maxPs = (Quiz.getRound r model.currentQuiz).maxPoints
+                                      in if p <= maxPs then (p, "")
+                                         else (maxPs, 
+                                               String.join " " ["The maximum number of points",
+                                                                "in this round is",
+                                                                String.fromFloat maxPs])
                                      Err _ -> (0, 
                                                String.join " " 
                                                            ["Invalid decimal point number",
@@ -143,10 +155,12 @@ update msg model = case msg of
                                 }, getAll)
     CreatedUser (Err err)   -> ({ model | feedback = errorToString err }, Cmd.none)
 
-    LabelsUpdate fld text   -> let lbls = updateLabels fld text model.labels
+    LabelsUpdate fld text   -> let lbls = updateLabelsByField fld text model.labels
                                in ({ model | labels = lbls }, Cmd.none)
     SetTeamName i teamName  -> let newQuiz = Quiz.updateTeamName i teamName model.currentQuiz
                                in ({ model | currentQuiz = newQuiz }, Cmd.none)
+    EditLabels              -> ({ model | displayState = Editing LabelsE }, Cmd.none)
+    --UpdateLabels            -> (model, updateLabels model.user model.oneWayHash model.labels)
     _                       -> (model, Cmd.none)
 
 view : Model -> Html Msg
@@ -154,7 +168,8 @@ view model =
     let currentView = case model.displayState of
             Authenticating -> authenticationView
             Initial -> authenticationView
-            Editing -> editingView
+            Editing ContentsE -> editingView
+            Editing LabelsE -> editingLabelsView 
             Selecting -> selectionView
             ConfirmingLock -> confirmView
             CreatingQuiz -> creatingQuizView
@@ -220,8 +235,20 @@ createNewUser u sk newUser =
         expect = Http.expectWhatever CreatedUser
     }
 
-updateLabels : LabelsField -> String -> Labels -> Labels
-updateLabels field text lbls = 
+updateLabelsApi : String
+updateLabelsApi = "foo"
+
+updateLabels : User -> SessionKey -> QuizName -> Labels -> Cmd Msg
+updateLabels u sk quizName labels = 
+    let params = mkWithSignature u sk [(quizParam, quizName), (actionParam, labelUpdate)]
+    in Http.post {
+        url = updateLabelsApi,
+        body = encodeBody (mkParams (List.concat [params, Labels.toParams labels])),
+        expect = Http.expectWhatever Updated
+    }
+
+updateLabelsByField : LabelsField -> String -> Labels -> Labels
+updateLabelsByField field text lbls = 
     case field of
         RoundField -> { lbls | roundLabel = text }
         TeamField -> { lbls | teamLabel = text }
@@ -247,7 +274,7 @@ updateQuizByText text model =
                        actual = if guess == 0 then model.teamsInQuiz else guess
                    in { model | currentQuiz = quiz, 
                                 teamsInQuiz = actual,
-                                isValidQuizUpdate = True,
+                                isValidQuizUpdate = True, 
                                 feedback = ""
                    }
         Err des -> { model | isValidQuizUpdate = False, 
