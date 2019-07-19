@@ -45,9 +45,11 @@ initialModel = { user = "",
                  feedback = "" 
                }
 
+type Edited = ContentsE | LabelsE
+
 {- The different types of possible states the page can transition. -}
 type DisplayState = Initial -- The state at the beginning of the application.
-                  | Editing -- The view where one sees the current quiz values and can update those.
+                  | Editing Edited -- The view where one sees the current quiz values and can update those.
                   | Authenticating -- The view presented for the authentication of a user.
                   | Selecting -- In this view you see all available quizzes.
                   | ConfirmingLock
@@ -86,6 +88,8 @@ type Msg = GetAll
          | Logged (Result Http.Error String)
          | LabelsUpdate LabelsField String
          | SetTeamName Int String
+         | EditLabels
+         | UpdateLabels
 
 type LabelsField = RoundField
                  | TeamField
