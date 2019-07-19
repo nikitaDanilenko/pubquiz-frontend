@@ -181,13 +181,3 @@ isValidRoundsText : String -> Bool
 isValidRoundsText text = 
   let (header, rounds) = splitFirstLast text
   in List.all isValidRound rounds 
-
-areValidPoints : Quiz -> Bool
-areValidPoints q = List.all Round.areValidPoints q.rounds
-
-isValidTeamNumber : Quiz -> Bool
-isValidTeamNumber q = 
-  let maxNumber = maxNumberOfTeams q
-      maxTeamNumberByPoints = Maybe.withDefault maxNumber 
-                                                (List.maximum (List.map (\r -> List.length (r.teamPoints)) q.rounds))
-  in maxNumber >= maxTeamNumberByPoints

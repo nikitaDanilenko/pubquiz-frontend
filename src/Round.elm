@@ -2,7 +2,7 @@ module Round exposing ( .. )
 
 import Parser exposing ( succeed, float, symbol, sequence, Trailing ( .. ), Parser, (|.),
                          (|=), end )
-import Util exposing   ( isParserSuccess, blanks, adjustToSize, foldMaybe )
+import Util exposing   ( isParserSuccess, blanks, adjustToSize )
 
 type alias Round = 
     {
@@ -48,6 +48,3 @@ roundParser = succeed Round
 
 isValidRound : String -> Bool
 isValidRound = isParserSuccess roundParser
-
-areValidPoints : Round -> Bool
-areValidPoints rd = foldMaybe False (\m -> m <= rd.maxPoints) (List.maximum rd.teamPoints)
