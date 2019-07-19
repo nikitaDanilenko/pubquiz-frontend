@@ -41,6 +41,9 @@ updateMax rd m quiz =
                                       quiz.rounds
   in { quiz | rounds = updatedRounds }
 
+getRound : Int -> Quiz -> Round
+getRound n q = Maybe.withDefault Round.empty (List.head (List.drop (n - 1) q.rounds))
+
 updateTeamName : Int -> String -> Quiz -> Quiz
 updateTeamName i newName quiz =
   let inTWON : String -> TeamWithOptionalName -> TeamWithOptionalName
@@ -178,3 +181,13 @@ isValidRoundsText : String -> Bool
 isValidRoundsText text = 
   let (header, rounds) = splitFirstLast text
   in List.all isValidRound rounds 
+
+areValidPoints : Quiz -> Bool
+areValidPoints q = List.all Round.areValidPoints q.rounds
+
+isValidTeamNumber : Quiz -> Bool
+isValidTeamNumber q = 
+  let maxNumber = maxNumberOfTeams q
+      maxTeamNumberByPoints = Maybe.withDefault maxNumber 
+                                                (List.maximum (List.map (\r -> List.length (r.teamPoints)) q.rounds))
+  in maxNumber >= maxTeamNumberByPoints
