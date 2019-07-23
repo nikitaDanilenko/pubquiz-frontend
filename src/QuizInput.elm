@@ -159,15 +159,15 @@ update msg model = case msg of
                                in ({ model | labels = lbls }, Cmd.none)
     SetTeamName i teamName  -> let newQuiz = Quiz.updateTeamName i teamName model.currentQuiz
                                in ({ model | currentQuiz = newQuiz }, Cmd.none)
-    EditLabels              -> ({ model | displayState = Editing LabelsE }, Cmd.none)
-    GetLabels               -> (model, getQuizLabels model.editing)
+    GetLabels              -> (model, getQuizLabels model.editing)
     GotLabels (Ok lbls)     -> let (labels, feedback) = 
                                     case Labels.parseLabels lbls of
                                       Just ls -> (ls, "")
                                       _       -> (Labels.emptyLabels, 
                                                   "Cannot parse server response, using empty labels.")
-
-                               in ({ model | feedback = feedback, labels = labels }, Cmd.none)
+                               in ({ model | feedback = feedback, 
+                                             labels = labels, 
+                                             displayState = Editing LabelsE }, Cmd.none)
     GotLabels (Err err)     -> ({ model | feedback = errorToString err }, Cmd.none)
     _                       -> (model, Cmd.none)
 
