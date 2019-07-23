@@ -58,10 +58,12 @@ type DisplayState = Initial -- The state at the beginning of the application.
 
 type alias QuizName = String
 
+type alias ErrorOr a = Result Http.Error a
+
 type Msg = GetAll 
-         | GotAll (Result Http.Error String)
+         | GotAll (ErrorOr String)
          | GetSingle QuizName
-         | GotSingle (Result Http.Error String)
+         | GotSingle (ErrorOr String)
          | PostUpdate QuizName String
          | AcknowledgeLock
          | Lock QuizName
@@ -74,22 +76,24 @@ type Msg = GetAll
          | AddRound
          | SetRoundsNumber String
          | LocationChange
-         | Updated (Result Http.Error ())
-         | Locked (Result Http.Error ())
+         | Updated (ErrorOr ())
+         | Locked (ErrorOr ())
          | StartCreatingQuiz
          | StartCreatingUser
          | CreateQuiz
-         | Created (Result Http.Error ())
+         | Created (ErrorOr ())
          | CreateUser
-         | CreatedUser (Result Http.Error ())
+         | CreatedUser (ErrorOr ())
          | SetNewQuizName QuizName
          | SetNewUserParam NewUserField String
          | Login
-         | Logged (Result Http.Error String)
+         | Logged (ErrorOr String)
          | LabelsUpdate LabelsField String
          | SetTeamName Int String
          | EditLabels
-         | UpdateLabels
+         | GetLabels
+         | GotLabels (ErrorOr String)
+         | PostLabelUpdate QuizName Labels
 
 type LabelsField = RoundField
                  | TeamField
