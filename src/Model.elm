@@ -90,7 +90,6 @@ type Msg = GetAll
          | Logged (ErrorOr String)
          | LabelsUpdate LabelsField String
          | SetTeamName Int String
-         | EditLabels
          | GetLabels
          | GotLabels (ErrorOr String)
          | PostLabelUpdate QuizName Labels
