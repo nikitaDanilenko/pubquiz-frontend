@@ -65,7 +65,7 @@ editingView md =
                         min "1", 
                         step "1",
                         max (String.fromInt (Quiz.maxNumberOfTeams md.currentQuiz)) ,
-                        onInput SetTeamsInQuiz 
+                        onInput (SetTeamsInQuiz IntermediateTU)
                       ] 
                       []
               ],
@@ -138,7 +138,7 @@ creatingQuizView md =
                          value (String.fromInt md.numberOfRounds) ] [] ], 
            div [ id "teamNumberArea" ]
                [ label [ for "teamNumber" ] [ text "Number of teams" ],
-                 input [ onInput SetTeamsInQuiz,
+                 input [ onInput (SetTeamsInQuiz InitialTU),
                          class "teamsSpinner",
                          type_ "number", 
                          min "1",
