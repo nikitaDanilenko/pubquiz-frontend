@@ -52,20 +52,11 @@ update msg model = case msg of
     GotSingle (Ok text)     -> let updatedModel = updateQuizByText text model
                                in ({ updatedModel | displayState = Editing ContentsE }, Cmd.none)
 
-    SetTeamsInQuiz text    -> let (teams, response) = 
-                                    case run int text of
-                                     Ok n -> 
-                                      let maxTeams = Quiz.maxNumberOfTeams model.currentQuiz
-                                      in if n <= maxTeams then (n, "")
-                                         else (maxTeams, 
-                                               String.concat ["Quiz supports only ", 
-                                                              String.fromInt maxTeams,
-                                                              " teams."])
-                                     Err _ -> (0, "Invalid team number. Substituting 0.")
-                                  newQuiz = Quiz.adjustTo teams model.currentQuiz
-                               in ({ model | teamsInQuiz = teams,
+    SetTeamsInQuiz s text   -> let tu = processTeamUpdate s text model
+                                   newQuiz = Quiz.adjustTo tu.teams model.currentQuiz
+                               in ({ model | teamsInQuiz = tu.teams,
                                              currentQuiz = newQuiz,
-                                             feedback = response }, Cmd.none)
+                                             feedback = tu.response }, Cmd.none)
     UpdatePoints r g ps     -> let (np, response) =
                                     case run float ps of
                                      Ok p -> 
@@ -321,3 +312,20 @@ mkParamsWithSignature u key kvs = mkParams (mkWithSignature u key kvs)
 
 encodeBody : String -> Http.Body
 encodeBody = Http.stringBody "application/x-www-form-urlencoded"
+
+processTeamUpdate : TeamUpdateSetting -> String -> Model -> { teams : Int, response : String }
+processTeamUpdate setting text model = 
+  let (ts, r) = case run int text of
+                  Ok n -> 
+                    case setting of
+                      InitialTU      -> (n, "")
+                      IntermediateTU -> 
+                        let maxTeams = Quiz.maxNumberOfTeams model.currentQuiz
+                        in if n <= maxTeams then (n, "")
+                           else (maxTeams, 
+                                 String.join " " ["Quiz supports only", 
+                                                  String.fromInt maxTeams, 
+                                                  "teams."])
+                  Err _ -> (0, "Invalid team number. Substituting 0.")
+  in { teams = ts, response = r }
+                                    
