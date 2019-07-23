@@ -160,7 +160,15 @@ update msg model = case msg of
     SetTeamName i teamName  -> let newQuiz = Quiz.updateTeamName i teamName model.currentQuiz
                                in ({ model | currentQuiz = newQuiz }, Cmd.none)
     EditLabels              -> ({ model | displayState = Editing LabelsE }, Cmd.none)
-    --UpdateLabels            -> (model, updateLabels model.user model.oneWayHash model.labels)
+    GetLabels               -> (model, getQuizLabels model.editing)
+    GotLabels (Ok lbls)     -> let (labels, feedback) = 
+                                    case Labels.parseLabels lbls of
+                                      Just ls -> (ls, "")
+                                      _       -> (Labels.emptyLabels, 
+                                                  "Cannot parse server response, using empty labels.")
+
+                               in ({ model | feedback = feedback, labels = labels }, Cmd.none)
+    GotLabels (Err err)     -> ({ model | feedback = errorToString err }, Cmd.none)
     _                       -> (model, Cmd.none)
 
 view : Model -> Html Msg
@@ -194,6 +202,12 @@ getSingle quizName = Http.get {
         url = Url.Builder.relative [ quizApi, "getQuizData"] [ string quizParam quizName ],
         expect = Http.expectString GotSingle
     }
+
+getQuizLabels : String -> Cmd Msg
+getQuizLabels quizName = Http.get {
+    url = Url.Builder.relative [ quizApi, "getQuizLabels" ] [ string quizParam quizName ],
+    expect = Http.expectString GotLabels
+  }
 
 postUpdate : User -> SessionKey -> QuizName -> String -> Cmd Msg
 postUpdate u sk quizName points = 
