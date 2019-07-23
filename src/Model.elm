@@ -60,6 +60,8 @@ type alias QuizName = String
 
 type alias ErrorOr a = Result Http.Error a
 
+type TeamUpdateSetting = InitialTU | IntermediateTU
+
 type Msg = GetAll 
          | GotAll (ErrorOr String)
          | GetSingle QuizName
@@ -70,7 +72,7 @@ type Msg = GetAll
          | SetUser User
          | SetPassword Password
          | SetPoints String String
-         | SetTeamsInQuiz String
+         | SetTeamsInQuiz TeamUpdateSetting String
          | UpdatePoints Int Int String -- Points for round, team, value.
          | SetMaxPoints Int String    -- Points for round, value
          | AddRound
