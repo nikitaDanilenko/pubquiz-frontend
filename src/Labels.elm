@@ -39,6 +39,14 @@ emptyLabels = {
       roundWinnerLabel = ""
     }
 
+parseLabels : String -> Maybe Labels
+parseLabels text = 
+  let words = String.words text
+  in case words of
+       r :: t :: op :: mred :: mr :: btc :: m :: o :: vq :: c :: i :: pr :: plcmt :: plc :: pts :: rw :: [] ->
+        Just (mkLabels r t op mred mr btc m o vq c i pr plcmt plc pts rw)
+       _ -> Nothing
+
 mkLabels : String 
         -> String 
         -> String
