@@ -191,7 +191,7 @@ html, head, body {
 }
 
 #feedbackArea {
-  position: fixed;
+  padding-top: 10pt;
   left: 1%;
   bottom: 1%;
   width: 100%;
