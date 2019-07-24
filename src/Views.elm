@@ -153,11 +153,14 @@ creatingQuizView md =
 
 editingLabelsView : Model -> Html Msg
 editingLabelsView md = 
-  let done = PostLabelUpdate md.editing md.labels
+  let lbls = md.labels
+      edit = md.editing
+      done = PostLabelUpdate edit lbls
   in div [ id "editingLabelsView" ]
-         [ mkCreationForm (onEnter done) md.labels,
+         [ mkCreationForm (onEnter done) lbls,
            button [ class "button", onClick done ] [ text "Update" ] ,
-           button [ class "backButton", onClick (GetSingle md.editing) ] [ text "Back" ]
+           button [ class "backButton", onClick (GetSingle edit) ] [ text "Back" ],
+           addFeedbackLabel md
          ]
 
 creatingUserView : Model -> Html Msg
