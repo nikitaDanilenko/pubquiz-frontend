@@ -19,8 +19,8 @@ type alias Labels = {
       roundWinnerLabel : String
     }
 
-emptyLabels : Labels
-emptyLabels = {
+empty : Labels
+empty = {
       roundLabel = "",
       teamLabel = "",
       ownPointsLabel = "", 
@@ -86,8 +86,8 @@ mkLabels roundLbl teamLbl ownPointsLbl maxReachedLbl maxReachableLbl backToChart
     roundWinnerLabel = roundWinnerLbl
   }
 
-defaultLabels : Labels
-defaultLabels = mkLabels 
+default : Labels
+default = mkLabels 
     "Runde"
     "Gruppe"
     "Erreichte Punkte"
