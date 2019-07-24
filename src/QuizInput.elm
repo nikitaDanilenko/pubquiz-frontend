@@ -160,7 +160,7 @@ update msg model = case msg of
                                              labels = labels, 
                                              displayState = Editing LabelsE }, Cmd.none)
     GotLabels (Err err)     -> ({ model | feedback = errorToString err }, Cmd.none)
-    _                       -> (model, Cmd.none)
+    PostLabelUpdate q lbls  -> (model, updateLabels model.user model.oneWayHash q lbls)
 
 view : Model -> Html Msg
 view model = 
@@ -246,9 +246,6 @@ createNewUser u sk newUser =
         body = encodeBody params,
         expect = Http.expectWhatever CreatedUser
     }
-
-updateLabelsApi : String
-updateLabelsApi = "foo"
 
 updateLabels : User -> SessionKey -> QuizName -> Labels -> Cmd Msg
 updateLabels u sk quizName labels = 
