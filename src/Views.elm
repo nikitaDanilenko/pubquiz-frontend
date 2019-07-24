@@ -266,7 +266,7 @@ pointInputAttributes = [ class "labeledInput", type_ "number", min "0", step "0.
 
 wrapView : (Model -> Html Msg) -> Model -> Html Msg
 wrapView viewOf model = 
-  div [ id "mainPage"]
+  div [ id "mainPage" ]
       [
         node "link" [ rel "stylesheet", type_ "text/css", href "style.css" ] [],
         viewOf model 
