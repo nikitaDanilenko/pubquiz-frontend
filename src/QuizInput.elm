@@ -11,7 +11,7 @@ import Url.Builder exposing     ( string )
 -- todo Write all out.
 import Base exposing            ( User, Password, SessionKey )
 import Constants exposing       ( .. )
-import Labels exposing          ( Labels, defaultLabels )
+import Labels exposing          ( Labels )
 import Model exposing           ( .. )
 import NewUser exposing         ( NewUser )
 import Parser exposing          ( int, float, run )
@@ -129,7 +129,7 @@ update msg model = case msg of
                                                     model.labels)
     Created (Err err)       -> ({ model | feedback = errorToString err }, Cmd.none)
     Created (Ok ok)         -> ({ model | editing = model.createName,
-                                          labels = defaultLabels }, 
+                                          labels = Labels.default }, 
                                 getSingle model.createName)
 
     
@@ -150,11 +150,11 @@ update msg model = case msg of
                                in ({ model | labels = lbls }, Cmd.none)
     SetTeamName i teamName  -> let newQuiz = Quiz.updateTeamName i teamName model.currentQuiz
                                in ({ model | currentQuiz = newQuiz }, Cmd.none)
-    GetLabels              -> (model, getQuizLabels model.editing)
+    GetLabels               -> (model, getQuizLabels model.editing)
     GotLabels (Ok lbls)     -> let (labels, feedback) = 
                                     case Labels.parseLabels lbls of
                                       Just ls -> (ls, "")
-                                      _       -> (Labels.emptyLabels, 
+                                      _       -> (Labels.empty, 
                                                   "Cannot parse server response, using empty labels.")
                                in ({ model | feedback = feedback, 
                                              labels = labels, 

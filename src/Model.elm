@@ -3,7 +3,7 @@ module Model exposing ( .. )
 import Http exposing    ( Error ( .. ) )
 
 import Base   exposing  ( User, Password )
-import Labels exposing  ( Labels, defaultLabels )
+import Labels exposing  ( Labels, default )
 import NewUser exposing ( NewUser, NewUserField )
 import Quiz exposing    ( Quiz, empty )
 
@@ -40,7 +40,7 @@ initialModel = { user = "",
                  numberOfRounds = 4,
                  displayState = Initial, 
                  createName = "",
-                 labels = defaultLabels,
+                 labels = default,
                  newUser = NewUser.emptyUser,
                  feedback = "" 
                }
