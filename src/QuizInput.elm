@@ -188,17 +188,24 @@ getAll = Http.get {
     expect = Http.expectString GotAll 
   }
 
-getSingle : String -> Cmd Msg
-getSingle quizName = Http.get { 
-        url = Url.Builder.relative [ quizApi, "getQuizData"] [ string quizParam quizName ],
-        expect = Http.expectString GotSingle
+type QuizPart = DataPart | LabelsPart
+
+getMsg : QuizPart -> String -> Cmd Msg
+getMsg part quizName =
+  let (path, action) = 
+        case part of
+          DataPart -> ("getQuizData", GotSingle)
+          LabelsPart -> ("getQuizLabels", GotLabels)
+  in Http.get { 
+        url = Url.Builder.relative [ quizApi, path ] [ string quizParam quizName ],
+        expect = Http.expectString action
     }
 
+getSingle : String -> Cmd Msg
+getSingle = getMsg DataPart
+
 getQuizLabels : String -> Cmd Msg
-getQuizLabels quizName = Http.get {
-    url = Url.Builder.relative [ quizApi, "getQuizLabels" ] [ string quizParam quizName ],
-    expect = Http.expectString GotLabels
-  }
+getQuizLabels = getMsg LabelsPart
 
 postUpdate : User -> SessionKey -> QuizName -> String -> Cmd Msg
 postUpdate u sk quizName points = 
