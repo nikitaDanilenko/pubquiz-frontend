@@ -77,7 +77,6 @@ type Msg = GetAll
          | SetMaxPoints Int String    -- Points for round, value
          | AddRound
          | SetRoundsNumber String
-         | LocationChange
          | Updated (ErrorOr ())
          | Locked (ErrorOr ())
          | StartCreatingQuiz
