@@ -38,20 +38,41 @@ update msg model = case msg of
                                           editing = "",
                                           teamsInQuiz = initialModel.teamsInQuiz }, 
                                  getAll)
+    ResponseF tpe (Ok text) ->
+      case tpe of
+        GotAll    -> ({ model | quizzes = String.lines text, 
+                                displayState = Selecting,
+                                feedback = "",
+                                createName = "" },
+                      Cmd.none)
+        GotSingleQuiz   -> let updatedModel = updateQuizByText text model
+                           in ({ updatedModel | displayState = Editing ContentsE }, Cmd.none)
+        Logged          -> ({ model | feedback = "", oneWayHash = text }, getAll)
+        GotSingleLabels -> let (labels, feedback) = 
+                                 case Labels.parseLabels text of
+                                   Just ls -> (ls, "")
+                                   _       -> (Labels.empty, 
+                                               "Cannot parse server response, using empty labels.")
+                           in ({ model | feedback = feedback, 
+                                         labels = labels, 
+                                         displayState = Editing LabelsE }, Cmd.none)
 
-    GotAll (Err err)        -> ({ model | feedback = errorToString err}, Cmd.none)
-    GotAll (Ok text)        -> ({ model | quizzes = String.lines text, 
-                                          displayState = Selecting,
-                                          feedback = "",
-                                          createName = "" },
-                                Cmd.none)
-    
-    GetSingle qName         -> ({ model | editing = qName, feedback = "" }, getSingle qName)
-    
-    GotSingle (Err err)     -> ({ model | feedback = errorToString err}, Cmd.none)
-    GotSingle (Ok text)     -> let updatedModel = updateQuizByText text model
-                               in ({ updatedModel | displayState = Editing ContentsE }, Cmd.none)
+    ResponseF _ (Err err)   -> ({ model | feedback = errorToString err}, Cmd.none)
 
+    ResponseP tpe (Ok _)    ->
+      case tpe of
+        Locked      -> ({ model | feedback = String.concat ["Locked ", model.editing] }, getAll)
+        Updated     -> ({ model | feedback = "Update successful"}, Cmd.none)
+        CreatedQuiz -> ({ model | editing = model.createName,
+                                  labels = Labels.default }, 
+                        getSingle model.createName)
+        CreatedUser -> ({ model | newUser = NewUser.emptyUser, 
+                                  feedback = String.join " " [ "Created user", model.newUser.user ] 
+                         }, getAll)
+
+    ResponseP _ (Err err)   -> ({ model | feedback = errorToString err}, Cmd.none)
+    
+    GetSingle qName         -> ({ model | editing = qName, feedback = "" }, getSingle qName)  
     SetTeamsInQuiz s text   -> let tu = processTeamUpdate s text model
                                    newQuiz = Quiz.adjustTo tu.teams model.currentQuiz
                                in ({ model | teamsInQuiz = tu.teams,
@@ -91,20 +112,13 @@ update msg model = case msg of
     SetPoints header points -> (updateQuizByText (String.join "\n" [ header, points ]) model, 
                                 Cmd.none)
     PostUpdate qName points -> (model, postUpdate model.user model.oneWayHash qName points)
-    Updated (Err err)       -> ({ model | feedback = errorToString err }, Cmd.none)
-    Updated (Ok _)          -> ({ model | feedback = "Update successful"}, Cmd.none)
+    
     
     AcknowledgeLock         -> ({ model | displayState = ConfirmingLock }, Cmd.none)
     Lock qName              -> (model, postLock model.user model.oneWayHash qName)
     
-    Locked (Err err)        -> ({ model | feedback = errorToString err}, Cmd.none)
-    Locked (Ok ok)          -> ({ model | feedback = String.concat ["Locked ", model.editing] }, 
-                                getAll)
-
     Login                   -> ({ model | displayState = Authenticating }, 
                                 login model.user model.password)
-    Logged (Err err)        -> ({ model | feedback = errorToString err}, Cmd.none)
-    Logged (Ok text)        -> ({ model | feedback = "", oneWayHash = text }, getAll)
 
     StartCreatingQuiz       -> ({ model | displayState = CreatingQuiz }, Cmd.none)
     SetNewQuizName name     -> let feedback = 
@@ -127,12 +141,6 @@ update msg model = case msg of
                                                     model.oneWayHash 
                                                     model.createName 
                                                     model.labels)
-    Created (Err err)       -> ({ model | feedback = errorToString err }, Cmd.none)
-    Created (Ok ok)         -> ({ model | editing = model.createName,
-                                          labels = Labels.default }, 
-                                getSingle model.createName)
-
-    
     StartCreatingUser       -> ({ model | newUser = NewUser.emptyUser, displayState = CreatingUser},
                                 Cmd.none)
     SetNewUserParam fld txt -> let nu = NewUser.update fld txt model.newUser
@@ -140,26 +148,11 @@ update msg model = case msg of
                                 Cmd.none)
 
     CreateUser              -> (model, createNewUser model.user model.oneWayHash model.newUser)
-    CreatedUser (Ok ok)     -> ({ model | newUser = NewUser.emptyUser, 
-                                          feedback = String.join " " [ "Created user", 
-                                                                       model.newUser.user ] 
-                                }, getAll)
-    CreatedUser (Err err)   -> ({ model | feedback = errorToString err }, Cmd.none)
-
     LabelsUpdate fld text   -> let lbls = updateLabelsByField fld text model.labels
                                in ({ model | labels = lbls }, Cmd.none)
     SetTeamName i teamName  -> let newQuiz = Quiz.updateTeamName i teamName model.currentQuiz
                                in ({ model | currentQuiz = newQuiz }, Cmd.none)
     GetLabels               -> (model, getQuizLabels model.editing)
-    GotLabels (Ok lbls)     -> let (labels, feedback) = 
-                                    case Labels.parseLabels lbls of
-                                      Just ls -> (ls, "")
-                                      _       -> (Labels.empty, 
-                                                  "Cannot parse server response, using empty labels.")
-                               in ({ model | feedback = feedback, 
-                                             labels = labels, 
-                                             displayState = Editing LabelsE }, Cmd.none)
-    GotLabels (Err err)     -> ({ model | feedback = errorToString err }, Cmd.none)
     PostLabelUpdate q lbls  -> (model, updateLabels model.user model.oneWayHash q lbls)
 
 view : Model -> Html Msg
@@ -178,14 +171,14 @@ view model =
 login : User -> Password -> Cmd Msg
 login user password = Http.post {
         url = loginApi,
-        expect = Http.expectString Logged,
+        expect = Http.expectString (ResponseF Logged),
         body = encodeBody (mkParams [ (userParam, user), (passwordParam, password) ])
     }
 
 getAll : Cmd Msg
 getAll = Http.get { 
     url = allApi, 
-    expect = Http.expectString GotAll 
+    expect = Http.expectString (ResponseF GotAll)
   }
 
 type QuizPart = DataPart | LabelsPart
@@ -194,8 +187,8 @@ getMsg : QuizPart -> String -> Cmd Msg
 getMsg part quizName =
   let (path, action) = 
         case part of
-          DataPart -> ("getQuizData", GotSingle)
-          LabelsPart -> ("getQuizLabels", GotLabels)
+          DataPart -> ("getQuizData", ResponseF GotSingleQuiz)
+          LabelsPart -> ("getQuizLabels", ResponseF GotSingleLabels)
   in Http.get { 
         url = Url.Builder.relative [ quizApi, path ] [ string quizParam quizName ],
         expect = Http.expectString action
@@ -214,7 +207,7 @@ postUpdate u sk quizName points =
     in Http.post {
         url = updateApi,
         body = encodeBody params,
-        expect = Http.expectWhatever Updated
+        expect = Http.expectWhatever (ResponseP Updated)
     }
 
 postLock : User -> SessionKey -> QuizName -> Cmd Msg
@@ -223,7 +216,7 @@ postLock u sk quizName =
     in Http.post {
         url = lockApi,
         body = encodeBody params,
-        expect = Http.expectWhatever Locked
+        expect = Http.expectWhatever (ResponseP Locked)
     }
 
 createNewQuiz : Int -> Int -> User -> SessionKey -> QuizName -> Labels -> Cmd Msg
@@ -234,7 +227,7 @@ createNewQuiz rs gs u sk quizName labels =
         body = encodeBody (mkParams ((roundsNumberParam, String.fromInt rs) :: 
                                      (numberOfTeamsParam, String.fromInt gs) :: 
                                      List.concat [params, Labels.toParams labels])),
-        expect = Http.expectWhatever Created
+        expect = Http.expectWhatever (ResponseP CreatedQuiz)
     }
 
 createNewUser : User -> SessionKey -> NewUser -> Cmd Msg
@@ -244,7 +237,7 @@ createNewUser u sk newUser =
     in Http.post {
         url = newUserApi,
         body = encodeBody params,
-        expect = Http.expectWhatever CreatedUser
+        expect = Http.expectWhatever (ResponseP CreatedUser)
     }
 
 updateLabels : User -> SessionKey -> QuizName -> Labels -> Cmd Msg
@@ -253,7 +246,7 @@ updateLabels u sk quizName labels =
     in Http.post {
         url = updateLabelsApi,
         body = encodeBody (mkParams (List.concat [params, Labels.toParams labels])),
-        expect = Http.expectWhatever Updated
+        expect = Http.expectWhatever (ResponseP Updated)
     }
 
 updateLabelsByField : LabelsField -> String -> Labels -> Labels

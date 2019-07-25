@@ -62,10 +62,19 @@ type alias ErrorOr a = Result Http.Error a
 
 type TeamUpdateSetting = InitialTU | IntermediateTU
 
+type ResponseWithFeedback = GotAll
+                          | GotSingleQuiz
+                          | GotSingleLabels
+                          | Logged
+
+type ResponsePure = Updated
+                  | Locked
+                  | CreatedQuiz
+                  | CreatedUser
+
+
 type Msg = GetAll 
-         | GotAll (ErrorOr String)
          | GetSingle QuizName
-         | GotSingle (ErrorOr String)
          | PostUpdate QuizName String
          | AcknowledgeLock
          | Lock QuizName
@@ -77,23 +86,19 @@ type Msg = GetAll
          | SetMaxPoints Int String    -- Points for round, value
          | AddRound
          | SetRoundsNumber String
-         | Updated (ErrorOr ())
-         | Locked (ErrorOr ())
          | StartCreatingQuiz
          | StartCreatingUser
          | CreateQuiz
-         | Created (ErrorOr ())
          | CreateUser
-         | CreatedUser (ErrorOr ())
          | SetNewQuizName QuizName
          | SetNewUserParam NewUserField String
          | Login
-         | Logged (ErrorOr String)
          | LabelsUpdate LabelsField String
          | SetTeamName Int String
          | GetLabels
-         | GotLabels (ErrorOr String)
          | PostLabelUpdate QuizName Labels
+         | ResponseF ResponseWithFeedback (ErrorOr String)
+         | ResponseP ResponsePure (ErrorOr ())
 
 type LabelsField = RoundField
                  | TeamField
