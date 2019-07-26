@@ -109,8 +109,6 @@ update msg model = case msg of
                                         in { model | currentQuiz = newQuiz }
                                       Err _ -> { model | feedback = "Not a decimal point number."}
                                in (newModel, Cmd.none)
-    SetPoints header points -> (updateQuizByText (String.join "\n" [ header, points ]) model, 
-                                Cmd.none)
     PostUpdate qName points -> (model, postUpdate model.user model.oneWayHash qName points)
     
     

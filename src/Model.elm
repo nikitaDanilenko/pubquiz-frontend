@@ -80,7 +80,6 @@ type Msg = GetAll
          | Lock QuizName
          | SetUser User
          | SetPassword Password
-         | SetPoints String String
          | SetTeamsInQuiz TeamUpdateSetting String
          | UpdatePoints Int Int String -- Points for round, team, value.
          | SetMaxPoints Int String    -- Points for round, value

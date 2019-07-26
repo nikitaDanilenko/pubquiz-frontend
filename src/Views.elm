@@ -78,8 +78,6 @@ editingView md =
           ++ 
          [
           button [ class "button", onClick AddRound ] [ text "Add round" ],
-          {-textarea [ id "singleQuizArea", onInput (SetPoints (Quiz.headerToString md.currentQuiz)) ] 
-                   [ text (toEditableString md.currentQuiz) ],-}
           button [ class "button", onClick GetLabels ] [ text "Edit labels" ],
           button [ class "backButton", onClick GetAll ] [ text "Back" ],
           button [ class "lockButton", onClick AcknowledgeLock ] [ text "Lock" ],
