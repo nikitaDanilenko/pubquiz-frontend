@@ -44,6 +44,9 @@ updateMax rd m quiz =
 getRound : Int -> Quiz -> Round
 getRound n q = Maybe.withDefault Round.empty (List.head (List.drop n q.rounds))
 
+arePointsValid : Quiz -> Bool
+arePointsValid q = List.all Round.arePointsValid q.rounds
+
 updateTeamName : Int -> String -> Quiz -> Quiz
 updateTeamName i newName quiz =
   let inTWON : String -> TeamWithOptionalName -> TeamWithOptionalName

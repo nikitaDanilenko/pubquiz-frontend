@@ -19,6 +19,9 @@ emptyOfSize n = { maxPoints = 0, teamPoints = List.repeat n 0 }
 adjustTo : Int -> Round -> Round
 adjustTo n rd = { rd | teamPoints = adjustToSize n rd.teamPoints }
 
+arePointsValid : Round -> Bool
+arePointsValid rd = List.all (\x -> x <= rd.maxPoints) rd.teamPoints
+
 update : Int -> Float -> Round -> Round
 update i ps rd = 
   let newPoints = List.indexedMap (\j p -> if i == j then ps else p) rd.teamPoints
