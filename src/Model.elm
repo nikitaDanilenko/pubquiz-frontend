@@ -1,11 +1,12 @@
 module Model exposing ( .. )
 
-import Http exposing    ( Error ( .. ) )
+import Http exposing     ( Error ( .. ) )
 
-import Base   exposing  ( User, Password )
-import Labels exposing  ( Labels, default )
-import NewUser exposing ( NewUser, NewUserField )
-import Quiz exposing    ( Quiz, empty )
+import Base   exposing   ( User, Password )
+import Labels exposing   ( Labels, default )
+import NewUser exposing  ( NewUser, NewUserField )
+import Quiz exposing     ( Quiz, empty )
+import Validity exposing ( Validity )
 
 type alias Model = 
     {
@@ -16,7 +17,7 @@ type alias Model =
         editing : QuizName,
         currentQuiz : Quiz,
         teamsInQuiz : Int,
-        isValidQuizUpdate : Bool,
+        isValidQuizUpdate : Validity,
         numberOfRounds : Int,
         displayState : DisplayState,
         createName : QuizName,
@@ -36,7 +37,7 @@ initialModel = { user = "",
                  editing = "",
                  currentQuiz = Quiz.empty,
                  teamsInQuiz = 8,
-                 isValidQuizUpdate = False,
+                 isValidQuizUpdate = Validity.default,
                  numberOfRounds = 4,
                  displayState = Initial, 
                  createName = "",
