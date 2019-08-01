@@ -42,7 +42,7 @@ updateMax rd m quiz =
   in { quiz | rounds = updatedRounds }
 
 getRound : Int -> Quiz -> Round
-getRound n q = Maybe.withDefault Round.empty (List.head (List.drop (n - 1) q.rounds))
+getRound n q = Maybe.withDefault Round.empty (List.head (List.drop n q.rounds))
 
 updateTeamName : Int -> String -> Quiz -> Quiz
 updateTeamName i newName quiz =
