@@ -16,6 +16,7 @@ import Quiz exposing              ( isValidRoundsText, toEditableString, Header 
 import Round exposing             ( isValidRound, Round )
 import Util exposing              ( isParserSuccess, splitFirstLast, adjustToSize, 
                                     isValidInternalQuizName )
+import Validity
 
 authenticationView : Model -> Html Msg
 authenticationView md = 
@@ -83,7 +84,7 @@ editingView md =
           button [ class "lockButton", onClick AcknowledgeLock ] [ text "Lock" ],
           button [ class "button", 
                    onClick (PostUpdate md.editing (Quiz.toString md.currentQuiz)),
-                   disabled (not md.isValidQuizUpdate) ]
+                   disabled (not (Validity.isValid md.isValidQuizUpdate)) ]
                  [ text "Update" ],
           div [ id "answerSheet" ]
               [ a [ class "link",
