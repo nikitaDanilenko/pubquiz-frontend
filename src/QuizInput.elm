@@ -18,6 +18,7 @@ import Parser exposing          ( int, float, run )
 import Quiz
 import Round
 import Util exposing            ( isValidInternalQuizName )
+import Validity
 import Views exposing           ( .. )
 
 main : Program () Model Msg
@@ -96,8 +97,13 @@ update msg model = case msg of
                                                             String.concat [String.fromInt (1 + g), 
                                                                            "."],
                                                             "Substituting 0."])
-                               in ({ model | currentQuiz = Quiz.update r g np model.currentQuiz,
-                                             feedback = response },
+                                   newQuiz = Quiz.update r g np model.currentQuiz
+                                   valid = Quiz.arePointsValid newQuiz
+                               in ({ model | currentQuiz = newQuiz,
+                                             feedback = response,
+                                             isValidQuizUpdate = 
+                                              Validity.updatePoints valid model.isValidQuizUpdate
+                                    },
                                    Cmd.none)
     AddRound                -> let newQuiz = Quiz.addRound (Round.emptyOfSize model.teamsInQuiz) 
                                                            model.currentQuiz
@@ -106,7 +112,12 @@ update msg model = case msg of
                                     case run float ps of
                                       Ok p -> 
                                         let newQuiz = Quiz.updateMax rd p model.currentQuiz
-                                        in { model | currentQuiz = newQuiz }
+                                            valid = Quiz.arePointsValid newQuiz
+                                        in { model | currentQuiz = newQuiz,
+                                                     isValidQuizUpdate = 
+                                                       Validity.updatePoints valid 
+                                                                             model.isValidQuizUpdate
+                                              }
                                       Err _ -> { model | feedback = "Not a decimal point number."}
                                in (newModel, Cmd.none)
     PostUpdate qName points -> (model, postUpdate model.user model.oneWayHash qName points)
@@ -272,12 +283,15 @@ updateQuizByText text model =
     case Quiz.parseQuiz text of
         Ok quiz -> let guess = Quiz.numberOfTeams quiz
                        actual = if guess == 0 then model.teamsInQuiz else guess
+                       pointsValid = Quiz.arePointsValid quiz
+                       validity = { pointsValid = pointsValid, serverTextOK = True }
                    in { model | currentQuiz = quiz, 
                                 teamsInQuiz = actual,
-                                isValidQuizUpdate = True, 
+                                isValidQuizUpdate = validity,
                                 feedback = ""
                    }
-        Err des -> { model | isValidQuizUpdate = False, 
+        Err des -> { model | isValidQuizUpdate = 
+                              Validity.updateServerText False model.isValidQuizUpdate, 
                              feedback = "Parsing error"
                    }
 
