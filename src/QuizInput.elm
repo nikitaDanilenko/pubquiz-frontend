@@ -160,7 +160,18 @@ update msg model = case msg of
     LabelsUpdate fld text   -> let lbls = updateLabelsByField fld text model.labels
                                in ({ model | labels = lbls }, Cmd.none)
     SetTeamName i teamName  -> let newQuiz = Quiz.updateTeamName i teamName model.currentQuiz
-                               in ({ model | currentQuiz = newQuiz }, Cmd.none)
+                                   valid = Quiz.allTeamNamesValid newQuiz
+                                   validity = Validity.updateTeamNames valid model.isValidQuizUpdate
+                                   error = String.join " " ["Team name of team", 
+                                                            String.fromInt ( 1+ i),
+                                                            "contains invalid symbols",
+                                                            "(", 
+                                                            String.fromChar Quiz.teamNameSeparator, 
+                                                            ")." ]
+                                   feedback = if valid then "" else error 
+                               in ({ model | currentQuiz = newQuiz,
+                                             feedback = feedback,
+                                             isValidQuizUpdate = validity }, Cmd.none)
     GetLabels               -> (model, getQuizLabels model.editing)
     PostLabelUpdate q lbls  -> (model, updateLabels model.user model.oneWayHash q lbls)
 
@@ -284,7 +295,9 @@ updateQuizByText text model =
         Ok quiz -> let guess = Quiz.numberOfTeams quiz
                        actual = if guess == 0 then model.teamsInQuiz else guess
                        pointsValid = Quiz.arePointsValid quiz
-                       validity = { pointsValid = pointsValid, serverTextOK = True }
+                       validity = { pointsValid = pointsValid,
+                                    serverTextOK = True, 
+                                    teamNamesValid = True }
                    in { model | currentQuiz = quiz, 
                                 teamsInQuiz = actual,
                                 isValidQuizUpdate = validity,

@@ -184,3 +184,10 @@ isValidRoundsText : String -> Bool
 isValidRoundsText text = 
   let (header, rounds) = splitFirstLast text
   in List.all isValidRound rounds 
+
+isValidTeamName : String -> Bool
+isValidTeamName = String.all (\c -> c /= teamNameSeparator)
+
+allTeamNamesValid : Quiz -> Bool
+allTeamNamesValid quiz =
+  List.all (\(_, mn) -> Util.foldMaybe True isValidTeamName mn) quiz.header
