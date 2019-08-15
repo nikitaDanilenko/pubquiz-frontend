@@ -8,7 +8,7 @@ import Html.Events exposing       ( onInput, onClick )
 import Html.Events.Extra exposing ( onEnter )
 import Parser exposing            ( int, float )
 
-import Constants exposing         ( sheetPDFPrefix, sheetPDFFile, mkPath )
+import Constants exposing         ( sheetPDFPrefix, sheetPDFFile, mkPath, qrPDFFile )
 import Labels exposing            ( Labels )
 import Model exposing             ( .. )
 import NewUser exposing           ( NewUserField ( .. ), isValid )
@@ -86,23 +86,24 @@ editingView md =
                    onClick (PostUpdate md.editing (Quiz.toString md.currentQuiz)),
                    disabled (not (Validity.isValid md.isValidQuizUpdate)) ]
                  [ text "Update" ],
-          div [ id "answerSheet" ]
-              [ a [ class "link",
-                    href (mkPath [ sheetPDFPrefix, 
-                                   md.editing, 
-                                   String.join "-" [ md.editing, sheetPDFFile ]
-                                 ]),
-                    target "_blank"
-                  ] 
-                  [ text "Get quiz sheet" ] ],
-          div [ id "mainGraphPage" ]
-              [ a [ class "link",
-                    href (mkPath [ sheetPDFPrefix, md.editing, "" ]),
-                    target "_blank"
-                  ] 
-                  [ text "View main graph page" ] ],
+          mkLinkToSheet "answerSheet" "Get quiz sheet" md.editing (String.join "-" [ md.editing, sheetPDFFile ]),
+          mkLinkToSheet "qrSheet" "Get QR codes only" md.editing (String.join "-" [ md.editing, qrPDFFile ]),
+          mkLinkToSheet "mainGraphPage" "View main graph page" md.editing "",
           addFeedbackLabel md
          ])
+
+mkLinkToSheet : String -> String -> String -> String -> Html Msg
+mkLinkToSheet divId linkText prefix file = 
+  div [ id divId ]
+      [ a [ class "link",
+            href (mkPath [ sheetPDFPrefix, 
+                           prefix, 
+                           file
+                  ]
+            ),
+            target "_blank"
+          ] 
+          [ text linkText ] ]
 
 confirmView : Model -> Html Msg
 confirmView md =

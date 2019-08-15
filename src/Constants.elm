@@ -83,3 +83,6 @@ sheetPDFPrefix = mkPath ["file://", "media", "nda", "DATA", "Programme", "pubqui
 
 sheetPDFFile : String
 sheetPDFFile = "Sheet.pdf"
+
+qrPDFFile : String
+qrPDFFile = "QR.pdf"
