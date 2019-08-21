@@ -147,7 +147,7 @@ update msg model = case msg of
                                    (newQs, feedback) =
                                      case run int txt of
                                       Ok q -> (updateIndex i q qs, "")
-                                      Err _ -> (qs, String.join " " [txt, "is not a natural number larger than zero."])
+                                      Err _ -> (qs, "Not a natural number larger than zero.")
                                    in ({ model | questions = newQs, feedback = feedback}, Cmd.none)
 
     CreateQuiz              -> if String.isEmpty (model.createName) 
