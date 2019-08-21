@@ -65,7 +65,8 @@ update msg model = case msg of
         Locked      -> ({ model | feedback = String.concat ["Locked ", model.editing] }, getAll)
         Updated     -> ({ model | feedback = "Update successful"}, Cmd.none)
         CreatedQuiz -> ({ model | editing = model.createName,
-                                  labels = Labels.default }, 
+                                  labels = Labels.default,
+                                  questions = Model.defaultQuestions }, 
                         getSingle model.createName)
         CreatedUser -> ({ model | newUser = NewUser.emptyUser, 
                                   feedback = String.join " " [ "Created user", model.newUser.user ] 
@@ -139,7 +140,7 @@ update msg model = case msg of
     SetRoundsNumber rs      -> let newModel =
                                     case run int rs of
                                      Ok r -> 
-                                      { model | questions = adjustToSizeWith defaultQuestionNumber r model.questions, 
+                                      { model | questions = adjustToSizeWith Model.defaultQuestionNumber r model.questions, 
                                                 feedback = "" }
                                      Err _ -> { model | feedback = "Not a valid number of teams." }
                                in (newModel, Cmd.none)
@@ -319,9 +320,6 @@ updateQuizByText text model =
                               Validity.updateServerText False model.isValidQuizUpdate, 
                              feedback = "Parsing error"
                    }
-
-defaultQuestionNumber : Int
-defaultQuestionNumber = 8
 
 type alias RestParam = String
 type alias RestValue = String
