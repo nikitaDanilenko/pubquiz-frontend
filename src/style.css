@@ -114,6 +114,10 @@ label, input {
   max-width: 32pt;
 }
 
+#questionArea .questionSpinner {
+  max-width: 32pt;
+}
+
 #editingLabel, .link {
   color: rgb(100, 149, 237);
 }
