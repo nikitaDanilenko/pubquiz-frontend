@@ -1,4 +1,4 @@
-module QuizInput exposing ( main )
+module QuizInput exposing ( main, intListToString )
 
 import Browser
 import Crypto.Hash exposing     ( sha512 )
@@ -17,7 +17,7 @@ import NewUser exposing         ( NewUser )
 import Parser exposing          ( int, float, run )
 import Quiz
 import Round
-import Util exposing            ( isValidInternalQuizName )
+import Util exposing            ( isValidInternalQuizName, adjustToSizeWith, updateIndex )
 import Validity
 import Views exposing           ( .. )
 
@@ -138,13 +138,22 @@ update msg model = case msg of
                                in ({ model | createName = name, feedback = feedback }, Cmd.none)
     SetRoundsNumber rs      -> let newModel =
                                     case run int rs of
-                                     Ok r -> { model | numberOfRounds = r, feedback = "" }
+                                     Ok r -> 
+                                      { model | questions = adjustToSizeWith defaultQuestionNumber r model.questions, 
+                                                feedback = "" }
                                      Err _ -> { model | feedback = "Not a valid number of teams." }
                                in (newModel, Cmd.none)
+    UpdateQuestions i txt   -> let qs = model.questions
+                                   (newQs, feedback) =
+                                     case run int txt of
+                                      Ok q -> (updateIndex i q qs, "")
+                                      Err _ -> (qs, String.join " " [txt, "is not a natural number larger than zero."])
+                                   in ({ model | questions = newQs, feedback = feedback}, Cmd.none)
+
     CreateQuiz              -> if String.isEmpty (model.createName) 
                                 then ({ model | feedback = "Empty quiz name" }, Cmd.none)
                                 else (model, 
-                                      createNewQuiz model.numberOfRounds
+                                      createNewQuiz model.questions
                                                     model.teamsInQuiz
                                                     model.user 
                                                     model.oneWayHash 
@@ -239,16 +248,19 @@ postLock u sk quizName =
         expect = Http.expectWhatever (ResponseP Locked)
     }
 
-createNewQuiz : Int -> Int -> User -> SessionKey -> QuizName -> Labels -> Cmd Msg
+createNewQuiz : List Int -> Int -> User -> SessionKey -> QuizName -> Labels -> Cmd Msg
 createNewQuiz rs gs u sk quizName labels = 
     let params = mkWithSignature u sk [(quizParam, quizName), (actionParam, createQuiz)]
     in Http.post {
         url = newApi,
-        body = encodeBody (mkParams ((roundsNumberParam, String.fromInt rs) :: 
+        body = encodeBody (mkParams ((roundsNumberParam, intListToString rs) :: 
                                      (numberOfTeamsParam, String.fromInt gs) :: 
                                      List.concat [params, Labels.toParams labels])),
         expect = Http.expectWhatever (ResponseP CreatedQuiz)
     }
+
+intListToString : List Int -> String
+intListToString xs = String.join "" [ "[", String.join ", " (List.map String.fromInt xs), "]" ]
 
 createNewUser : User -> SessionKey -> NewUser -> Cmd Msg
 createNewUser u sk newUser = 
@@ -307,6 +319,9 @@ updateQuizByText text model =
                               Validity.updateServerText False model.isValidQuizUpdate, 
                              feedback = "Parsing error"
                    }
+
+defaultQuestionNumber : Int
+defaultQuestionNumber = 8
 
 type alias RestParam = String
 type alias RestValue = String
