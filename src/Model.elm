@@ -38,13 +38,19 @@ initialModel = { user = "",
                  currentQuiz = Quiz.empty,
                  teamsInQuiz = 8,
                  isValidQuizUpdate = Validity.default,
-                 questions = List.repeat 4 8,
+                 questions = defaultQuestions,
                  displayState = Initial, 
                  createName = "",
                  labels = default,
                  newUser = NewUser.emptyUser,
                  feedback = "" 
                }
+
+defaultQuestionNumber : Int
+defaultQuestionNumber = 8
+
+defaultQuestions : List Int
+defaultQuestions = List.repeat 4 defaultQuestionNumber
 
 type Edited = ContentsE | LabelsE
 
