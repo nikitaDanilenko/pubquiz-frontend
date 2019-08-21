@@ -2,7 +2,7 @@ module Round exposing ( .. )
 
 import Parser exposing ( succeed, float, symbol, sequence, Trailing ( .. ), Parser, (|.),
                          (|=), end )
-import Util exposing   ( isParserSuccess, blanks, adjustToSize )
+import Util exposing   ( isParserSuccess, blanks, adjustToSize, updateIndex )
 
 type alias Round = 
     {
@@ -24,7 +24,7 @@ arePointsValid rd = List.all (\x -> x <= rd.maxPoints) rd.teamPoints
 
 update : Int -> Float -> Round -> Round
 update i ps rd = 
-  let newPoints = List.indexedMap (\j p -> if i == j then ps else p) rd.teamPoints
+  let newPoints = updateIndex i ps rd.teamPoints
   in { rd | teamPoints = newPoints }
 
 toString : Round -> String
