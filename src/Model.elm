@@ -18,7 +18,7 @@ type alias Model =
         currentQuiz : Quiz,
         teamsInQuiz : Int,
         isValidQuizUpdate : Validity,
-        numberOfRounds : Int,
+        questions : List Int,
         displayState : DisplayState,
         createName : QuizName,
         labels : Labels,
@@ -38,7 +38,7 @@ initialModel = { user = "",
                  currentQuiz = Quiz.empty,
                  teamsInQuiz = 8,
                  isValidQuizUpdate = Validity.default,
-                 numberOfRounds = 4,
+                 questions = List.repeat 4 8,
                  displayState = Initial, 
                  createName = "",
                  labels = default,
@@ -84,6 +84,7 @@ type Msg = GetAll
          | SetTeamsInQuiz TeamUpdateSetting String
          | UpdatePoints Int Int String -- Points for round, team, value.
          | SetMaxPoints Int String    -- Points for round, value
+         | UpdateQuestions Int String
          | AddRound
          | SetRoundsNumber String
          | StartCreatingQuiz
