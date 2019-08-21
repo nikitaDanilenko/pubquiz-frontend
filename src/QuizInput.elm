@@ -137,18 +137,17 @@ update msg model = case msg of
                                                           "only characters, numbers",
                                                           "_ and - are allowed."]
                                in ({ model | createName = name, feedback = feedback }, Cmd.none)
-    SetRoundsNumber rs      -> let newModel =
-                                    case run int rs of
-                                     Ok r -> 
-                                      { model | questions = adjustToSizeWith Model.defaultQuestionNumber r model.questions, 
-                                                feedback = "" }
-                                     Err _ -> { model | feedback = "Not a valid number of teams." }
+    SetRoundsNumber rs      -> let newModel = 
+                                     Util.foldMaybe { model | feedback = "Not a valid number of teams." }
+                                                    (\r -> { model | questions = adjustToSizeWith Model.defaultQuestionNumber r model.questions, 
+                                                                     feedback = "" }) 
+                                                    (validatePositiveNatural rs)
                                in (newModel, Cmd.none)
     UpdateQuestions i txt   -> let qs = model.questions
                                    (newQs, feedback) =
-                                     case run int txt of
-                                      Ok q -> (updateIndex i q qs, "")
-                                      Err _ -> (qs, "Not a natural number larger than zero.")
+                                     Util.foldMaybe (qs, "Not a natural number larger than zero.")
+                                                    (\q -> (updateIndex i q qs, ""))
+                                                    (validatePositiveNatural txt)
                                    in ({ model | questions = newQs, feedback = feedback}, Cmd.none)
 
     CreateQuiz              -> if String.isEmpty (model.createName) 
@@ -363,4 +362,9 @@ processTeamUpdate setting text model =
                                                   "teams."])
                   Err _ -> (0, "Invalid team number. Substituting 0.")
   in { teams = ts, response = r }
-                                    
+
+validatePositiveNatural : String -> Maybe Int
+validatePositiveNatural txt = 
+  case run int txt of
+    Ok n -> if n > 0 then Just n else Nothing
+    _    -> Nothing
