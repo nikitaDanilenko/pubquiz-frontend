@@ -135,11 +135,14 @@ creatingQuizView md =
                          min "1",
                          step "1",
                          createOnEnter,
-                         value (String.fromInt (List.length md.questions)) ] [],
-                 label [ id "questionsPerRound" ]
-                       [ text "Questions per round" ],
-                 mkQuestionsForm createOnEnter md.questions 
+                         value (String.fromInt (List.length md.questions)) ] []
                ],
+           div [ id "questionLabel" ]
+               [ label [ id "questionsPerRound" ]
+                       [ text "Questions per round" ]
+               ],
+           div [ id "questionArea" ]
+               [ mkQuestionsForm createOnEnter md.questions ],
            div [ id "teamNumberArea" ]
                [ label [ for "teamNumber" ] [ text "Number of teams" ],
                  input [ onInput (SetTeamsInQuiz InitialTU),
@@ -255,16 +258,18 @@ mkQuestionsForm : Html.Attribute Msg -> List Int -> Html Msg
 mkQuestionsForm createOnEnter rs =
   div [ id "perRound" ]
       (List.concat (
-        List.indexedMap (\i qs -> [ label [ class "roundNumber" ] 
-                                          [ text (String.join " " [ "Round", String.fromInt (1 + i) ]) ],
-                                    input [ value (String.fromInt qs),
-                                            onInput (UpdateQuestions i),
-                                            class "questionSpinner",
-                                            type_ "number", 
-                                            min "1",
-                                            step "1",
-                                            createOnEnter ]
-                                          []
+        List.indexedMap (\i qs -> [ div [ class "roundQuestionLine" ]
+                                        [ label [ class "roundNumber" ] 
+                                                [ text (String.join " " [ "Round", String.fromInt (1 + i) ]) ],
+                                          input [ value (String.fromInt qs),
+                                                  onInput (UpdateQuestions i),
+                                                  class "questionSpinner",
+                                                  type_ "number", 
+                                                  min "1",
+                                                  step "1",
+                                                  createOnEnter ]
+                                                []
+                                        ]
                                   ]) 
                         rs
         )
