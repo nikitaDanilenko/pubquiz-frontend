@@ -36,9 +36,20 @@ blanks = chompWhile (\c -> c == ' ' || c == '\r')
 {- Fills a list with zeroes in the back if the list is not long enough, 
    otherwise return the prefix of the list with the given length. -}
 adjustToSize : Int -> List Float -> List Float
-adjustToSize n fs = 
-    let fsLength = List.length fs
-    in if fsLength > n then List.take n fs else fs ++ List.repeat (n - fsLength) 0
+adjustToSize = adjustToSizeWith 0
+
+adjustToSizeWith : a -> Int -> List a -> List a
+adjustToSizeWith dft n lst = 
+    let combine : List a -> List a -> List a
+        combine l r = 
+            case (l, r) of
+                ([], rest) -> rest
+                (_, []) -> []
+                (x :: xs, _ :: ys) -> x :: combine xs ys
+    in combine lst (List.repeat n dft)
+
+updateIndex : Int -> a -> List a -> List a
+updateIndex i y = List.indexedMap (\j x -> if i == j then y else x)
 
 isValidInternalQuizChar : Char -> Bool
 isValidInternalQuizChar c = Char.isAlphaNum c || List.member c ['_', '-']
