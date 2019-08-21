@@ -138,7 +138,7 @@ creatingQuizView md =
                          value (String.fromInt (List.length md.questions)) ] [],
                  label [ id "questionsPerRound" ]
                        [ text "Questions per round" ],
-                 mkQuestionsForm md.questions
+                 mkQuestionsForm createOnEnter md.questions 
                ],
            div [ id "teamNumberArea" ]
                [ label [ for "teamNumber" ] [ text "Number of teams" ],
@@ -251,15 +251,19 @@ mkRoundForm number gs rd =
                                       ])
                         (adjustToSize gs rd.teamPoints))
 
-mkQuestionsForm : List Int -> Html Msg
-mkQuestionsForm rs =
+mkQuestionsForm : Html.Attribute Msg -> List Int -> Html Msg
+mkQuestionsForm createOnEnter rs =
   div [ id "perRound" ]
       (List.concat (
         List.indexedMap (\i qs -> [ label [ class "roundNumber" ] 
-                                          [ text (String.join " " [ "Round", String.fromInt i ]) ],
+                                          [ text (String.join " " [ "Round", String.fromInt (1 + i) ]) ],
                                     input [ value (String.fromInt qs),
                                             onInput (UpdateQuestions i),
-                                            min (String.fromInt 1) ]
+                                            class "questionSpinner",
+                                            type_ "number", 
+                                            min "1",
+                                            step "1",
+                                            createOnEnter ]
                                           []
                                   ]) 
                         rs
