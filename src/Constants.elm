@@ -68,8 +68,8 @@ lockApi = mkPath [quizApi, "lock"]
 updateApi : String
 updateApi = mkPath [quizApi, "update"]
 
-updateLabelsApi : String
-updateLabelsApi = mkPath [quizApi, "updateLabels"]
+updateQuizSettingsApi : String
+updateQuizSettingsApi = mkPath [quizApi, "updateQuizSettings"]
 
 allApi : String
 allApi = mkPath [quizApi, "all"]
