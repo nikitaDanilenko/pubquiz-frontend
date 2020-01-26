@@ -103,7 +103,7 @@ type Msg = GetAll
          | LabelsUpdate LabelsField String
          | SetTeamName Int String
          | GetLabels
-         | PostLabelUpdate QuizName Labels
+         | PostQuizSettingsUpdate QuizName (List Int) Int Labels
          | ResponseF ResponseWithFeedback (ErrorOr String)
          | ResponseP ResponsePure (ErrorOr ())
 
