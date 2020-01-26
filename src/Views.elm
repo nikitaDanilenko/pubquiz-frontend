@@ -103,7 +103,8 @@ mkLinkToSheet divId linkText prefix file =
             ),
             target "_blank"
           ] 
-          [ text linkText ] ]
+          [ text linkText ] 
+      ]
 
 confirmView : Model -> Html Msg
 confirmView md =
@@ -121,54 +122,35 @@ creatingQuizView : Model -> Html Msg
 creatingQuizView md = 
   let createOnEnter = onEnter CreateQuiz
   in div [ id "creatingQuizView" ]
-         [ label [ for "internalQuizName" ] [ text "Quiz name (internal)" ], 
-           input [ onInput SetNewQuizName,
-                   type_ "text",
-                   createOnEnter,
-                   placeholder "e.g. some-quiz-yyyy-mm-dd" ] [],
-           div [ id "roundsNumberDiv"] 
-               [ label [ for "roundsNumber" ]
-                       [ text "Number of rounds" ],
-                 input [ onInput SetRoundsNumber,
-                         class "roundsSpinner",
-                         type_ "number", 
-                         min "1",
-                         step "1",
-                         createOnEnter,
-                         value (String.fromInt (List.length md.questions)) ] []
-               ],
-           div [ id "questionLabel" ]
-               [ label [ id "questionsPerRound" ]
-                       [ text "Questions per round" ]
-               ],
-           div [ id "questionArea" ]
-               [ mkQuestionsForm createOnEnter md.questions ],
-           div [ id "teamNumberArea" ]
-               [ label [ for "teamNumber" ] [ text "Number of teams" ],
-                 input [ onInput (SetTeamsInQuiz InitialTU),
-                         class "teamsSpinner",
-                         type_ "number", 
-                         min "1",
-                         createOnEnter,
-                         value (String.fromInt md.teamsInQuiz) ] [] ],
-           mkCreationForm createOnEnter md.labels,
-           button [ class "button", onClick CreateQuiz, 
-                    disabled (not (isValidNewQuiz md)) ] [ text "Create" ] ,
-           button [ class "backButton", onClick GetAll ] [ text "Back" ],
-           addFeedbackLabel md
+         ([ label [ for "internalQuizName" ] [ text "Quiz name (internal)" ], 
+            input [ onInput SetNewQuizName,
+                    type_ "text",
+                    createOnEnter,
+                    placeholder "e.g. some-quiz-yyyy-mm-dd" ] []
+            ]
+          ++
+          mkCreationForm md createOnEnter md.labels
+          ++
+          [ button [ class "button", onClick CreateQuiz, 
+                     disabled (not (isValidNewQuiz md)) ] [ text "Create" ] ,
+            button [ class "backButton", onClick GetAll ] [ text "Back" ],
+            addFeedbackLabel md
           ]
+         )
 
 editingLabelsView : Model -> Html Msg
 editingLabelsView md = 
   let lbls = md.labels
       edit = md.editing
-      done = PostLabelUpdate edit lbls
+      done = PostQuizSettingsUpdate edit md.questions md.teamsInQuiz lbls
   in div [ id "editingLabelsView" ]
-         [ mkCreationForm (onEnter done) lbls,
-           button [ class "button", onClick done ] [ text "Update" ] ,
-           button [ class "backButton", onClick (GetSingle edit) ] [ text "Back" ],
-           addFeedbackLabel md
-         ]
+         (mkCreationForm md (onEnter done) lbls
+          ++
+          [ button [ class "button", onClick done ] [ text "Update" ] ,
+            button [ class "backButton", onClick (GetSingle edit) ] [ text "Back" ],
+            addFeedbackLabel md
+          ]
+          )
 
 creatingUserView : Model -> Html Msg
 creatingUserView md =
@@ -193,8 +175,8 @@ creatingUserView md =
         addFeedbackLabel md
       ]
 
-mkCreationForm : Html.Attribute Msg -> Labels -> Html Msg
-mkCreationForm createOnEnter labels = 
+mkCreationForm : Model -> Html.Attribute Msg -> Labels -> List (Html Msg)
+mkCreationForm md createOnEnter labels = 
   let associations = [("Description (external)", MainField, labels.mainLabel),
                       ("Label for rounds", RoundField, labels.roundLabel),
                       ("Label for teams", TeamField, labels.teamLabel),
@@ -217,8 +199,35 @@ mkCreationForm createOnEnter labels =
         div [ id (createIdByField fld) ] 
             [ label [] [ text lbl ], 
               input [ onInput (LabelsUpdate fld), type_ "text", value dft, createOnEnter ] [] ]
-  in div [ id "labelsForm" ]
-         (List.map (\(lbl, fld, dft) -> mkInput lbl fld dft) associations)
+  in [ 
+       div [ id "roundsNumberDiv" ] 
+           [ label [ for "roundsNumber" ]
+                   [ text "Number of rounds" ],
+             input [ onInput SetRoundsNumber,
+                     class "roundsSpinner",
+                     type_ "number", 
+                     min "1",
+                     step "1",
+                     createOnEnter,
+                     value (String.fromInt (List.length md.questions)) ] []
+           ],
+       div [ id "questionLabel" ]
+           [ label [ id "questionsPerRound" ]
+                   [ text "Questions per round" ]
+           ],
+       div [ id "questionArea" ]
+           [ mkQuestionsForm createOnEnter md.questions ],
+       div [ id "teamNumberArea" ]
+           [ label [ for "teamNumber" ] [ text "Number of teams" ],
+             input [ onInput (SetTeamsInQuiz InitialTU),
+                     class "teamsSpinner",
+                     type_ "number", 
+                     min "1",
+                     createOnEnter,
+                     value (String.fromInt md.teamsInQuiz) ] [] ],
+       div [ id "labelsForm" ]
+           (List.map (\(lbl, fld, dft) -> mkInput lbl fld dft) associations)
+     ]
 
 addFeedbackLabel : Model -> Html Msg
 addFeedbackLabel model = div [ id "feedbackArea" ] 
