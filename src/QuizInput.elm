@@ -44,7 +44,8 @@ update msg model = case msg of
         GotAll    -> ({ model | quizzes = String.lines text, 
                                 displayState = Selecting,
                                 feedback = "",
-                                createName = "" },
+                                createName = "",
+                                currentQuiz = Quiz.empty },
                       Cmd.none)
         GotSingleQuiz   -> let updatedModel = updateQuizByText text model
                            in ({ updatedModel | displayState = Editing ContentsE }, Cmd.none)
@@ -182,7 +183,8 @@ update msg model = case msg of
                                              feedback = feedback,
                                              isValidQuizUpdate = validity }, Cmd.none)
     GetLabels               -> (model, getQuizLabels model.editing)
-    PostLabelUpdate q lbls  -> (model, updateLabels model.user model.oneWayHash q lbls)
+    PostQuizSettingsUpdate q rs ts lbls  
+                            -> (model, updateQuizSettings model.user model.oneWayHash q rs ts lbls)
 
 view : Model -> Html Msg
 view model = 
@@ -272,11 +274,14 @@ createNewUser u sk newUser =
         expect = Http.expectWhatever (ResponseP CreatedUser)
     }
 
-updateLabels : User -> SessionKey -> QuizName -> Labels -> Cmd Msg
-updateLabels u sk quizName labels = 
-    let params = mkWithSignature u sk [(quizParam, quizName), (actionParam, labelUpdate)]
+updateQuizSettings : User -> SessionKey -> QuizName -> List Int -> Int -> Labels -> Cmd Msg
+updateQuizSettings u sk quizName rs ts labels = 
+    let params = mkWithSignature u sk [(quizParam, quizName), 
+                                       (roundsNumberParam, intListToString rs),
+                                       (numberOfTeamsParam, String.fromInt ts),
+                                       (actionParam, labelUpdate)]
     in Http.post {
-        url = updateLabelsApi,
+        url = updateQuizSettingsApi,
         body = encodeBody (mkParams (List.concat [params, Labels.toParams labels])),
         expect = Http.expectWhatever (ResponseP Updated)
     }
