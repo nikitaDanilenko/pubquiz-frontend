@@ -14,6 +14,7 @@
             "elm/parser": "1.1.0",
             "elm/url": "1.0.0",
             "elm-community/html-extra": "3.1.1",
+            "justinmimbs/date": "3.2.0",
             "ktonon/elm-crypto": "1.1.2"
         },
         "indirect": {
