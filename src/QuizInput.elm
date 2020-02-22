@@ -2,11 +2,11 @@ module QuizInput exposing ( main, intListToString )
 
 import Browser
 import Crypto.Hash exposing     ( sha512 )
-import Html exposing            ( Html, div, node )
-import Html.Attributes exposing ( rel, type_, href, id )
+import Html exposing            ( Html )
+import Http exposing (jsonBody)
 import Http
-import Http exposing            ( get, emptyBody, post )
-import Json.Encode as Encode
+import JSONConversion exposing (encodeWithSignature)
+import Types exposing (Credentials, QuizPDN, QuizSettings, jsonEncQuizPDN, jsonEncQuizSettings)
 import Url.Builder exposing     ( string )
 -- todo Write all out.
 import Base exposing            ( User, Password, SessionKey )
@@ -149,7 +149,7 @@ update msg model = case msg of
                                      Util.foldMaybe (qs, "Not a natural number larger than zero.")
                                                     (\q -> (updateIndex i q qs, ""))
                                                     (validatePositiveNatural txt)
-                                   in ({ model | questions = newQs, feedback = feedback}, Cmd.none)
+                               in ({ model | questions = newQs, feedback = feedback}, Cmd.none)
 
     CreateQuiz              -> if String.isEmpty (model.createName) 
                                 then ({ model | feedback = "Empty quiz name" }, Cmd.none)
@@ -261,6 +261,14 @@ createNewQuiz rs gs u sk quizName labels =
         expect = Http.expectWhatever (ResponseP CreatedQuiz)
     }
 
+createNewQuiz2 : SessionKey -> QuizPDN -> QuizSettings -> Credentials -> Cmd Msg
+createNewQuiz2 sk pdn s c = Http.post {
+      url = newApi,
+      body = jsonBody (encodeWithSignature c.user sk [(quizPDNParam, jsonEncQuizPDN pdn),
+                                                      (quizSettingsParam, jsonEncQuizSettings s)]),
+      expect = Http.expectWhatever (ResponseP CreatedQuiz)
+    }
+
 intListToString : List Int -> String
 intListToString xs = String.join "" [ "[", String.join ", " (List.map String.fromInt xs), "]" ]
 
@@ -320,7 +328,7 @@ updateQuizByText text model =
                                 isValidQuizUpdate = validity,
                                 feedback = ""
                    }
-        Err des -> { model | isValidQuizUpdate = 
+        Err _   -> { model | isValidQuizUpdate =
                               Validity.updateServerText False model.isValidQuizUpdate, 
                              feedback = "Parsing error"
                    }
