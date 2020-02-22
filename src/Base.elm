@@ -3,8 +3,6 @@ module Base exposing ( .. )
 import Date exposing (Date, day, fromCalendarDate, monthNumber, numberToMonth, year)
 import Types exposing (Day)
 
-type alias User = String
-type alias Password = String
 type alias SessionKey = String
 
 dayToDate : Day -> Date
