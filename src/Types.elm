@@ -315,3 +315,213 @@ jsonEncDay  val =
    , ("day", Json.Encode.int val.day)
    ]
 
+
+
+type alias TeamRating  =
+   { teamNumber: TeamNumber
+   , rating: Float
+   }
+
+jsonDecTeamRating : Json.Decode.Decoder ( TeamRating )
+jsonDecTeamRating =
+   Json.Decode.succeed (\pteamNumber prating -> {teamNumber = pteamNumber, rating = prating})
+   |> required "teamNumber" (jsonDecTeamNumber)
+   |> required "rating" (Json.Decode.float)
+
+jsonEncTeamRating : TeamRating -> Value
+jsonEncTeamRating  val =
+   Json.Encode.object
+   [ ("teamNumber", jsonEncTeamNumber val.teamNumber)
+   , ("rating", Json.Encode.float val.rating)
+   ]
+
+
+
+type alias RoundRating  =
+   { reachableInRound: Float
+   , points: (List TeamRating)
+   }
+
+jsonDecRoundRating : Json.Decode.Decoder ( RoundRating )
+jsonDecRoundRating =
+   Json.Decode.succeed (\preachableInRound ppoints -> {reachableInRound = preachableInRound, points = ppoints})
+   |> required "reachableInRound" (Json.Decode.float)
+   |> required "points" (Json.Decode.list (jsonDecTeamRating))
+
+jsonEncRoundRating : RoundRating -> Value
+jsonEncRoundRating  val =
+   Json.Encode.object
+   [ ("reachableInRound", Json.Encode.float val.reachableInRound)
+   , ("points", (Json.Encode.list jsonEncTeamRating) val.points)
+   ]
+
+
+
+type alias Ratings  = (List (RoundNumber, RoundRating))
+
+jsonDecRatings : Json.Decode.Decoder ( Ratings )
+jsonDecRatings =
+    Json.Decode.list (Json.Decode.map2 tuple2 (Json.Decode.index 0 (jsonDecRoundNumber)) (Json.Decode.index 1 (jsonDecRoundRating)))
+
+jsonEncRatings : Ratings -> Value
+jsonEncRatings  val = (Json.Encode.list (\(t1,t2) -> Json.Encode.list identity [(jsonEncRoundNumber) t1,(jsonEncRoundRating) t2])) val
+
+
+
+type alias Credentials  =
+   { user: String
+   , signature: String
+   }
+
+jsonDecCredentials : Json.Decode.Decoder ( Credentials )
+jsonDecCredentials =
+   Json.Decode.succeed (\puser psignature -> {user = puser, signature = psignature})
+   |> required "user" (Json.Decode.string)
+   |> required "signature" (Json.Decode.string)
+
+jsonEncCredentials : Credentials -> Value
+jsonEncCredentials  val =
+   Json.Encode.object
+   [ ("user", Json.Encode.string val.user)
+   , ("signature", Json.Encode.string val.signature)
+   ]
+
+
+
+type alias QuizSettings  =
+   { rounds: (List Int)
+   , numberOfTeams: Int
+   , labels: Labels
+   }
+
+jsonDecQuizSettings : Json.Decode.Decoder ( QuizSettings )
+jsonDecQuizSettings =
+   Json.Decode.succeed (\prounds pnumberOfTeams plabels -> {rounds = prounds, numberOfTeams = pnumberOfTeams, labels = plabels})
+   |> required "rounds" (Json.Decode.list (Json.Decode.int))
+   |> required "numberOfTeams" (Json.Decode.int)
+   |> required "labels" (jsonDecLabels)
+
+jsonEncQuizSettings : QuizSettings -> Value
+jsonEncQuizSettings  val =
+   Json.Encode.object
+   [ ("rounds", (Json.Encode.list Json.Encode.int) val.rounds)
+   , ("numberOfTeams", Json.Encode.int val.numberOfTeams)
+   , ("labels", jsonEncLabels val.labels)
+   ]
+
+
+
+type alias QuizPDN  =
+   { place: Place
+   , date: QuizDate
+   , name: QuizName
+   }
+
+jsonDecQuizPDN : Json.Decode.Decoder ( QuizPDN )
+jsonDecQuizPDN =
+   Json.Decode.succeed (\pplace pdate pname -> {place = pplace, date = pdate, name = pname})
+   |> required "place" (jsonDecPlace)
+   |> required "date" (jsonDecQuizDate)
+   |> required "name" (jsonDecQuizName)
+
+jsonEncQuizPDN : QuizPDN -> Value
+jsonEncQuizPDN  val =
+   Json.Encode.object
+   [ ("place", jsonEncPlace val.place)
+   , ("date", jsonEncQuizDate val.date)
+   , ("name", jsonEncQuizName val.name)
+   ]
+
+
+
+type alias QuizInfo  =
+   { quizId: DbQuizId
+   , identifier: QuizPDN
+   }
+
+jsonDecQuizInfo : Json.Decode.Decoder ( QuizInfo )
+jsonDecQuizInfo =
+   Json.Decode.succeed (\pquizId pidentifier -> {quizId = pquizId, identifier = pidentifier})
+   |> required "quizId" (jsonDecDbQuizId)
+   |> required "identifier" (jsonDecQuizPDN)
+
+jsonEncQuizInfo : QuizInfo -> Value
+jsonEncQuizInfo  val =
+   Json.Encode.object
+   [ ("quizId", jsonEncDbQuizId val.quizId)
+   , ("identifier", jsonEncQuizPDN val.identifier)
+   ]
+
+
+
+type alias Labels  =
+   { roundLabel: RoundLabel
+   , teamLabel: TeamLabel
+   , ownPointsLabel: OwnPointsLabel
+   , maxReachedLabel: MaxReachedLabel
+   , maxReachableLabel: MaxReachableLabel
+   , backToChartView: BackToChartViewLabel
+   , mainLabel: MainLabel
+   , ownPageLabel: OwnPageLabel
+   , viewPrevious: ViewPreviousLabel
+   , cumulativeLabel: CumulativeLabel
+   , individualRoundsLabel: IndividualRoundsLabel
+   , progressionLabel: ProgressionLabel
+   , placementLabel: PlacementLabel
+   , placeLabel: PlaceLabel
+   , pointsLabel: PointsLabel
+   , roundWinnerLabel: RoundWinnerLabel
+   }
+
+jsonDecLabels : Json.Decode.Decoder ( Labels )
+jsonDecLabels =
+   Json.Decode.succeed (\proundLabel pteamLabel pownPointsLabel pmaxReachedLabel pmaxReachableLabel pbackToChartView pmainLabel pownPageLabel pviewPrevious pcumulativeLabel pindividualRoundsLabel pprogressionLabel pplacementLabel pplaceLabel ppointsLabel proundWinnerLabel -> {roundLabel = proundLabel, teamLabel = pteamLabel, ownPointsLabel = pownPointsLabel, maxReachedLabel = pmaxReachedLabel, maxReachableLabel = pmaxReachableLabel, backToChartView = pbackToChartView, mainLabel = pmainLabel, ownPageLabel = pownPageLabel, viewPrevious = pviewPrevious, cumulativeLabel = pcumulativeLabel, individualRoundsLabel = pindividualRoundsLabel, progressionLabel = pprogressionLabel, placementLabel = pplacementLabel, placeLabel = pplaceLabel, pointsLabel = ppointsLabel, roundWinnerLabel = proundWinnerLabel})
+   |> required "roundLabel" (jsonDecRoundLabel)
+   |> required "teamLabel" (jsonDecTeamLabel)
+   |> required "ownPointsLabel" (jsonDecOwnPointsLabel)
+   |> required "maxReachedLabel" (jsonDecMaxReachedLabel)
+   |> required "maxReachableLabel" (jsonDecMaxReachableLabel)
+   |> required "backToChartView" (jsonDecBackToChartViewLabel)
+   |> required "mainLabel" (jsonDecMainLabel)
+   |> required "ownPageLabel" (jsonDecOwnPageLabel)
+   |> required "viewPrevious" (jsonDecViewPreviousLabel)
+   |> required "cumulativeLabel" (jsonDecCumulativeLabel)
+   |> required "individualRoundsLabel" (jsonDecIndividualRoundsLabel)
+   |> required "progressionLabel" (jsonDecProgressionLabel)
+   |> required "placementLabel" (jsonDecPlacementLabel)
+   |> required "placeLabel" (jsonDecPlaceLabel)
+   |> required "pointsLabel" (jsonDecPointsLabel)
+   |> required "roundWinnerLabel" (jsonDecRoundWinnerLabel)
+
+jsonEncLabels : Labels -> Value
+jsonEncLabels  val =
+   Json.Encode.object
+   [ ("roundLabel", jsonEncRoundLabel val.roundLabel)
+   , ("teamLabel", jsonEncTeamLabel val.teamLabel)
+   , ("ownPointsLabel", jsonEncOwnPointsLabel val.ownPointsLabel)
+   , ("maxReachedLabel", jsonEncMaxReachedLabel val.maxReachedLabel)
+   , ("maxReachableLabel", jsonEncMaxReachableLabel val.maxReachableLabel)
+   , ("backToChartView", jsonEncBackToChartViewLabel val.backToChartView)
+   , ("mainLabel", jsonEncMainLabel val.mainLabel)
+   , ("ownPageLabel", jsonEncOwnPageLabel val.ownPageLabel)
+   , ("viewPrevious", jsonEncViewPreviousLabel val.viewPrevious)
+   , ("cumulativeLabel", jsonEncCumulativeLabel val.cumulativeLabel)
+   , ("individualRoundsLabel", jsonEncIndividualRoundsLabel val.individualRoundsLabel)
+   , ("progressionLabel", jsonEncProgressionLabel val.progressionLabel)
+   , ("placementLabel", jsonEncPlacementLabel val.placementLabel)
+   , ("placeLabel", jsonEncPlaceLabel val.placeLabel)
+   , ("pointsLabel", jsonEncPointsLabel val.pointsLabel)
+   , ("roundWinnerLabel", jsonEncRoundWinnerLabel val.roundWinnerLabel)
+   ]
+
+
+
+type alias DbQuizId  = Int
+
+jsonDecDbQuizId : Json.Decode.Decoder ( DbQuizId )
+jsonDecDbQuizId =
+    Json.Decode.int
+
+jsonEncDbQuizId : DbQuizId -> Value
+jsonEncDbQuizId  val = Json.Encode.int val
+
