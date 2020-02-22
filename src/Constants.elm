@@ -44,9 +44,6 @@ passwordParam = "pass"
 signatureParam : String
 signatureParam = "signature"
 
-dataParam : String
-dataParam = "data"
-
 quizPDNParam : String
 quizPDNParam = "quizPDN"
 
