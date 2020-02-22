@@ -415,16 +415,14 @@ type alias QuizPDN  =
    { place: Place
    , date: QuizDate
    , name: QuizName
-   , active: Activity
    }
 
 jsonDecQuizPDN : Json.Decode.Decoder ( QuizPDN )
 jsonDecQuizPDN =
-   Json.Decode.succeed (\pplace pdate pname pactive -> {place = pplace, date = pdate, name = pname, active = pactive})
+   Json.Decode.succeed (\pplace pdate pname -> {place = pplace, date = pdate, name = pname})
    |> required "place" (jsonDecPlace)
    |> required "date" (jsonDecQuizDate)
    |> required "name" (jsonDecQuizName)
-   |> required "active" (jsonDecActivity)
 
 jsonEncQuizPDN : QuizPDN -> Value
 jsonEncQuizPDN  val =
@@ -432,7 +430,6 @@ jsonEncQuizPDN  val =
    [ ("place", jsonEncPlace val.place)
    , ("date", jsonEncQuizDate val.date)
    , ("name", jsonEncQuizName val.name)
-   , ("active", jsonEncActivity val.active)
    ]
 
 
@@ -440,19 +437,22 @@ jsonEncQuizPDN  val =
 type alias QuizInfo  =
    { quizId: DbQuizId
    , identifier: QuizPDN
+   , active: Activity
    }
 
 jsonDecQuizInfo : Json.Decode.Decoder ( QuizInfo )
 jsonDecQuizInfo =
-   Json.Decode.succeed (\pquizId pidentifier -> {quizId = pquizId, identifier = pidentifier})
+   Json.Decode.succeed (\pquizId pidentifier pactive -> {quizId = pquizId, identifier = pidentifier, active = pactive})
    |> required "quizId" (jsonDecDbQuizId)
    |> required "identifier" (jsonDecQuizPDN)
+   |> required "active" (jsonDecActivity)
 
 jsonEncQuizInfo : QuizInfo -> Value
 jsonEncQuizInfo  val =
    Json.Encode.object
    [ ("quizId", jsonEncDbQuizId val.quizId)
    , ("identifier", jsonEncQuizPDN val.identifier)
+   , ("active", jsonEncActivity val.active)
    ]
 
 
@@ -541,37 +541,40 @@ jsonEncPassword  val = Json.Encode.string val
 
 
 
-type alias TeamCodeNameNumber  =
-   { tcnCode: Code
-   , tcnName: TeamName
-   , tcnNumber: TeamNumber
+type alias TeamInfo  =
+   { teamInfoCode: Code
+   , teamInfoName: TeamName
+   , teamInfoNumber: TeamNumber
+   , teamInfoActivity: Activity
    }
 
-jsonDecTeamCodeNameNumber : Json.Decode.Decoder ( TeamCodeNameNumber )
-jsonDecTeamCodeNameNumber =
-   Json.Decode.succeed (\ptcnCode ptcnName ptcnNumber -> {tcnCode = ptcnCode, tcnName = ptcnName, tcnNumber = ptcnNumber})
-   |> required "tcnCode" (jsonDecCode)
-   |> required "tcnName" (jsonDecTeamName)
-   |> required "tcnNumber" (jsonDecTeamNumber)
+jsonDecTeamInfo : Json.Decode.Decoder ( TeamInfo )
+jsonDecTeamInfo =
+   Json.Decode.succeed (\pteamInfoCode pteamInfoName pteamInfoNumber pteamInfoActivity -> {teamInfoCode = pteamInfoCode, teamInfoName = pteamInfoName, teamInfoNumber = pteamInfoNumber, teamInfoActivity = pteamInfoActivity})
+   |> required "teamInfoCode" (jsonDecCode)
+   |> required "teamInfoName" (jsonDecTeamName)
+   |> required "teamInfoNumber" (jsonDecTeamNumber)
+   |> required "teamInfoActivity" (jsonDecActivity)
 
-jsonEncTeamCodeNameNumber : TeamCodeNameNumber -> Value
-jsonEncTeamCodeNameNumber  val =
+jsonEncTeamInfo : TeamInfo -> Value
+jsonEncTeamInfo  val =
    Json.Encode.object
-   [ ("tcnCode", jsonEncCode val.tcnCode)
-   , ("tcnName", jsonEncTeamName val.tcnName)
-   , ("tcnNumber", jsonEncTeamNumber val.tcnNumber)
+   [ ("teamInfoCode", jsonEncCode val.teamInfoCode)
+   , ("teamInfoName", jsonEncTeamName val.teamInfoName)
+   , ("teamInfoNumber", jsonEncTeamNumber val.teamInfoNumber)
+   , ("teamInfoActivity", jsonEncActivity val.teamInfoActivity)
    ]
 
 
 
-type alias Header  = (List TeamCodeNameNumber)
+type alias Header  = (List TeamInfo)
 
 jsonDecHeader : Json.Decode.Decoder ( Header )
 jsonDecHeader =
-    Json.Decode.list (jsonDecTeamCodeNameNumber)
+    Json.Decode.list (jsonDecTeamInfo)
 
 jsonEncHeader : Header -> Value
-jsonEncHeader  val = (Json.Encode.list jsonEncTeamCodeNameNumber) val
+jsonEncHeader  val = (Json.Encode.list jsonEncTeamInfo) val
 
 
 
