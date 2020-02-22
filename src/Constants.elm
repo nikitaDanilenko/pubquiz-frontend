@@ -44,6 +44,18 @@ passwordParam = "pass"
 signatureParam : String
 signatureParam = "signature"
 
+dataParam : String
+dataParam = "data"
+
+quizPDNParam : String
+quizPDNParam = "quizPDN"
+
+quizSettingsParam : String
+quizSettingsParam = "quizSettings"
+
+credentialsParam : String
+credentialsParam = "credentials"
+
 numberOfTeamsParam : String
 numberOfTeamsParam = "numberOfTeams"
 
