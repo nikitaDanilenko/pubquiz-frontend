@@ -525,3 +525,14 @@ jsonDecDbQuizId =
 jsonEncDbQuizId : DbQuizId -> Value
 jsonEncDbQuizId  val = Json.Encode.int val
 
+
+
+type alias Password  = String
+
+jsonDecPassword : Json.Decode.Decoder ( Password )
+jsonDecPassword =
+    Json.Decode.string
+
+jsonEncPassword : Password -> Value
+jsonEncPassword  val = Json.Encode.string val
+
