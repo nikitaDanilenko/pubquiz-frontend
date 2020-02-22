@@ -1,5 +1,18 @@
 module Base exposing ( .. )
 
-type alias User = String 
+import Date exposing (Date, day, fromCalendarDate, monthNumber, numberToMonth, year)
+import Types exposing (Day)
+
+type alias User = String
 type alias Password = String
 type alias SessionKey = String
+
+dayToDate : Day -> Date
+dayToDate d = fromCalendarDate d.year (numberToMonth d.month) d.day
+
+dateToDay : Date -> Day
+dateToDay date = {
+    year = year date,
+    month = monthNumber date,
+    day = day date
+    }
