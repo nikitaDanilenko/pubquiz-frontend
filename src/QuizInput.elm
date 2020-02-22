@@ -3,13 +3,13 @@ module QuizInput exposing ( main, intListToString )
 import Browser
 import Crypto.Hash exposing     ( sha512 )
 import Html exposing            ( Html )
-import Http exposing (jsonBody)
 import Http
-import JSONConversion exposing (encodeWithSignature)
-import Types exposing (Credentials, QuizPDN, QuizSettings, jsonEncQuizPDN, jsonEncQuizSettings)
+import Json.Encode as Encode
+import RequestUtils exposing (RestKey, RestParam, RestValue, encodeWithSignature, mkJSONParams, mkParams)
+import Types exposing (Credentials, Password, QuizPDN, QuizSettings, UserName, jsonEncPassword, jsonEncQuizPDN, jsonEncQuizSettings, jsonEncUserName)
 import Url.Builder exposing     ( string )
 -- todo Write all out.
-import Base exposing            ( User, Password, SessionKey )
+import Base exposing            ( SessionKey )
 import Constants exposing       ( .. )
 import Labels exposing          ( Labels )
 import Model exposing           ( .. )
@@ -199,11 +199,11 @@ view model =
             CreatingUser -> creatingUserView
      in wrapView currentView model
 
-login : User -> Password -> Cmd Msg
+login : UserName -> Password -> Cmd Msg
 login user password = Http.post {
         url = loginApi,
         expect = Http.expectString (ResponseF Logged),
-        body = encodeBody (mkParams [ (userParam, user), (passwordParam, password) ])
+        body = encodeBody (mkJSONParams [ (userParam, jsonEncUserName user), (passwordParam, jsonEncPassword password) ])
     }
 
 getAll : Cmd Msg
@@ -231,7 +231,7 @@ getSingle = getMsg DataPart
 getQuizLabels : String -> Cmd Msg
 getQuizLabels = getMsg LabelsPart
 
-postUpdate : User -> SessionKey -> QuizName -> String -> Cmd Msg
+postUpdate : UserName -> SessionKey -> QuizName -> String -> Cmd Msg
 postUpdate u sk quizName points = 
     let params = mkParamsWithSignature u sk [(quizParam, quizName), 
                                              (roundsParam, points)]
@@ -241,7 +241,7 @@ postUpdate u sk quizName points =
         expect = Http.expectWhatever (ResponseP Updated)
     }
 
-postLock : User -> SessionKey -> QuizName -> Cmd Msg
+postLock : UserName -> SessionKey -> QuizName -> Cmd Msg
 postLock u sk quizName = 
     let params = mkParamsWithSignature u sk [(quizParam, quizName), (actionParam, lockQuiz)]
     in Http.post {
@@ -250,7 +250,7 @@ postLock u sk quizName =
         expect = Http.expectWhatever (ResponseP Locked)
     }
 
-createNewQuiz : List Int -> Int -> User -> SessionKey -> QuizName -> Labels -> Cmd Msg
+createNewQuiz : List Int -> Int -> UserName -> SessionKey -> QuizName -> Labels -> Cmd Msg
 createNewQuiz rs gs u sk quizName labels = 
     let params = mkWithSignature u sk [(quizParam, quizName), (actionParam, createQuiz)]
     in Http.post {
@@ -264,15 +264,15 @@ createNewQuiz rs gs u sk quizName labels =
 createNewQuiz2 : SessionKey -> QuizPDN -> QuizSettings -> Credentials -> Cmd Msg
 createNewQuiz2 sk pdn s c = Http.post {
       url = newApi,
-      body = jsonBody (encodeWithSignature c.user sk [(quizPDNParam, jsonEncQuizPDN pdn),
-                                                      (quizSettingsParam, jsonEncQuizSettings s)]),
+      body = encodeBody (encodeWithSignature c.user sk [(quizPDNParam, jsonEncQuizPDN pdn),
+                                                        (quizSettingsParam, jsonEncQuizSettings s)]),
       expect = Http.expectWhatever (ResponseP CreatedQuiz)
     }
 
 intListToString : List Int -> String
 intListToString xs = String.join "" [ "[", String.join ", " (List.map String.fromInt xs), "]" ]
 
-createNewUser : User -> SessionKey -> NewUser -> Cmd Msg
+createNewUser : UserName -> SessionKey -> NewUser -> Cmd Msg
 createNewUser u sk newUser = 
     let params = mkParamsWithSignature u sk [(newUserParam, newUser.user), 
                                              (passwordParam, newUser.password1)]
@@ -282,7 +282,7 @@ createNewUser u sk newUser =
         expect = Http.expectWhatever (ResponseP CreatedUser)
     }
 
-updateQuizSettings : User -> SessionKey -> QuizName -> List Int -> Int -> Labels -> Cmd Msg
+updateQuizSettings : UserName -> SessionKey -> QuizName -> List Int -> Int -> Labels -> Cmd Msg
 updateQuizSettings u sk quizName rs ts labels = 
     let params = mkWithSignature u sk [(quizParam, quizName), 
                                        (roundsNumberParam, intListToString rs),
@@ -333,28 +333,13 @@ updateQuizByText text model =
                              feedback = "Parsing error"
                    }
 
-type alias RestParam = String
-type alias RestValue = String
-type alias RestKey = String
-
-mkParamPure : RestKey -> RestValue -> RestParam
-mkParamPure key value = String.join "=" [key, value]
-
-mkParamsPure : List (RestKey, RestValue) -> RestParam
-mkParamsPure kvs = String.join "&" (List.map (\(k, v) -> mkParamPure k v) kvs)
-
-mkParams : List (RestKey, RestValue) -> RestParam
-mkParams kvs = 
-    let done = Url.Builder.relative [] (List.map (\(k, v) -> string k v) kvs)
-    in String.dropLeft 1 done
-
-mkWithSignature : User -> SessionKey -> List (RestKey, RestValue) -> List (RestKey, RestValue)
+mkWithSignature : UserName -> SessionKey -> List (RestKey, RestValue) -> List (RestKey, RestValue)
 mkWithSignature u key kvs = 
     let allParams = (userParam, u) :: kvs
-        sig = sha512 (String.concat [key, mkParamsPure allParams])
+        sig = sha512 (String.concat [key, mkParams allParams])
     in (signatureParam, sig) :: allParams
 
-mkParamsWithSignature : User -> SessionKey -> List (RestKey, RestValue) -> RestParam
+mkParamsWithSignature : UserName -> SessionKey -> List (RestKey, RestValue) -> RestParam
 mkParamsWithSignature u key kvs = mkParams (mkWithSignature u key kvs)
 
 encodeBody : String -> Http.Body

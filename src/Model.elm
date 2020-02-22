@@ -2,15 +2,15 @@ module Model exposing ( .. )
 
 import Http exposing     ( Error ( .. ) )
 
-import Base   exposing   ( User, Password )
 import Labels exposing   ( Labels, default )
 import NewUser exposing  ( NewUser, NewUserField )
-import Quiz exposing     ( Quiz, empty )
+import Quiz exposing     ( Quiz )
+import Types exposing (Password, UserName)
 import Validity exposing ( Validity )
 
 type alias Model = 
     {
-        user : User,
+        user : UserName,
         password : Password,
         oneWayHash : String,
         quizzes : List QuizName,
@@ -85,7 +85,7 @@ type Msg = GetAll
          | PostUpdate QuizName String
          | AcknowledgeLock
          | Lock QuizName
-         | SetUser User
+         | SetUser UserName
          | SetPassword Password
          | SetTeamsInQuiz TeamUpdateSetting String
          | UpdatePoints Int Int String -- Points for round, team, value.

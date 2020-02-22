@@ -1,9 +1,9 @@
 module NewUser exposing ( .. )
 
-import Base exposing ( User, Password )
+import Types exposing (Password, UserName)
 
 type alias NewUser = {
-        user : User,
+        user : UserName,
         password1 : Password,
         password2 : Password
     }
