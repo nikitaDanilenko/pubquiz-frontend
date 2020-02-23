@@ -8,7 +8,7 @@ import Http
 import Json.Encode as Encode
 import Json.Decode as Decode
 import RequestUtils exposing (RestKey, RestParam, RestValue, encodeWithSignature, mkJSONParams, mkParams)
-import Types exposing (Action(..), Credentials, Labels, Password, QuizName, QuizPDN, QuizSettings, UserHash, UserName, jsonDecLabels, jsonDecUserHash, jsonEncAction, jsonEncLabels, jsonEncPassword, jsonEncQuizName, jsonEncQuizPDN, jsonEncQuizSettings, jsonEncUserName)
+import Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizName, QuizPDN, QuizSettings, UserHash, UserName, jsonDecLabels, jsonDecUserHash, jsonEncAction, jsonEncDbQuizId, jsonEncLabels, jsonEncPassword, jsonEncQuizName, jsonEncQuizPDN, jsonEncQuizSettings, jsonEncUserName)
 import Url.Builder exposing     ( string )
 -- todo Write all out.
 import Base exposing            ( SessionKey )
@@ -16,8 +16,8 @@ import Constants exposing       ( .. )
 import Model exposing           ( .. )
 import NewUser exposing         ( NewUser )
 import Parser exposing          ( int, float, run )
-import Quiz
-import Round
+import QuizRatings
+import RoundRating
 import Util exposing            ( isValidInternalQuizName, adjustToSizeWith, updateIndex )
 import Validity
 import Views exposing           ( .. )
@@ -26,7 +26,7 @@ main : Program () Model Msg
 main =
   Browser.document
     { init          = initialModelFunction
-    , view          = \model -> { title = "Quiz Interface", body = [ view model ] }
+    , view          = \model -> { title = "QuizRatings Interface", body = [ view model ] }
     , update        = update
     , subscriptions = \_ -> Sub.none
     }
@@ -36,17 +36,17 @@ update msg model = case msg of
     SetUser u               -> ({ model | user = u }, Cmd.none)
     SetPassword p           -> ({ model | password = p}, Cmd.none)
     GetAll                  -> ({ model | displayState = Authenticating,
-                                          currentQuiz = Quiz.empty,
-                                          editing = "",
-                                          quizSettings = Model.defaultQuizSettings },
+                                          currentQuizRatings = QuizRatings.empty,
+                                          currentQuizInfo = Model.defaultQuizInfo,
+                                          currentQuizSettings = Model.defaultQuizSettings },
                                  getAll)
     ResponseF tpe (Ok text) ->
       case tpe of
         GotAll    -> ({ model | quizzes = String.lines text, 
                                 displayState = Selecting,
                                 feedback = "",
-                                createQuizPDN = Model.defaultQuizPDN,
-                                currentQuiz = Quiz.empty },
+                                currentQuizInfo = Model.defaultQuizInfo,
+                                currentQuizRatings = QuizRatings.empty },
                       Cmd.none)
         GotSingleQuiz   -> let updatedModel = updateQuizByText text model
                            in ({ updatedModel | displayState = Editing ContentsE }, Cmd.none)
@@ -60,34 +60,33 @@ update msg model = case msg of
                                    _       -> (Model.defaultLabels,
                                                "Cannot parse server response, using default labels.")
                            in ({ model | feedback = feedback, 
-                                         quizSettings = updateQuizSettingsLabels model.quizSettings labels,
+                                         currentQuizSettings = updateQuizSettingsLabels model.currentQuizSettings labels,
                                          displayState = Editing LabelsE }, Cmd.none)
 
     ResponseF _ (Err err)   -> ({ model | feedback = errorToString err}, Cmd.none)
 
     ResponseP tpe (Ok _)    ->
       case tpe of
-        Locked      -> ({ model | feedback = String.concat ["Locked ", model.editing] }, getAll)
+        Locked      -> ({ model | feedback = String.concat ["Locked ", model.currentQuizInfo.identifier.name] }, getAll)
         Updated     -> ({ model | feedback = "Update successful"}, Cmd.none)
-        CreatedQuiz -> ({ model | editing = model.createQuizPDN.name,
-                                  quizSettings = Model.defaultQuizSettings },
-                        getSingle model.createQuizPDN.name)
+        CreatedQuiz -> ({ model | currentQuizSettings = Model.defaultQuizSettings },
+                        getSingle model.currentQuizInfo.quizId)
         CreatedUser -> ({ model | newUser = NewUser.emptyUser, 
                                   feedback = String.join " " [ "Created user", model.newUser.user ] 
                          }, getAll)
 
     ResponseP _ (Err err)   -> ({ model | feedback = errorToString err}, Cmd.none)
     
-    GetSingle qName         -> ({ model | editing = qName, feedback = "" }, getSingle qName)  
+    GetSingle qName         -> ({ model | currentQuizInfo = qName, feedback = "" }, getSingle qName)
     SetTeamsInQuiz s text   -> let tu = processTeamUpdate s text model
-                                   newQuiz = Quiz.adjustTo tu.teams model.currentQuiz
-                               in ({ model | quizSettings = updateQuizSettingsNumberOfTeams model.quizSettings tu.teams,
-                                             currentQuiz = newQuiz,
+                                   newQuiz = QuizRatings.adjustTo tu.teams model.currentRatings
+                               in ({ model | currentQuizSettings = updateQuizSettingsNumberOfTeams model.currentQuizSettings tu.teams,
+                                             currentRatings = newQuiz,
                                              feedback = tu.response }, Cmd.none)
     UpdatePoints r g ps     -> let (np, response) =
                                     case run float ps of
                                      Ok p -> 
-                                      let maxPs = (Quiz.getRound r model.currentQuiz).maxPoints
+                                      let maxPs = (QuizRatings.getRound r model.currentRatings).maxPoints
                                       in if p <= maxPs then (p, "")
                                          else (maxPs, 
                                                String.join " " ["The maximum number of points",
@@ -102,23 +101,23 @@ update msg model = case msg of
                                                             String.concat [String.fromInt (1 + g), 
                                                                            "."],
                                                             "Substituting 0."])
-                                   newQuiz = Quiz.update r g np model.currentQuiz
-                                   valid = Quiz.arePointsValid newQuiz
-                               in ({ model | currentQuiz = newQuiz,
+                                   newQuiz = QuizRatings.update r g np model.currentRatings
+                                   valid = QuizRatings.arePointsValid newQuiz
+                               in ({ model | currentRatings = newQuiz,
                                              feedback = response,
                                              isValidQuizUpdate = 
                                               Validity.updatePoints valid model.isValidQuizUpdate
                                     },
                                    Cmd.none)
-    AddRound                -> let newQuiz = Quiz.addRound (Round.emptyOfSize model.quizSettings.numberOfTeams)
-                                                           model.currentQuiz
-                               in ({ model | currentQuiz = newQuiz }, Cmd.none)
+    AddRound                -> let newQuiz = QuizRatings.addRound (RoundRating.emptyOfSize model.currentQuizSettings.numberOfTeams)
+                                                           model.currentRatings
+                               in ({ model | currentRatings = newQuiz }, Cmd.none)
     SetMaxPoints rd ps      -> let newModel =
                                     case run float ps of
                                       Ok p -> 
-                                        let newQuiz = Quiz.updateMax rd p model.currentQuiz
-                                            valid = Quiz.arePointsValid newQuiz
-                                        in { model | currentQuiz = newQuiz,
+                                        let newQuiz = QuizRatings.updateMax rd p model.currentRatings
+                                            valid = QuizRatings.arePointsValid newQuiz
+                                        in { model | currentRatings = newQuiz,
                                                      isValidQuizUpdate = 
                                                        Validity.updatePoints valid 
                                                                              model.isValidQuizUpdate
@@ -144,16 +143,16 @@ update msg model = case msg of
                                              feedback = feedback }, Cmd.none)
     SetRoundsNumber rs      -> let newModel = 
                                      Util.foldMaybe { model | feedback = "Not a valid number of teams." }
-                                                    (\r -> { model | quizSettings = updateQuizSettingsRounds model.quizSettings (adjustToSizeWith Model.defaultQuestionNumber r model.quizSettings.rounds),
+                                                    (\r -> { model | currentQuizSettings = updateQuizSettingsRounds model.currentQuizSettings (adjustToSizeWith Model.defaultQuestionNumber r model.currentQuizSettings.rounds),
                                                                      feedback = "" }) 
                                                     (validatePositiveNatural rs)
                                in (newModel, Cmd.none)
-    UpdateQuestions i txt   -> let rs = model.quizSettings.rounds
+    UpdateQuestions i txt   -> let rs = model.currentQuizSettings.rounds
                                    (newRs, feedback) =
                                      Util.foldMaybe (rs, "Not a natural number larger than zero.")
                                                     (\q -> (updateIndex i q rs, ""))
                                                     (validatePositiveNatural txt)
-                               in ({ model | quizSettings = updateQuizSettingsRounds model.quizSettings newRs,
+                               in ({ model | currentQuizSettings = updateQuizSettingsRounds model.currentQuizSettings newRs,
                                              feedback = feedback}, Cmd.none)
 
     CreateQuiz              -> if String.isEmpty (model.createQuizPDN.name)
@@ -163,7 +162,7 @@ update msg model = case msg of
                                       createNewQuiz model.user
                                                     model.oneWayHash
                                                     model.createQuizPDN
-                                                    model.quizSettings)
+                                                    model.currentQuizSettings)
     StartCreatingUser       -> ({ model | newUser = NewUser.emptyUser, displayState = CreatingUser},
                                 Cmd.none)
     SetNewUserParam fld txt -> let nu = NewUser.update fld txt model.newUser
@@ -171,22 +170,22 @@ update msg model = case msg of
                                 Cmd.none)
 
     CreateUser              -> (model, createNewUser model.user model.oneWayHash model.newUser)
-    LabelsUpdate fld text   -> let lbls = updateLabelsByField fld text model.quizSettings.labels
-                               in ({ model | quizSettings = updateQuizSettingsLabels model.quizSettings lbls }, Cmd.none)
-    SetTeamName i teamName  -> let newQuiz = Quiz.updateTeamName i teamName model.currentQuiz
-                                   valid = Quiz.allTeamNamesValid newQuiz
+    LabelsUpdate fld text   -> let lbls = updateLabelsByField fld text model.currentQuizSettings.labels
+                               in ({ model | currentQuizSettings = updateQuizSettingsLabels model.currentQuizSettings lbls }, Cmd.none)
+    SetTeamName i teamName  -> let newQuiz = QuizRatings.updateTeamName i teamName model.currentRatings
+                                   valid = QuizRatings.allTeamNamesValid newQuiz
                                    validity = Validity.updateTeamNames valid model.isValidQuizUpdate
                                    error = String.join " " ["Team name of team", 
                                                             String.fromInt ( 1+ i),
                                                             "contains invalid symbols",
                                                             "(", 
-                                                            String.fromChar Quiz.teamNameSeparator, 
+                                                            String.fromChar QuizRatings.teamNameSeparator,
                                                             ")." ]
                                    feedback = if valid then "" else error 
-                               in ({ model | currentQuiz = newQuiz,
+                               in ({ model | currentRatings = newQuiz,
                                              feedback = feedback,
                                              isValidQuizUpdate = validity }, Cmd.none)
-    GetLabels               -> (model, getQuizLabels model.editing)
+    GetLabels               -> (model, getQuizLabels model.currentQuizInfo)
     PostQuizSettingsUpdate q qs
                             -> (model, updateQuizSettings model.user model.oneWayHash q qs)
 
@@ -218,21 +217,21 @@ getAll = Http.get {
 
 type QuizPart = DataPart | LabelsPart
 
-getMsg : QuizPart -> String -> Cmd Msg
-getMsg part quizName =
+getMsg : QuizPart -> DbQuizId -> Cmd Msg
+getMsg part quizId =
   let (path, action) = 
         case part of
           DataPart -> ("getQuizData", ResponseF GotSingleQuiz)
           LabelsPart -> ("getQuizLabels", ResponseF GotSingleLabels)
   in Http.get { 
-        url = Url.Builder.relative [ quizApi, path ] [ string quizParam quizName ],
+        url = Url.Builder.relative [ quizApi, path ] [ string quizParam (Encode.encode 0 (jsonEncDbQuizId quizId)) ],
         expect = Http.expectString action
     }
 
-getSingle : String -> Cmd Msg
+getSingle : DbQuizId -> Cmd Msg
 getSingle = getMsg DataPart
 
-getQuizLabels : String -> Cmd Msg
+getQuizLabels : DbQuizId -> Cmd Msg
 getQuizLabels = getMsg LabelsPart
 
 postUpdate : UserName -> SessionKey -> QuizName -> String -> Cmd Msg
@@ -274,9 +273,9 @@ createNewUser u sk newUser =
         expect = Http.expectWhatever (ResponseP CreatedUser)
     }
 
-updateQuizSettings : UserName -> SessionKey -> QuizName -> QuizSettings -> Cmd Msg
-updateQuizSettings u sk quizName settings =
-    let params = encodeWithSignature u sk [(quizParam, jsonEncQuizName quizName),
+updateQuizSettings : UserName -> SessionKey -> DbQuizId -> QuizSettings -> Cmd Msg
+updateQuizSettings u sk qid settings =
+    let params = encodeWithSignature u sk [(quizIdParam, jsonEncDbQuizId qid),
                                            (quizSettingsParam, jsonEncQuizSettings settings),
                                            (actionParam, jsonEncAction UpdateSettingsA)]
     in Http.post {
@@ -287,15 +286,15 @@ updateQuizSettings u sk quizName settings =
 
 updateQuizByText : String -> Model -> Model
 updateQuizByText text model = 
-    case Quiz.parseQuiz text of
-        Ok quiz -> let guess = Quiz.numberOfTeams quiz
-                       actual = if guess == 0 then model.quizSettings.numberOfTeams else guess
-                       pointsValid = Quiz.arePointsValid quiz
+    case QuizRatings.parseQuiz text of
+        Ok quiz -> let guess = QuizRatings.numberOfTeams quiz
+                       actual = if guess == 0 then model.currentQuizSettings.numberOfTeams else guess
+                       pointsValid = QuizRatings.arePointsValid quiz
                        validity = { pointsValid = pointsValid,
                                     serverTextOK = True, 
                                     teamNamesValid = True }
-                   in { model | currentQuiz = quiz,
-                                quizSettings = updateQuizSettingsNumberOfTeams model.quizSettings actual,
+                   in { model | currentRatings = quiz,
+                                currentQuizSettings = updateQuizSettingsNumberOfTeams model.currentQuizSettings actual,
                                 isValidQuizUpdate = validity,
                                 feedback = ""
                    }
@@ -323,10 +322,10 @@ processTeamUpdate setting text model =
                     case setting of
                       InitialTU      -> (n, "")
                       IntermediateTU -> 
-                        let maxTeams = Quiz.maxNumberOfTeams model.currentQuiz
+                        let maxTeams = QuizRatings.maxNumberOfTeams model.currentRatings
                         in if n <= maxTeams then (n, "")
                            else (maxTeams, 
-                                 String.join " " ["Quiz supports only", 
+                                 String.join " " ["QuizRatings supports only",
                                                   String.fromInt maxTeams, 
                                                   "teams."])
                   Err _ -> (0, "Invalid team number. Substituting 0.")
