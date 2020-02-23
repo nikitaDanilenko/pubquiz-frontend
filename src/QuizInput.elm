@@ -53,7 +53,7 @@ update msg model =
             , getAll
             )
 
-        ResponseF tpe (Ok text) ->
+        ResponseF tpe ->
             case tpe of
                 GotAll qis ->
                     ( { model
@@ -73,17 +73,8 @@ update msg model =
                     in
                     ( { updatedModel | displayState = Editing ContentsE }, Cmd.none )
 
-                Logged ->
-                    let
-                        hash =
-                            case Decode.decodeString jsonDecUserHash text of
-                                Ok h ->
-                                    h
-
-                                Err _ ->
-                                    ""
-                    in
-                    ( { model | feedback = "", oneWayHash = hash }, getAll )
+                Logged c -> let hash = Result.withDefault "" c
+                            in ( { model | feedback = "", oneWayHash = hash }, getAll )
 
                 GotLabels c ->
                     let
@@ -104,9 +95,6 @@ update msg model =
                       }
                     , Cmd.none
                     )
-
-        ResponseF _ (Err err) ->
-            ( { model | feedback = errorToString err }, Cmd.none )
 
         ResponseP tpe (Ok _) ->
             case tpe of
@@ -399,7 +387,7 @@ login : UserName -> Password -> Cmd Msg
 login user password =
     Http.post
         { url = loginApi
-        , expect = Http.expectString (ResponseF Logged)
+        , expect = Http.expectJson (\x -> x |> Logged |> ResponseF) jsonDecUserHash
         , body = encodeBody (mkJSONParams [ ( userParam, jsonEncUserName user ), ( passwordParam, jsonEncPassword password ) ])
         }
 
