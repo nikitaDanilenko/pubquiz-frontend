@@ -1,11 +1,11 @@
 module Model exposing ( .. )
 
+import Copy exposing (LabelsField)
 import Http exposing     ( Error ( .. ) )
 
-import Labels exposing   ( Labels, default )
 import NewUser exposing  ( NewUser, NewUserField )
 import Quiz exposing     ( Quiz )
-import Types exposing (Password, UserName)
+import Types exposing (Labels, Password, Place, QuizDate, QuizName, QuizPDN, QuizSettings, UserName)
 import Validity exposing ( Validity )
 
 type alias Model = 
@@ -16,12 +16,10 @@ type alias Model =
         quizzes : List QuizName,
         editing : QuizName,
         currentQuiz : Quiz,
-        teamsInQuiz : Int,
         isValidQuizUpdate : Validity,
-        questions : List Int,
         displayState : DisplayState,
-        createName : QuizName,
-        labels : Labels,
+        createQuizPDN : QuizPDN,
+        quizSettings : QuizSettings,
         newUser : NewUser,
         feedback : String
     }
@@ -32,25 +30,60 @@ initialModelFunction () = (initialModel, Cmd.none)
 initialModel : Model
 initialModel = { user = "",
                  password = "",
-                 oneWayHash = "", 
+                 oneWayHash = "",
                  quizzes = [], 
                  editing = "",
                  currentQuiz = Quiz.empty,
-                 teamsInQuiz = 8,
                  isValidQuizUpdate = Validity.default,
-                 questions = defaultQuestions,
-                 displayState = Initial, 
-                 createName = "",
-                 labels = default,
+                 displayState = Initial,
+                 createQuizPDN = defaultQuizPDN,
+                 quizSettings = defaultQuizSettings,
                  newUser = NewUser.emptyUser,
                  feedback = "" 
                }
 
+defaultQuizPDN : QuizPDN
+defaultQuizPDN = {
+    place = "",
+    date = { year = 2100, month = 1, day = 1 },
+    name = defaultLabels.mainLabel
+  }
+
+defaultQuizSettings : QuizSettings
+defaultQuizSettings = {
+    rounds = defaultRounds,
+    numberOfTeams = defaultNumberOfTeams,
+    labels = defaultLabels
+  }
+
+defaultLabels : Labels
+defaultLabels = {
+    roundLabel = "Runde",
+    teamLabel = "Gruppe",
+    ownPointsLabel = "Erreichte Punkte",
+    maxReachedLabel = (String.concat ["Erreichte H", String.fromChar (Char.fromCode 246), "chstpunktzahl"]),
+    maxReachableLabel = "Erreichbare Punkte",
+    backToChartView = "Gesamtwertung",
+    mainLabel = "Quiz",
+    ownPageLabel = "Eigene Punkte",
+    viewPrevious = "Alle Quizzes",
+    cumulativeLabel = "Gesamtpunktzahl",
+    individualRoundsLabel = "Punkte pro Runde",
+    progressionLabel = "Verlauf",
+    placementLabel = "Platzierung",
+    placeLabel = "Platz",
+    pointsLabel = "Punkte",
+    roundWinnerLabel = "Rundensieger"
+  }
+
+defaultNumberOfTeams : Int
+defaultNumberOfTeams = 8
+
 defaultQuestionNumber : Int
 defaultQuestionNumber = 8
 
-defaultQuestions : List Int
-defaultQuestions = List.repeat 4 defaultQuestionNumber
+defaultRounds : List Int
+defaultRounds = List.repeat 4 defaultQuestionNumber
 
 type Edited = ContentsE | LabelsE
 
@@ -62,8 +95,6 @@ type DisplayState = Initial -- The state at the beginning of the application.
                   | ConfirmingLock
                   | CreatingQuiz
                   | CreatingUser
-
-type alias QuizName = String
 
 type alias ErrorOr a = Result Http.Error a
 
@@ -107,22 +138,7 @@ type Msg = GetAll
          | ResponseF ResponseWithFeedback (ErrorOr String)
          | ResponseP ResponsePure (ErrorOr ())
 
-type LabelsField = RoundField
-                 | TeamField
-                 | OwnPointsField
-                 | MaxReachedField
-                 | MaxReachableField
-                 | BackField
-                 | MainField
-                 | OwnPageField
-                 | ViewQuizzesField
-                 | CumulativeField
-                 | IndividualField
-                 | ProgressionField
-                 | PlacementField
-                 | PlaceField
-                 | PointsField
-                 | RoundWinnerField
+
 
 errorToString : Http.Error -> String
 errorToString err = case err of
