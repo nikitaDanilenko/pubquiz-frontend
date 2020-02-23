@@ -1,6 +1,7 @@
 module Util exposing ( .. )
 
 import Parser exposing ( Parser, run, chompWhile )
+import Types exposing (TeamRating)
 
 escapeHTML : String -> String
 escapeHTML str = case String.uncons str of
@@ -35,18 +36,18 @@ blanks = chompWhile (\c -> c == ' ' || c == '\r')
 
 {- Fills a list with zeroes in the back if the list is not long enough, 
    otherwise return the prefix of the list with the given length. -}
-adjustToSize : Int -> List Float -> List Float
-adjustToSize = adjustToSizeWith 0
+adjustToSize : Int -> List TeamRating -> List TeamRating
+adjustToSize n = adjustToSizeWith (List.indexedMap (\i r -> {teamNumber = i, rating = r}) (List.repeat n 0))
 
-adjustToSizeWith : a -> Int -> List a -> List a
-adjustToSizeWith dft n lst = 
+adjustToSizeWith : List a -> List a -> List a
+adjustToSizeWith dft lst =
     let combine : List a -> List a -> List a
         combine l r = 
             case (l, r) of
                 ([], rest) -> rest
                 (_, []) -> []
                 (x :: xs, _ :: ys) -> x :: combine xs ys
-    in combine lst (List.repeat n dft)
+    in combine lst dft
 
 updateIndex : Int -> a -> List a -> List a
 updateIndex i y = List.indexedMap (\j x -> if i == j then y else x)
