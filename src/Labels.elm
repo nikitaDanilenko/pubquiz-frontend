@@ -39,14 +39,6 @@ empty = {
       roundWinnerLabel = ""
     }
 
-parseLabels : String -> Maybe Labels
-parseLabels text = 
-  let lines = String.lines text
-  in case lines of
-       r :: t :: op :: mred :: mr :: btc :: m :: o :: vq :: c :: i :: pr :: plcmt :: plc :: pts :: rw :: [] ->
-        Just (mkLabels r t op mred mr btc m o vq c i pr plcmt plc pts rw)
-       _ -> Nothing
-
 mkLabels : String 
         -> String 
         -> String
@@ -104,23 +96,3 @@ default = mkLabels
     "Platz"
     "Punkte"
     "Rundensieger"
-
-toParams : Labels -> List (String, String)
-toParams labels = [
-  ("roundLabel", labels.roundLabel),
-  ("teamLabel", labels.teamLabel),
-  ("ownPointsLabel", labels.ownPointsLabel),
-  ("maxReachedLabel", labels.maxReachedLabel),
-  ("maxReachableLabel", labels.maxReachableLabel),
-  ("backToChartViewLabel", labels.backToChartView),
-  ("mainLabel", labels.mainLabel),
-  ("ownPageLabel", labels.ownPageLabel),
-  ("viewQuizzesLabel", labels.viewQuizzesLabel),
-  ("cumulativeLabel", labels.cumulativeLabel),
-  ("individualLabel", labels.individualLabel),
-  ("progressionLabel", labels.progressionLabel),
-  ("placementLabel", labels.placementLabel),
-  ("placeLabel", labels.placeLabel),
-  ("pointsLabel", labels.pointsLabel),
-  ("roundWinnerLabel", labels.roundWinnerLabel)
-  ]
