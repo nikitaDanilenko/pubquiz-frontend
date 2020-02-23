@@ -94,9 +94,9 @@ updateTeamName tNum tName quiz =
     { quiz | header = inHeader tNum tName quiz.header }
 
 
-addRound : TeamNumber -> RoundRating -> QuizRatings -> QuizRatings
-addRound tNum r q =
-    { q | ratings = q.ratings ++ [ ( tNum, r ) ] }
+addRound : RoundNumber -> RoundRating -> QuizRatings -> QuizRatings
+addRound rNum r q =
+    { q | ratings = q.ratings ++ [ ( rNum, r ) ] }
 
 
 maxNumberOfTeams : QuizRatings -> Int
