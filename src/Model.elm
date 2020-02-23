@@ -12,7 +12,7 @@ type alias Model =
     { user : UserName
     , password : Password
     , oneWayHash : String
-    , quizzes : List QuizName
+    , quizzes : List QuizInfo
     , currentQuizInfo : QuizInfo
     , currentQuizSettings : QuizSettings
     , currentQuizRatings : QuizRatings
@@ -148,10 +148,10 @@ type ResponsePure
 
 type Msg
     = GetAll
-    | GetSingle QuizName
-    | PostUpdate QuizName String
+    | GetSingle DbQuizId
+    | PostUpdate DbQuizId QuizRatings
     | AcknowledgeLock
-    | LockQuiz QuizName
+    | LockQuiz DbQuizId
     | SetUser UserName
     | SetPassword Password
     | SetTeamsInQuiz TeamUpdateSetting String
@@ -170,7 +170,7 @@ type Msg
     | LabelsUpdate LabelsField String
     | SetTeamName Int String
     | GetLabels
-    | PostQuizSettingsUpdate QuizName QuizSettings
+    | PostQuizSettingsUpdate DbQuizId QuizSettings
     | ResponseF ResponseWithFeedback (ErrorOr String)
     | ResponseP ResponsePure (ErrorOr ())
 
