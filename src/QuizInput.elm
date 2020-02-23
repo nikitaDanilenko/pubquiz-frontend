@@ -73,8 +73,8 @@ update msg model =
                     in
                     ( { updatedModel | displayState = Editing ContentsE }, Cmd.none )
 
-                Logged c -> let hash = Result.withDefault "" c
-                            in ( { model | feedback = "", oneWayHash = hash }, getAll )
+                Logged c ->
+                    ( { model | feedback = "", oneWayHash = Result.withDefault "" c }, getAll )
 
                 GotLabels c ->
                     let
