@@ -3,8 +3,8 @@ module Model exposing (..)
 import Copy exposing (LabelsField)
 import Http exposing (Error(..))
 import NewUser exposing (NewUser, NewUserField)
-import QuizRatings exposing (QuizRatings)
-import Types exposing (Activity(..), DbQuizId, Header, Labels, Password, Place, QuizDate, QuizInfo, QuizName, QuizPDN, QuizSettings, Ratings, UserName)
+import QuizRatings
+import Types exposing (Activity(..), DbQuizId, Header, Labels, Password, Place, QuizDate, QuizInfo, QuizName, QuizPDN, QuizRatings, QuizSettings, Ratings, UserName)
 import Validity exposing (Validity)
 
 -- todo: split model in various models? This may simplify the handling of default values.
@@ -134,8 +134,8 @@ type TeamUpdateSetting
 
 type ResponseWithFeedback
     = GotAll
-    | GotSingleQuiz
-    | GotSingleLabels
+    | GotSingleQuizRatings (ErrorOr QuizRatings)
+    | GotSingleQuizInfo (ErrorOr QuizInfo)
     | Logged
 
 

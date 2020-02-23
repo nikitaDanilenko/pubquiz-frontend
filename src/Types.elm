@@ -600,3 +600,23 @@ jsonEncAction  val =
         LockA -> Json.Encode.string "LockA"
         UpdateSettingsA -> Json.Encode.string "UpdateSettingsA"
 
+
+
+type alias QuizRatings  =
+   { header: Header
+   , ratings: Ratings
+   }
+
+jsonDecQuizRatings : Json.Decode.Decoder ( QuizRatings )
+jsonDecQuizRatings =
+   Json.Decode.succeed (\pheader pratings -> {header = pheader, ratings = pratings})
+   |> required "header" (jsonDecHeader)
+   |> required "ratings" (jsonDecRatings)
+
+jsonEncQuizRatings : QuizRatings -> Value
+jsonEncQuizRatings  val =
+   Json.Encode.object
+   [ ("header", jsonEncHeader val.header)
+   , ("ratings", jsonEncRatings val.ratings)
+   ]
+

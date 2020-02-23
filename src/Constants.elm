@@ -17,6 +17,9 @@ actionParam = "action"
 quizParam : String
 quizParam = "quiz"
 
+quizIdParam : String
+quizIdParam = "quizId"
+
 roundsParam : String
 roundsParam = "rounds"
 
@@ -70,6 +73,12 @@ lockApi = mkPath [quizApi, "lock"]
 
 updateApi : String
 updateApi = mkPath [quizApi, "update"]
+
+getQuizRatingsApi : String
+getQuizRatingsApi = mkPath [quizApi, "getQuizRatings"]
+
+getQuizInfoApi : String
+getQuizInfoApi = mkPath [quizApi, "getQuizInfo"]
 
 updateQuizSettingsApi : String
 updateQuizSettingsApi = mkPath [quizApi, "updateQuizSettings"]

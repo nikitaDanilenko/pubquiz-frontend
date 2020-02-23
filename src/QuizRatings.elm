@@ -1,14 +1,8 @@
 module QuizRatings exposing (..)
 
 import RoundRating
-import Types exposing (Header, Ratings, RoundNumber, RoundRating, TeamName, TeamNumber)
+import Types exposing (Header, QuizRatings, Ratings, RoundNumber, RoundRating, TeamName, TeamNumber)
 import Util
-
-
-type alias QuizRatings =
-    { header : Header
-    , ratings : Ratings
-    }
 
 
 empty : QuizRatings
