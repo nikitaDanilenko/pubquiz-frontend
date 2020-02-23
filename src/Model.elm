@@ -4,7 +4,7 @@ import Copy exposing (LabelsField)
 import Http exposing (Error(..))
 import NewUser exposing (NewUser, NewUserField)
 import QuizRatings
-import Types exposing (Activity(..), DbQuizId, Header, Labels, Password, Place, QuizDate, QuizInfo, QuizName, QuizPDN, QuizRatings, QuizSettings, Ratings, UserName)
+import Types exposing (Activity(..), DbQuizId, Header, Labels, Password, Place, QuizDate, QuizInfo, QuizName, QuizPDN, QuizRatings, QuizSettings, Ratings, RoundNumber, UserName)
 import Validity exposing (Validity)
 
 -- todo: split model in various models? This may simplify the handling of default values.
@@ -133,9 +133,9 @@ type TeamUpdateSetting
 
 
 type ResponseWithFeedback
-    = GotAll
-    | GotSingleQuizRatings (ErrorOr QuizRatings)
-    | GotSingleQuizInfo (ErrorOr QuizInfo)
+    = GotAll (List QuizInfo)
+    | GotQuizRatings (ErrorOr QuizRatings)
+    | GotLabels (ErrorOr Labels)
     | Logged
 
 
@@ -158,7 +158,7 @@ type Msg
     | UpdatePoints Int Int String -- Points for round, team, value.
     | SetMaxPoints Int String -- Points for round, value
     | UpdateQuestions Int String
-    | AddRound
+    | AddRound RoundNumber
     | SetRoundsNumber String
     | StartCreatingQuiz
     | StartCreatingUser
