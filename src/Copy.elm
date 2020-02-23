@@ -46,7 +46,7 @@ updateQuizPDNDate : QuizPDN -> QuizDate -> QuizPDN
 updateQuizPDNDate q d = { q | date = d }
 
 updateQuizPDNName : QuizPDN -> QuizName -> QuizPDN
-updateQuizPDNName q n = { q | place = n }
+updateQuizPDNName q n = { q | name = n }
 
 updateQuizSettingsRounds : QuizSettings -> List Int -> QuizSettings
 updateQuizSettingsRounds qs rs = { qs | rounds = rs }
