@@ -294,26 +294,14 @@ jsonEncUserHash  val = Json.Encode.string val
 
 
 
-type alias Day  =
-   { year: Int
-   , month: Int
-   , day: Int
-   }
+type alias Day  = String
 
 jsonDecDay : Json.Decode.Decoder ( Day )
 jsonDecDay =
-   Json.Decode.succeed (\pyear pmonth pday -> {year = pyear, month = pmonth, day = pday})
-   |> required "year" (Json.Decode.int)
-   |> required "month" (Json.Decode.int)
-   |> required "day" (Json.Decode.int)
+    Json.Decode.string
 
 jsonEncDay : Day -> Value
-jsonEncDay  val =
-   Json.Encode.object
-   [ ("year", Json.Encode.int val.year)
-   , ("month", Json.Encode.int val.month)
-   , ("day", Json.Encode.int val.day)
-   ]
+jsonEncDay  val = Json.Encode.string val
 
 
 
@@ -592,4 +580,23 @@ jsonEncActivity  val =
     case val of
         Active -> Json.Encode.string "Active"
         Inactive -> Json.Encode.string "Inactive"
+
+
+
+type Action  =
+    CreateQuizA 
+    | LockA 
+    | UpdateSettingsA 
+
+jsonDecAction : Json.Decode.Decoder ( Action )
+jsonDecAction = 
+    let jsonDecDictAction = Dict.fromList [("CreateQuizA", CreateQuizA), ("LockA", LockA), ("UpdateSettingsA", UpdateSettingsA)]
+    in  decodeSumUnaries "Action" jsonDecDictAction
+
+jsonEncAction : Action -> Value
+jsonEncAction  val =
+    case val of
+        CreateQuizA -> Json.Encode.string "CreateQuizA"
+        LockA -> Json.Encode.string "LockA"
+        UpdateSettingsA -> Json.Encode.string "UpdateSettingsA"
 

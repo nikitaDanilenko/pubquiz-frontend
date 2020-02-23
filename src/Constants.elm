@@ -14,15 +14,6 @@ apiLocation = mkPath [ String.concat [serverLocation, ":", serverPort], "api" ]
 actionParam : String
 actionParam = "action"
 
-createQuizAction : String
-createQuizAction = "createQuiz"
-
-labelUpdate : String
-labelUpdate = "labelUpdate"
-
-lockQuiz : String
-lockQuiz = "lock"
-
 quizParam : String
 quizParam = "quiz"
 
