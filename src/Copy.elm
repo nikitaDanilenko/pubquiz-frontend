@@ -1,6 +1,6 @@
 module Copy exposing (..)
 
-import Types exposing (Labels, Place, QuizDate, QuizName, QuizPDN, QuizSettings)
+import Types exposing (Activity, DbQuizId, Labels, Place, QuizDate, QuizInfo, QuizName, QuizPDN, QuizSettings)
 
 type LabelsField = RoundField
                  | TeamField
@@ -56,3 +56,12 @@ updateQuizSettingsNumberOfTeams qs ts = { qs | numberOfTeams = ts }
 
 updateQuizSettingsLabels : QuizSettings -> Labels -> QuizSettings
 updateQuizSettingsLabels qs ls = { qs | labels = ls }
+
+updateQuizInfoQuizId : QuizInfo -> DbQuizId -> QuizInfo
+updateQuizInfoQuizId qi qid = { qi | quizId = qid }
+
+updateQuizInfoQuizPDN : QuizInfo -> QuizPDN -> QuizInfo
+updateQuizInfoQuizPDN qi pdn = { qi | identifier = pdn }
+
+updateQuizInfoQuizActivity : QuizInfo -> Activity -> QuizInfo
+updateQuizInfoQuizActivity qi a = { qi | active = a }
