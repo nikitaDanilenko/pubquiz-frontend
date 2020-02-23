@@ -133,16 +133,16 @@ type TeamUpdateSetting
 
 
 type ResponseWithFeedback
-    = GotAll (List QuizInfo)
+    = GotAll (ErrorOr (List QuizInfo))
     | GotQuizRatings (ErrorOr QuizRatings)
     | GotLabels (ErrorOr Labels)
     | Logged (ErrorOr UserHash)
+    | CreatedQuiz (ErrorOr DbQuizId)
 
 
 type ResponsePure
     = Updated
     | Locked
-    | CreatedQuiz
     | CreatedUser
 
 
@@ -158,7 +158,7 @@ type Msg
     | UpdatePoints Int Int String -- Points for round, team, value.
     | SetMaxPoints Int String -- Points for round, value
     | UpdateQuestions Int String
-    | AddRound RoundNumber
+    | AddRound
     | SetRoundsNumber String
     | StartCreatingQuiz
     | StartCreatingUser
