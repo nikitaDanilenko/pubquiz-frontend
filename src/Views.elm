@@ -12,6 +12,7 @@ import Html
         , label
         , node
         , text
+        , tr
         )
 import Html.Attributes
     exposing
@@ -34,13 +35,11 @@ import Html.Events exposing (onClick, onInput)
 import Html.Events.Extra exposing (onEnter)
 import Model exposing (..)
 import NewUser exposing (NewUserField(..), isValid)
-import Quiz exposing (Header)
-import Round exposing (Round)
-import Types exposing (Labels, QuizName)
+import QuizRatings
+import Types exposing (DbQuizId, Header, Labels, QuizInfo, QuizName, RoundRating)
 import Util
     exposing
         ( adjustToSize
-        , isValidInternalQuizName
         )
 import Validity
 
@@ -65,17 +64,17 @@ authenticationView md =
 selectionView : Model -> Html Msg
 selectionView md =
     let
-        mkButton : QuizName -> Html Msg
-        mkButton name =
+        mkButton : QuizInfo -> Html Msg
+        mkButton qi =
             button
                 [ class "quizButton"
-                , onClick (GetSingle name)
+                , onClick (GetSingle qi.quizId)
                 ]
-                [ text name ]
+                [ text qi.identifier.name ]
     in
     div [ id "quizSelectionMain" ]
         [ div [ id "selectExistingQuizzesMain" ]
-            (List.map mkButton (List.filter (\q -> not (String.isEmpty q)) md.quizzes))
+            (List.map mkButton (List.filter (\q -> not (String.isEmpty q.identifier.name)) md.quizzes))
         , div [ id "createNewQuiz" ]
             [ button [ class "newQuizButton", onClick StartCreatingQuiz ] [ text "New quiz" ] ]
         , div [ id "createNewUser" ]
@@ -89,40 +88,41 @@ editingView md =
     div [ id "singleQuiz" ]
         ([ div [ id "editingLabel" ]
             [ label [ for "editingQuiz" ]
-                [ text (String.join " " [ "Editing", md.editing ]) ]
+                [ text (String.join " " [ "Editing", md.currentQuizInfo.identifier.name ]) ]
             ]
          , div [ id "teamsInQuiz" ]
             [ label [ for "teamInQuizLabel" ] [ text "Teams in the quiz" ]
             , input
-                [ value (String.fromInt md.quizSettings.numberOfTeams)
+                [ value (String.fromInt md.currentQuizSettings.numberOfTeams)
                 , type_ "number"
                 , min "1"
                 , step "1"
-                , max (String.fromInt (Quiz.maxNumberOfTeams md.currentQuiz))
+                , max (String.fromInt (QuizRatings.maxNumberOfTeams md.currentQuizRatings))
                 , onInput (SetTeamsInQuiz IntermediateTU)
                 ]
                 []
             ]
          , div [ id "teamNames" ]
             (label [ for "teamNamesLabel" ] [ text "Team names" ]
-                :: mkTeamNameInput (List.take md.quizSettings.numberOfTeams md.currentQuiz.header)
+                :: mkTeamNameInput md.currentQuizSettings.labels (List.take md.currentQuizSettings.numberOfTeams md.currentQuizRatings.header)
             )
          ]
-            ++ List.indexedMap (\i rd -> mkRoundForm i md.quizSettings.numberOfTeams rd)
-                md.currentQuiz.rounds
+            ++ List.map (\( rn, rr ) -> mkRoundForm rn md.currentQuizSettings.numberOfTeams rr)
+                md.currentQuizRatings.ratings
             ++ [ button [ class "button", onClick AddRound ] [ text "Add round" ]
                , button [ class "button", onClick GetLabels ] [ text "Edit labels" ]
                , button [ class "backButton", onClick GetAll ] [ text "Back" ]
                , button [ class "lockButton", onClick AcknowledgeLock ] [ text "Lock" ]
                , button
                     [ class "button"
-                    , onClick (PostUpdate md.editing (Quiz.toString md.currentQuiz))
+                    , onClick (PostUpdate md.currentQuizInfo.quizId md.currentQuizRatings)
                     , disabled (not (Validity.isValid md.isValidQuizUpdate))
                     ]
                     [ text "Update" ]
-               , mkLinkToSheet "answerSheet" "Get quiz sheet" md.editing (String.join "-" [ md.editing, sheetPDFFile ])
-               , mkLinkToSheet "qrSheet" "Get QR codes only" md.editing (String.join "-" [ md.editing, qrPDFFile ])
-               , mkLinkToSheet "mainGraphPage" "View main graph page" md.editing ""
+                    -- todo: Fix these links according to new structure. This holds twice: once for top level sheets, and once for RESTview
+               , mkLinkToSheet "answerSheet" "Get quiz sheet" md.currentQuizInfo.identifier.name (String.join "-" [ md.currentQuizInfo.identifier.name, sheetPDFFile ])
+               , mkLinkToSheet "qrSheet" "Get QR codes only" md.currentQuizInfo.identifier.name (String.join "-" [ md.currentQuizInfo.identifier.name, qrPDFFile ])
+               , mkLinkToSheet "mainGraphPage" "View main graph page" md.currentQuizInfo.identifier.name ""
                , addFeedbackLabel md
                ]
         )
@@ -153,15 +153,15 @@ confirmView md =
             [ text
                 (String.concat
                     [ "You are about to lock "
-                    , md.editing
+                    , md.currentQuizInfo.identifier.name
                     , ". "
                     , "This cannot be undone. Please confirm. "
                     ]
                 )
             ]
-        , button [ class "backButton", onClick (GetSingle md.editing) ]
+        , button [ class "backButton", onClick (GetSingle md.currentQuizInfo.quizId) ]
             [ text "Back" ]
-        , button [ class "lockButton", onClick (Lock md.editing) ]
+        , button [ class "lockButton", onClick (LockQuiz md.currentQuizInfo.quizId) ]
             [ text "Yes, lock" ]
         ]
 
@@ -173,7 +173,7 @@ creatingQuizView md =
             onEnter CreateQuiz
     in
     div [ id "creatingQuizView" ]
-        ([ label [ for "internalQuizName" ] [ text "Quiz name (internal)" ]
+        ([ label [ for "internalQuizName" ] [ text "QuizRatings name (internal)" ]
          , input
             [ onInput SetNewQuizName
             , type_ "text"
@@ -182,7 +182,7 @@ creatingQuizView md =
             ]
             []
          ]
-            ++ mkCreationForm md createOnEnter md.quizSettings.labels
+            ++ mkCreationForm md createOnEnter md.currentQuizSettings.labels
             ++ [ button
                     [ class "button"
                     , onClick CreateQuiz
@@ -199,13 +199,13 @@ editingLabelsView : Model -> Html Msg
 editingLabelsView md =
     let
         lbls =
-            md.quizSettings.labels
+            md.currentQuizSettings.labels
 
         edit =
-            md.editing
+            md.currentQuizInfo.quizId
 
         done =
-            PostQuizSettingsUpdate edit md.quizSettings
+            PostQuizSettingsUpdate edit md.currentQuizSettings
     in
     div [ id "editingLabelsView" ]
         (mkCreationForm md (onEnter done) lbls
@@ -285,7 +285,7 @@ mkCreationForm md createOnEnter labels =
             , min "1"
             , step "1"
             , createOnEnter
-            , value (String.fromInt (List.length md.quizSettings.rounds))
+            , value (String.fromInt (List.length md.currentQuizSettings.rounds))
             ]
             []
         ]
@@ -294,7 +294,7 @@ mkCreationForm md createOnEnter labels =
             [ text "Questions per round" ]
         ]
     , div [ id "questionArea" ]
-        [ mkQuestionsForm createOnEnter md.quizSettings.rounds ]
+        [ mkQuestionsForm createOnEnter md.currentQuizSettings.rounds ]
     , div [ id "teamNumberArea" ]
         [ label [ for "teamNumber" ] [ text "Number of teams" ]
         , input
@@ -303,7 +303,7 @@ mkCreationForm md createOnEnter labels =
             , type_ "number"
             , min "1"
             , createOnEnter
-            , value (String.fromInt md.quizSettings.numberOfTeams)
+            , value (String.fromInt md.currentQuizSettings.numberOfTeams)
             ]
             []
         ]
@@ -318,45 +318,45 @@ addFeedbackLabel model =
         [ label [ for "feedbackLabel" ] [ text model.feedback ] ]
 
 
-mkRoundForm : Int -> Int -> Round -> Html Msg
+mkRoundForm : Int -> Int -> RoundRating -> Html Msg
 mkRoundForm number gs rd =
     div [ id "roundPoints" ]
         (label [ class "roundNumber" ]
-            [ text (String.join " " [ "Round", String.fromInt (1 + number) ]) ]
+            [ text (String.join " " [ "RoundRating", String.fromInt (1 + number) ]) ]
             :: div [ id "maxPointsArea" ]
                 [ label [ class "maxPoints" ] [ text "Obtainable" ]
                 , input
-                    (value (String.fromFloat rd.maxPoints)
+                    (value (String.fromFloat rd.reachableInRound)
                         :: onInput (SetMaxPoints number)
                         :: pointInputAttributes
                     )
                     []
                 ]
-            :: List.indexedMap
-                (\i ps ->
+            :: List.map
+                (\tr ->
                     div [ class "teamPointsArea" ]
                         [ div [ class "label" ]
                             [ label [ class "pointsPerTeamLabel" ]
                                 [ text
                                     (String.join " "
                                         [ "Team"
-                                        , String.fromInt (1 + i)
+                                        , String.fromInt (1 + tr.teamNumber)
                                         ]
                                     )
                                 ]
                             ]
                         , div [ class "input" ]
                             [ input
-                                (value (String.fromFloat ps)
-                                    :: onInput (UpdatePoints number i)
-                                    :: max (String.fromFloat rd.maxPoints)
+                                (value (String.fromFloat tr.rating)
+                                    :: onInput (UpdatePoints number tr.teamNumber)
+                                    :: max (String.fromFloat rd.reachableInRound)
                                     :: pointInputAttributes
                                 )
                                 []
                             ]
                         ]
                 )
-                (adjustToSize gs rd.teamPoints)
+                (adjustToSize gs rd.points)
         )
 
 
@@ -368,7 +368,7 @@ mkQuestionsForm createOnEnter rs =
                 (\i qs ->
                     [ div [ class "roundQuestionLine" ]
                         [ label [ class "roundNumber" ]
-                            [ text (String.join " " [ "Round", String.fromInt (1 + i) ]) ]
+                            [ text (String.join " " [ "RoundRating", String.fromInt (1 + i) ]) ]
                         , input
                             [ value (String.fromInt qs)
                             , onInput (UpdateQuestions i)
@@ -392,26 +392,21 @@ mkTeamNumber i wordForTeam =
     String.join " " [ wordForTeam, String.fromInt i ]
 
 
-mkSingleTeamName : Int -> String -> Maybe String -> String
-mkSingleTeamName i wordForTeam =
-    Maybe.withDefault (mkTeamNumber i wordForTeam)
-
-
-mkSingleTeamNameInput : Int -> String -> Maybe String -> Html Msg
-mkSingleTeamNameInput i wordForTeam mn =
+mkSingleTeamNameInput : Int -> String -> Html Msg
+mkSingleTeamNameInput i wordForTeam =
     div [ class "teamNameInputArea" ]
         [ label [ for "teamName" ] [ text (mkTeamNumber (1 + i) "Team") ]
         , input
-            [ value (mkSingleTeamName (1 + i) wordForTeam mn)
+            [ value (mkTeamNumber (1 + i) wordForTeam)
             , onInput (SetTeamName i)
             ]
             []
         ]
 
 
-mkTeamNameInput : Header -> List (Html Msg)
-mkTeamNameInput =
-    List.indexedMap (\i ( _, mn ) -> mkSingleTeamNameInput i "Gruppe" mn)
+mkTeamNameInput : Labels -> Header -> List (Html Msg)
+mkTeamNameInput l =
+    List.map (\ti -> mkSingleTeamNameInput ti.teamInfoNumber l.teamLabel)
 
 
 pointInputAttributes : List (Html.Attribute Msg)
@@ -478,6 +473,7 @@ createIdByField fld =
         RoundWinnerField ->
             "roundWinnerField"
 
+
 isValidNewQuiz : Model -> Bool
 isValidNewQuiz md =
-    not (String.isEmpty md.createQuizPDN.name) && isValidInternalQuizName md.createQuizPDN.name
+    not (String.isEmpty md.currentQuizInfo.identifier.name)
