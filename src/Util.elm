@@ -1,6 +1,5 @@
 module Util exposing ( .. )
 
-import Parser exposing ( Parser, run, chompWhile )
 import Types exposing (TeamRating)
 
 escapeHTML : String -> String
@@ -21,18 +20,6 @@ escapeHTML str = case String.uncons str of
 
 foldMaybe : b -> (a -> b) -> Maybe a -> b
 foldMaybe empty f m = Maybe.withDefault empty (Maybe.map f m)
-
-splitFirstLast : String -> (String, List String)
-splitFirstLast text = 
-  case String.lines text of
-    []      -> ("", [])
-    l :: ls -> (l, ls)
-
-isParserSuccess : Parser a -> String -> Bool
-isParserSuccess p text = foldMaybe False (\_ -> True) (Result.toMaybe (run p text))
-
-blanks : Parser ()
-blanks = chompWhile (\c -> c == ' ' || c == '\r')
 
 {- Fills a list with zeroes in the back if the list is not long enough, 
    otherwise return the prefix of the list with the given length. -}
@@ -57,3 +44,8 @@ isValidInternalQuizChar c = Char.isAlphaNum c || List.member c ['_', '-']
 
 isValidInternalQuizName : String -> Bool
 isValidInternalQuizName = String.all isValidInternalQuizChar
+
+find : (a -> Bool) -> List a -> Maybe a
+find p l = case l of
+  [] -> Nothing
+  (x :: xs) -> if p x then Just x else find p xs
