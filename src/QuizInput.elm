@@ -8,7 +8,7 @@ import Http
 import Json.Encode as Encode
 import Json.Decode as Decode
 import RequestUtils exposing (RestKey, RestParam, RestValue, encodeWithSignature, mkJSONParams, mkParams)
-import Types exposing (Credentials, Labels, Password, QuizName, QuizPDN, QuizSettings, UserHash, UserName, jsonDecLabels, jsonEncLabels, jsonEncPassword, jsonEncQuizName, jsonEncQuizPDN, jsonEncQuizSettings, jsonEncUserName)
+import Types exposing (Action(..), Credentials, Labels, Password, QuizName, QuizPDN, QuizSettings, UserHash, UserName, jsonDecLabels, jsonDecUserHash, jsonEncAction, jsonEncLabels, jsonEncPassword, jsonEncQuizName, jsonEncQuizPDN, jsonEncQuizSettings, jsonEncUserName)
 import Url.Builder exposing     ( string )
 -- todo Write all out.
 import Base exposing            ( SessionKey )
@@ -50,7 +50,10 @@ update msg model = case msg of
                       Cmd.none)
         GotSingleQuiz   -> let updatedModel = updateQuizByText text model
                            in ({ updatedModel | displayState = Editing ContentsE }, Cmd.none)
-        Logged          -> ({ model | feedback = "", oneWayHash = text }, getAll)
+        Logged          -> let hash = case Decode.decodeString jsonDecUserHash text of
+                                        Ok h -> h
+                                        Err _ -> ""
+                            in ({ model | feedback = "", oneWayHash = hash }, getAll)
         GotSingleLabels -> let (labels, feedback) =
                                  case Decode.decodeString jsonDecLabels text of
                                    Ok ls -> (ls, "")
@@ -126,7 +129,7 @@ update msg model = case msg of
     
     
     AcknowledgeLock         -> ({ model | displayState = ConfirmingLock }, Cmd.none)
-    Lock qName              -> (model, postLock model.user model.oneWayHash qName)
+    LockQuiz qName              -> (model, postLock model.user model.oneWayHash qName)
     
     Login                   -> ({ model | displayState = Authenticating }, 
                                 login model.user model.password)
@@ -184,8 +187,8 @@ update msg model = case msg of
                                              feedback = feedback,
                                              isValidQuizUpdate = validity }, Cmd.none)
     GetLabels               -> (model, getQuizLabels model.editing)
-    PostQuizSettingsUpdate q rs ts lbls  
-                            -> (model, updateQuizSettings model.user model.oneWayHash q rs ts lbls)
+    PostQuizSettingsUpdate q qs
+                            -> (model, updateQuizSettings model.user model.oneWayHash q qs)
 
 view : Model -> Html Msg
 view model = 
@@ -244,7 +247,7 @@ postUpdate u sk quizName points =
 
 postLock : UserName -> SessionKey -> QuizName -> Cmd Msg
 postLock u sk quizName = 
-    let params = mkParamsWithSignature u sk [(quizParam, quizName), (actionParam, lockQuiz)]
+    let params = encodeWithSignature u sk [(quizParam, jsonEncQuizName quizName), (actionParam, jsonEncAction LockA)]
     in Http.post {
         url = lockApi,
         body = encodeBody params,
@@ -252,10 +255,12 @@ postLock u sk quizName =
     }
 
 createNewQuiz : UserName -> UserHash -> QuizPDN -> QuizSettings -> Cmd Msg
-createNewQuiz u sk pdn s  = Http.post {
+createNewQuiz u sk pdn s =
+  Http.post {
       url = newApi,
       body = encodeBody (encodeWithSignature u sk [(quizPDNParam, jsonEncQuizPDN pdn),
-                                                   (quizSettingsParam, jsonEncQuizSettings s)]),
+                                                   (quizSettingsParam, jsonEncQuizSettings s),
+                                                   (actionParam, jsonEncAction CreateQuizA)]),
       expect = Http.expectWhatever (ResponseP CreatedQuiz)
     }
 
@@ -269,13 +274,11 @@ createNewUser u sk newUser =
         expect = Http.expectWhatever (ResponseP CreatedUser)
     }
 
-updateQuizSettings : UserName -> SessionKey -> QuizName -> List Int -> Int -> Labels -> Cmd Msg
-updateQuizSettings u sk quizName rs ts labels = 
+updateQuizSettings : UserName -> SessionKey -> QuizName -> QuizSettings -> Cmd Msg
+updateQuizSettings u sk quizName settings =
     let params = encodeWithSignature u sk [(quizParam, jsonEncQuizName quizName),
-                                           (roundsNumberParam, Encode.list Encode.int rs),
-                                           (numberOfTeamsParam, Encode.int ts),
-                                           (labelsParam, jsonEncLabels labels),
-                                           (actionParam, Encode.string labelUpdate)]
+                                           (quizSettingsParam, jsonEncQuizSettings settings),
+                                           (actionParam, jsonEncAction UpdateSettingsA)]
     in Http.post {
         url = updateQuizSettingsApi,
         body = encodeBody params,
