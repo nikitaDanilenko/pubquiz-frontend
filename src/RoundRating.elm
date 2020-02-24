@@ -1,7 +1,7 @@
 module RoundRating exposing (..)
 
-import Types exposing (RoundRating)
-import Util exposing (adjustToSize, updateIndex)
+import Types exposing (RoundRating, TeamNumber)
+import Util exposing (adjustToSize)
 
 
 empty : RoundRating
@@ -12,7 +12,7 @@ empty =
 emptyOfSize : Int -> RoundRating
 emptyOfSize n =
     { reachableInRound = 0
-    , points = List.indexedMap (\i z -> { teamNumber = i, rating = z }) (List.repeat n 0)
+    , points = List.map (\i -> { teamNumber = i, rating = 0 }) (List.range 1 n)
     }
 
 
@@ -26,10 +26,10 @@ arePointsValid rr =
     List.all (\x -> x.rating <= rr.reachableInRound) rr.points
 
 
-update : Int -> Float -> RoundRating -> RoundRating
-update i ps rr =
+update : TeamNumber -> Float -> RoundRating -> RoundRating
+update tn ps rr =
     let
         newPoints =
-            updateIndex i { teamNumber = i, rating = ps } rr.points
+            List.map (\tr -> if tr.teamNumber == tn then { tr | rating = ps } else tr) rr.points
     in
     { rr | points = newPoints }
