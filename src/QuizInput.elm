@@ -463,7 +463,7 @@ createNewQuiz u sk idf s =
             encodeBody
                 (encodeWithSignature u
                     sk
-                    [ ( quizPDNParam, jsonEncQuizIdentifier idf )
+                    [ ( quizIdentifierParam, jsonEncQuizIdentifier idf )
                     , ( quizSettingsParam, jsonEncQuizSettings s )
                     , ( actionParam, jsonEncAction CreateQuizA )
                     ]

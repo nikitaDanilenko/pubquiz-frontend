@@ -38,8 +38,8 @@ passwordParam = "pass"
 signatureParam : String
 signatureParam = "signature"
 
-quizPDNParam : String
-quizPDNParam = "quizPDN"
+quizIdentifierParam : String
+quizIdentifierParam = "quizIdentifier"
 
 quizSettingsParam : String
 quizSettingsParam = "quizSettings"

@@ -61,7 +61,7 @@ updateQuizInfoQuizId : QuizInfo -> DbQuizId -> QuizInfo
 updateQuizInfoQuizId qi qid = { qi | quizId = qid }
 
 updateQuizInfoQuizIdentifier : QuizInfo -> QuizIdentifier -> QuizInfo
-updateQuizInfoQuizIdentifier qi pdn = { qi | quizIdentifier = pdn }
+updateQuizInfoQuizIdentifier qi idf = { qi | quizIdentifier = idf }
 
 updateQuizInfoQuizActivity : QuizInfo -> Activity -> QuizInfo
 updateQuizInfoQuizActivity qi a = { qi | active = a }
