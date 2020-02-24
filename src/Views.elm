@@ -36,7 +36,7 @@ import Html.Events.Extra exposing (onEnter)
 import Model exposing (..)
 import NewUser exposing (NewUserField(..), isValid)
 import QuizRatings
-import Types exposing (DbQuizId, Header, Labels, QuizInfo, QuizName, RoundRating, TeamNumber)
+import Types exposing (DbQuizId, Header, Labels, QuizInfo, QuizName, RoundNumber, RoundRating, TeamNumber)
 import Util
     exposing
         ( adjustToSize
@@ -322,16 +322,16 @@ addFeedbackLabel model =
         [ label [ for "feedbackLabel" ] [ text model.feedback ] ]
 
 
-mkRoundForm : Int -> Int -> RoundRating -> Html Msg
-mkRoundForm number gs rd =
+mkRoundForm : RoundNumber -> Int -> RoundRating -> Html Msg
+mkRoundForm rn gs rr =
     div [ id "roundPoints" ]
         (label [ class "roundNumber" ]
-            [ text (String.join " " [ "Round", String.fromInt number ]) ]
+            [ text (String.join " " [ "Round", String.fromInt rn ]) ]
             :: div [ id "maxPointsArea" ]
                 [ label [ class "maxPoints" ] [ text "Obtainable" ]
                 , input
-                    (value (String.fromFloat rd.reachableInRound)
-                        :: onInput (SetMaxPoints number)
+                    (value (String.fromFloat rr.reachableInRound)
+                        :: onInput (SetMaxPoints rn)
                         :: pointInputAttributes
                     )
                     []
@@ -352,15 +352,15 @@ mkRoundForm number gs rd =
                         , div [ class "input" ]
                             [ input
                                 (value (String.fromFloat tr.rating)
-                                    :: onInput (UpdatePoints number tr.teamNumber)
-                                    :: max (String.fromFloat rd.reachableInRound)
+                                    :: onInput (UpdatePoints rn tr.teamNumber)
+                                    :: max (String.fromFloat rr.reachableInRound)
                                     :: pointInputAttributes
                                 )
                                 []
                             ]
                         ]
                 )
-                (adjustToSize gs rd.points)
+                (adjustToSize gs rr.points)
         )
 
 

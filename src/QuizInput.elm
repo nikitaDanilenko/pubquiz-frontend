@@ -151,14 +151,14 @@ update msg model =
             , Cmd.none
             )
 
-        UpdatePoints r g ps ->
+        UpdatePoints rn tn ps ->
             let
                 ( np, response ) =
                     case run float ps of
                         Ok p ->
                             let
                                 maxPs =
-                                    (QuizRatings.getRound r model.currentQuizRatings).reachableInRound
+                                    (QuizRatings.getRound rn model.currentQuizRatings).reachableInRound
                             in
                             if p <= maxPs then
                                 ( p, "" )
@@ -177,10 +177,10 @@ update msg model =
                             , String.join " "
                                 [ "Invalid decimal point number"
                                 , "at round ="
-                                , String.fromInt (1 + r)
+                                , String.fromInt rn
                                 , "and team ="
                                 , String.concat
-                                    [ String.fromInt (1 + g)
+                                    [ String.fromInt tn
                                     , "."
                                     ]
                                 , "Substituting 0."
@@ -188,7 +188,7 @@ update msg model =
                             )
 
                 newQuiz =
-                    QuizRatings.update r g np model.currentQuizRatings
+                    QuizRatings.update rn tn np model.currentQuizRatings
 
                 valid =
                     QuizRatings.arePointsValid newQuiz
