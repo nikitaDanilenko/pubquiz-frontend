@@ -159,8 +159,8 @@ type Msg
     | SetUser UserName
     | SetPassword Password
     | SetTeamsInQuiz TeamUpdateSetting String
-    | UpdatePoints Int Int String -- Points for round, team, value.
-    | SetMaxPoints Int String -- Points for round, value
+    | UpdatePoints RoundNumber TeamNumber String -- Points for round, team, value.
+    | SetMaxPoints RoundNumber String -- Points for round, value
     | UpdateQuestions Int String
     | AddRound
     | SetRoundsNumber String
