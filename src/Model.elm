@@ -4,10 +4,14 @@ import Copy exposing (LabelsField)
 import Http exposing (Error(..))
 import NewUser exposing (NewUser, NewUserField)
 import QuizRatings
-import Types exposing (Activity(..), DbQuizId, Header, Labels, Password, Place, QuizDate, QuizInfo, QuizName, QuizPDN, QuizRatings, QuizSettings, Ratings, RoundNumber, UserHash, UserName)
+import Types exposing (Activity(..), DbQuizId, Header, Labels, Password, Place, QuizDate, QuizIdentifier, QuizInfo, QuizName, QuizRatings, QuizSettings, Ratings, RoundNumber, TeamNumber, UserHash, UserName)
 import Validity exposing (Validity)
 
+
+
 -- todo: split model in various models? This may simplify the handling of default values.
+
+
 type alias Model =
     { user : UserName
     , password : Password
@@ -47,13 +51,13 @@ initialModel =
 defaultQuizInfo : QuizInfo
 defaultQuizInfo =
     { quizId = -1
-    , identifier = defaultQuizPDN
+    , quizIdentifier = defaultQuizIdentifier
     , active = Inactive
     }
 
 
-defaultQuizPDN : QuizPDN
-defaultQuizPDN =
+defaultQuizIdentifier : QuizIdentifier
+defaultQuizIdentifier =
     { place = ""
     , date = "2100-01-01"
     , name = defaultLabels.mainLabel
@@ -76,7 +80,7 @@ defaultLabels =
     , maxReachedLabel = String.concat [ "Erreichte H", String.fromChar (Char.fromCode 246), "chstpunktzahl" ]
     , maxReachableLabel = "Erreichbare Punkte"
     , backToChartView = "Gesamtwertung"
-    , mainLabel = "QuizRatings"
+    , mainLabel = "Quiz"
     , ownPageLabel = "Eigene Punkte"
     , viewPrevious = "Alle Quizzes"
     , cumulativeLabel = "Gesamtpunktzahl"
@@ -168,7 +172,7 @@ type Msg
     | SetNewUserParam NewUserField String
     | Login
     | LabelsUpdate LabelsField String
-    | SetTeamName Int String
+    | SetTeamName TeamNumber String
     | GetLabels
     | PostQuizSettingsUpdate DbQuizId QuizSettings
     | ResponseF ResponseWithFeedback

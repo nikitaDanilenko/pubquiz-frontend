@@ -399,21 +399,21 @@ jsonEncQuizSettings  val =
 
 
 
-type alias QuizPDN  =
+type alias QuizIdentifier  =
    { place: Place
    , date: QuizDate
    , name: QuizName
    }
 
-jsonDecQuizPDN : Json.Decode.Decoder ( QuizPDN )
-jsonDecQuizPDN =
+jsonDecQuizIdentifier : Json.Decode.Decoder ( QuizIdentifier )
+jsonDecQuizIdentifier =
    Json.Decode.succeed (\pplace pdate pname -> {place = pplace, date = pdate, name = pname})
    |> required "place" (jsonDecPlace)
    |> required "date" (jsonDecQuizDate)
    |> required "name" (jsonDecQuizName)
 
-jsonEncQuizPDN : QuizPDN -> Value
-jsonEncQuizPDN  val =
+jsonEncQuizIdentifier : QuizIdentifier -> Value
+jsonEncQuizIdentifier  val =
    Json.Encode.object
    [ ("place", jsonEncPlace val.place)
    , ("date", jsonEncQuizDate val.date)
@@ -424,22 +424,22 @@ jsonEncQuizPDN  val =
 
 type alias QuizInfo  =
    { quizId: DbQuizId
-   , identifier: QuizPDN
+   , quizIdentifier: QuizIdentifier
    , active: Activity
    }
 
 jsonDecQuizInfo : Json.Decode.Decoder ( QuizInfo )
 jsonDecQuizInfo =
-   Json.Decode.succeed (\pquizId pidentifier pactive -> {quizId = pquizId, identifier = pidentifier, active = pactive})
+   Json.Decode.succeed (\pquizId pquizIdentifier pactive -> {quizId = pquizId, quizIdentifier = pquizIdentifier, active = pactive})
    |> required "quizId" (jsonDecDbQuizId)
-   |> required "identifier" (jsonDecQuizPDN)
+   |> required "quizIdentifier" (jsonDecQuizIdentifier)
    |> required "active" (jsonDecActivity)
 
 jsonEncQuizInfo : QuizInfo -> Value
 jsonEncQuizInfo  val =
    Json.Encode.object
    [ ("quizId", jsonEncDbQuizId val.quizId)
-   , ("identifier", jsonEncQuizPDN val.identifier)
+   , ("quizIdentifier", jsonEncQuizIdentifier val.quizIdentifier)
    , ("active", jsonEncActivity val.active)
    ]
 

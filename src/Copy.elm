@@ -1,6 +1,6 @@
 module Copy exposing (..)
 
-import Types exposing (Activity, DbQuizId, Labels, Place, QuizDate, QuizInfo, QuizName, QuizPDN, QuizSettings)
+import Types exposing (Activity, DbQuizId, Labels, Place, QuizDate, QuizInfo, QuizName, QuizIdentifier, QuizSettings)
 
 type LabelsField = RoundField
                  | TeamField
@@ -39,14 +39,14 @@ updateLabelsByField field text lbls =
         PointsField -> { lbls | pointsLabel = text }
         RoundWinnerField -> { lbls | roundWinnerLabel = text }
 
-updateQuizPDNPlace : QuizPDN -> Place -> QuizPDN
-updateQuizPDNPlace q p = { q | place = p }
+updateQuizIdentifierPlace : QuizIdentifier -> Place -> QuizIdentifier
+updateQuizIdentifierPlace q p = { q | place = p }
 
-updateQuizPDNDate : QuizPDN -> QuizDate -> QuizPDN
-updateQuizPDNDate q d = { q | date = d }
+updateQuizIdentifierDate : QuizIdentifier -> QuizDate -> QuizIdentifier
+updateQuizIdentifierDate q d = { q | date = d }
 
-updateQuizPDNName : QuizPDN -> QuizName -> QuizPDN
-updateQuizPDNName q n = { q | name = n }
+updateQuizIdentifierName : QuizIdentifier -> QuizName -> QuizIdentifier
+updateQuizIdentifierName q n = { q | name = n }
 
 updateQuizSettingsRounds : QuizSettings -> List Int -> QuizSettings
 updateQuizSettingsRounds qs rs = { qs | rounds = rs }
@@ -60,8 +60,8 @@ updateQuizSettingsLabels qs ls = { qs | labels = ls }
 updateQuizInfoQuizId : QuizInfo -> DbQuizId -> QuizInfo
 updateQuizInfoQuizId qi qid = { qi | quizId = qid }
 
-updateQuizInfoQuizPDN : QuizInfo -> QuizPDN -> QuizInfo
-updateQuizInfoQuizPDN qi pdn = { qi | identifier = pdn }
+updateQuizInfoQuizIdentifier : QuizInfo -> QuizIdentifier -> QuizInfo
+updateQuizInfoQuizIdentifier qi pdn = { qi | quizIdentifier = pdn }
 
 updateQuizInfoQuizActivity : QuizInfo -> Activity -> QuizInfo
 updateQuizInfoQuizActivity qi a = { qi | active = a }
