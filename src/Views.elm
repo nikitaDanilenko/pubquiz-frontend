@@ -419,8 +419,9 @@ mkSingleTeamNameInput tn name =
 
 
 mkTeamNameInput : Header -> List (Html Msg)
-mkTeamNameInput =
-    List.map (\ti -> mkSingleTeamNameInput ti.teamInfoNumber ti.teamInfoName)
+mkTeamNameInput h =
+    h |> List.sortBy (\ti -> ti.teamInfoNumber)
+      |> List.map (\ti -> mkSingleTeamNameInput ti.teamInfoNumber ti.teamInfoName)
 
 
 pointInputAttributes : List (Html.Attribute Msg)
