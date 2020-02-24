@@ -94,8 +94,12 @@ updateTeamName tNum tName quiz =
     { quiz | header = inHeader tNum tName quiz.header }
 
 
-addRound : RoundNumber -> RoundRating -> QuizRatings -> QuizRatings
-addRound rNum r q =
+addRound : RoundRating -> QuizRatings -> QuizRatings
+addRound r q =
+    let
+        rNum =
+            1 + Maybe.withDefault 0 (List.maximum (List.map Tuple.first q.ratings))
+    in
     { q | ratings = q.ratings ++ [ ( rNum, r ) ] }
 
 
@@ -109,5 +113,5 @@ numberOfTeams quiz =
     let
         max =
             maxNumberOfTeams quiz
-    in
+    in  
     Maybe.withDefault max (List.maximum (List.map (\( _, rr ) -> List.length rr.points) quiz.ratings))
