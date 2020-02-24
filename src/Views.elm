@@ -85,10 +85,19 @@ selectionView md =
 
 editingView : Model -> Html Msg
 editingView md =
-  let quizName = md.currentQuizInfo.quizIdentifier.name
-      numberOfTeams = md.currentQuizSettings.numberOfTeams
-      quizRatings = md.currentQuizRatings
-  in
+    let
+        _ =
+            Debug.log "header" md.currentQuizRatings.header
+
+        quizName =
+            md.currentQuizInfo.quizIdentifier.name
+
+        numberOfTeams =
+            md.currentQuizSettings.numberOfTeams
+
+        quizRatings =
+            md.currentQuizRatings
+    in
     div [ id "singleQuiz" ]
         ([ div [ id "editingLabel" ]
             [ label [ for "editingQuiz" ]
@@ -108,7 +117,7 @@ editingView md =
             ]
          , div [ id "teamNames" ]
             (label [ for "teamNamesLabel" ] [ text "Team names" ]
-                :: mkTeamNameInput md.currentQuizSettings.labels (List.take numberOfTeams quizRatings.header)
+                :: mkTeamNameInput (List.take numberOfTeams quizRatings.header)
             )
          ]
             ++ List.map (\( rn, rr ) -> mkRoundForm rn numberOfTeams rr)
@@ -123,7 +132,8 @@ editingView md =
                     , disabled (not (Validity.isValid md.isValidQuizUpdate))
                     ]
                     [ text "Update" ]
-                    -- todo: Fix these links according to new structure. This holds twice: once for top level sheets, and once for RESTview
+
+               -- todo: Fix these links according to new structure. This holds twice: once for top level sheets, and once for RESTview
                , mkLinkToSheet "answerSheet" "Get quiz sheet" quizName (String.join "-" [ quizName, sheetPDFFile ])
                , mkLinkToSheet "qrSheet" "Get QR codes only" quizName (String.join "-" [ quizName, qrPDFFile ])
                , mkLinkToSheet "mainGraphPage" "View main graph page" quizName ""
@@ -391,26 +401,26 @@ mkQuestionsForm createOnEnter rs =
         )
 
 
-mkTeamNumber : Int -> String -> String
+mkTeamNumber : TeamNumber -> String -> String
 mkTeamNumber i wordForTeam =
     String.join " " [ wordForTeam, String.fromInt i ]
 
 
 mkSingleTeamNameInput : TeamNumber -> String -> Html Msg
-mkSingleTeamNameInput tn wordForTeam =
+mkSingleTeamNameInput tn name =
     div [ class "teamNameInputArea" ]
         [ label [ for "teamName" ] [ text (mkTeamNumber tn "Team") ]
         , input
-            [ value (mkTeamNumber tn wordForTeam)
+            [ value name
             , onInput (SetTeamName tn)
             ]
             []
         ]
 
 
-mkTeamNameInput : Labels -> Header -> List (Html Msg)
-mkTeamNameInput l =
-    List.map (\ti -> mkSingleTeamNameInput ti.teamInfoNumber l.teamLabel)
+mkTeamNameInput : Header -> List (Html Msg)
+mkTeamNameInput =
+    List.map (\ti -> mkSingleTeamNameInput ti.teamInfoNumber ti.teamInfoName)
 
 
 pointInputAttributes : List (Html.Attribute Msg)
