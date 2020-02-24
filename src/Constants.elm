@@ -14,17 +14,10 @@ apiLocation = mkPath [ String.concat [serverLocation, ":", serverPort], "api" ]
 actionParam : String
 actionParam = "action"
 
-quizParam : String
-quizParam = "quiz"
 
 quizIdParam : String
 quizIdParam = "quizId"
 
-roundsParam : String
-roundsParam = "rounds"
-
-roundsNumberParam : String
-roundsNumberParam = "roundsNumber"
 
 newUserParam : String
 newUserParam = "newUser"
@@ -49,12 +42,6 @@ quizRatingsParam = "quizRatings"
 
 credentialsParam : String
 credentialsParam = "credentials"
-
-numberOfTeamsParam : String
-numberOfTeamsParam = "numberOfTeams"
-
-labelsParam : String
-labelsParam = "labels"
 
 mkPath : List String -> String
 mkPath = String.join "/"

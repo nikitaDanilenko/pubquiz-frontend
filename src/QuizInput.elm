@@ -446,7 +446,7 @@ postLock : UserName -> SessionKey -> DbQuizId -> Cmd Msg
 postLock u sk qid =
     let
         params =
-            encodeWithSignature u sk [ ( quizParam, jsonEncDbQuizId qid ), ( actionParam, jsonEncAction LockA ) ]
+            encodeWithSignature u sk [ ( quizIdParam, jsonEncDbQuizId qid ), ( actionParam, jsonEncAction LockA ) ]
     in
     Http.post
         { url = lockApi
