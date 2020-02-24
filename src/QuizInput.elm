@@ -17,7 +17,7 @@ import Parser exposing (float, int, run)
 import QuizRatings
 import RequestUtils exposing (RestKey, RestParam, RestValue, encodeWithSignature, mkJSONParams, mkParams)
 import RoundRating
-import Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizName, QuizPDN, QuizRatings, QuizSettings, UserHash, UserName, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings, jsonDecUserHash, jsonEncAction, jsonEncDbQuizId, jsonEncPassword, jsonEncQuizPDN, jsonEncQuizRatings, jsonEncQuizSettings, jsonEncUserName)
+import Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizName, QuizPDN, QuizRatings, QuizSettings, UserHash, UserName, jsonDecDbQuizId, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings, jsonDecUserHash, jsonEncAction, jsonEncDbQuizId, jsonEncPassword, jsonEncQuizPDN, jsonEncQuizRatings, jsonEncQuizSettings, jsonEncUserName)
 import Url.Builder exposing (string)
 import Util exposing (adjustToSizeWith, isValidInternalQuizName, updateIndex)
 import Validity
@@ -57,7 +57,7 @@ update msg model =
             case tpe of
                 GotAll qis ->
                     ( { model
-                        | quizzes = qis
+                        | quizzes = Result.withDefault [] qis
                         , displayState = Selecting
                         , feedback = ""
                         , currentQuizInfo = Model.defaultQuizInfo
@@ -96,6 +96,19 @@ update msg model =
                     , Cmd.none
                     )
 
+                CreatedQuiz c ->
+                    case c of
+                        Ok qid ->
+                            ( { model
+                                | currentQuizSettings = Model.defaultQuizSettings
+                                , currentQuizInfo = updateQuizInfoQuizId model.currentQuizInfo qid
+                              }
+                            , getQuizRatings qid
+                            )
+
+                        Err err ->
+                            ( { model | feedback = errorToString err }, Cmd.none )
+
         ResponseP tpe (Ok _) ->
             case tpe of
                 Locked ->
@@ -103,11 +116,6 @@ update msg model =
 
                 Updated ->
                     ( { model | feedback = "Update successful" }, Cmd.none )
-
-                CreatedQuiz ->
-                    ( { model | currentQuizSettings = Model.defaultQuizSettings }
-                    , getQuizRatings model.currentQuizInfo.quizId
-                    )
 
                 CreatedUser ->
                     ( { model
@@ -195,10 +203,10 @@ update msg model =
             , Cmd.none
             )
 
-        AddRound rn ->
+        AddRound ->
             let
                 newQuiz =
-                    QuizRatings.addRound rn
+                    QuizRatings.addRound
                         (RoundRating.emptyOfSize model.currentQuizSettings.numberOfTeams)
                         model.currentQuizRatings
             in
@@ -400,10 +408,10 @@ getAll =
         }
 
 
-getMsg : String -> (Result Error a -> msg) -> Decode.Decoder a -> DbQuizId -> Cmd Msg
+getMsg : String -> (Result Error a -> Msg) -> Decode.Decoder a -> DbQuizId -> Cmd Msg
 getMsg path action decoder quizId =
     Http.get
-        { url = Url.Builder.relative [ quizApi, path ] [ string quizParam (Encode.encode 0 (jsonEncDbQuizId quizId)) ]
+        { url = Url.Builder.relative [ path ] [ string quizIdParam (Encode.encode 0 (jsonEncDbQuizId quizId)) ]
         , expect = Http.expectJson action decoder
         }
 
@@ -425,7 +433,7 @@ postUpdate u sk qid quizRatings =
             encodeWithSignature u
                 sk
                 [ ( quizIdParam, jsonEncDbQuizId qid )
-                , ( roundsParam, jsonEncQuizRatings quizRatings )
+                , ( quizRatingsParam, jsonEncQuizRatings quizRatings )
                 ]
     in
     Http.post
@@ -461,7 +469,7 @@ createNewQuiz u sk pdn s =
                     , ( actionParam, jsonEncAction CreateQuizA )
                     ]
                 )
-        , expect = Http.expectWhatever (ResponseP CreatedQuiz)
+        , expect = Http.expectJson (\x -> x |> CreatedQuiz |> ResponseF) jsonDecDbQuizId
         }
 
 

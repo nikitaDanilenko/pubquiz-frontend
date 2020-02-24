@@ -44,6 +44,9 @@ quizPDNParam = "quizPDN"
 quizSettingsParam : String
 quizSettingsParam = "quizSettings"
 
+quizRatingsParam : String
+quizRatingsParam = "quizRatings"
+
 credentialsParam : String
 credentialsParam = "credentials"
 
