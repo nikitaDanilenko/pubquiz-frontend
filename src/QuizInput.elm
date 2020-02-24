@@ -5,7 +5,7 @@ module QuizInput exposing (main)
 import Base exposing (SessionKey)
 import Browser
 import Constants exposing (..)
-import Copy exposing (updateLabelsByField, updateQuizInfoQuizId, updateQuizInfoQuizPDN, updateQuizPDNName, updateQuizSettingsLabels, updateQuizSettingsNumberOfTeams, updateQuizSettingsRounds)
+import Copy exposing (updateLabelsByField, updateQuizIdentifierName, updateQuizInfoQuizId, updateQuizInfoQuizIdentifier, updateQuizSettingsLabels, updateQuizSettingsNumberOfTeams, updateQuizSettingsRounds)
 import Crypto.Hash exposing (sha512)
 import Html exposing (Html)
 import Http exposing (Error)
@@ -17,7 +17,7 @@ import Parser exposing (float, int, run)
 import QuizRatings
 import RequestUtils exposing (RestKey, RestParam, RestValue, encodeWithSignature, mkJSONParams, mkParams)
 import RoundRating
-import Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizName, QuizPDN, QuizRatings, QuizSettings, UserHash, UserName, jsonDecDbQuizId, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings, jsonDecUserHash, jsonEncAction, jsonEncDbQuizId, jsonEncPassword, jsonEncQuizPDN, jsonEncQuizRatings, jsonEncQuizSettings, jsonEncUserName)
+import Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizIdentifier, QuizName, QuizRatings, QuizSettings, UserHash, UserName, jsonDecDbQuizId, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings, jsonDecUserHash, jsonEncAction, jsonEncDbQuizId, jsonEncPassword, jsonEncQuizIdentifier, jsonEncQuizRatings, jsonEncQuizSettings, jsonEncUserName)
 import Url.Builder exposing (string)
 import Util exposing (adjustToSizeWith, isValidInternalQuizName, updateIndex)
 import Validity
@@ -67,11 +67,7 @@ update msg model =
                     )
 
                 GotQuizRatings c ->
-                    let
-                        updatedModel =
-                            updateQuizByText c model
-                    in
-                    ( { updatedModel | displayState = Editing ContentsE }, Cmd.none )
+                    ( updateQuizByQuizRatings c model, Cmd.none )
 
                 Logged c ->
                     ( { model | feedback = "", oneWayHash = Result.withDefault "" c }, getAll )
@@ -99,9 +95,12 @@ update msg model =
                 CreatedQuiz c ->
                     case c of
                         Ok qid ->
+                          let newQuizInfo = updateQuizInfoQuizId model.currentQuizInfo qid
+                          in
                             ( { model
                                 | currentQuizSettings = Model.defaultQuizSettings
                                 , currentQuizInfo = updateQuizInfoQuizId model.currentQuizInfo qid
+                                , quizzes = model.quizzes ++ [newQuizInfo]
                               }
                             , getQuizRatings qid
                             )
@@ -112,7 +111,7 @@ update msg model =
         ResponseP tpe (Ok _) ->
             case tpe of
                 Locked ->
-                    ( { model | feedback = String.concat [ "Locked ", model.currentQuizInfo.identifier.name ] }, getAll )
+                    ( { model | feedback = String.concat [ "Locked ", model.currentQuizInfo.quizIdentifier.name ] }, getAll )
 
                 Updated ->
                     ( { model | feedback = "Update successful" }, Cmd.none )
@@ -267,7 +266,7 @@ update msg model =
                             ]
             in
             ( { model
-                | currentQuizInfo = name |> updateQuizPDNName model.currentQuizInfo.identifier |> updateQuizInfoQuizPDN model.currentQuizInfo
+                | currentQuizInfo = name |> updateQuizIdentifierName model.currentQuizInfo.quizIdentifier |> updateQuizInfoQuizIdentifier model.currentQuizInfo
                 , feedback = feedback
               }
             , Cmd.none
@@ -305,14 +304,14 @@ update msg model =
             )
 
         CreateQuiz ->
-            if String.isEmpty model.currentQuizInfo.identifier.name then
+            if String.isEmpty model.currentQuizInfo.quizIdentifier.name then
                 ( { model | feedback = "Empty quiz name" }, Cmd.none )
 
             else
                 ( model
                 , createNewQuiz model.user
                     model.oneWayHash
-                    model.currentQuizInfo.identifier
+                    model.currentQuizInfo.quizIdentifier
                     model.currentQuizSettings
                 )
 
@@ -340,10 +339,10 @@ update msg model =
             in
             ( { model | currentQuizSettings = updateQuizSettingsLabels model.currentQuizSettings lbls }, Cmd.none )
 
-        SetTeamName i teamName ->
+        SetTeamName tn teamName ->
             let
                 newQuizRatings =
-                    QuizRatings.updateTeamName i teamName model.currentQuizRatings
+                    QuizRatings.updateTeamName tn teamName model.currentQuizRatings
             in
             ( { model
                 | currentQuizRatings = newQuizRatings
@@ -456,15 +455,15 @@ postLock u sk qid =
         }
 
 
-createNewQuiz : UserName -> UserHash -> QuizPDN -> QuizSettings -> Cmd Msg
-createNewQuiz u sk pdn s =
+createNewQuiz : UserName -> UserHash -> QuizIdentifier -> QuizSettings -> Cmd Msg
+createNewQuiz u sk idf s =
     Http.post
         { url = newApi
         , body =
             encodeBody
                 (encodeWithSignature u
                     sk
-                    [ ( quizPDNParam, jsonEncQuizPDN pdn )
+                    [ ( quizPDNParam, jsonEncQuizIdentifier idf )
                     , ( quizSettingsParam, jsonEncQuizSettings s )
                     , ( actionParam, jsonEncAction CreateQuizA )
                     ]
@@ -508,8 +507,8 @@ updateQuizSettings u sk qid settings =
         }
 
 
-updateQuizByText : ErrorOr QuizRatings -> Model -> Model
-updateQuizByText eQuizRatings model =
+updateQuizByQuizRatings : ErrorOr QuizRatings -> Model -> Model
+updateQuizByQuizRatings eQuizRatings model =
     case eQuizRatings of
         Ok quizRatings ->
             let
@@ -535,15 +534,18 @@ updateQuizByText eQuizRatings model =
             { model
                 | currentQuizRatings = quizRatings
                 , currentQuizSettings = updateQuizSettingsNumberOfTeams model.currentQuizSettings actual
+                , currentQuizInfo = Maybe.withDefault Model.defaultQuizInfo (Util.find (\qi -> qi.quizId == model.currentQuizInfo.quizId) model.quizzes)
                 , isValidQuizUpdate = validity
                 , feedback = ""
+                , displayState = Editing ContentsE
             }
 
         Err _ ->
             { model
                 | isValidQuizUpdate =
                     Validity.updateServerText False model.isValidQuizUpdate
-                , feedback = "Parsing error"
+                , feedback = "Parsing error: Could not read quiz ratings from server"
+                , displayState = Selecting
             }
 
 
