@@ -1,6 +1,6 @@
 module Views exposing (..)
 
-import Constants exposing (mkPath, qrPDFFile, sheetPDFFile, sheetPDFPrefix)
+import Constants exposing (mkPath, sheetPDFPrefix)
 import Copy exposing (LabelsField(..))
 import Html
     exposing
@@ -86,9 +86,6 @@ selectionView md =
 editingView : Model -> Html Msg
 editingView md =
     let
-        _ =
-            Debug.log "header" md.currentQuizRatings.header
-
         quizName =
             md.currentQuizInfo.quizIdentifier.name
 
@@ -134,8 +131,8 @@ editingView md =
                     [ text "Update" ]
 
                -- todo: Fix these links according to new structure. This holds twice: once for top level sheets, and once for RESTview
-               , mkLinkToSheet "answerSheet" "Get quiz sheet" quizName (String.join "-" [ quizName, sheetPDFFile ])
-               , mkLinkToSheet "qrSheet" "Get QR codes only" quizName (String.join "-" [ quizName, qrPDFFile ])
+               , mkLinkToSheet "answerSheet" "Get quiz sheet" quizName md.currentQuizInfo.fullSheetPath
+               , mkLinkToSheet "qrSheet" "Get QR codes only" quizName md.currentQuizInfo.qrOnlyPath
                , mkLinkToSheet "mainGraphPage" "View main graph page" quizName ""
                , addFeedbackLabel md
                ]
