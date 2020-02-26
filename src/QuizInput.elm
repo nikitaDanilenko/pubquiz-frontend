@@ -28,7 +28,7 @@ main : Program () Model Msg
 main =
     Browser.document
         { init = initialModelFunction
-        , view = \model -> { title = "QuizRatings Interface", body = [ view model ] }
+        , view = \model -> { title = "Quiz Interface", body = [ view model ] }
         , update = update
         , subscriptions = \_ -> Sub.none
         }
@@ -590,7 +590,7 @@ processTeamUpdate setting text model =
                             else
                                 ( maxTeams
                                 , String.join " "
-                                    [ "QuizRatings supports only"
+                                    [ "Quiz supports only"
                                     , String.fromInt maxTeams
                                     , "teams."
                                     ]

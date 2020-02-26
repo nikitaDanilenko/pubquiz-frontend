@@ -184,7 +184,7 @@ creatingQuizView md =
             onEnter CreateQuiz
     in
     div [ id "creatingQuizView" ]
-        ([ label [ for "internalQuizName" ] [ text "QuizRatings name (internal)" ]
+        ([ label [ for "internalQuizName" ] [ text "Quiz name (internal)" ]
          , input
             [ onInput SetNewQuizName
             , type_ "text"
