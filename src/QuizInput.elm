@@ -17,7 +17,7 @@ import Parser exposing (float, int, run)
 import QuizRatings
 import RequestUtils exposing (RestKey, RestParam, RestValue, encodeWithSignature, mkJSONParams, mkParams)
 import RoundRating
-import Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizIdentifier, QuizName, QuizRatings, QuizSettings, UserHash, UserName, jsonDecDbQuizId, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings, jsonDecUserHash, jsonEncAction, jsonEncDbQuizId, jsonEncPassword, jsonEncQuizIdentifier, jsonEncQuizRatings, jsonEncQuizSettings, jsonEncUserName)
+import Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizIdentifier, QuizName, QuizRatings, QuizSettings, UserHash, UserName, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings, jsonDecUserHash, jsonEncAction, jsonEncDbQuizId, jsonEncPassword, jsonEncQuizIdentifier, jsonEncQuizRatings, jsonEncQuizSettings, jsonEncUserName)
 import Url.Builder exposing (string)
 import Util exposing (adjustToSizeWith, isValidInternalQuizName, updateIndex)
 import Validity
@@ -94,15 +94,13 @@ update msg model =
 
                 CreatedQuiz c ->
                     case c of
-                        Ok qid ->
-                          let newQuizInfo = updateQuizInfoQuizId model.currentQuizInfo qid
-                          in
+                        Ok quizInfo ->
                             ( { model
                                 | currentQuizSettings = Model.defaultQuizSettings
-                                , currentQuizInfo = updateQuizInfoQuizId model.currentQuizInfo qid
-                                , quizzes = model.quizzes ++ [newQuizInfo]
+                                , currentQuizInfo = quizInfo
+                                , quizzes = model.quizzes ++ [quizInfo]
                               }
-                            , getQuizRatings qid
+                            , getQuizRatings quizInfo.quizId
                             )
 
                         Err err ->
@@ -468,7 +466,7 @@ createNewQuiz u sk idf s =
                     , ( actionParam, jsonEncAction CreateQuizA )
                     ]
                 )
-        , expect = Http.expectJson (\x -> x |> CreatedQuiz |> ResponseF) jsonDecDbQuizId
+        , expect = Http.expectJson (\x -> x |> CreatedQuiz |> ResponseF) jsonDecQuizInfo
         }
 
 

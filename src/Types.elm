@@ -426,14 +426,18 @@ type alias QuizInfo  =
    { quizId: DbQuizId
    , quizIdentifier: QuizIdentifier
    , active: Activity
+   , fullSheetPath: String
+   , qrOnlyPath: String
    }
 
 jsonDecQuizInfo : Json.Decode.Decoder ( QuizInfo )
 jsonDecQuizInfo =
-   Json.Decode.succeed (\pquizId pquizIdentifier pactive -> {quizId = pquizId, quizIdentifier = pquizIdentifier, active = pactive})
+   Json.Decode.succeed (\pquizId pquizIdentifier pactive pfullSheetPath pqrOnlyPath -> {quizId = pquizId, quizIdentifier = pquizIdentifier, active = pactive, fullSheetPath = pfullSheetPath, qrOnlyPath = pqrOnlyPath})
    |> required "quizId" (jsonDecDbQuizId)
    |> required "quizIdentifier" (jsonDecQuizIdentifier)
    |> required "active" (jsonDecActivity)
+   |> required "fullSheetPath" (Json.Decode.string)
+   |> required "qrOnlyPath" (Json.Decode.string)
 
 jsonEncQuizInfo : QuizInfo -> Value
 jsonEncQuizInfo  val =
@@ -441,6 +445,8 @@ jsonEncQuizInfo  val =
    [ ("quizId", jsonEncDbQuizId val.quizId)
    , ("quizIdentifier", jsonEncQuizIdentifier val.quizIdentifier)
    , ("active", jsonEncActivity val.active)
+   , ("fullSheetPath", Json.Encode.string val.fullSheetPath)
+   , ("qrOnlyPath", Json.Encode.string val.qrOnlyPath)
    ]
 
 

@@ -53,6 +53,8 @@ defaultQuizInfo =
     { quizId = -1
     , quizIdentifier = defaultQuizIdentifier
     , active = Inactive
+    , fullSheetPath = ""
+    , qrOnlyPath = ""
     }
 
 
@@ -141,7 +143,7 @@ type ResponseWithFeedback
     | GotQuizRatings (ErrorOr QuizRatings)
     | GotLabels (ErrorOr Labels)
     | Logged (ErrorOr UserHash)
-    | CreatedQuiz (ErrorOr DbQuizId)
+    | CreatedQuiz (ErrorOr QuizInfo)
 
 
 type ResponsePure
