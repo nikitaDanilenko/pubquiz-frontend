@@ -1,5 +1,6 @@
 module Labels exposing ( .. )
 
+-- todo: remove this file
 type alias Labels = {
       roundLabel : String,
       teamLabel : String,
