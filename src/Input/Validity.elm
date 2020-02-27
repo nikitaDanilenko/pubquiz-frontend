@@ -1,4 +1,4 @@
-module Validity exposing ( .. )
+module Input.Validity exposing ( .. )
 
 type alias Validity = 
     {

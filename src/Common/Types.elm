@@ -1,4 +1,4 @@
-module Types exposing(..)
+module Common.Types exposing(..)
 
 import Json.Decode
 import Json.Encode exposing (Value)

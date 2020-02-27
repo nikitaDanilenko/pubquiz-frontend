@@ -1,8 +1,8 @@
-module QuizRatings exposing (..)
+module Common.QuizRatings exposing (..)
 
-import RoundRating
-import Types exposing (Header, QuizRatings, Ratings, RoundNumber, RoundRating, TeamName, TeamNumber)
-import Util
+import Common.RoundRating as RoundRating
+import Common.Types exposing (Header, QuizRatings, Ratings, RoundNumber, RoundRating, TeamName, TeamNumber)
+import Common.Util as Util
 
 
 empty : QuizRatings

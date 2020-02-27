@@ -1,6 +1,6 @@
-module Util exposing ( .. )
+module Common.Util exposing ( .. )
 
-import Types exposing (TeamRating)
+import Common.Types exposing (TeamRating)
 
 escapeHTML : String -> String
 escapeHTML str = case String.uncons str of

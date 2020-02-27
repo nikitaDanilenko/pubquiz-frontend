@@ -2,27 +2,27 @@ module QuizInput exposing (main)
 
 -- todo Write all out.
 
-import Base exposing (SessionKey)
 import Browser
-import Constants exposing (..)
-import Copy exposing (updateLabelsByField, updateQuizIdentifierDate, updateQuizIdentifierName, updateQuizIdentifierPlace, updateQuizInfoQuizId, updateQuizInfoQuizIdentifier, updateQuizSettingsLabels, updateQuizSettingsNumberOfTeams, updateQuizSettingsRounds)
+import Common.Base exposing (SessionKey)
+import Common.Constants exposing (..)
+import Common.Copy exposing (updateLabelsByField, updateQuizIdentifierDate, updateQuizIdentifierName, updateQuizIdentifierPlace, updateQuizInfoQuizId, updateQuizInfoQuizIdentifier, updateQuizSettingsLabels, updateQuizSettingsNumberOfTeams, updateQuizSettingsRounds)
+import Common.QuizRatings as QuizRatings
+import Common.RoundRating as RoundRating
+import Common.Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizIdentifier, QuizName, QuizRatings, QuizSettings, UserHash, UserName, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings, jsonDecUserHash, jsonEncAction, jsonEncDbQuizId, jsonEncPassword, jsonEncQuizIdentifier, jsonEncQuizRatings, jsonEncQuizSettings, jsonEncUserName)
+import Common.Util as Util exposing (adjustToSizeWith, isValidQuizName, updateIndex)
 import Crypto.Hash exposing (sha512)
 import Date
 import Html exposing (Html)
 import Http exposing (Error)
+import Input.Model as Model exposing (DisplayState(..), Edited(..), ErrorOr, Model, Msg(..), ResponsePure(..), ResponseWithFeedback(..), TeamUpdateSetting(..), errorToString, initialModelFunction)
+import Input.NewUser as NewUser exposing (NewUser)
+import Input.RequestUtils exposing (RestKey, RestParam, RestValue, encodeWithSignature, mkJSONParams, mkParams)
+import Input.Validity as Validity
 import Json.Decode as Decode
 import Json.Encode as Encode
-import Model exposing (..)
-import NewUser exposing (NewUser)
 import Parser exposing (float, int, run)
-import QuizRatings
-import RequestUtils exposing (RestKey, RestParam, RestValue, encodeWithSignature, mkJSONParams, mkParams)
-import RoundRating
-import Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizIdentifier, QuizName, QuizRatings, QuizSettings, UserHash, UserName, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings, jsonDecUserHash, jsonEncAction, jsonEncDbQuizId, jsonEncPassword, jsonEncQuizIdentifier, jsonEncQuizRatings, jsonEncQuizSettings, jsonEncUserName)
 import Url.Builder exposing (string)
-import Util exposing (adjustToSizeWith, isValidQuizName, updateIndex)
-import Validity
-import Views exposing (..)
+import Input.Views exposing (authenticationView, confirmView, creatingQuizView, creatingUserView, editingLabelsView, editingView, selectionView, wrapView)
 
 
 main : Program () Model Msg

@@ -1,4 +1,4 @@
-module Constants exposing ( .. )
+module Common.Constants exposing ( .. )
 
 serverLocation : String
 -- serverLocation = "https://www.danilenko.io"

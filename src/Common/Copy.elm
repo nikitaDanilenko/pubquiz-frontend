@@ -1,7 +1,7 @@
-module Copy exposing (..)
+module Common.Copy exposing (..)
 
 import Date exposing (Date)
-import Types exposing (Activity, DbQuizId, Labels, Place, QuizDate, QuizInfo, QuizName, QuizIdentifier, QuizSettings)
+import Common.Types exposing (Activity, DbQuizId, Labels, Place, QuizDate, QuizInfo, QuizName, QuizIdentifier, QuizSettings)
 
 type LabelsField = RoundField
                  | TeamField

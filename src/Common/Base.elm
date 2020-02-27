@@ -1,7 +1,7 @@
-module Base exposing ( .. )
+module Common.Base exposing ( .. )
 
 import Date exposing (Date, fromIsoString, toIsoString)
-import Types exposing (Day)
+import Common.Types exposing (Day)
 
 type alias SessionKey = String
 

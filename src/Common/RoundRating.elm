@@ -1,7 +1,7 @@
-module RoundRating exposing (..)
+module Common.RoundRating exposing (..)
 
-import Types exposing (RoundRating, TeamNumber)
-import Util exposing (adjustToSize)
+import Common.Types exposing (RoundRating, TeamNumber)
+import Common.Util exposing (adjustToSize)
 
 
 empty : RoundRating

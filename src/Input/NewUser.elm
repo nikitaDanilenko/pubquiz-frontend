@@ -1,6 +1,6 @@
-module NewUser exposing ( .. )
+module Input.NewUser exposing ( .. )
 
-import Types exposing (Password, UserName)
+import Common.Types exposing (Password, UserName)
 
 type alias NewUser = {
         user : UserName,

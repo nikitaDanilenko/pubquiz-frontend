@@ -1,7 +1,7 @@
-module Views exposing (..)
+module Input.Views exposing (..)
 
-import Constants exposing (mkPath, sheetPDFPrefix)
-import Copy exposing (LabelsField(..))
+import Common.Constants exposing (mkPath, sheetPDFPrefix)
+import Common.Copy exposing (LabelsField(..))
 import Html
     exposing
         ( Html
@@ -33,15 +33,15 @@ import Html.Attributes
         )
 import Html.Events exposing (onClick, onInput)
 import Html.Events.Extra exposing (onEnter)
-import Model exposing (..)
-import NewUser exposing (NewUserField(..), isValid)
-import QuizRatings
-import Types exposing (DbQuizId, Header, Labels, QuizInfo, QuizName, RoundNumber, RoundRating, TeamNumber)
-import Util
+import Input.Model exposing (..)
+import Input.NewUser exposing (NewUserField(..), isValid)
+import Common.QuizRatings as QuizRatings
+import Common.Types exposing (DbQuizId, Header, Labels, QuizInfo, QuizName, RoundNumber, RoundRating, TeamNumber)
+import Common.Util
     exposing
         ( adjustToSize
         )
-import Validity
+import Input.Validity as Validity
 
 
 authenticationView : Model -> Html Msg
