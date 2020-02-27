@@ -184,7 +184,7 @@ creatingQuizView md =
             onEnter CreateQuiz
     in
     div [ id "creatingQuizView" ]
-        ([ label [ for "internalQuizName" ] [ text "Quiz name (internal)" ]
+        ([ label [ for "internalQuizName" ] [ text "Quiz name" ]
          , input
             [ onInput SetNewQuizName
             , type_ "text"
@@ -261,8 +261,7 @@ mkCreationForm : Model -> Html.Attribute Msg -> Labels -> List (Html Msg)
 mkCreationForm md createOnEnter labels =
     let
         associations =
-            [ ( "Description (external)", MainField, labels.mainLabel )
-            , ( "Label for rounds", RoundField, labels.roundLabel )
+            [ ( "Label for rounds", RoundField, labels.roundLabel )
             , ( "Label for teams", TeamField, labels.teamLabel )
             , ( "Label for own points", OwnPointsField, labels.ownPointsLabel )
             , ( "Label for maximum reached points", MaxReachedField, labels.maxReachedLabel )
@@ -454,9 +453,6 @@ createIdByField fld =
 
         BackField ->
             "backField"
-
-        MainField ->
-            "mainField"
 
         OwnPageField ->
             "ownPageField"

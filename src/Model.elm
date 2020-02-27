@@ -62,7 +62,7 @@ defaultQuizIdentifier : QuizIdentifier
 defaultQuizIdentifier =
     { place = ""
     , date = "2100-01-01"
-    , name = defaultLabels.mainLabel
+    , name = "Quiz"
     }
 
 
@@ -82,7 +82,6 @@ defaultLabels =
     , maxReachedLabel = String.concat [ "Erreichte H", String.fromChar (Char.fromCode 246), "chstpunktzahl" ]
     , maxReachableLabel = "Erreichbare Punkte"
     , backToChartView = "Gesamtwertung"
-    , mainLabel = "Quiz"
     , ownPageLabel = "Eigene Punkte"
     , viewPrevious = "Alle Quizzes"
     , cumulativeLabel = "Gesamtpunktzahl"

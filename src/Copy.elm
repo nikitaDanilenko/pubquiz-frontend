@@ -8,7 +8,6 @@ type LabelsField = RoundField
                  | MaxReachedField
                  | MaxReachableField
                  | BackField
-                 | MainField
                  | OwnPageField
                  | ViewPreviousField
                  | CumulativeField
@@ -28,7 +27,6 @@ updateLabelsByField field text lbls =
         MaxReachedField -> { lbls | maxReachedLabel = text }
         MaxReachableField -> { lbls | maxReachableLabel = text }
         BackField -> { lbls | backToChartView = text }
-        MainField -> { lbls | mainLabel = text }
         OwnPageField -> { lbls | ownPageLabel = text }
         ViewPreviousField -> { lbls | viewPrevious = text }
         CumulativeField -> { lbls | cumulativeLabel = text }
