@@ -184,31 +184,7 @@ creatingQuizView md =
             onEnter CreateQuiz
     in
     div [ id "creatingQuizView" ]
-        ([ label [ for "quizName" ] [ text "Quiz name" ]
-         , input
-            [ onInput SetNewQuizName
-            , type_ "text"
-            , createOnEnter
-            , placeholder "e.g. Quiz"
-            ]
-            []
-         , label [ for "quizDate" ] [ text "Quiz date" ]
-         , input
-            [ onInput SetNewQuizDate
-            , type_ "date"
-            , createOnEnter
-            ]
-            []
-         , label [ for "quizPlace" ] [ text "Quiz place" ]
-         , input
-            [ onInput SetNewQuizPlace
-            , type_ "text"
-            , createOnEnter
-            , placeholder "e.g. Cheers"
-            ]
-            []
-         ]
-            ++ mkCreationForm md createOnEnter md.currentQuizSettings.labels
+        (mkCreationForm md createOnEnter md.currentQuizSettings.labels
             ++ [ button
                     [ class "button"
                     , onClick CreateQuiz
@@ -299,8 +275,18 @@ mkCreationForm md createOnEnter labels =
                 [ label [] [ text lbl ]
                 , input [ onInput (LabelsUpdate fld), type_ "text", value dft, createOnEnter ] []
                 ]
+
+        mkIdentifierPart : String -> String -> String -> String -> String -> (String -> Msg) -> Html Msg
+        mkIdentifierPart divId labelFor description inputType example onInputFct =
+            div [ id divId ]
+                [ label [ for labelFor ] [ text description ]
+                , input [ onInput onInputFct, type_ inputType, createOnEnter, placeholder example ] []
+                ]
     in
-    [ div [ id "roundsNumberDiv" ]
+    [ mkIdentifierPart "quizNameDiv" "quizName" "Quiz name" "text" "e.g. Quiz" SetNewQuizName
+    , mkIdentifierPart "quizDateDiv" "quizDate" "Quiz name" "date" "e.g. 2020-01-01" SetNewQuizDate
+    , mkIdentifierPart "quizPlaceDiv" "quizPlace" "Quiz name" "text" "e.g. Cheers" SetNewQuizPlace
+    , div [ id "roundsNumberDiv" ]
         [ label [ for "roundsNumber" ]
             [ text "Number of rounds" ]
         , input
