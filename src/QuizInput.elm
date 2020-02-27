@@ -1,10 +1,8 @@
 module QuizInput exposing (main)
 
--- todo Write all out.
-
 import Browser
 import Common.Base exposing (SessionKey)
-import Common.Constants exposing (..)
+import Common.Constants exposing (actionParam, allApi, getLabelsApi, getQuizRatingsApi, lockApi, loginApi, newApi, newUserApi, newUserParam, passwordParam, quizIdParam, quizIdentifierParam, quizRatingsParam, quizSettingsParam, signatureParam, updateApi, updateQuizSettingsApi, userParam)
 import Common.Copy exposing (updateLabelsByField, updateQuizIdentifierDate, updateQuizIdentifierName, updateQuizIdentifierPlace, updateQuizInfoQuizId, updateQuizInfoQuizIdentifier, updateQuizSettingsLabels, updateQuizSettingsNumberOfTeams, updateQuizSettingsRounds)
 import Common.QuizRatings as QuizRatings
 import Common.RoundRating as RoundRating
@@ -18,11 +16,11 @@ import Input.Model as Model exposing (DisplayState(..), Edited(..), ErrorOr, Mod
 import Input.NewUser as NewUser exposing (NewUser)
 import Input.RequestUtils exposing (RestKey, RestParam, RestValue, encodeWithSignature, mkJSONParams, mkParams)
 import Input.Validity as Validity
+import Input.Views exposing (authenticationView, confirmView, creatingQuizView, creatingUserView, editingLabelsView, editingView, selectionView, wrapView)
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Parser exposing (float, int, run)
 import Url.Builder exposing (string)
-import Input.Views exposing (authenticationView, confirmView, creatingQuizView, creatingUserView, editingLabelsView, editingView, selectionView, wrapView)
 
 
 main : Program () Model Msg

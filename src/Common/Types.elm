@@ -612,3 +612,40 @@ jsonEncQuizRatings  val =
    , ("ratings", jsonEncRatings val.ratings)
    ]
 
+
+
+type alias TeamLine  =
+   { roundNumber: RoundNumber
+   , reachedPoints: Float
+   , maximumPoints: Float
+   , reachablePoints: Float
+   }
+
+jsonDecTeamLine : Json.Decode.Decoder ( TeamLine )
+jsonDecTeamLine =
+   Json.Decode.succeed (\proundNumber preachedPoints pmaximumPoints preachablePoints -> {roundNumber = proundNumber, reachedPoints = preachedPoints, maximumPoints = pmaximumPoints, reachablePoints = preachablePoints})
+   |> required "roundNumber" (jsonDecRoundNumber)
+   |> required "reachedPoints" (Json.Decode.float)
+   |> required "maximumPoints" (Json.Decode.float)
+   |> required "reachablePoints" (Json.Decode.float)
+
+jsonEncTeamLine : TeamLine -> Value
+jsonEncTeamLine  val =
+   Json.Encode.object
+   [ ("roundNumber", jsonEncRoundNumber val.roundNumber)
+   , ("reachedPoints", Json.Encode.float val.reachedPoints)
+   , ("maximumPoints", Json.Encode.float val.maximumPoints)
+   , ("reachablePoints", Json.Encode.float val.reachablePoints)
+   ]
+
+
+
+type alias TeamTable  = (List TeamLine)
+
+jsonDecTeamTable : Json.Decode.Decoder ( TeamTable )
+jsonDecTeamTable =
+    Json.Decode.list (jsonDecTeamLine)
+
+jsonEncTeamTable : TeamTable -> Value
+jsonEncTeamTable  val = (Json.Encode.list jsonEncTeamLine) val
+
