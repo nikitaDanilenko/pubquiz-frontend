@@ -80,5 +80,5 @@ loginApi : String
 loginApi = mkPath [apiLocation, "secrets"]
 
 sheetPDFPrefix : String
---sheetPDFPrefix = mkPath [ serverLocation, "quizzes" ]
-sheetPDFPrefix = mkPath ["file://", "media", "nda", "DATA", "Programme", "pubquiz-server", "quizzes"]
+--sheetPDFPrefix = mkPath [ serverLocation ]
+sheetPDFPrefix = mkPath ["file://", "media", "nda", "DATA", "Programme", "pubquiz-server"]

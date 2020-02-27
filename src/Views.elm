@@ -131,23 +131,23 @@ editingView md =
                     [ text "Update" ]
 
                -- todo: Fix these links according to new structure. This holds twice: once for top level sheets, and once for RESTview
-               , mkLinkToSheet "answerSheet" "Get quiz sheet" quizName md.currentQuizInfo.fullSheetPath
-               , mkLinkToSheet "qrSheet" "Get QR codes only" quizName md.currentQuizInfo.qrOnlyPath
-               , mkLinkToSheet "mainGraphPage" "View main graph page" quizName ""
+               , mkLinkToSheet "answerSheet" "Get quiz sheet" md.currentQuizInfo.fullSheetPath
+               , mkLinkToSheet "qrSheet" "Get QR codes only" md.currentQuizInfo.qrOnlyPath
+               -- todo: Adjust this path using a proper REST request
+               , mkLinkToSheet "mainGraphPage" "View main graph page" ""
                , addFeedbackLabel md
                ]
         )
 
 
-mkLinkToSheet : String -> String -> String -> String -> Html Msg
-mkLinkToSheet divId linkText prefix file =
+mkLinkToSheet : String -> String -> String -> Html Msg
+mkLinkToSheet divId linkText file =
     div [ id divId ]
         [ a
             [ class "link"
             , href
                 (mkPath
                     [ sheetPDFPrefix
-                    , prefix
                     , file
                     ]
                 )
