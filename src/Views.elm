@@ -184,12 +184,27 @@ creatingQuizView md =
             onEnter CreateQuiz
     in
     div [ id "creatingQuizView" ]
-        ([ label [ for "internalQuizName" ] [ text "Quiz name" ]
+        ([ label [ for "quizName" ] [ text "Quiz name" ]
          , input
             [ onInput SetNewQuizName
             , type_ "text"
             , createOnEnter
-            , placeholder "e.g. some-quiz-yyyy-mm-dd"
+            , placeholder "e.g. Quiz"
+            ]
+            []
+         , label [ for "quizDate" ] [ text "Quiz date" ]
+         , input
+            [ onInput SetNewQuizDate
+            , type_ "date"
+            , createOnEnter
+            ]
+            []
+         , label [ for "quizPlace" ] [ text "Quiz place" ]
+         , input
+            [ onInput SetNewQuizPlace
+            , type_ "text"
+            , createOnEnter
+            , placeholder "e.g. Cheers"
             ]
             []
          ]
@@ -416,8 +431,9 @@ mkSingleTeamNameInput tn name =
 
 mkTeamNameInput : Header -> List (Html Msg)
 mkTeamNameInput h =
-    h |> List.sortBy (\ti -> ti.teamInfoNumber)
-      |> List.map (\ti -> mkSingleTeamNameInput ti.teamInfoNumber ti.teamInfoName)
+    h
+        |> List.sortBy (\ti -> ti.teamInfoNumber)
+        |> List.map (\ti -> mkSingleTeamNameInput ti.teamInfoNumber ti.teamInfoName)
 
 
 pointInputAttributes : List (Html.Attribute Msg)

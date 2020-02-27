@@ -39,11 +39,8 @@ adjustToSizeWith dft lst =
 updateIndex : Int -> a -> List a -> List a
 updateIndex i y = List.indexedMap (\j x -> if i == j then y else x)
 
-isValidInternalQuizChar : Char -> Bool
-isValidInternalQuizChar c = Char.isAlphaNum c || List.member c ['_', '-']
-
-isValidInternalQuizName : String -> Bool
-isValidInternalQuizName = String.all isValidInternalQuizChar
+isValidQuizName : String -> Bool
+isValidQuizName n = not (String.isEmpty n)
 
 find : (a -> Bool) -> List a -> Maybe a
 find p l = case l of

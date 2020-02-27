@@ -1,5 +1,6 @@
 module Copy exposing (..)
 
+import Date exposing (Date)
 import Types exposing (Activity, DbQuizId, Labels, Place, QuizDate, QuizInfo, QuizName, QuizIdentifier, QuizSettings)
 
 type LabelsField = RoundField
@@ -40,8 +41,8 @@ updateLabelsByField field text lbls =
 updateQuizIdentifierPlace : QuizIdentifier -> Place -> QuizIdentifier
 updateQuizIdentifierPlace q p = { q | place = p }
 
-updateQuizIdentifierDate : QuizIdentifier -> QuizDate -> QuizIdentifier
-updateQuizIdentifierDate q d = { q | date = d }
+updateQuizIdentifierDate : QuizIdentifier -> Date -> QuizIdentifier
+updateQuizIdentifierDate q d = { q | date = Date.toIsoString d }
 
 updateQuizIdentifierName : QuizIdentifier -> QuizName -> QuizIdentifier
 updateQuizIdentifierName q n = { q | name = n }

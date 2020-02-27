@@ -1,6 +1,7 @@
 module Model exposing (..)
 
 import Copy exposing (LabelsField)
+import Date exposing (Date)
 import Http exposing (Error(..))
 import NewUser exposing (NewUser, NewUserField)
 import QuizRatings
@@ -170,6 +171,8 @@ type Msg
     | CreateQuiz
     | CreateUser
     | SetNewQuizName QuizName
+    | SetNewQuizDate String
+    | SetNewQuizPlace Place
     | SetNewUserParam NewUserField String
     | Login
     | LabelsUpdate LabelsField String

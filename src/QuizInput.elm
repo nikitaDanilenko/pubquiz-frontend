@@ -5,8 +5,9 @@ module QuizInput exposing (main)
 import Base exposing (SessionKey)
 import Browser
 import Constants exposing (..)
-import Copy exposing (updateLabelsByField, updateQuizIdentifierName, updateQuizInfoQuizId, updateQuizInfoQuizIdentifier, updateQuizSettingsLabels, updateQuizSettingsNumberOfTeams, updateQuizSettingsRounds)
+import Copy exposing (updateLabelsByField, updateQuizIdentifierDate, updateQuizIdentifierName, updateQuizIdentifierPlace, updateQuizInfoQuizId, updateQuizInfoQuizIdentifier, updateQuizSettingsLabels, updateQuizSettingsNumberOfTeams, updateQuizSettingsRounds)
 import Crypto.Hash exposing (sha512)
+import Date
 import Html exposing (Html)
 import Http exposing (Error)
 import Json.Decode as Decode
@@ -19,7 +20,7 @@ import RequestUtils exposing (RestKey, RestParam, RestValue, encodeWithSignature
 import RoundRating
 import Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizIdentifier, QuizName, QuizRatings, QuizSettings, UserHash, UserName, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings, jsonDecUserHash, jsonEncAction, jsonEncDbQuizId, jsonEncPassword, jsonEncQuizIdentifier, jsonEncQuizRatings, jsonEncQuizSettings, jsonEncUserName)
 import Url.Builder exposing (string)
-import Util exposing (adjustToSizeWith, isValidInternalQuizName, updateIndex)
+import Util exposing (adjustToSizeWith, isValidQuizName, updateIndex)
 import Validity
 import Views exposing (..)
 
@@ -98,7 +99,7 @@ update msg model =
                             ( { model
                                 | currentQuizSettings = Model.defaultQuizSettings
                                 , currentQuizInfo = quizInfo
-                                , quizzes = model.quizzes ++ [quizInfo]
+                                , quizzes = model.quizzes ++ [ quizInfo ]
                               }
                             , getQuizRatings quizInfo.quizId
                             )
@@ -253,18 +254,43 @@ update msg model =
         SetNewQuizName name ->
             let
                 feedback =
-                    if isValidInternalQuizName name then
+                    -- todo inline function?
+                    if isValidQuizName name then
                         ""
 
                     else
-                        String.join " "
-                            [ "Internal name contains invalid symbols:"
-                            , "only characters, numbers"
-                            , "_ and - are allowed."
-                            ]
+                        "Quiz name is empty."
             in
             ( { model
                 | currentQuizInfo = name |> updateQuizIdentifierName model.currentQuizInfo.quizIdentifier |> updateQuizInfoQuizIdentifier model.currentQuizInfo
+                , feedback = feedback
+              }
+            , Cmd.none
+            )
+
+        SetNewQuizDate dateString ->
+            let
+                ( updatedQuizInfo, feedback ) =
+                    case Date.fromIsoString dateString of
+                        Ok date ->
+                            ( date |> updateQuizIdentifierDate model.currentQuizInfo.quizIdentifier |> updateQuizInfoQuizIdentifier model.currentQuizInfo, "" )
+
+                        Err err ->
+                            ( model.currentQuizInfo, String.join " " [ err, "Using default date." ] )
+            in
+            ( { model | currentQuizInfo = updatedQuizInfo, feedback = feedback }, Cmd.none )
+
+        SetNewQuizPlace place ->
+            let
+                feedback =
+                    if not (String.isEmpty place) then
+                        ""
+
+                    else
+                        "Quiz place is empty."
+            in
+            ( { model
+                | currentQuizInfo = place |> updateQuizIdentifierPlace model.currentQuizInfo.quizIdentifier |> updateQuizInfoQuizIdentifier model.currentQuizInfo
                 , feedback = feedback
               }
             , Cmd.none
