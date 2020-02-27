@@ -82,9 +82,3 @@ loginApi = mkPath [apiLocation, "secrets"]
 sheetPDFPrefix : String
 --sheetPDFPrefix = mkPath [ serverLocation, "quizzes" ]
 sheetPDFPrefix = mkPath ["file://", "media", "nda", "DATA", "Programme", "pubquiz-server", "quizzes"]
-
-sheetPDFFile : String
-sheetPDFFile = "Sheet.pdf"
-
-qrPDFFile : String
-qrPDFFile = "QR.pdf"
