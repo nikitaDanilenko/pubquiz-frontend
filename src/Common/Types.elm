@@ -596,20 +596,20 @@ jsonEncAction  val =
 
 type alias QuizRatings  =
    { header: Header
-   , reached: Ratings
+   , ratings: Ratings
    }
 
 jsonDecQuizRatings : Json.Decode.Decoder ( QuizRatings )
 jsonDecQuizRatings =
-   Json.Decode.succeed (\pheader preached -> {header = pheader, reached = preached})
+   Json.Decode.succeed (\pheader pratings -> {header = pheader, ratings = pratings})
    |> required "header" (jsonDecHeader)
-   |> required "reached" (jsonDecRatings)
+   |> required "ratings" (jsonDecRatings)
 
 jsonEncQuizRatings : QuizRatings -> Value
 jsonEncQuizRatings  val =
    Json.Encode.object
    [ ("header", jsonEncHeader val.header)
-   , ("reached", jsonEncRatings val.reached)
+   , ("ratings", jsonEncRatings val.ratings)
    ]
 
 
@@ -670,5 +670,28 @@ jsonEncTeamQuery  val =
    [ ("teamQueryQuizId", jsonEncDbQuizId val.teamQueryQuizId)
    , ("teamQueryTeamNumber", jsonEncTeamNumber val.teamQueryTeamNumber)
    , ("teamQueryTeamCode", jsonEncCode val.teamQueryTeamCode)
+   ]
+
+
+
+type alias TeamTableInfo  =
+   { teamTable: TeamTable
+   , teamTableInfoTeamName: TeamName
+   , teamTableInfoNumberOfTeams: Int
+   }
+
+jsonDecTeamTableInfo : Json.Decode.Decoder ( TeamTableInfo )
+jsonDecTeamTableInfo =
+   Json.Decode.succeed (\pteamTable pteamTableInfoTeamName pteamTableInfoNumberOfTeams -> {teamTable = pteamTable, teamTableInfoTeamName = pteamTableInfoTeamName, teamTableInfoNumberOfTeams = pteamTableInfoNumberOfTeams})
+   |> required "teamTable" (jsonDecTeamTable)
+   |> required "teamTableInfoTeamName" (jsonDecTeamName)
+   |> required "teamTableInfoNumberOfTeams" (Json.Decode.int)
+
+jsonEncTeamTableInfo : TeamTableInfo -> Value
+jsonEncTeamTableInfo  val =
+   Json.Encode.object
+   [ ("teamTable", jsonEncTeamTable val.teamTable)
+   , ("teamTableInfoTeamName", jsonEncTeamName val.teamTableInfoTeamName)
+   , ("teamTableInfoNumberOfTeams", Json.Encode.int val.teamTableInfoNumberOfTeams)
    ]
 
