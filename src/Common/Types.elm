@@ -596,20 +596,20 @@ jsonEncAction  val =
 
 type alias QuizRatings  =
    { header: Header
-   , ratings: Ratings
+   , reached: Ratings
    }
 
 jsonDecQuizRatings : Json.Decode.Decoder ( QuizRatings )
 jsonDecQuizRatings =
-   Json.Decode.succeed (\pheader pratings -> {header = pheader, ratings = pratings})
+   Json.Decode.succeed (\pheader preached -> {header = pheader, reached = preached})
    |> required "header" (jsonDecHeader)
-   |> required "ratings" (jsonDecRatings)
+   |> required "reached" (jsonDecRatings)
 
 jsonEncQuizRatings : QuizRatings -> Value
 jsonEncQuizRatings  val =
    Json.Encode.object
    [ ("header", jsonEncHeader val.header)
-   , ("ratings", jsonEncRatings val.ratings)
+   , ("reached", jsonEncRatings val.reached)
    ]
 
 
@@ -648,4 +648,27 @@ jsonDecTeamTable =
 
 jsonEncTeamTable : TeamTable -> Value
 jsonEncTeamTable  val = (Json.Encode.list jsonEncTeamLine) val
+
+
+
+type alias TeamQuery  =
+   { teamQueryQuizId: DbQuizId
+   , teamQueryTeamNumber: TeamNumber
+   , teamQueryTeamCode: Code
+   }
+
+jsonDecTeamQuery : Json.Decode.Decoder ( TeamQuery )
+jsonDecTeamQuery =
+   Json.Decode.succeed (\pteamQueryQuizId pteamQueryTeamNumber pteamQueryTeamCode -> {teamQueryQuizId = pteamQueryQuizId, teamQueryTeamNumber = pteamQueryTeamNumber, teamQueryTeamCode = pteamQueryTeamCode})
+   |> required "teamQueryQuizId" (jsonDecDbQuizId)
+   |> required "teamQueryTeamNumber" (jsonDecTeamNumber)
+   |> required "teamQueryTeamCode" (jsonDecCode)
+
+jsonEncTeamQuery : TeamQuery -> Value
+jsonEncTeamQuery  val =
+   Json.Encode.object
+   [ ("teamQueryQuizId", jsonEncDbQuizId val.teamQueryQuizId)
+   , ("teamQueryTeamNumber", jsonEncTeamNumber val.teamQueryTeamNumber)
+   , ("teamQueryTeamCode", jsonEncCode val.teamQueryTeamCode)
+   ]
 
