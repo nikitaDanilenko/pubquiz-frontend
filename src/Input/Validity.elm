@@ -1,5 +1,5 @@
 module Input.Validity exposing ( .. )
-
+-- todo: check necessity
 type alias Validity = 
     {
         serverTextOK : Bool,
