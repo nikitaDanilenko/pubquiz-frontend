@@ -7,7 +7,7 @@ import Common.Copy exposing (updateLabelsByField, updateQuizIdentifierDate, upda
 import Common.QuizRatings as QuizRatings
 import Common.RoundRating as RoundRating
 import Common.Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizIdentifier, QuizName, QuizRatings, QuizSettings, UserHash, UserName, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings, jsonDecUserHash, jsonEncAction, jsonEncDbQuizId, jsonEncPassword, jsonEncQuizIdentifier, jsonEncQuizRatings, jsonEncQuizSettings, jsonEncUserName)
-import Common.Util as Util exposing (adjustToSizeWith, isValidQuizName, updateIndex)
+import Common.Util as Util exposing (adjustToSizeWith, getMsg, isValidQuizName, updateIndex)
 import Crypto.Hash exposing (sha512)
 import Date
 import Html exposing (Html)
@@ -426,14 +426,6 @@ getAll =
     Http.get
         { url = allApi
         , expect = Http.expectJson (\x -> x |> GotAll |> ResponseF) (Decode.list jsonDecQuizInfo)
-        }
-
-
-getMsg : String -> (Result Error a -> Msg) -> Decode.Decoder a -> DbQuizId -> Cmd Msg
-getMsg path action decoder quizId =
-    Http.get
-        { url = Url.Builder.relative [ path ] [ string quizIdParam (Encode.encode 0 (jsonEncDbQuizId quizId)) ]
-        , expect = Http.expectJson action decoder
         }
 
 

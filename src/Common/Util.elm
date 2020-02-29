@@ -1,6 +1,11 @@
 module Common.Util exposing ( .. )
 
-import Common.Types exposing (TeamRating)
+import Common.Constants exposing (quizIdParam)
+import Common.Types exposing (DbQuizId, TeamRating, jsonEncDbQuizId)
+import Http exposing (Error)
+import Json.Decode as Decode
+import Json.Encode as Encode
+import Url.Builder exposing (string)
 
 escapeHTML : String -> String
 escapeHTML str = case String.uncons str of
@@ -46,3 +51,10 @@ find : (a -> Bool) -> List a -> Maybe a
 find p l = case l of
   [] -> Nothing
   (x :: xs) -> if p x then Just x else find p xs
+
+getMsg : String -> (Result Error a -> msg) -> Decode.Decoder a -> DbQuizId -> Cmd msg
+getMsg path action decoder quizId =
+    Http.get
+        { url = Url.Builder.relative [ path ] [ string quizIdParam (Encode.encode 0 (jsonEncDbQuizId quizId)) ]
+        , expect = Http.expectJson action decoder
+        }
