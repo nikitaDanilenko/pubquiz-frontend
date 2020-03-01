@@ -3,7 +3,6 @@ module Input.Model exposing (..)
 import Common.Copy exposing (LabelsField)
 import Common.QuizRatings as QuizRatings
 import Common.Types exposing (Activity(..), DbQuizId, Header, Labels, Password, Place, QuizDate, QuizIdentifier, QuizInfo, QuizName, QuizRatings, QuizSettings, Ratings, RoundNumber, TeamNumber, UserHash, UserName)
-import Date exposing (Date)
 import Http exposing (Error(..))
 import Input.NewUser as NewUser exposing (NewUser, NewUserField)
 import Input.Validity as Validity exposing (Validity)
