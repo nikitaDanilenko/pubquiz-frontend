@@ -93,7 +93,7 @@ quizView quizRatings labels =
         , div [ id "cumulativeChart" ]
             [ chart 798 599 (Charts.cumulativeChart sortedHeader cumulativePoints roundLabels labels.cumulativeLabel) ]
         , div [ id "progressionChart" ]
-            [ chart 798 599 (Charts.progressionChart sortedHeader cumulativePoints roundLabels labels.cumulativeLabel) ]
+            [ chart 798 599 (Charts.progressionChart sortedHeader cumulativePoints roundLabels labels.progressionLabel) ]
         ]
 
 
