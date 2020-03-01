@@ -284,8 +284,8 @@ mkCreationForm md createOnEnter labels =
                 ]
     in
     [ mkIdentifierPart "quizNameDiv" "quizName" "Quiz name" "text" "e.g. Quiz" SetNewQuizName
-    , mkIdentifierPart "quizDateDiv" "quizDate" "Quiz name" "date" "e.g. 2020-01-01" SetNewQuizDate
-    , mkIdentifierPart "quizPlaceDiv" "quizPlace" "Quiz name" "text" "e.g. Cheers" SetNewQuizPlace
+    , mkIdentifierPart "quizDateDiv" "quizDate" "Quiz date" "date" "e.g. 2020-01-01" SetNewQuizDate
+    , mkIdentifierPart "quizPlaceDiv" "quizPlace" "Quiz place" "text" "e.g. Cheers" SetNewQuizPlace
     , div [ id "roundsNumberDiv" ]
         [ label [ for "roundsNumber" ]
             [ text "Number of rounds" ]
