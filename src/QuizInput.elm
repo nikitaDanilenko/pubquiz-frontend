@@ -7,7 +7,7 @@ import Common.Copy exposing (updateLabelsByField, updateQuizIdentifierDate, upda
 import Common.QuizRatings as QuizRatings
 import Common.RoundRating as RoundRating
 import Common.Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizIdentifier, QuizName, QuizRatings, QuizSettings, UserHash, UserName, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings, jsonDecUserHash, jsonEncAction, jsonEncDbQuizId, jsonEncPassword, jsonEncQuizIdentifier, jsonEncQuizRatings, jsonEncQuizSettings, jsonEncUserName)
-import Common.Util as Util exposing (adjustToSizeWith, getMsg, isValidQuizName, updateIndex)
+import Common.Util as Util exposing (adjustToSizeWith, getAllWith, getMsg, isValidQuizName, updateIndex)
 import Crypto.Hash exposing (sha512)
 import Date
 import Html exposing (Html)
@@ -416,27 +416,22 @@ login : UserName -> Password -> Cmd Msg
 login user password =
     Http.post
         { url = loginApi
-        , expect = Http.expectJson (\x -> x |> Logged |> ResponseF) jsonDecUserHash
+        , expect = Http.expectJson (Logged >> ResponseF) jsonDecUserHash
         , body = encodeBody (mkJSONParams [ ( userParam, jsonEncUserName user ), ( passwordParam, jsonEncPassword password ) ])
         }
 
 
 getAll : Cmd Msg
-getAll =
-    Http.get
-        { url = allApi
-        , expect = Http.expectJson (\x -> x |> GotAll |> ResponseF) (Decode.list jsonDecQuizInfo)
-        }
-
+getAll = getAllWith (GotAll >> ResponseF)
 
 getLabels : DbQuizId -> Cmd Msg
 getLabels =
-    getMsg getLabelsApi (\x -> x |> GotLabels |> ResponseF) jsonDecLabels
+    getMsg getLabelsApi (GotLabels >> ResponseF) jsonDecLabels
 
 
 getQuizRatings : DbQuizId -> Cmd Msg
 getQuizRatings =
-    getMsg getQuizRatingsApi (\x -> x |> GotQuizRatings |> ResponseF) jsonDecQuizRatings
+    getMsg getQuizRatingsApi (GotQuizRatings >> ResponseF) jsonDecQuizRatings
 
 
 postUpdate : UserName -> SessionKey -> DbQuizId -> QuizRatings -> Cmd Msg
@@ -482,7 +477,7 @@ createNewQuiz u sk idf s =
                     , ( actionParam, jsonEncAction CreateQuizA )
                     ]
                 )
-        , expect = Http.expectJson (\x -> x |> CreatedQuiz |> ResponseF) jsonDecQuizInfo
+        , expect = Http.expectJson (CreatedQuiz >> ResponseF) jsonDecQuizInfo
         }
 
 
