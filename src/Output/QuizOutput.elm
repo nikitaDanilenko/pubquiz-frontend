@@ -4,6 +4,7 @@ import Browser
 import Common.Constants exposing (getQuizRatingsApi, teamQueryParam, teamTableApi)
 import Common.Types exposing (DbQuizId, QuizInfo, TeamQuery, jsonDecQuizRatings, jsonDecTeamTable, jsonEncTeamQuery)
 import Common.Util exposing (getAllWith, getMsg, getMsgWith)
+import Input.Model exposing (ErrorOr)
 import Output.Model as Model exposing (Model, Msg(..), QuizModelKind, SubModel(..), initialModelFunction)
 import Output.Views exposing (view)
 
@@ -21,53 +22,36 @@ main =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.subModel ) of
-        ( GetQuizRatings qid, AllModel _ ) ->
-            ( model, getQuizRatings qid )
+        ( GetQuizRatings quizInfo, _ ) ->
+            ( model, getQuizRatings quizInfo )
 
-        ( GotQuizRatings qid qrCandidate, AllModel _ ) ->
-            let
-                newModel =
-                    case qrCandidate of
-                        Ok quizRatings ->
-                            QuizModel quizRatings qid
-
-                        Err _ ->
-                            model.subModel
-            in
-            ( { model | subModel = newModel }, Cmd.none )
+        ( GotQuizRatings quizInfo qrCandidate, _ ) ->
+            ( updateSubModel (Result.map (\quizRatings -> QuizModel quizRatings quizInfo) qrCandidate) model, Cmd.none )
 
         ( GetTeamTable, QuizModel _ _ ) ->
             ( model, getTeamTable model.teamQuery )
 
         ( GotTeamTable teamTableCandidate, QuizModel _ quizInfo ) ->
-            let
-                newModel =
-                    case teamTableCandidate of
-                        Ok teamTable ->
-                            TableModel teamTable quizInfo
-
-                        Err _ ->
-                            model.subModel
-            in
-            ( { model | subModel = newModel }, Cmd.none )
+            ( updateSubModel (Result.map (\table -> TableModel table quizInfo) teamTableCandidate) model, Cmd.none )
 
         ( GetAllQuizzes, QuizModel _ _ ) ->
             ( model, getAllQuizzes )
 
         ( GotAllQuizzes quizzesCandidate, QuizModel _ _ ) ->
-            let
-                newModel =
-                    case Debug.log "candidate" quizzesCandidate of
-                        Ok quizInfos ->
-                            AllModel quizInfos
-
-                        Err _ ->
-                            model.subModel
-            in
-            ( { model | subModel = newModel }, Cmd.none )
+            ( updateSubModel (Result.map AllModel quizzesCandidate) model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
+
+
+updateSubModel : ErrorOr SubModel -> Model -> Model
+updateSubModel sub model =
+    case sub of
+        Ok subModel ->
+            { model | subModel = subModel }
+
+        Err _ ->
+            model
 
 
 getQuizRatings : QuizInfo -> Cmd Msg
