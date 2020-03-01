@@ -43,6 +43,9 @@ quizRatingsParam = "quizRatings"
 credentialsParam : String
 credentialsParam = "credentials"
 
+teamQueryParam : String
+teamQueryParam = "teamQuery"
+
 mkPath : List String -> String
 mkPath = String.join "/"
 
@@ -72,6 +75,9 @@ getLabelsApi = mkPath [quizApi, "getLabels"]
 
 updateQuizSettingsApi : String
 updateQuizSettingsApi = mkPath [quizApi, "updateQuizSettings"]
+
+teamTableApi : String
+teamTableApi = "teamTable"
 
 allApi : String
 allApi = mkPath [quizApi, "all"]
