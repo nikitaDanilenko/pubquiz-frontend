@@ -3,7 +3,7 @@ module Output.Model exposing (..)
 import Common.Types exposing (Activity(..), Code, DbQuizId, Labels, QuizIdentifier, QuizInfo, QuizRatings, TeamNumber, TeamQuery, TeamTable)
 import Input.Model exposing (ErrorOr)
 
-
+--todo: extract labels
 type Model
     = TableModel TeamTable QuizInfo Labels
     | QuizModel QuizRatings QuizInfo Labels

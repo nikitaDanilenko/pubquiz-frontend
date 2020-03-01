@@ -5,7 +5,7 @@ import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine,
 import Html exposing (Html, button, div, table, td, text, th, tr)
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
-import List.Extra exposing (transpose)
+import List.Extra exposing (scanl, transpose)
 import Output.Charts as Charts
 import Output.Model exposing (Model(..), Msg(..), mkFullQuizName)
 
@@ -75,16 +75,25 @@ quizView quizRatings labels =
         sortedHeader =
             List.sortBy .teamInfoNumber quizRatings.header
 
-        roundLabels = List.map (\( n, _ ) -> String.join " " [ labels.roundLabel, String.fromInt n ]) sortedRatings
+        roundLabels =
+            List.map (\( n, _ ) -> String.join " " [ labels.roundLabel, String.fromInt n ]) sortedRatings
 
         rearranged =
             transpose (List.map (\( rn, rat ) -> rat.points |> List.sortBy .teamNumber |> List.map (\x -> ( rn, x ))) sortedRatings)
+
+        perRoundPoints =
+            List.map (List.map (\a -> a |> Tuple.second |> .rating)) rearranged
+
+        cumulativePoints =
+            List.map (\xs -> xs |> scanl (\( _, nextTr ) current -> current + nextTr.rating) 0 |> List.drop 1) rearranged
     in
-    div [id "charts"]
+    div [ id "charts" ]
         [ div [ id "perRoundChart" ]
-              [ chart 798 599 (Charts.perRoundChart sortedHeader rearranged roundLabels labels) ],
-          div [ id "cumulativeChart"]
-              [ chart 798 599 (Charts.cumulativeChart sortedHeader rearranged roundLabels labels)]
+            [ chart 798 599 (Charts.perRoundChart sortedHeader perRoundPoints roundLabels labels.individualRoundsLabel) ]
+        , div [ id "cumulativeChart" ]
+            [ chart 798 599 (Charts.cumulativeChart sortedHeader cumulativePoints roundLabels labels.cumulativeLabel) ]
+        , div [ id "progressionChart" ]
+            [ chart 798 599 (Charts.progressionChart sortedHeader cumulativePoints roundLabels labels.cumulativeLabel) ]
         ]
 
 
