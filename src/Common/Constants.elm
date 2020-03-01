@@ -77,7 +77,7 @@ updateQuizSettingsApi : String
 updateQuizSettingsApi = mkPath [quizApi, "updateQuizSettings"]
 
 teamTableApi : String
-teamTableApi = "teamTable"
+teamTableApi = mkPath [quizApi, "teamTable"]
 
 allApi : String
 allApi = mkPath [quizApi, "all"]
