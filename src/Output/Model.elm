@@ -1,7 +1,7 @@
 module Output.Model exposing (..)
 
-import Common.Types exposing (Code, DbQuizId, Labels, QuizIdentifier, QuizInfo, QuizRatings, TeamNumber, TeamQuery, TeamTable)
-import Input.Model
+import Common.Types exposing (Activity(..), Code, DbQuizId, Labels, QuizIdentifier, QuizInfo, QuizRatings, TeamNumber, TeamQuery, TeamTable)
+import Input.Model exposing (ErrorOr)
 
 
 type Model
@@ -33,7 +33,8 @@ mkFullQuizName idf =
 
 
 type Msg
-    = Any
+    = GetQuizRatings DbQuizId
+    | GotQuizRatings (ErrorOr QuizRatings)
 
 
 initialModelFunction : () -> ( Model, Cmd Msg )
@@ -43,4 +44,13 @@ initialModelFunction _ =
 
 initialModel : Model
 initialModel =
-    AllModel [] Input.Model.defaultLabels
+    QuizModel testRatings Input.Model.defaultQuizInfo Input.Model.defaultLabels
+
+testRatings : QuizRatings
+testRatings = {
+  header = [{teamInfoName = "G1", teamInfoCode = "", teamInfoNumber = 1, teamInfoActivity = Active},
+            {teamInfoName = "Gruppe 2", teamInfoCode = "", teamInfoNumber = 2, teamInfoActivity = Active}],
+  ratings = [(1, {reachableInRound = 8, points = [{ teamNumber = 1, rating = 2 }, { teamNumber = 2, rating = 5 }]}),
+             (2, {reachableInRound = 9, points = [{ teamNumber = 1, rating = 7 }, { teamNumber = 2, rating = 3 }]})
+            ]
+  }
