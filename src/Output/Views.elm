@@ -7,7 +7,7 @@ import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import List.Extra exposing (scanl, transpose)
 import Output.Charts as Charts
-import Output.Model exposing (Model(..), Msg(..), mkFullQuizName)
+import Output.Model exposing (Model(..), Msg(..), QuizModelKind(..), mkFullQuizName)
 
 
 view : Model -> Html Msg
@@ -16,8 +16,8 @@ view model =
         TableModel teamTable quizInfo labels ->
             tableView teamTable quizInfo.quizId labels
 
-        QuizModel quizRatings _ labels ->
-            quizView quizRatings labels
+        QuizModel quizRatings _ kind labels ->
+            quizView quizRatings labels kind
 
         AllModel quizInfos _ ->
             allView quizInfos
@@ -66,8 +66,8 @@ showStanding ( reached, reachable ) =
     String.join "/" [ String.fromFloat reached, String.fromFloat reachable ]
 
 
-quizView : QuizRatings -> Labels -> Html Msg
-quizView quizRatings labels =
+quizView : QuizRatings -> Labels -> QuizModelKind -> Html Msg
+quizView quizRatings labels kind =
     let
         sortedRatings =
             List.sortBy Tuple.first quizRatings.ratings
@@ -86,15 +86,22 @@ quizView quizRatings labels =
 
         cumulativePoints =
             List.map (\xs -> xs |> scanl (\( _, nextTr ) current -> current + nextTr.rating) 0 |> List.drop 1) rearranged
+
+        backToTable = case kind of
+                        Current teamQuery -> [ div [id "backToTable"] [ button [class "ownPointsButton", onClick (GetTeamTable teamQuery)]
+                                               [ text labels.ownPointsLabel ] ] ]
+                        Other -> []
     in
     div [ id "charts" ]
-        [ div [ id "perRoundChart" ]
+        ([ div [ id "perRoundChart" ]
             [ chart 798 599 (Charts.perRoundChart sortedHeader perRoundPoints roundLabels labels.individualRoundsLabel) ]
         , div [ id "cumulativeChart" ]
             [ chart 798 599 (Charts.cumulativeChart sortedHeader cumulativePoints roundLabels labels.cumulativeLabel) ]
         , div [ id "progressionChart" ]
             [ chart 798 599 (Charts.progressionChart sortedHeader cumulativePoints roundLabels labels.progressionLabel) ]
-        ]
+        , div [ id "allQuizzes" ]
+              [ button [ class "allQuizzesButton", onClick GetAllQuizzes] [ text labels.viewPrevious ] ]
+        ] ++ backToTable)
 
 
 allView : List QuizInfo -> Html Msg
