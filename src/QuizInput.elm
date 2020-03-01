@@ -480,7 +480,7 @@ createNewQuiz u sk idf s =
         , expect = Http.expectJson (CreatedQuiz >> ResponseF) jsonDecQuizInfo
         }
 
-
+-- todo: This is not working right now.
 createNewUser : UserName -> SessionKey -> NewUser -> Cmd Msg
 createNewUser u sk newUser =
     let
