@@ -3,25 +3,40 @@ module Output.Model exposing (..)
 import Common.Types exposing (Activity(..), Code, DbQuizId, Labels, QuizIdentifier, QuizInfo, QuizRatings, TeamNumber, TeamQuery, TeamTable)
 import Input.Model exposing (ErrorOr)
 
---todo: extract labels
-type Model
-    = TableModel TeamTable QuizInfo Labels
-    | QuizModel QuizRatings QuizInfo QuizModelKind Labels
-    | AllModel (List QuizInfo) Labels
 
-type QuizModelKind = Current TeamQuery | Other
+
+--todo: extract labels
+
+
+type alias Model =
+    { teamQuery : TeamQuery
+    , labels : Labels
+    , subModel : SubModel
+    }
+
+
+type SubModel
+    = TableModel TeamTable QuizInfo
+    | QuizModel QuizRatings QuizInfo
+    | AllModel (List QuizInfo)
+
+
+type QuizModelKind
+    = Current
+    | Other
+
 
 titleFor : Model -> String
 titleFor model =
-    case model of
-        TableModel _ quizInfo labels ->
-            String.join " - " [ mkFullQuizName quizInfo.quizIdentifier, labels.ownPointsLabel ]
+    case model.subModel of
+        TableModel _ quizInfo ->
+            String.join " - " [ mkFullQuizName quizInfo.quizIdentifier, model.labels.ownPointsLabel ]
 
-        QuizModel _ quizInfo _ labels ->
-            String.join " - " [ mkFullQuizName quizInfo.quizIdentifier, labels.backToChartView ]
+        QuizModel _ quizInfo ->
+            String.join " - " [ mkFullQuizName quizInfo.quizIdentifier, model.labels.backToChartView ]
 
-        AllModel _ labels ->
-            labels.viewPrevious
+        AllModel _ ->
+            model.labels.viewPrevious
 
 
 mkFullQuizName : QuizIdentifier -> String
@@ -34,9 +49,9 @@ mkFullQuizName idf =
 
 
 type Msg
-    = GetQuizRatings DbQuizId
-    | GotQuizRatings (ErrorOr QuizRatings)
-    | GetTeamTable TeamQuery
+    = GetQuizRatings QuizInfo
+    | GotQuizRatings QuizInfo (ErrorOr QuizRatings)
+    | GetTeamTable
     | GotTeamTable (ErrorOr TeamTable)
     | GetAllQuizzes
     | GotAllQuizzes (ErrorOr (List QuizInfo))
@@ -49,14 +64,19 @@ initialModelFunction _ =
 
 initialModel : Model
 initialModel =
-    QuizModel testRatings Input.Model.defaultQuizInfo (Current { teamQueryQuizId = 1, teamQueryTeamNumber = 1, teamQueryTeamCode = "" }) Input.Model.defaultLabels
+  let quizInfo =  Input.Model.defaultQuizInfo
+  in  Model { teamQueryQuizId = 1, teamQueryTeamNumber = 1, teamQueryTeamCode = "d1215d" } Input.Model.defaultLabels (QuizModel testRatings { quizInfo | quizId = 1 })
+
 
 testRatings : QuizRatings
-testRatings = {
-  header = [{teamInfoName = "G1", teamInfoCode = "", teamInfoNumber = 1, teamInfoActivity = Active},
-            {teamInfoName = "Gruppe 2", teamInfoCode = "", teamInfoNumber = 2, teamInfoActivity = Active}],
-  ratings = [(1, {reachableInRound = 8, points = [{ teamNumber = 1, rating = 2 }, { teamNumber = 2, rating = 5 }]}),
-             (2, {reachableInRound = 9, points = [{ teamNumber = 1, rating = 7 }, { teamNumber = 2, rating = 3 }]}),
-             (2, {reachableInRound = 10, points = [{ teamNumber = 1, rating = 4 }, { teamNumber = 2, rating = 6 }]})
-            ]
-  }
+testRatings =
+    { header =
+        [ { teamInfoName = "G1", teamInfoCode = "", teamInfoNumber = 1, teamInfoActivity = Active }
+        , { teamInfoName = "Gruppe 2", teamInfoCode = "", teamInfoNumber = 2, teamInfoActivity = Active }
+        ]
+    , ratings =
+        [ ( 1, { reachableInRound = 8, points = [ { teamNumber = 1, rating = 2 }, { teamNumber = 2, rating = 5 } ] } )
+        , ( 2, { reachableInRound = 9, points = [ { teamNumber = 1, rating = 7 }, { teamNumber = 2, rating = 3 } ] } )
+        , ( 2, { reachableInRound = 10, points = [ { teamNumber = 1, rating = 4 }, { teamNumber = 2, rating = 6 } ] } )
+        ]
+    }

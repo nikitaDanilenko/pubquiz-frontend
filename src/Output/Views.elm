@@ -1,30 +1,31 @@
 module Output.Views exposing (..)
 
 import Chartjs.Chart exposing (chart)
-import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine, TeamTable)
+import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine, TeamQuery, TeamTable)
 import Html exposing (Html, button, div, table, td, text, th, tr)
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import List.Extra exposing (scanl, transpose)
 import Output.Charts as Charts
-import Output.Model exposing (Model(..), Msg(..), QuizModelKind(..), mkFullQuizName)
+import Output.Model exposing (Model, Msg(..), QuizModelKind(..), SubModel(..), mkFullQuizName)
 
 
 view : Model -> Html Msg
 view model =
-    case model of
-        TableModel teamTable quizInfo labels ->
-            tableView teamTable quizInfo.quizId labels
+    case model.subModel of
+        TableModel teamTable quizInfo ->
+            tableView teamTable quizInfo model.labels
 
-        QuizModel quizRatings _ kind labels ->
-            quizView quizRatings labels kind
+        QuizModel quizRatings quizInfo ->
+            quizView quizRatings (if model.teamQuery.teamQueryQuizId == quizInfo.quizId then Possible else Impossible) model.labels
 
-        AllModel quizInfos _ ->
+        AllModel quizInfos ->
             allView quizInfos
 
+type BackToTable = Possible | Impossible
 
-tableView : TeamTable -> DbQuizId -> Labels -> Html Msg
-tableView teamTable qid labels =
+tableView : TeamTable -> QuizInfo -> Labels -> Html Msg
+tableView teamTable quizInfo labels =
     div [ id "tableView" ]
         [ div [ id "ownPoints" ]
             -- todo: Add colour parameter
@@ -42,7 +43,7 @@ tableView teamTable qid labels =
                 )
             ]
         , div [ id "quizRatings" ]
-            [ button [ class "quizRatingsButton", onClick (GetQuizRatings qid) ] [ text labels.backToChartView ] ]
+            [ button [ class "quizRatingsButton", onClick (GetQuizRatings quizInfo) ] [ text labels.backToChartView ] ]
         ]
 
 
@@ -66,8 +67,8 @@ showStanding ( reached, reachable ) =
     String.join "/" [ String.fromFloat reached, String.fromFloat reachable ]
 
 
-quizView : QuizRatings -> Labels -> QuizModelKind -> Html Msg
-quizView quizRatings labels kind =
+quizView : QuizRatings -> BackToTable -> Labels -> Html Msg
+quizView quizRatings btt labels =
     let
         sortedRatings =
             List.sortBy Tuple.first quizRatings.ratings
@@ -82,15 +83,15 @@ quizView quizRatings labels kind =
             transpose (List.map (\( rn, rat ) -> rat.points |> List.sortBy .teamNumber |> List.map (\x -> ( rn, x ))) sortedRatings)
 
         perRoundPoints =
-            List.map (List.map (\a -> a |> Tuple.second |> .rating)) rearranged
+            List.map (List.map (Tuple.second >> .rating)) rearranged
 
         cumulativePoints =
-            List.map (\xs -> xs |> scanl (\( _, nextTr ) current -> current + nextTr.rating) 0 |> List.drop 1) rearranged
+            List.map (scanl (\( _, nextTr ) current -> current + nextTr.rating) 0 >> List.drop 1) rearranged
 
-        backToTable = case kind of
-                        Current teamQuery -> [ div [id "backToTable"] [ button [class "ownPointsButton", onClick (GetTeamTable teamQuery)]
+        backToTable = case btt of
+                        Possible -> [ div [id "backToTable"] [ button [class "ownPointsButton", onClick GetTeamTable]
                                                [ text labels.ownPointsLabel ] ] ]
-                        Other -> []
+                        Impossible -> []
     in
     div [ id "charts" ]
         ([ div [ id "perRoundChart" ]
@@ -113,6 +114,6 @@ allView quizInfos =
 mkQuizInfoButton : QuizInfo -> Html Msg
 mkQuizInfoButton quizInfo =
     div []
-        [ button [ class "quizInfoButton", onClick (GetQuizRatings quizInfo.quizId) ]
+        [ button [ class "quizInfoButton", onClick (GetQuizRatings quizInfo) ]
             [ text (mkFullQuizName quizInfo.quizIdentifier) ]
         ]

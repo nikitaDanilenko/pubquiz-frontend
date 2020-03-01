@@ -2,9 +2,9 @@ module Output.QuizOutput exposing (..)
 
 import Browser
 import Common.Constants exposing (getQuizRatingsApi, teamQueryParam, teamTableApi)
-import Common.Types exposing (DbQuizId, TeamQuery, jsonDecQuizRatings, jsonDecTeamTable, jsonEncTeamQuery)
+import Common.Types exposing (DbQuizId, QuizInfo, TeamQuery, jsonDecQuizRatings, jsonDecTeamTable, jsonEncTeamQuery)
 import Common.Util exposing (getAllWith, getMsg, getMsgWith)
-import Output.Model as Model exposing (Model(..), Msg(..), initialModelFunction)
+import Output.Model as Model exposing (Model, Msg(..), QuizModelKind, SubModel(..), initialModelFunction)
 import Output.Views exposing (view)
 
 
@@ -20,50 +20,59 @@ main =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case ( msg, model ) of
-        ( GetQuizRatings qid, AllModel _ _ ) ->
+    case ( msg, model.subModel ) of
+        ( GetQuizRatings qid, AllModel _ ) ->
             ( model, getQuizRatings qid )
 
-        --( GotQuizRatings qrCandidate, _ ) ->
-        --   case qrCandidate of
-        --     Ok quizRatings ->
-        ( GetTeamTable teamQuery, QuizModel _ _ _ _ ) ->
-            ( model, getTeamTable teamQuery )
+        ( GotQuizRatings qid qrCandidate, AllModel _ ) ->
+            let
+                newModel =
+                    case qrCandidate of
+                        Ok quizRatings ->
+                            QuizModel quizRatings qid
 
-        ( GotTeamTable teamTableCandidate, QuizModel _ quizInfo _ labels ) ->
+                        Err _ ->
+                            model.subModel
+            in
+            ( { model | subModel = newModel }, Cmd.none )
+
+        ( GetTeamTable, QuizModel _ _ ) ->
+            ( model, getTeamTable model.teamQuery )
+
+        ( GotTeamTable teamTableCandidate, QuizModel _ quizInfo ) ->
             let
                 newModel =
                     case teamTableCandidate of
                         Ok teamTable ->
-                            TableModel teamTable quizInfo labels
+                            TableModel teamTable quizInfo
 
                         Err _ ->
-                            model
+                            model.subModel
             in
-            ( newModel, Cmd.none )
+            ( { model | subModel = newModel }, Cmd.none )
 
-        ( GetAllQuizzes, QuizModel _ _ _ _ ) ->
+        ( GetAllQuizzes, QuizModel _ _ ) ->
             ( model, getAllQuizzes )
 
-        ( GotAllQuizzes quizzesCandidate, QuizModel _ _ _ labels ) ->
+        ( GotAllQuizzes quizzesCandidate, QuizModel _ _ ) ->
             let
                 newModel =
                     case Debug.log "candidate" quizzesCandidate of
                         Ok quizInfos ->
-                            AllModel quizInfos labels
+                            AllModel quizInfos
 
                         Err _ ->
-                            model
+                            model.subModel
             in
-            ( newModel, Cmd.none )
+            ( { model | subModel = newModel }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
 
 
-getQuizRatings : DbQuizId -> Cmd Msg
-getQuizRatings =
-    getMsg getQuizRatingsApi GotQuizRatings jsonDecQuizRatings
+getQuizRatings : QuizInfo -> Cmd Msg
+getQuizRatings quizInfo =
+    getMsg getQuizRatingsApi (GotQuizRatings quizInfo) jsonDecQuizRatings quizInfo.quizId
 
 
 getTeamTable : TeamQuery -> Cmd Msg
