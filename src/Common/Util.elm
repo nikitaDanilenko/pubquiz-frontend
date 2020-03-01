@@ -58,6 +58,3 @@ getMsg path action decoder quizId =
         { url = Url.Builder.relative [ path ] [ string quizIdParam (Encode.encode 0 (jsonEncDbQuizId quizId)) ]
         , expect = Http.expectJson action decoder
         }
-
-uncurry : (a -> b -> c) -> (a, b) -> c
-uncurry f (x, y) = f x y

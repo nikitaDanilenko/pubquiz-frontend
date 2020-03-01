@@ -2,9 +2,10 @@ module Output.Views exposing (..)
 
 import Chartjs.Chart exposing (chart)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine, TeamTable)
-import Html exposing (Html, button, div, node, table, td, text, th, tr)
-import Html.Attributes exposing (attribute, class, id, src)
+import Html exposing (Html, button, div, table, td, text, th, tr)
+import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
+import List.Extra exposing (transpose)
 import Output.Charts as Charts
 import Output.Model exposing (Model(..), Msg(..), mkFullQuizName)
 
@@ -44,6 +45,7 @@ tableView teamTable qid labels =
             [ button [ class "quizRatingsButton", onClick (GetQuizRatings qid) ] [ text labels.backToChartView ] ]
         ]
 
+
 mkHTMLLine : TeamLine -> Html Msg
 mkHTMLLine ti =
     tr []
@@ -66,8 +68,24 @@ showStanding ( reached, reachable ) =
 
 quizView : QuizRatings -> Labels -> Html Msg
 quizView quizRatings labels =
-    div [id "overallView"]
-        [ chart 800 600 (Charts.perRoundChart quizRatings labels)  ]
+    let
+        sortedRatings =
+            List.sortBy Tuple.first quizRatings.ratings
+
+        sortedHeader =
+            List.sortBy .teamInfoNumber quizRatings.header
+
+        roundLabels = List.map (\( n, _ ) -> String.join " " [ labels.roundLabel, String.fromInt n ]) sortedRatings
+
+        rearranged =
+            transpose (List.map (\( rn, rat ) -> rat.points |> List.sortBy .teamNumber |> List.map (\x -> ( rn, x ))) sortedRatings)
+    in
+    div [id "charts"]
+        [ div [ id "perRoundChart" ]
+              [ chart 798 599 (Charts.perRoundChart sortedHeader rearranged roundLabels labels) ],
+          div [ id "cumulativeChart"]
+              [ chart 798 599 (Charts.cumulativeChart sortedHeader rearranged roundLabels labels)]
+        ]
 
 
 allView : List QuizInfo -> Html Msg
