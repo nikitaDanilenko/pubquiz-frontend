@@ -18,18 +18,11 @@ actionParam = "action"
 quizIdParam : String
 quizIdParam = "quizId"
 
-
-newUserParam : String
-newUserParam = "newUser"
-
 userParam : String
 userParam = "user"
 
 passwordParam : String
 passwordParam = "pass"
-
-signatureParam : String
-signatureParam = "signature"
 
 quizIdentifierParam : String
 quizIdentifierParam = "quizIdentifier"
