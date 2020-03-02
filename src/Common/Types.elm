@@ -695,3 +695,23 @@ jsonEncTeamTableInfo  val =
    , ("teamTableInfoNumberOfTeams", Json.Encode.int val.teamTableInfoNumberOfTeams)
    ]
 
+
+
+type alias UserCreation  =
+   { userCreationUser: UserName
+   , userCreationPassword: Password
+   }
+
+jsonDecUserCreation : Json.Decode.Decoder ( UserCreation )
+jsonDecUserCreation =
+   Json.Decode.succeed (\puserCreationUser puserCreationPassword -> {userCreationUser = puserCreationUser, userCreationPassword = puserCreationPassword})
+   |> required "userCreationUser" (jsonDecUserName)
+   |> required "userCreationPassword" (jsonDecPassword)
+
+jsonEncUserCreation : UserCreation -> Value
+jsonEncUserCreation  val =
+   Json.Encode.object
+   [ ("userCreationUser", jsonEncUserName val.userCreationUser)
+   , ("userCreationPassword", jsonEncPassword val.userCreationPassword)
+   ]
+

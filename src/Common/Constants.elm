@@ -46,6 +46,9 @@ credentialsParam = "credentials"
 teamQueryParam : String
 teamQueryParam = "teamQuery"
 
+userCreationParam : String
+userCreationParam = "userCreation"
+
 mkPath : List String -> String
 mkPath = String.join "/"
 

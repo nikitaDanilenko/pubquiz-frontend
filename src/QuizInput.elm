@@ -2,25 +2,21 @@ module QuizInput exposing (main)
 
 import Browser
 import Common.Base exposing (SessionKey)
-import Common.Constants exposing (actionParam, allApi, getLabelsApi, getQuizRatingsApi, lockApi, loginApi, newApi, newUserApi, newUserParam, passwordParam, quizIdParam, quizIdentifierParam, quizRatingsParam, quizSettingsParam, signatureParam, updateApi, updateQuizSettingsApi, userParam)
+import Common.Constants exposing (actionParam, getLabelsApi, getQuizRatingsApi, lockApi, loginApi, newApi, newUserApi, passwordParam, quizIdParam, quizIdentifierParam, quizRatingsParam, quizSettingsParam, updateApi, updateQuizSettingsApi, userCreationParam, userParam)
 import Common.Copy exposing (updateLabelsByField, updateQuizIdentifierDate, updateQuizIdentifierName, updateQuizIdentifierPlace, updateQuizInfoQuizId, updateQuizInfoQuizIdentifier, updateQuizSettingsLabels, updateQuizSettingsNumberOfTeams, updateQuizSettingsRounds)
 import Common.QuizRatings as QuizRatings
 import Common.RoundRating as RoundRating
-import Common.Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizIdentifier, QuizName, QuizRatings, QuizSettings, UserHash, UserName, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings, jsonDecUserHash, jsonEncAction, jsonEncDbQuizId, jsonEncPassword, jsonEncQuizIdentifier, jsonEncQuizRatings, jsonEncQuizSettings, jsonEncUserName)
+import Common.Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizIdentifier, QuizName, QuizRatings, QuizSettings, UserHash, UserName, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings, jsonDecUserHash, jsonEncAction, jsonEncDbQuizId, jsonEncPassword, jsonEncQuizIdentifier, jsonEncQuizRatings, jsonEncQuizSettings, jsonEncUserCreation, jsonEncUserName)
 import Common.Util as Util exposing (adjustToSizeWith, getAllWith, getMsg, isValidQuizName, updateIndex)
-import Crypto.Hash exposing (sha512)
 import Date
 import Html exposing (Html)
 import Http exposing (Error)
 import Input.Model as Model exposing (DisplayState(..), Edited(..), ErrorOr, Model, Msg(..), ResponsePure(..), ResponseWithFeedback(..), TeamUpdateSetting(..), errorToString, initialModelFunction)
 import Input.NewUser as NewUser exposing (NewUser)
-import Input.RequestUtils exposing (RestKey, RestParam, RestValue, encodeWithSignature, mkJSONParams, mkParams)
+import Input.RequestUtils exposing (RestKey, RestParam, RestValue, encodeWithSignature, mkJSONParams)
 import Input.Validity as Validity
 import Input.Views exposing (authenticationView, confirmView, creatingQuizView, creatingUserView, editingLabelsView, editingView, selectionView, wrapView)
-import Json.Decode as Decode
-import Json.Encode as Encode
 import Parser exposing (float, int, run)
-import Url.Builder exposing (string)
 
 
 main : Program () Model Msg
@@ -480,16 +476,13 @@ createNewQuiz u sk idf s =
         , expect = Http.expectJson (CreatedQuiz >> ResponseF) jsonDecQuizInfo
         }
 
--- todo: This is not working right now.
 createNewUser : UserName -> SessionKey -> NewUser -> Cmd Msg
 createNewUser u sk newUser =
     let
         params =
-            mkParamsWithSignature u
+            encodeWithSignature u
                 sk
-                [ ( newUserParam, newUser.user )
-                , ( passwordParam, newUser.password1 )
-                ]
+                [ ( userCreationParam, jsonEncUserCreation { userCreationUser = newUser.user, userCreationPassword = newUser.password1 } )]
     in
     Http.post
         { url = newUserApi
@@ -556,23 +549,6 @@ updateQuizByQuizRatings eQuizRatings model =
                 , feedback = "Parsing error: Could not read quiz ratings from server"
                 , displayState = Selecting
             }
-
-
-mkWithSignature : UserName -> SessionKey -> List ( RestKey, RestValue ) -> List ( RestKey, RestValue )
-mkWithSignature u key kvs =
-    let
-        allParams =
-            ( userParam, u ) :: kvs
-
-        sig =
-            sha512 (String.concat [ key, mkParams allParams ])
-    in
-    ( signatureParam, sig ) :: allParams
-
-
-mkParamsWithSignature : UserName -> SessionKey -> List ( RestKey, RestValue ) -> RestParam
-mkParamsWithSignature u key kvs =
-    mkParams (mkWithSignature u key kvs)
 
 
 encodeBody : String -> Http.Body
