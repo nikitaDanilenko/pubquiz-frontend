@@ -196,7 +196,7 @@ creatingQuizView md =
                ]
         )
 
-
+-- todo: Re-use suggestions in the input field.
 editingLabelsView : Model -> Html Msg
 editingLabelsView md =
     let
