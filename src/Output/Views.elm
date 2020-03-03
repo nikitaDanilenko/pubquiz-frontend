@@ -1,36 +1,62 @@
 module Output.Views exposing (..)
 
 import Chartjs.Chart exposing (chart)
-import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine, TeamQuery, TeamTable)
-import Html exposing (Html, button, div, table, td, text, th, tr)
-import Html.Attributes exposing (class, id)
+import Color.Convert
+import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine, TeamQuery, TeamTable, TeamTableInfo)
+import Common.Util as Util
+import Html exposing (Html, button, div, h1, table, td, text, th, tr)
+import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
 import List.Extra exposing (scanl, transpose)
 import Output.Charts as Charts
 import Output.Colors exposing (mkColors)
-import Output.Model exposing (Model, Msg(..), QuizModelKind(..), SubModel(..), mkFullQuizName)
+import Output.Model exposing (Model, Msg(..), SubModel(..), mkFullQuizName)
 
 
 view : Model -> Html Msg
 view model =
     case model.subModel of
-        TableModel teamTable quizInfo ->
-            tableView teamTable quizInfo model.labels
+        TableModel teamTableInfo quizInfo ->
+            tableView teamTableInfo quizInfo model.labels
 
         QuizModel quizRatings quizInfo ->
-            quizView quizRatings (if model.teamQuery.teamQueryQuizId == quizInfo.quizId then Possible else Impossible) model.labels
+            quizView quizRatings
+                (if model.teamQuery.teamQueryQuizId == quizInfo.quizId then
+                    Possible
+
+                 else
+                    Impossible
+                )
+                model.labels
 
         AllModel quizInfos ->
             allView quizInfos
 
-type BackToTable = Possible | Impossible
 
-tableView : TeamTable -> QuizInfo -> Labels -> Html Msg
-tableView teamTable quizInfo labels =
+type BackToTable
+    = Possible
+    | Impossible
+
+
+tableView : TeamTableInfo -> QuizInfo -> Labels -> Html Msg
+tableView teamTableInfo quizInfo labels =
+    let
+        colors =
+            mkColors teamTableInfo.teamTableInfoNumberOfTeams
+
+        colorSetting =
+            Util.foldMaybe []
+                (\c -> [ style "color" (Color.Convert.colorToCssRgba c) ])
+                (List.Extra.getAt teamTableInfo.teamTableInfoTeamNumber colors)
+    in
     div [ id "tableView" ]
         [ div [ id "ownPoints" ]
-            -- todo: Add colour parameter
-            [ text (showStanding (standing teamTable)) ]
+            [ h1 colorSetting
+                [ text teamTableInfo.teamTableInfoTeamName
+                , text ": "
+                , text (showStanding (standing teamTableInfo.teamTable))
+                ]
+            ]
         , div [ id "pointsTable" ]
             [ table
                 []
@@ -40,7 +66,7 @@ tableView teamTable quizInfo labels =
                     , th [] [ text labels.maxReachedLabel ]
                     , th [] [ text labels.maxReachableLabel ]
                     ]
-                    :: List.map mkHTMLLine teamTable
+                    :: List.map mkHTMLLine teamTableInfo.teamTable
                 )
             ]
         , div [ id "quizRatings" ]
@@ -89,22 +115,33 @@ quizView quizRatings btt labels =
         cumulativePoints =
             List.map (scanl (\( _, nextTr ) current -> current + nextTr.rating) 0 >> List.drop 1) rearranged
 
-        backToTable = case btt of
-                        Possible -> [ div [id "backToTable"] [ button [class "ownPointsButton", onClick GetTeamTable]
-                                               [ text labels.ownPointsLabel ] ] ]
-                        Impossible -> []
-        colors = mkColors (List.length quizRatings.header)
+        backToTable =
+            case btt of
+                Possible ->
+                    [ div [ id "backToTable" ]
+                        [ button [ class "ownPointsButton", onClick GetTeamTable ]
+                            [ text labels.ownPointsLabel ]
+                        ]
+                    ]
+
+                Impossible ->
+                    []
+
+        colors =
+            mkColors (List.length quizRatings.header)
     in
     div [ id "charts" ]
         ([ div [ id "perRoundChart" ]
             [ chart 798 599 (Charts.perRoundChart sortedHeader colors perRoundPoints roundLabels labels.individualRoundsLabel) ]
-        , div [ id "cumulativeChart" ]
+         , div [ id "cumulativeChart" ]
             [ chart 798 599 (Charts.cumulativeChart sortedHeader colors cumulativePoints roundLabels labels.cumulativeLabel) ]
-        , div [ id "progressionChart" ]
+         , div [ id "progressionChart" ]
             [ chart 798 599 (Charts.progressionChart sortedHeader colors cumulativePoints roundLabels labels.progressionLabel) ]
-        , div [ id "allQuizzes" ]
-              [ button [ class "allQuizzesButton", onClick GetAllQuizzes] [ text labels.viewPrevious ] ]
-        ] ++ backToTable)
+         , div [ id "allQuizzes" ]
+            [ button [ class "allQuizzesButton", onClick GetAllQuizzes ] [ text labels.viewPrevious ] ]
+         ]
+            ++ backToTable
+        )
 
 
 allView : List QuizInfo -> Html Msg
