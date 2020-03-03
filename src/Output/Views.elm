@@ -7,6 +7,7 @@ import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import List.Extra exposing (scanl, transpose)
 import Output.Charts as Charts
+import Output.Colors exposing (mkColors)
 import Output.Model exposing (Model, Msg(..), QuizModelKind(..), SubModel(..), mkFullQuizName)
 
 
@@ -92,14 +93,15 @@ quizView quizRatings btt labels =
                         Possible -> [ div [id "backToTable"] [ button [class "ownPointsButton", onClick GetTeamTable]
                                                [ text labels.ownPointsLabel ] ] ]
                         Impossible -> []
+        colors = mkColors (List.length quizRatings.header)
     in
     div [ id "charts" ]
         ([ div [ id "perRoundChart" ]
-            [ chart 798 599 (Charts.perRoundChart sortedHeader perRoundPoints roundLabels labels.individualRoundsLabel) ]
+            [ chart 798 599 (Charts.perRoundChart sortedHeader colors perRoundPoints roundLabels labels.individualRoundsLabel) ]
         , div [ id "cumulativeChart" ]
-            [ chart 798 599 (Charts.cumulativeChart sortedHeader cumulativePoints roundLabels labels.cumulativeLabel) ]
+            [ chart 798 599 (Charts.cumulativeChart sortedHeader colors cumulativePoints roundLabels labels.cumulativeLabel) ]
         , div [ id "progressionChart" ]
-            [ chart 798 599 (Charts.progressionChart sortedHeader cumulativePoints roundLabels labels.progressionLabel) ]
+            [ chart 798 599 (Charts.progressionChart sortedHeader colors cumulativePoints roundLabels labels.progressionLabel) ]
         , div [ id "allQuizzes" ]
               [ button [ class "allQuizzesButton", onClick GetAllQuizzes] [ text labels.viewPrevious ] ]
         ] ++ backToTable)
