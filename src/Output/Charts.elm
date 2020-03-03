@@ -1,7 +1,7 @@
 module Output.Charts exposing (cumulativeChart, perRoundChart, progressionChart)
 
-import Basics.Extra exposing (uncurry)
 import Chartjs.Chart exposing (Chart, Type(..))
+import Chartjs.Common exposing (PointProperty(..))
 import Chartjs.Data exposing (DataSet(..))
 import Chartjs.DataSets.Bar as Bar
 import Chartjs.DataSets.Line as Line
@@ -9,48 +9,63 @@ import Chartjs.Options exposing (defaultOptions)
 import Chartjs.Options.Elements exposing (LineFill(..), defaultElements)
 import Chartjs.Options.Scales exposing (Axis, defaultAxis, defaultScales, defaultTicks)
 import Chartjs.Options.Title exposing (defaultTitle)
+import Color exposing (Color)
 import Common.Types exposing (Header, Labels, QuizRatings, Ratings, RoundNumber, TeamInfo, TeamName, TeamNumber, TeamRating)
+import Common.Util exposing (uncurry3)
 
 
-perRoundChart : Header -> List (List Float) -> List String -> String -> Chart
+perRoundChart : Header -> List Color -> List (List Float) -> List String -> String -> Chart
 perRoundChart =
     mkChartWith mkPerRoundDataSets Bar
 
 
-cumulativeChart : Header -> List (List Float) -> List String -> String -> Chart
+cumulativeChart : Header -> List Color -> List (List Float) -> List String -> String -> Chart
 cumulativeChart =
     mkChartWith mkCumulativeDataSets Bar
 
 
-progressionChart : Header -> List (List Float) -> List String -> String -> Chart
+progressionChart : Header -> List Color -> List (List Float) -> List String -> String -> Chart
 progressionChart =
     mkChartWith mkProgressionDataSets Line
 
 
-mkChartWith : (Header -> List (List Float) -> List DataSet) -> Type -> Header -> List (List Float) -> List String -> String -> Chart
-mkChartWith mkDataSets chartType header ratings roundLabels chartTitle =
+mkChartWith : (Header -> List Color -> List (List Float) -> List DataSet) -> Type -> Header -> List Color -> List (List Float) -> List String -> String -> Chart
+mkChartWith mkDataSets chartType header colors ratings roundLabels chartTitle =
     { chartType = chartType
-    , data = { labels = roundLabels, datasets = mkDataSets header ratings }
+    , data = { labels = roundLabels, datasets = mkDataSets header colors ratings }
     , options = chartOptionsWithTitle chartTitle
     }
 
 
-mkPerRoundBarDataSet : TeamName -> List Float -> Bar.DataSet
-mkPerRoundBarDataSet tn xs =
+mkPerRoundBarDataSet : TeamName -> Color -> List Float -> Bar.DataSet
+mkPerRoundBarDataSet tn color xs =
     let
         base =
             Bar.defaultFromLabel tn
     in
-    { base | data = xs }
+    { base
+        | data = xs
+        , backgroundColor = mkColorProperty color
+        , borderColor = mkColorProperty color
+    }
 
 
-mkPerRoundLineDataSet : TeamName -> List Float -> Line.DataSet
-mkPerRoundLineDataSet tn xs =
+mkColorProperty : Color -> Maybe (PointProperty Color)
+mkColorProperty =
+    All >> Just
+
+
+mkPerRoundLineDataSet : TeamName -> Color -> List Float -> Line.DataSet
+mkPerRoundLineDataSet tn color xs =
     let
         base =
             Line.defaultFromLabel tn
     in
-    { base | data = xs }
+    { base
+        | data = xs
+        , backgroundColor = mkColorProperty color
+        , borderColor = mkColorProperty color
+    }
 
 
 chartYAxis : Axis
@@ -91,21 +106,21 @@ defaultLine =
     }
 
 
-mkPerRoundDataSets : Header -> List (List Float) -> List DataSet
-mkPerRoundDataSets header rearranged =
-    List.map2 (\ti x -> ( ti.teamInfoName, x ) |> uncurry mkPerRoundBarDataSet |> BarDataSet) header rearranged
+mkPerRoundDataSets : Header -> List Color -> List (List Float) -> List DataSet
+mkPerRoundDataSets =
+    List.map3 (\ti c x -> ( ti.teamInfoName, c, x ) |> uncurry3 mkPerRoundBarDataSet |> BarDataSet)
 
 
-mkCumulativeDataSets : Header -> List (List Float) -> List DataSet
+mkCumulativeDataSets : Header -> List Color -> List (List Float) -> List DataSet
 mkCumulativeDataSets =
     processCumulativeWith mkPerRoundBarDataSet BarDataSet
 
 
-mkProgressionDataSets : Header -> List (List Float) -> List DataSet
+mkProgressionDataSets : Header -> List Color -> List (List Float) -> List DataSet
 mkProgressionDataSets =
     processCumulativeWith mkPerRoundLineDataSet LineDataSet
 
 
-processCumulativeWith : (TeamName -> List Float -> ds) -> (ds -> DataSet) -> Header -> List (List Float) -> List DataSet
+processCumulativeWith : (TeamName -> Color -> List Float -> ds) -> (ds -> DataSet) -> Header -> List Color -> List (List Float) -> List DataSet
 processCumulativeWith mkSpecialDataSet mkDataSet =
-    List.map2 (\ti x -> ( ti.teamInfoName, x ) |> uncurry mkSpecialDataSet |> mkDataSet)
+    List.map3 (\ti c x -> ( ti.teamInfoName, c, x ) |> uncurry3 mkSpecialDataSet |> mkDataSet)
