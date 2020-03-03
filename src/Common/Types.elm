@@ -678,14 +678,16 @@ type alias TeamTableInfo  =
    { teamTable: TeamTable
    , teamTableInfoTeamName: TeamName
    , teamTableInfoNumberOfTeams: Int
+   , teamTableInfoTeamNumber: TeamNumber
    }
 
 jsonDecTeamTableInfo : Json.Decode.Decoder ( TeamTableInfo )
 jsonDecTeamTableInfo =
-   Json.Decode.succeed (\pteamTable pteamTableInfoTeamName pteamTableInfoNumberOfTeams -> {teamTable = pteamTable, teamTableInfoTeamName = pteamTableInfoTeamName, teamTableInfoNumberOfTeams = pteamTableInfoNumberOfTeams})
+   Json.Decode.succeed (\pteamTable pteamTableInfoTeamName pteamTableInfoNumberOfTeams pteamTableInfoTeamNumber -> {teamTable = pteamTable, teamTableInfoTeamName = pteamTableInfoTeamName, teamTableInfoNumberOfTeams = pteamTableInfoNumberOfTeams, teamTableInfoTeamNumber = pteamTableInfoTeamNumber})
    |> required "teamTable" (jsonDecTeamTable)
    |> required "teamTableInfoTeamName" (jsonDecTeamName)
    |> required "teamTableInfoNumberOfTeams" (Json.Decode.int)
+   |> required "teamTableInfoTeamNumber" (jsonDecTeamNumber)
 
 jsonEncTeamTableInfo : TeamTableInfo -> Value
 jsonEncTeamTableInfo  val =
@@ -693,6 +695,7 @@ jsonEncTeamTableInfo  val =
    [ ("teamTable", jsonEncTeamTable val.teamTable)
    , ("teamTableInfoTeamName", jsonEncTeamName val.teamTableInfoTeamName)
    , ("teamTableInfoNumberOfTeams", Json.Encode.int val.teamTableInfoNumberOfTeams)
+   , ("teamTableInfoTeamNumber", jsonEncTeamNumber val.teamTableInfoTeamNumber)
    ]
 
 
