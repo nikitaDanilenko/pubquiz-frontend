@@ -2,10 +2,10 @@ module Output.QuizOutput exposing (..)
 
 import Browser
 import Common.Constants exposing (getQuizRatingsApi, teamQueryParam, teamTableApi)
-import Common.Types exposing (DbQuizId, QuizInfo, TeamQuery, jsonDecQuizRatings, jsonDecTeamTable, jsonEncTeamQuery)
+import Common.Types exposing (DbQuizId, QuizInfo, TeamQuery, jsonDecQuizRatings, jsonDecTeamTableInfo, jsonEncTeamQuery)
 import Common.Util exposing (getAllWith, getMsg, getMsgWith)
 import Input.Model exposing (ErrorOr)
-import Output.Model as Model exposing (Model, Msg(..), QuizModelKind, SubModel(..), initialModelFunction)
+import Output.Model as Model exposing (Model, Msg(..), SubModel(..), initialModelFunction)
 import Output.Views exposing (view)
 
 
@@ -61,7 +61,7 @@ getQuizRatings quizInfo =
 
 getTeamTable : TeamQuery -> Cmd Msg
 getTeamTable =
-    getMsgWith jsonEncTeamQuery teamQueryParam teamTableApi GotTeamTable jsonDecTeamTable
+    getMsgWith jsonEncTeamQuery teamQueryParam teamTableApi GotTeamTable jsonDecTeamTableInfo
 
 
 getAllQuizzes : Cmd Msg

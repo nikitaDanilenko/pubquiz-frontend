@@ -1,6 +1,6 @@
 module Output.Model exposing (..)
 
-import Common.Types exposing (Activity(..), Code, DbQuizId, Labels, QuizIdentifier, QuizInfo, QuizRatings, TeamNumber, TeamQuery, TeamTable)
+import Common.Types exposing (Activity(..), Code, DbQuizId, Labels, QuizIdentifier, QuizInfo, QuizRatings, TeamNumber, TeamQuery, TeamTable, TeamTableInfo)
 import Input.Model exposing (ErrorOr)
 
 
@@ -16,14 +16,9 @@ type alias Model =
 
 
 type SubModel
-    = TableModel TeamTable QuizInfo
+    = TableModel TeamTableInfo QuizInfo
     | QuizModel QuizRatings QuizInfo
     | AllModel (List QuizInfo)
-
-
-type QuizModelKind
-    = Current
-    | Other
 
 
 titleFor : Model -> String
@@ -52,7 +47,7 @@ type Msg
     = GetQuizRatings QuizInfo
     | GotQuizRatings QuizInfo (ErrorOr QuizRatings)
     | GetTeamTable
-    | GotTeamTable (ErrorOr TeamTable)
+    | GotTeamTable (ErrorOr TeamTableInfo)
     | GetAllQuizzes
     | GotAllQuizzes (ErrorOr (List QuizInfo))
 
