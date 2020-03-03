@@ -129,3 +129,6 @@ getAllWith mkMsg =
         { url = allApi
         , expect = Http.expectJson mkMsg (Decode.list jsonDecQuizInfo)
         }
+
+uncurry3 : (a -> b -> c -> d) -> (a, b, c) -> d
+uncurry3 f (a, b, c) = f a b c
