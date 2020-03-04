@@ -2,12 +2,13 @@ module Output.Views exposing (..)
 
 import Chartjs.Chart exposing (chart)
 import Color.Convert
+import Common.Ranking exposing (ratingsToRankings)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine, TeamQuery, TeamTable, TeamTableInfo)
 import Common.Util as Util
 import Html exposing (Html, button, div, h1, table, td, text, th, tr)
 import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
-import List.Extra exposing (scanl, transpose)
+import List.Extra
 import Output.Charts as Charts
 import Output.Colors exposing (mkColors)
 import Output.Model exposing (Model, Msg(..), SubModel(..), mkFullQuizName)
@@ -97,33 +98,13 @@ showStanding ( reached, reachable ) =
 quizView : QuizRatings -> BackToTable -> Labels -> Html Msg
 quizView quizRatings btt labels =
     let
-        sortedRatings =
-            List.sortBy Tuple.first quizRatings.ratings
+        rankings = ratingsToRankings quizRatings.ratings
 
         sortedHeader =
             List.sortBy .teamInfoNumber quizRatings.header
 
         roundLabels =
-            List.map (\( n, _ ) -> String.join " " [ labels.roundLabel, String.fromInt n ]) sortedRatings
-
-        rearranged =
-            transpose (List.map (\( rn, rat ) -> rat.points |> List.sortBy .teamNumber |> List.map (\x -> ( rn, x ))) sortedRatings)
-
-        roundRankings =
-            List.indexedMap (\i l -> { roundNumber = 1 + i, teamRatings = List.map Tuple.second l }) rearranged
-
-        cumulativeRankings =
-            List.indexedMap
-                (\i l ->
-                    { roundNumber = 1 + i
-                    , teamRatings =
-                        l
-                            |> scanl (\( _, nextTr ) current -> current + nextTr.rating) 0
-                            |> List.drop 1
-                            |> List.indexedMap (\tn r -> { teamNumber = tn, rating = r })
-                    }
-                )
-                rearranged
+            List.map (\( n, _ ) -> String.join " " [ labels.roundLabel, String.fromInt n ]) rankings.sortedRatings
 
         backToTable =
             case btt of
@@ -142,11 +123,11 @@ quizView quizRatings btt labels =
     in
     div [ id "charts" ]
         ([ div [ id "cumulativeChart" ]
-            [ chart 798 599 (Charts.cumulativeChart sortedHeader colors cumulativeRankings roundLabels labels.cumulativeLabel) ]
+            [ chart 798 599 (Charts.cumulativeChart sortedHeader colors rankings.cumulative roundLabels labels.cumulativeLabel) ]
          , div [ id "perRoundChart" ]
-            [ chart 798 599 (Charts.perRoundChart sortedHeader colors roundRankings roundLabels labels.individualRoundsLabel) ]
+            [ chart 798 599 (Charts.perRoundChart sortedHeader colors rankings.perRound roundLabels labels.individualRoundsLabel) ]
          , div [ id "progressionChart" ]
-            [ chart 798 599 (Charts.progressionChart sortedHeader colors cumulativeRankings roundLabels labels.progressionLabel) ]
+            [ chart 798 599 (Charts.progressionChart sortedHeader colors rankings.cumulative roundLabels labels.progressionLabel) ]
          , div [ id "allQuizzes" ]
             [ button [ class "allQuizzesButton", onClick GetAllQuizzes ] [ text labels.viewPrevious ] ]
          ]
