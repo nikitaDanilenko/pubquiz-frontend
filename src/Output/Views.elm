@@ -109,11 +109,21 @@ quizView quizRatings btt labels =
         rearranged =
             transpose (List.map (\( rn, rat ) -> rat.points |> List.sortBy .teamNumber |> List.map (\x -> ( rn, x ))) sortedRatings)
 
-        perRoundPoints =
-            List.map (List.map (Tuple.second >> .rating)) rearranged
+        roundRankings =
+            List.indexedMap (\i l -> { roundNumber = 1 + i, teamRatings = List.map Tuple.second l }) rearranged
 
-        cumulativePoints =
-            List.map (scanl (\( _, nextTr ) current -> current + nextTr.rating) 0 >> List.drop 1) rearranged
+        cumulativeRankings =
+            List.indexedMap
+                (\i l ->
+                    { roundNumber = 1 + i
+                    , teamRatings =
+                        l
+                            |> scanl (\( _, nextTr ) current -> current + nextTr.rating) 0
+                            |> List.drop 1
+                            |> List.indexedMap (\tn r -> { teamNumber = tn, rating = r })
+                    }
+                )
+                rearranged
 
         backToTable =
             case btt of
@@ -132,11 +142,11 @@ quizView quizRatings btt labels =
     in
     div [ id "charts" ]
         ([ div [ id "perRoundChart" ]
-            [ chart 798 599 (Charts.perRoundChart sortedHeader colors perRoundPoints roundLabels labels.individualRoundsLabel) ]
+            [ chart 798 599 (Charts.perRoundChart sortedHeader colors roundRankings roundLabels labels.individualRoundsLabel) ]
          , div [ id "cumulativeChart" ]
-            [ chart 798 599 (Charts.cumulativeChart sortedHeader colors cumulativePoints roundLabels labels.cumulativeLabel) ]
+            [ chart 798 599 (Charts.cumulativeChart sortedHeader colors cumulativeRankings roundLabels labels.cumulativeLabel) ]
          , div [ id "progressionChart" ]
-            [ chart 798 599 (Charts.progressionChart sortedHeader colors cumulativePoints roundLabels labels.progressionLabel) ]
+            [ chart 798 599 (Charts.progressionChart sortedHeader colors cumulativeRankings roundLabels labels.progressionLabel) ]
          , div [ id "allQuizzes" ]
             [ button [ class "allQuizzesButton", onClick GetAllQuizzes ] [ text labels.viewPrevious ] ]
          ]
