@@ -141,10 +141,10 @@ quizView quizRatings btt labels =
             mkColors (List.length quizRatings.header)
     in
     div [ id "charts" ]
-        ([ div [ id "perRoundChart" ]
-            [ chart 798 599 (Charts.perRoundChart sortedHeader colors roundRankings roundLabels labels.individualRoundsLabel) ]
-         , div [ id "cumulativeChart" ]
+        ([ div [ id "cumulativeChart" ]
             [ chart 798 599 (Charts.cumulativeChart sortedHeader colors cumulativeRankings roundLabels labels.cumulativeLabel) ]
+         , div [ id "perRoundChart" ]
+            [ chart 798 599 (Charts.perRoundChart sortedHeader colors roundRankings roundLabels labels.individualRoundsLabel) ]
          , div [ id "progressionChart" ]
             [ chart 798 599 (Charts.progressionChart sortedHeader colors cumulativeRankings roundLabels labels.progressionLabel) ]
          , div [ id "allQuizzes" ]
