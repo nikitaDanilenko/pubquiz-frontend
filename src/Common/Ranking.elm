@@ -1,6 +1,6 @@
 module Common.Ranking exposing (..)
 
-import Common.Types exposing (Ratings, RoundNumber, TeamRating)
+import Common.Types exposing (Ratings, RoundNumber, TeamName, TeamRating)
 import List.Extra exposing (scanl, transpose)
 
 
@@ -45,3 +45,18 @@ ratingsToRankings ratings =
                 rearranged
     in
     { sortedRatings = sortedRatings, perRound = roundRankings, cumulative = cumulativeRankings }
+
+type alias RoundWinner = {
+  roundNumber : RoundNumber,
+  teamName : TeamName,
+  points : Float
+ }
+
+--rankingsToRoundWinners : RoundRanking -> List RoundWinner
+--rankingsToRoundWinners =
+
+-- todo: This function should also produce the team names.
+-- Assuming that the ranking contains sorted teamRatings by team,
+-- we can get the team names by zipping (smartly) with the header of the quiz.
+rankingToPlacement : RoundRanking -> (RoundNumber, List (Int, TeamRating))
+rankingToPlacement rr = (rr.roundNumber, rr.teamRatings |> List.sortBy .rating |> List.indexedMap (\i p -> (1 + i, p)))
