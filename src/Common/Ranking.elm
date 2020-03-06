@@ -117,13 +117,6 @@ rankingToPlacement numberedTeamRatings =
     let
         rating =
             .teamRating >> .rating
-
-        a =
-            numberedTeamRatings
-                |> List.sortBy rating
-                |> List.reverse
-                |> Util.groupBy (\x y -> rating x == rating y)
-
         placed =
             numberedTeamRatings
                 |> List.sortBy rating
