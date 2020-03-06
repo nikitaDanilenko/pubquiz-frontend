@@ -72,6 +72,6 @@ testRatings =
     , ratings =
         [ ( 1, { reachableInRound = 8, points = [ { teamNumber = 1, rating = 2 }, { teamNumber = 2, rating = 5 } ] } )
         , ( 2, { reachableInRound = 9, points = [ { teamNumber = 1, rating = 7 }, { teamNumber = 2, rating = 3 } ] } )
-        , ( 2, { reachableInRound = 10, points = [ { teamNumber = 1, rating = 4 }, { teamNumber = 2, rating = 6 } ] } )
+        , ( 3, { reachableInRound = 10, points = [ { teamNumber = 1, rating = 4 }, { teamNumber = 2, rating = 6 } ] } )
         ]
     }

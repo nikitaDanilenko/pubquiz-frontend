@@ -1,62 +1,135 @@
 module Common.Ranking exposing (..)
 
-import Common.Types exposing (Ratings, RoundNumber, TeamName, TeamRating)
-import List.Extra exposing (scanl, transpose)
+import Common.Types exposing (Header, Ratings, RoundNumber, TeamName, TeamNumber, TeamRating)
+import Common.Util as Util
+import List.Extra exposing (maximumBy, scanl, transpose)
 
 
-type alias RoundRanking =
-    { roundNumber : RoundNumber
-    , teamRatings : List TeamRating
+type alias RoundRankingPerTeam =
+    { teamNumber : TeamNumber
+    , teamName : TeamName
+    , teamRatings : List ( RoundNumber, TeamRating )
     }
 
 
-roundRankingToPointsByTeam : RoundRanking -> List Float
-roundRankingToPointsByTeam =
-    .teamRatings >> List.sortBy .teamNumber >> List.map .rating
+roundRankingPerTeamToPointsPerTeam : RoundRankingPerTeam -> List Float
+roundRankingPerTeamToPointsPerTeam =
+    .teamRatings >> List.sortBy (Tuple.second >> .teamNumber) >> List.map (Tuple.second >> .rating)
 
 
 type alias RoundRankings =
-    List RoundRanking
+    List RoundRankingPerTeam
 
 
-ratingsToRankings : Ratings -> { sortedRatings : Ratings, perRound : RoundRankings, cumulative : RoundRankings }
-ratingsToRankings ratings =
+ratingsToRankings : Ratings -> Header -> { sortedRatings : Ratings, perRound : RoundRankings, cumulative : RoundRankings }
+ratingsToRankings ratings header =
     let
         sortedRatings =
-            List.sortBy Tuple.first ratings
+            ratings
+                |> List.sortBy Tuple.first
+                |> List.map (Tuple.mapSecond (\tr -> { tr | points = List.sortBy .teamNumber tr.points }))
+
+        sortedHeader =
+            List.sortBy .teamInfoNumber header
 
         rearranged =
             transpose (List.map (\( rn, rat ) -> rat.points |> List.sortBy .teamNumber |> List.map (\x -> ( rn, x ))) sortedRatings)
 
+        -- We process the header twice for simplicity of representation.
+        -- It is possible to achieve the same result with only one traversal,
+        -- but the corresponding steps are more technical.
         roundRankings =
-            List.indexedMap (\i l -> { roundNumber = 1 + i, teamRatings = List.map Tuple.second l }) rearranged
+            List.map2 (\l ti -> { teamNumber = ti.teamInfoNumber, teamName = ti.teamInfoName, teamRatings = l }) rearranged sortedHeader
 
         cumulativeRankings =
-            List.indexedMap
-                (\i l ->
-                    { roundNumber = 1 + i
+            List.map2
+                (\l ti ->
+                    { teamNumber = ti.teamInfoNumber
+                    , teamName = ti.teamInfoName
                     , teamRatings =
                         l
-                            |> scanl (\( _, nextTr ) current -> current + nextTr.rating) 0
+                            |> scanl (\( rn, nextTr ) ( _, current ) -> ( rn, addNamedTeamRatings nextTr current )) ( 1, defaultTeamRating )
                             |> List.drop 1
-                            |> List.indexedMap (\tn r -> { teamNumber = tn, rating = r })
                     }
                 )
                 rearranged
+                sortedHeader
     in
     { sortedRatings = sortedRatings, perRound = roundRankings, cumulative = cumulativeRankings }
 
-type alias RoundWinner = {
-  roundNumber : RoundNumber,
-  teamName : TeamName,
-  points : Float
- }
 
---rankingsToRoundWinners : RoundRanking -> List RoundWinner
---rankingsToRoundWinners =
+type alias RoundWinner =
+    { roundNumber : RoundNumber
+    , teamNames : List TeamName
+    , points : Float
+    }
 
--- todo: This function should also produce the team names.
--- Assuming that the ranking contains sorted teamRatings by team,
--- we can get the team names by zipping (smartly) with the header of the quiz.
-rankingToPlacement : RoundRanking -> (RoundNumber, List (Int, TeamRating))
-rankingToPlacement rr = (rr.roundNumber, rr.teamRatings |> List.sortBy .rating |> List.indexedMap (\i p -> (1 + i, p)))
+
+type alias NamedTeamRating =
+    { teamRating : TeamRating
+    , teamName : TeamName
+    }
+
+
+defaultTeamRating : TeamRating
+defaultTeamRating =
+    { rating = 0, teamNumber = 1 }
+
+
+addNamedTeamRatings : TeamRating -> TeamRating -> TeamRating
+addNamedTeamRatings tr1 tr2 =
+    { tr1 | rating = tr1.rating + tr2.rating }
+
+
+type alias TeamRanking =
+    { teamRating : TeamRating
+    , teamName : TeamName
+    , position : Int
+    }
+
+
+roundRankingsToRoundWinners : RoundRankings -> List RoundWinner
+roundRankingsToRoundWinners rankings =
+    let
+        roundInside =
+            List.map (\perTeam -> List.map (\( rn, r ) -> { roundNumber = rn, teamName = perTeam.teamName, teamRating = r }) perTeam.teamRatings) rankings
+
+        rearranged =
+            transpose roundInside
+
+        findWinner : List { roundNumber : RoundNumber, teamName : TeamName, teamRating : TeamRating } -> RoundWinner
+        findWinner ratings =
+            let
+                max =
+                    ratings |> maximumBy (.teamRating >> .rating) |> Maybe.withDefault { roundNumber = 1, teamName = "", teamRating = defaultTeamRating }
+                maxPoints = max.teamRating.rating
+            in
+            { points = maxPoints
+            , teamNames = ratings |> List.filter (\t -> t.teamRating.rating == maxPoints) |> List.map .teamName
+            , roundNumber = max.roundNumber
+            }
+    in
+    List.map findWinner rearranged
+
+
+rankingToPlacement : List NamedTeamRating -> List TeamRanking
+rankingToPlacement numberedTeamRatings =
+    let
+        rating =
+            .teamRating >> .rating
+
+        a =
+            numberedTeamRatings
+                |> List.sortBy rating
+                |> List.reverse
+                |> Util.groupBy (\x y -> rating x == rating y)
+
+        placed =
+            numberedTeamRatings
+                |> List.sortBy rating
+                |> List.reverse
+                |> Util.groupBy (\x y -> rating x == rating y)
+                |> List.indexedMap (\i -> List.map (\c -> { teamRating = c.teamRating, teamName = c.teamName, position = 1 + i }))
+                |> List.concat
+    in
+    placed

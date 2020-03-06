@@ -5,6 +5,7 @@ import Common.Types exposing (DbQuizId, QuizInfo, TeamRating, jsonDecQuizInfo, j
 import Http exposing (Error)
 import Json.Decode as Decode
 import Json.Encode as Encode exposing (Value)
+import List.Extra
 import Url.Builder exposing (string)
 
 
@@ -130,5 +131,44 @@ getAllWith mkMsg =
         , expect = Http.expectJson mkMsg (Decode.list jsonDecQuizInfo)
         }
 
-uncurry3 : (a -> b -> c -> d) -> (a, b, c) -> d
-uncurry3 f (a, b, c) = f a b c
+
+uncurry3 : (a -> b -> c -> d) -> ( a, b, c ) -> d
+uncurry3 f ( a, b, c ) =
+    f a b c
+
+
+intersectWith : (a -> b -> c) -> (x -> Int) -> (x -> a) -> (y -> Int) -> (y -> b) -> List x -> List y -> List c
+intersectWith combine xKey xValue yKey yValue =
+    let
+        merge : List x -> List y -> List c
+        merge xs ys =
+            case ( xs, ys ) of
+                ( [], _ ) ->
+                    []
+
+                ( _, [] ) ->
+                    []
+
+                ( hx :: tx, hy :: ty ) ->
+                    let
+                        xK =
+                            xKey hx
+
+                        yK =
+                            yKey hy
+                    in
+                    if xK == yK then
+                        combine (xValue hx) (yValue hy) :: merge tx ty
+
+                    else if xK < yK then
+                        merge tx ys
+
+                    else
+                        merge xs ty
+    in
+    merge
+
+groupBy : (a -> a -> Bool) -> List a -> List (List a)
+groupBy equal l = case l of
+                     [] -> []
+                     x :: xs -> List.Extra.takeWhile (equal x) l :: groupBy equal (List.Extra.dropWhile (equal x) xs)

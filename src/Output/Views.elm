@@ -2,13 +2,13 @@ module Output.Views exposing (..)
 
 import Chartjs.Chart exposing (chart)
 import Color.Convert
-import Common.Ranking exposing (ratingsToRankings)
-import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine, TeamQuery, TeamTable, TeamTableInfo)
+import Common.Ranking exposing (RoundRankings, rankingToPlacement, ratingsToRankings, roundRankingsToRoundWinners)
+import Common.Types exposing (DbQuizId, Header, Labels, QuizInfo, QuizRatings, TeamLine, TeamQuery, TeamTable, TeamTableInfo)
 import Common.Util as Util
 import Html exposing (Html, button, div, h1, table, td, text, th, tr)
 import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
-import List.Extra
+import List.Extra exposing (maximumBy)
 import Output.Charts as Charts
 import Output.Colors exposing (mkColors)
 import Output.Model exposing (Model, Msg(..), SubModel(..), mkFullQuizName)
@@ -98,10 +98,8 @@ showStanding ( reached, reachable ) =
 quizView : QuizRatings -> BackToTable -> Labels -> Html Msg
 quizView quizRatings btt labels =
     let
-        rankings = ratingsToRankings quizRatings.ratings
-
-        sortedHeader =
-            List.sortBy .teamInfoNumber quizRatings.header
+        rankings =
+            ratingsToRankings quizRatings.ratings quizRatings.header
 
         roundLabels =
             List.map (\( n, _ ) -> String.join " " [ labels.roundLabel, String.fromInt n ]) rankings.sortedRatings
@@ -122,16 +120,87 @@ quizView quizRatings btt labels =
             mkColors (List.length quizRatings.header)
     in
     div [ id "charts" ]
-        ([ div [ id "cumulativeChart" ]
-            [ chart 798 599 (Charts.cumulativeChart sortedHeader colors rankings.cumulative roundLabels labels.cumulativeLabel) ]
-         , div [ id "perRoundChart" ]
-            [ chart 798 599 (Charts.perRoundChart sortedHeader colors rankings.perRound roundLabels labels.individualRoundsLabel) ]
-         , div [ id "progressionChart" ]
-            [ chart 798 599 (Charts.progressionChart sortedHeader colors rankings.cumulative roundLabels labels.progressionLabel) ]
-         , div [ id "allQuizzes" ]
-            [ button [ class "allQuizzesButton", onClick GetAllQuizzes ] [ text labels.viewPrevious ] ]
-         ]
+        (mkPlacements rankings.cumulative labels.placementLabel labels.placeLabel labels.pointsLabel
+            :: mkRoundWinners rankings.perRound labels.roundWinnerLabel labels.roundLabel labels.pointsLabel
+            :: [ div [ id "cumulativeChart" ]
+                    [ chart 798 599 (Charts.cumulativeChart colors rankings.cumulative roundLabels labels.cumulativeLabel) ]
+               , div [ id "perRoundChart" ]
+                    [ chart 798 599 (Charts.perRoundChart colors rankings.perRound roundLabels labels.individualRoundsLabel) ]
+               , div [ id "progressionChart" ]
+                    [ chart 798 599 (Charts.progressionChart colors rankings.cumulative roundLabels labels.progressionLabel) ]
+               , div [ id "allQuizzes" ]
+                    [ button [ class "allQuizzesButton", onClick GetAllQuizzes ] [ text labels.viewPrevious ] ]
+               ]
             ++ backToTable
+        )
+
+
+mkPlacements : RoundRankings -> String -> String -> String -> Html Msg
+mkPlacements rrs wordForPlacement wordForPlace wordForPoints =
+    let
+        zeroRating =
+            ( 1, { teamNumber = 1, rating = 0 } )
+
+        findCurrent =
+            .teamRatings >> maximumBy Tuple.first >> Maybe.withDefault zeroRating >> Tuple.second
+
+        currentRanking =
+            List.map (\perTeam -> { teamName = perTeam.teamName, teamRating = findCurrent perTeam }) rrs
+
+        placement =
+            rankingToPlacement currentRanking
+    in
+    div [ id "placements" ]
+        (text wordForPlacement
+            :: List.map
+                (\tr ->
+                    div [ id "place" ]
+                        [ text
+                            (String.join " "
+                                [ String.concat
+                                    [ String.join " "
+                                        [ wordForPlace
+                                        , String.fromInt tr.position
+                                        , String.concat [ "(", String.fromFloat tr.teamRating.rating, " ", wordForPoints, ")" ]
+                                        ]
+                                    , ":"
+                                    ]
+                                , tr.teamName
+                                ]
+                            )
+                        ]
+                )
+                placement
+        )
+
+
+mkRoundWinners : RoundRankings -> String -> String -> String -> Html Msg
+mkRoundWinners rr wordForRoundWinner wordForRound wordForPoints =
+    let
+        roundWinners =
+            roundRankingsToRoundWinners rr
+    in
+    div [ id "roundWinners" ]
+        (text wordForRoundWinner
+            :: List.map
+                (\rw ->
+                    div [ id "roundWinner" ]
+                        [ text
+                            (String.concat
+                                [ wordForRound
+                                , " "
+                                , String.fromInt rw.roundNumber
+                                , " ("
+                                , String.fromFloat rw.points
+                                , " "
+                                , wordForPoints
+                                , "): "
+                                , String.join ", " rw.teamNames
+                                ]
+                            )
+                        ]
+                )
+                (Debug.log "roundWinners" roundWinners)
         )
 
 
