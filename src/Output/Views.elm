@@ -200,7 +200,7 @@ mkRoundWinners rr wordForRoundWinner wordForRound wordForPoints =
                             )
                         ]
                 )
-                (Debug.log "roundWinners" roundWinners)
+                roundWinners
         )
 
 
