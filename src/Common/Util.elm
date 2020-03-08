@@ -51,6 +51,11 @@ foldMaybe empty f m =
     Maybe.withDefault empty (Maybe.map f m)
 
 
+foldResult : b -> (a -> b) -> Result e a -> b
+foldResult empty f r =
+    Result.withDefault empty (Result.map f r)
+
+
 
 {- Fills a list with zeroes in the back if the list is not long enough,
    otherwise return the prefix of the list with the given length.
@@ -168,7 +173,12 @@ intersectWith combine xKey xValue yKey yValue =
     in
     merge
 
+
 groupBy : (a -> a -> Bool) -> List a -> List (List a)
-groupBy equal l = case l of
-                     [] -> []
-                     x :: xs -> List.Extra.takeWhile (equal x) l :: groupBy equal (List.Extra.dropWhile (equal x) xs)
+groupBy equal l =
+    case l of
+        [] ->
+            []
+
+        x :: xs ->
+            List.Extra.takeWhile (equal x) l :: groupBy equal (List.Extra.dropWhile (equal x) xs)
