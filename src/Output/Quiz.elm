@@ -4,7 +4,7 @@ import Chartjs.Chart exposing (chart)
 import Common.ConnectionUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, linkButton, useOrFetchWith)
 import Common.Constants exposing (quizIdParam, teamCodeParam, teamNumberParam)
 import Common.QuizRatings as QuizRatings
-import Common.Ranking exposing (RoundRankings, TeamsRanking, rankingToPlacement, ratingsToRankings, roundRankingsToRoundWinners)
+import Common.Ranking exposing (RoundRankingPerTeam, RoundRankings, RoundWinner, TeamsRanking, rankingToPlacement, ratingsToRankings, roundRankingsToRoundWinners)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamQuery)
 import Common.Util as Util
 import Html exposing (Html, div, label, table, td, text, tr)
@@ -200,13 +200,13 @@ mkPlacements rrs wordForPlacement wordForPlace wordForPoints =
     in
     div [ id "placements" ]
         [ label [ for "placementsLabel" ] [ text wordForPlacement ]
-        , table [ id "placementsTable"]
-            (List.map (mkTableLine wordForPlace wordForPoints) placement)
+        , table [ id "placementsTable" ]
+            (List.map (mkPlacementsTableLine wordForPlace wordForPoints) placement)
         ]
 
 
-mkTableLine : String -> String -> TeamsRanking -> Html Msg
-mkTableLine wordForPlace wordForPoints teamsRanking =
+mkPlacementsTableLine : String -> String -> TeamsRanking -> Html Msg
+mkPlacementsTableLine wordForPlace wordForPoints teamsRanking =
     tr []
         [ td []
             [ text
@@ -232,27 +232,31 @@ mkRoundWinners rr wordForRoundWinner wordForRound wordForPoints =
             roundRankingsToRoundWinners rr
     in
     div [ id "roundWinners" ]
-        (label [ for "roundWinnersLabel" ] [ text wordForRoundWinner ]
-            :: List.map
-                (\rw ->
-                    div [ id "roundWinner" ]
-                        [ text
-                            (String.concat
-                                [ wordForRound
-                                , " "
-                                , String.fromInt rw.roundNumber
-                                , " ("
-                                , String.fromFloat rw.points
-                                , " "
-                                , wordForPoints
-                                , "): "
-                                , String.join ", " rw.teamNames
-                                ]
-                            )
-                        ]
+        [ label [ for "roundWinnersLabel" ] [ text wordForRoundWinner ]
+        , table [ id "roundWinnersTable" ]
+            (List.map (mkRoundWinnersTableLine wordForRound wordForPoints) roundWinners)
+        ]
+
+
+mkRoundWinnersTableLine : String -> String -> RoundWinner -> Html Msg
+mkRoundWinnersTableLine wordForRound wordForPoints rw =
+    tr []
+        [ td []
+            [ text
+                (String.concat
+                    [ wordForRound
+                    , " "
+                    , String.fromInt rw.roundNumber
+                    , " ("
+                    , String.fromFloat rw.points
+                    , " "
+                    , wordForPoints
+                    , "):"
+                    ]
                 )
-                roundWinners
-        )
+            ]
+        , td [] [ text (String.join ", " rw.teamNames) ]
+        ]
 
 
 mkTeamQueryLink : TeamQuery -> String
