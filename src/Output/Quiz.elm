@@ -13,7 +13,7 @@ import List.Extra exposing (maximumBy)
 import Output.Charts as Charts
 import Output.Colors exposing (mkColors)
 import Output.Model
-import Output.OutputUtil exposing (fragmentUrl)
+import Output.OutputUtil exposing (fragmentUrl, mkFullQuizName)
 
 
 type alias Model =
@@ -124,15 +124,17 @@ view model =
             backToTable =
                 case model.teamQueryCandidate of
                     Just teamQuery ->
-                      if teamQuery.teamQueryQuizId == model.quizInfo.quizId then
-                        [ div [ id "backToTable" ]
-                            [ linkButton
-                                (mkTeamQueryLink teamQuery)
-                                [ class "ownPointsButton", value model.labels.ownPointsLabel ]
-                                []
+                        if teamQuery.teamQueryQuizId == model.quizInfo.quizId then
+                            [ div [ id "backToTable" ]
+                                [ linkButton
+                                    (mkTeamQueryLink teamQuery)
+                                    [ class "ownPointsButton", value model.labels.ownPointsLabel ]
+                                    []
+                                ]
                             ]
-                        ]
-                      else []
+
+                        else
+                            []
 
                     Nothing ->
                         []
@@ -140,23 +142,27 @@ view model =
             colors =
                 mkColors (List.length model.quizRatings.header)
         in
-        div [ id "charts" ]
-            (mkPlacements rankings.cumulative model.labels.placementLabel model.labels.placeLabel model.labels.pointsLabel
-                :: mkRoundWinners rankings.perRound model.labels.roundWinnerLabel model.labels.roundLabel model.labels.pointsLabel
-                :: [ div [ id "cumulativeChart" ]
+        div [ id "quizView" ]
+            ( div [ id "quizTitle" ] [ text (mkFullQuizName model.quizInfo.quizIdentifier) ]
+                :: div [ id "placements" ]
+                    [ mkPlacements rankings.cumulative model.labels.placementLabel model.labels.placeLabel model.labels.pointsLabel
+                    , mkRoundWinners rankings.perRound model.labels.roundWinnerLabel model.labels.roundLabel model.labels.pointsLabel
+                    ]
+                :: div [ id "charts" ]
+                    [ div [ id "cumulativeChart" ]
                         [ chart 800 600 cumulativeChart ]
-                   , div [ id "perRoundChart" ]
+                    , div [ id "perRoundChart" ]
                         [ chart 800 600 perRoundChart ]
-                   , div [ id "progressionChart" ]
+                    , div [ id "progressionChart" ]
                         [ chart 800 600 progressionChart ]
-                   , div [ id "allQuizzes" ]
-                        [ linkButton
-                            (fragmentUrl [ "" ])
-                            [ class "allQuizzesButton", value model.labels.viewPrevious ]
-                            []
-                        ]
-                   ]
-                ++ backToTable
+                    ]
+                :: div [ id "allQuizzes" ]
+                    [ linkButton
+                        (fragmentUrl [ "" ])
+                        [ class "allQuizzesButton", value model.labels.viewPrevious ]
+                        []
+                    ]
+                :: backToTable
             )
 
 
