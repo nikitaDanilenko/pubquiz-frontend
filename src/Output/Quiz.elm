@@ -1,14 +1,12 @@
 module Output.Quiz exposing (..)
 
 import Chartjs.Chart exposing (chart)
-import Common.Constants exposing (getLabelsApi, getQuizInfoApi, getQuizRatingsApi)
-import Common.QuizRatings as QuizRatings
+import Common.ConnectionUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith)
 import Common.Ranking exposing (RoundRankings, rankingToPlacement, ratingsToRankings, roundRankingsToRoundWinners)
-import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamQuery, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings)
-import Common.Util as Util exposing (getMsg)
+import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamQuery)
+import Common.Util as Util
 import Html exposing (Html, a, button, div, text)
 import Html.Attributes exposing (class, href, id)
-import Html.Events exposing (onClick)
 import Input.Model as Input exposing (ErrorOr)
 import List.Extra exposing (maximumBy)
 import Output.Charts as Charts
@@ -92,7 +90,7 @@ init qid =
       , quizInfo = Input.defaultQuizInfo
       , status = loading
       }
-    , Cmd.batch [ getQuizInfo qid, getLabels qid, getQuizRatings qid ]
+    , Cmd.batch [ getQuizInfoWith GotQuizInfo qid, getLabelsWith GotLabels qid, getQuizRatingsWith GotQuizRatings qid ]
     )
 
 
@@ -162,15 +160,16 @@ view model =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        GotQuizRatings quizRatingsCandidate ->
-            ( Util.foldResult model (updateQuizRatings model) quizRatingsCandidate, Cmd.none )
+    let newModel = case msg of
+                    GotQuizRatings quizRatingsCandidate ->
+                        Util.foldResult model (updateQuizRatings model) quizRatingsCandidate
 
-        GotLabels labelsCandidate ->
-            ( Util.foldResult model (updateLabels model) labelsCandidate, Cmd.none )
+                    GotLabels labelsCandidate ->
+                        Util.foldResult model (updateLabels model) labelsCandidate
 
-        GotQuizInfo quizInfoCandidate ->
-            ( Util.foldResult model (updateQuizInfo model) quizInfoCandidate, Cmd.none )
+                    GotQuizInfo quizInfoCandidate ->
+                        Util.foldResult model (updateQuizInfo model) quizInfoCandidate
+    in (newModel, Cmd.none)
 
 
 mkPlacements : RoundRankings -> String -> String -> String -> Html Msg
@@ -240,18 +239,3 @@ mkRoundWinners rr wordForRoundWinner wordForRound wordForPoints =
                 )
                 roundWinners
         )
-
-
-getQuizRatings : DbQuizId -> Cmd Msg
-getQuizRatings =
-    getMsg getQuizRatingsApi GotQuizRatings jsonDecQuizRatings
-
-
-getLabels : DbQuizId -> Cmd Msg
-getLabels =
-    getMsg getLabelsApi GotLabels jsonDecLabels
-
-
-getQuizInfo : DbQuizId -> Cmd Msg
-getQuizInfo =
-    getMsg getQuizInfoApi GotQuizInfo jsonDecQuizInfo

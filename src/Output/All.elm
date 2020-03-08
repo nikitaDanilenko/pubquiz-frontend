@@ -15,6 +15,11 @@ type alias Model =
     }
 
 
+updateQuizInfos : Model -> List QuizInfo -> Model
+updateQuizInfos model quizInfos =
+    { model | quizInfos = quizInfos }
+
+
 type Msg
     = GotAllQuizzes (ErrorOr (List QuizInfo))
 
@@ -34,7 +39,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GotAllQuizzes quizInfosCandidate ->
-            ( Util.foldResult model (\qs -> { model | quizInfos = qs }) quizInfosCandidate, Cmd.none )
+            ( Util.foldResult model (updateQuizInfos model) quizInfosCandidate, Cmd.none )
 
 
 mkQuizInfoButton : QuizInfo -> Html Msg
