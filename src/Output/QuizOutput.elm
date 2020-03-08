@@ -1,7 +1,7 @@
 module Output.QuizOutput exposing (..)
 
 import Basics.Extra exposing (flip)
-import Browser exposing (UrlRequest)
+import Browser exposing (UrlRequest(..))
 import Browser.Navigation as Nav
 import Common.Constants exposing (quizIdParam)
 import Common.Types exposing (DbQuizId, QuizInfo, TeamQuery)
@@ -10,7 +10,7 @@ import Html exposing (Html, div)
 import Output.All as All
 import Output.OutputUtil exposing (mkFullQuizName)
 import Output.Quiz as Quiz
-import Output.Table as Table
+import Output.Table as Table exposing (Msg)
 import Url exposing (Protocol(..), Url)
 import Url.Parser as Parser exposing ((</>), (<?>), Parser, oneOf, s)
 
@@ -43,8 +43,8 @@ titleFor model =
             String.join " - " [ mkFullQuizName quizModel.quizInfo.quizIdentifier, quizModel.labels.backToChartView ]
 
         All all ->
-          -- Entering the all view does not provide a sensible way of fetching a label for the title.
-          Util.foldMaybe "" .viewPrevious all.labelsCandidate
+            -- Entering the all view does not provide a sensible way of fetching a label for the title.
+            Util.foldMaybe "" .viewPrevious all.labelsCandidate
 
         Void ->
             "Welcome to Janet's void! How did you get here?"
