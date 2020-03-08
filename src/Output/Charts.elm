@@ -8,6 +8,7 @@ import Chartjs.DataSets.Bar as Bar
 import Chartjs.DataSets.Line as Line
 import Chartjs.Options exposing (defaultOptions)
 import Chartjs.Options.Elements exposing (LineFill(..), defaultElements)
+import Chartjs.Options.Legend exposing (defaultLabels, defaultLegend)
 import Chartjs.Options.Scales exposing (Axis, defaultAxis, defaultScales, defaultTicks)
 import Chartjs.Options.Title exposing (defaultTitle)
 import Color exposing (Color)
@@ -85,10 +86,16 @@ chartOptionsWithTitle : String -> Chartjs.Options.Options
 chartOptionsWithTitle title =
     { defaultOptions
         | scales = Just chartScales
-        , title = Just { defaultTitle | text = Just title, display = Just True }
-        , elements = Just { defaultElements | line = Just { defaultLine | tension = Just 0, fill = Just NoFill } }
-    }
+        , title = Just { defaultTitle | text = Just title, display = Just True, fontSize = Just titleFontSize }
+        , elements = Just { defaultElements | line = Just { defaultLine | tension = Just 0, fill = Just NoFill }}
+        , legend = Just { defaultLegend | labels = Just { defaultLabels | fontSize = Just legendFontSize}}
+        }
 
+titleFontSize : Int
+titleFontSize = 30
+
+legendFontSize : Int
+legendFontSize = 24
 
 defaultLine : Chartjs.Options.Elements.Line
 defaultLine =
