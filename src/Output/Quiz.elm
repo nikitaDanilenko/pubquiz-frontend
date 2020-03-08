@@ -124,6 +124,7 @@ view model =
             backToTable =
                 case model.teamQueryCandidate of
                     Just teamQuery ->
+                      if teamQuery.teamQueryQuizId == model.quizInfo.quizId then
                         [ div [ id "backToTable" ]
                             [ linkButton
                                 (mkTeamQueryLink teamQuery)
@@ -131,6 +132,7 @@ view model =
                                 []
                             ]
                         ]
+                      else []
 
                     Nothing ->
                         []
