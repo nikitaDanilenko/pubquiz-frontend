@@ -3,6 +3,8 @@ module Common.ConnectionUtil exposing (..)
 import Common.Constants exposing (getLabelsApi, getQuizInfoApi, getQuizRatingsApi)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings)
 import Common.Util as Util exposing (getMsg)
+import Html exposing (Attribute, Html, form, input)
+import Html.Attributes exposing (action, type_)
 import Input.Model exposing (ErrorOr)
 
 
@@ -20,6 +22,13 @@ getQuizRatingsWith : (ErrorOr QuizRatings -> msg) -> DbQuizId -> Cmd msg
 getQuizRatingsWith f =
     getMsg getQuizRatingsApi f jsonDecQuizRatings
 
+
 useOrFetchWith : (DbQuizId -> Cmd msg) -> Maybe a -> DbQuizId -> Cmd msg
 useOrFetchWith dft mA qid =
     Util.foldMaybe (dft qid) (always Cmd.none) mA
+
+
+linkButton : String -> List (Attribute msg) -> List (Html msg) -> Html msg
+linkButton link attrs children =
+    form [ action link ]
+        [ input (type_ "submit" :: attrs) children ]
