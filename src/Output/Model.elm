@@ -1,47 +1,10 @@
 module Output.Model exposing (..)
 
+import Browser exposing (UrlRequest)
+import Browser.Navigation as Navigation
 import Common.Types exposing (Activity(..), Code, DbQuizId, Labels, QuizIdentifier, QuizInfo, QuizRatings, TeamNumber, TeamQuery, TeamTable, TeamTableInfo)
 import Input.Model exposing (ErrorOr)
-
-
-
---todo: extract labels
-
-
-type alias Model =
-    { teamQuery : TeamQuery
-    , labels : Labels
-    , subModel : SubModel
-    }
-
-
-type SubModel
-    = TableModel TeamTableInfo QuizInfo
-    | QuizModel QuizRatings QuizInfo
-    | AllModel (List QuizInfo)
-
-
-titleFor : Model -> String
-titleFor model =
-    case model.subModel of
-        TableModel _ quizInfo ->
-            String.join " - " [ mkFullQuizName quizInfo.quizIdentifier, model.labels.ownPointsLabel ]
-
-        QuizModel _ quizInfo ->
-            String.join " - " [ mkFullQuizName quizInfo.quizIdentifier, model.labels.backToChartView ]
-
-        AllModel _ ->
-            model.labels.viewPrevious
-
-
-mkFullQuizName : QuizIdentifier -> String
-mkFullQuizName idf =
-    String.join " "
-        [ String.concat [ idf.date, ":" ]
-        , idf.name
-        , String.concat [ "(", idf.place, ")" ]
-        ]
-
+import Url exposing (Url)
 
 type Msg
     = GetQuizRatings QuizInfo
@@ -50,17 +13,23 @@ type Msg
     | GotTeamTable (ErrorOr TeamTableInfo)
     | GetAllQuizzes
     | GotAllQuizzes (ErrorOr (List QuizInfo))
+    | ClickedLink UrlRequest
+    | ChangedUrl Url
+    | GetLabels DbQuizId
+    | GotLabels DbQuizId (ErrorOr Labels)
+    | GotQuizInfo (ErrorOr QuizInfo)
 
 
-initialModelFunction : () -> ( Model, Cmd Msg )
-initialModelFunction _ =
-    ( initialModel, Cmd.none )
-
-
-initialModel : Model
-initialModel =
-  let quizInfo =  Input.Model.defaultQuizInfo
-  in  Model { teamQueryQuizId = 1, teamQueryTeamNumber = 1, teamQueryTeamCode = "d1215d" } Input.Model.defaultLabels (QuizModel testRatings { quizInfo | quizId = 1 })
+--initialModel : Model
+--initialModel =
+--    let
+--        quizInfo =
+--            Input.Model.defaultQuizInfo
+--    in
+--    QuizModel Input.Model.defaultLabels
+--              (Just { teamQueryQuizId = 1, teamQueryTeamNumber = 1, teamQueryTeamCode = "d1215d" })
+--              testRatings
+--              { quizInfo | quizId = 1 }
 
 
 testRatings : QuizRatings
