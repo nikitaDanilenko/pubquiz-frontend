@@ -5,6 +5,7 @@ import Browser exposing (UrlRequest)
 import Browser.Navigation as Nav
 import Common.Constants exposing (quizIdParam)
 import Common.Types exposing (DbQuizId, QuizInfo, TeamQuery)
+import Common.Util as Util
 import Html exposing (Html, div)
 import Output.All as All
 import Output.OutputUtil exposing (mkFullQuizName)
@@ -41,12 +42,12 @@ titleFor model =
         Quiz quizModel ->
             String.join " - " [ mkFullQuizName quizModel.quizInfo.quizIdentifier, quizModel.labels.backToChartView ]
 
-        All _ ->
-            -- todo: A title would be nice, but how to get one?
-            ""
+        All all ->
+          -- Entering the all view does not provide a sensible way of fetching a label for the title.
+          Util.foldMaybe "" .viewPrevious all.labelsCandidate
 
         Void ->
-            "Welcome to Janet's void!"
+            "Welcome to Janet's void! How did you get here?"
 
 
 type Page
