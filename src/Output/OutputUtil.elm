@@ -1,6 +1,6 @@
 module Output.OutputUtil exposing (..)
 
-import Common.Types exposing (QuizIdentifier)
+import Common.Types exposing (DbQuizId, Labels, QuizIdentifier, QuizInfo)
 import Url.Builder exposing (Root(..))
 
 

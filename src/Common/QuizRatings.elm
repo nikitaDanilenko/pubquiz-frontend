@@ -1,7 +1,7 @@
 module Common.QuizRatings exposing (..)
 
 import Common.RoundRating as RoundRating
-import Common.Types exposing (Header, QuizRatings, Ratings, RoundNumber, RoundRating, TeamName, TeamNumber)
+import Common.Types exposing (DbQuizId, Header, QuizRatings, Ratings, RoundNumber, RoundRating, TeamName, TeamNumber)
 import Common.Util as Util
 
 
@@ -113,5 +113,6 @@ numberOfTeams quiz =
     let
         max =
             maxNumberOfTeams quiz
-    in  
+    in
     Maybe.withDefault max (List.maximum (List.map (\( _, rr ) -> List.length rr.points) quiz.ratings))
+
