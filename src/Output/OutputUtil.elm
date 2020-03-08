@@ -1,6 +1,9 @@
 module Output.OutputUtil exposing (..)
 
 import Common.Types exposing (QuizIdentifier)
+import Url.Builder exposing (Root(..))
+
+
 mkFullQuizName : QuizIdentifier -> String
 mkFullQuizName idf =
     String.join " "
@@ -8,3 +11,6 @@ mkFullQuizName idf =
         , idf.name
         , String.concat [ "(", idf.place, ")" ]
         ]
+
+fragmentUrl : List String -> String
+fragmentUrl parts = Url.Builder.custom Relative [] [] (Just (Url.Builder.absolute parts []))
