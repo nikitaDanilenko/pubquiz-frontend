@@ -277,25 +277,6 @@ tr:not(.tableHeader):hover {
 
   text-decoration: none;
   font-size: xx-large;
-}
-
-#quizRatings {
-  text-align: center;
-}
-
-.quizRatingsButton, .allQuizzesButton {
-  color: rgb(250, 250, 250);
-  background-color: rgb(70, 200, 40);
-  font-size: xx-large;
-}
-
-.quizRatingsButton:hover, .allQuizzesButton:hover {
-  background-color: rgb(85, 225, 60);
-}
-
-.quizInfoButton {
-  color: rgb(250, 250, 250);
-  background-color: rgb(66, 100, 160);
   text-align: center;
   display: inline-block;
   width: 40%;
@@ -303,12 +284,26 @@ tr:not(.tableHeader):hover {
   word-wrap: break-word;
 }
 
-.quizInfoButton:hover {
-  background-color: rgb(100, 149, 237);
+#quizRatings, #backToTable, #allQuizzes {
+  text-align: center;
 }
 
-#allQuizzes {
-  text-align: center;
+.quizRatingsButton, .allQuizzesButton, .ownPointsButton {
+  color: rgb(250, 250, 250);
+  background-color: rgb(70, 200, 40);
+}
+
+.quizRatingsButton:hover, .allQuizzesButton:hover, .ownPointsButton:hover {
+  background-color: rgb(85, 225, 60);
+}
+
+.quizInfoButton {
+  color: rgb(250, 250, 250);
+  background-color: rgb(66, 100, 160);
+}
+
+.quizInfoButton:hover {
+  background-color: rgb(100, 149, 237);
 }
 
 @media screen and (orientation: portrait) {
