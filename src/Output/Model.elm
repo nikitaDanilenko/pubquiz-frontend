@@ -5,7 +5,7 @@ import Browser.Navigation as Navigation
 import Common.Types exposing (Activity(..), Code, DbQuizId, Labels, QuizIdentifier, QuizInfo, QuizRatings, TeamNumber, TeamQuery, TeamTable, TeamTableInfo)
 import Input.Model exposing (ErrorOr)
 import Url exposing (Url)
-
+--todo remove this module.
 type Msg
     = GetQuizRatings QuizInfo
     | GotQuizRatings QuizInfo (ErrorOr QuizRatings)
