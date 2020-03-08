@@ -18,6 +18,12 @@ actionParam = "action"
 quizIdParam : String
 quizIdParam = "quizId"
 
+teamNumberParam : String
+teamNumberParam = "teamNumber"
+
+teamCodeParam : String
+teamCodeParam = "teamCode"
+
 userParam : String
 userParam = "user"
 

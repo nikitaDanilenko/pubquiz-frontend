@@ -1,17 +1,19 @@
 module Output.Quiz exposing (Model, Msg, init, update, view)
 
 import Chartjs.Chart exposing (chart)
-import Common.ConnectionUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, useOrFetchWith)
+import Common.ConnectionUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, linkButton, useOrFetchWith)
+import Common.Constants exposing (quizIdParam, teamCodeParam, teamNumberParam)
 import Common.Ranking exposing (RoundRankings, rankingToPlacement, ratingsToRankings, roundRankingsToRoundWinners)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamQuery)
 import Common.Util as Util
-import Html exposing (Html, a, button, div, text)
-import Html.Attributes exposing (class, href, id)
+import Html exposing (Html, div, text)
+import Html.Attributes exposing (class, id, value)
 import Input.Model as Input exposing (ErrorOr)
 import List.Extra exposing (maximumBy)
 import Output.Charts as Charts
 import Output.Colors exposing (mkColors)
 import Output.Model
+import Output.OutputUtil exposing (fragmentUrl)
 
 
 type alias Model =
@@ -38,11 +40,10 @@ updateQuizInfo model quizInfo =
     { model | quizInfo = quizInfo, status = updateQuizInfoSet model.status True }
 
 
--- | Without the status, the charts are initialised with whatever values are contained in the initial
---   models only. The precise background is unclear.
---   Using a status is a simple workaround since we only create charts once every value has been set.
-
-
+{-| Without the status, the charts are initialised with whatever values are contained in the initial
+models only. The precise background is unclear.
+Using a status is a simple workaround since we only create charts once every value has been set.
+-}
 type alias Status =
     { labelsSet : Bool
     , quizRatingsSet : Bool
@@ -89,10 +90,11 @@ init mLabels mTeamQuery qid =
       , quizInfo = Input.defaultQuizInfo
       , status = { loading | labelsSet = Util.isDefined mLabels }
       }
-    , Cmd.batch [
-    getQuizInfoWith GotQuizInfo qid,
-    useOrFetchWith (getLabelsWith GotLabels) mLabels qid,
-    getQuizRatingsWith GotQuizRatings qid ]
+    , Cmd.batch
+        [ getQuizInfoWith GotQuizInfo qid
+        , useOrFetchWith (getLabelsWith GotLabels) mLabels qid
+        , getQuizRatingsWith GotQuizRatings qid
+        ]
     )
 
 
@@ -123,12 +125,10 @@ view model =
                 case model.teamQueryCandidate of
                     Just teamQuery ->
                         [ div [ id "backToTable" ]
-                            [ button
-                                [ class "ownPointsButton"
-
-                                {- , onClick (GetTeamTable teamQuery) -}
-                                ]
-                                [ text model.labels.ownPointsLabel ]
+                            [ linkButton
+                                (mkTeamQueryLink teamQuery)
+                                [ class "ownPointsButton", value model.labels.ownPointsLabel ]
+                                []
                             ]
                         ]
 
@@ -148,13 +148,10 @@ view model =
                    , div [ id "progressionChart" ]
                         [ chart 800 600 progressionChart ]
                    , div [ id "allQuizzes" ]
-                        [ a
-                            [ class "allQuizzesButton"
-                            , href "/"
-
-                            {- , onClick GetAllQuizzes -}
-                            ]
-                            [ text model.labels.viewPrevious ]
+                        [ linkButton
+                            (fragmentUrl [ "" ])
+                            [ class "allQuizzesButton", value model.labels.viewPrevious ]
+                            []
                         ]
                    ]
                 ++ backToTable
@@ -245,3 +242,15 @@ mkRoundWinners rr wordForRoundWinner wordForRound wordForPoints =
                 )
                 roundWinners
         )
+
+
+mkTeamQueryLink : TeamQuery -> String
+mkTeamQueryLink teamQuery =
+    fragmentUrl
+        [ quizIdParam
+        , String.fromInt teamQuery.teamQueryQuizId
+        , teamNumberParam
+        , String.fromInt teamQuery.teamQueryTeamNumber
+        , teamCodeParam
+        , teamQuery.teamQueryTeamCode
+        ]

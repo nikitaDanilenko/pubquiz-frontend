@@ -1,10 +1,11 @@
 module Output.All exposing (..)
 
+import Common.ConnectionUtil exposing (linkButton)
 import Common.Constants exposing (quizIdParam)
 import Common.Types exposing (Labels, QuizInfo, TeamQuery)
 import Common.Util as Util exposing (getAllWith)
-import Html exposing (Html, a, div, text)
-import Html.Attributes exposing (class, href, id)
+import Html exposing (Html, div)
+import Html.Attributes exposing (class, id, value)
 import Input.Model exposing (ErrorOr)
 import Output.OutputUtil exposing (fragmentUrl, mkFullQuizName)
 
@@ -46,11 +47,10 @@ update msg model =
 mkQuizInfoButton : QuizInfo -> Html Msg
 mkQuizInfoButton quizInfo =
     div []
-        [ a
-            [ class "quizInfoButton"
-            , href (fragmentUrl [ quizIdParam, String.fromInt quizInfo.quizId ])
-            ]
-            [ text (mkFullQuizName quizInfo.quizIdentifier) ]
+        [ linkButton
+            (fragmentUrl [ quizIdParam, String.fromInt quizInfo.quizId ])
+            [ class "quizInfoButton", value (mkFullQuizName quizInfo.quizIdentifier) ]
+            []
         ]
 
 
