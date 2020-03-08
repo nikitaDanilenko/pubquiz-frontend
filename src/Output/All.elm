@@ -6,8 +6,7 @@ import Common.Util as Util exposing (getAllWith)
 import Html exposing (Html, a, div, text)
 import Html.Attributes exposing (class, href, id)
 import Input.Model exposing (ErrorOr)
-import Output.OutputUtil exposing (mkFullQuizName)
-import Url.Builder
+import Output.OutputUtil exposing (fragmentUrl, mkFullQuizName)
 
 
 type alias Model =
@@ -43,7 +42,7 @@ mkQuizInfoButton quizInfo =
     div []
         [ a
             [ class "quizInfoButton"
-            , href (Url.Builder.absolute [ quizIdParam, String.fromInt quizInfo.quizId ] [])
+            , href (fragmentUrl [ quizIdParam, String.fromInt quizInfo.quizId ])
             ]
             [ text (mkFullQuizName quizInfo.quizIdentifier) ]
         ]

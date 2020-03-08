@@ -133,22 +133,11 @@ route =
 fragmentToPath : Url -> Url
 fragmentToPath url = {url | path = Maybe.withDefault "" url.fragment, fragment = Nothing}
 
-testUrl : Url
-testUrl =
-    { protocol = Http
-    , host = "danilenko.io"
-    , port_ = Just 9000
-    , path = "/quizzes"
-    , query = Nothing
-    , fragment = Just "quizId/23/teamNumber/1/teamCode/baad12"
-    }
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ClickedLink urlRequest ->
-            case Debug.log "request" urlRequest of
+            case urlRequest of
                 Browser.Internal url ->
                     ( model, Nav.pushUrl model.key (Url.toString url) )
 
@@ -160,6 +149,11 @@ update msg model =
         AllMsg allMsg ->
           case model.page of
             All all -> stepAll model (All.update allMsg all)
+            _ -> (model, Cmd.none)
+
+        QuizMsg quizMsg ->
+          case model.page of
+            Quiz quiz -> stepQuiz model (Quiz.update quizMsg quiz)
             _ -> (model, Cmd.none)
         --( GetQuizRatings quizInfo, _ ) ->
         --    ( model, getQuizRatings quizInfo )
@@ -194,8 +188,6 @@ update msg model =
 --updateSubModel : ErrorOr Model -> Model -> Model
 --updateSubModel newModel model = Result.withDefault model newModel
 --getQuizRatings : QuizInfo -> Cmd Msg
---getQuizRatings quizInfo =
---    getMsg getQuizRatingsApi (GotQuizRatings quizInfo) jsonDecQuizRatings quizInfo.quizId
 -- todo: check
 --getTeamTable : TeamQuery -> Cmd Msg
 --getTeamTable =
