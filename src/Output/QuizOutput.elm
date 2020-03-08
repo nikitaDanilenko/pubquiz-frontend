@@ -123,32 +123,34 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        --( GetQuizRatings quizInfo, _ ) ->
-        --    ( model, getQuizRatings quizInfo )
-        --
-        --( GotQuizRatings quizInfo qrCandidate, _ ) ->
-        --    ( updateSubModel (Result.map (\quizRatings -> QuizModel quizRatings quizInfo) qrCandidate) model, Cmd.none )
-        --
-        --( GetTeamTable, QuizModel _ tq _ _ ) ->
-        --    ( model, Util.foldMaybe Cmd.none getTeamTable tq )
-        --
-        --( GotTeamTable teamTableCandidate, QuizModel labels _ _ quizInfo ) ->
-        --    ( updateSubModel (Result.map (\table -> TableModel labels table quizInfo) teamTableCandidate) model, Cmd.none )
-        --
-        --( GetAllQuizzes, QuizModel _ _ _ _) ->
-        --    ( model, getAllQuizzes )
-        --
-        --( GotAllQuizzes quizzesCandidate, QuizModel _ mtq _ _) ->
-        --    ( updateSubModel (Result.map (AllModel mtq) quizzesCandidate) model, Cmd.none )
-        --
-        --( GetLabels qid, _) ->
-        --  (model, getLabels qid)
-        --
-        --( GotLabels qid labelsCandidate, _ ) ->
-        --  (Result.withDefault model (Result.map (updateLabels model) labelsCandidate), getQuizInfo qid)
-        --( GotQuizInfo quizInfoCandidate, _) ->
-        --_ ->
-        --    ( model, Cmd.none )
+
+
+--( GetQuizRatings quizInfo, _ ) ->
+--    ( model, getQuizRatings quizInfo )
+--
+--( GotQuizRatings quizInfo qrCandidate, _ ) ->
+--    ( updateSubModel (Result.map (\quizRatings -> QuizModel quizRatings quizInfo) qrCandidate) model, Cmd.none )
+--
+--( GetTeamTable, QuizModel _ tq _ _ ) ->
+--    ( model, Util.foldMaybe Cmd.none getTeamTable tq )
+--
+--( GotTeamTable teamTableCandidate, QuizModel labels _ _ quizInfo ) ->
+--    ( updateSubModel (Result.map (\table -> TableModel labels table quizInfo) teamTableCandidate) model, Cmd.none )
+--
+--( GetAllQuizzes, QuizModel _ _ _ _) ->
+--    ( model, getAllQuizzes )
+--
+--( GotAllQuizzes quizzesCandidate, QuizModel _ mtq _ _) ->
+--    ( updateSubModel (Result.map (AllModel mtq) quizzesCandidate) model, Cmd.none )
+--
+--( GetLabels qid, _) ->
+--  (model, getLabels qid)
+--
+--( GotLabels qid labelsCandidate, _ ) ->
+--  (Result.withDefault model (Result.map (updateLabels model) labelsCandidate), getQuizInfo qid)
+--( GotQuizInfo quizInfoCandidate, _) ->
+--_ ->
+--    ( model, Cmd.none )
 
 
 stepTo : Url -> Model -> ( Model, Cmd Msg )
@@ -185,15 +187,37 @@ parser model =
         teamParser =
             quizIdParser </> s "teamNumber" </> Parser.int </> s "teamCode" </> Parser.string
 
-        (currentLabels, currentQuizInfo) =
-          case model.page of
-            Quiz quiz -> (Just quiz.labels, Just quiz.quizInfo)
-            Table table -> (Just table.labels, Just table.quizInfo)
-            _ -> (Nothing, Nothing)
+        ( currentLabels, currentQuizInfo ) =
+            case model.page of
+                Quiz quiz ->
+                    ( Just quiz.labels, Just quiz.quizInfo )
+
+                Table table ->
+                    ( Just table.labels, Just table.quizInfo )
+
+                All all ->
+                    ( all.labelsCandidate, Nothing )
+
+                _ ->
+                    ( Nothing, Nothing )
+
+        currentTeamQuery =
+            case model.page of
+                Table table ->
+                    Just table.teamQuery
+
+                Quiz quiz ->
+                    quiz.teamQueryCandidate
+
+                All all ->
+                    all.teamQueryCandidate
+
+                _ ->
+                    Nothing
     in
     oneOf
-        [ route Parser.top (stepAll model All.init)
-        , route quizIdParser (Quiz.init >> stepQuiz model)
+        [ route Parser.top (stepAll model (All.init currentLabels currentTeamQuery))
+        , route quizIdParser (Quiz.init currentLabels currentTeamQuery >> stepQuiz model)
         , route teamParser (\qid tn tc -> TeamQuery qid tn tc |> Table.init currentLabels currentQuizInfo |> stepTable model)
         ]
 

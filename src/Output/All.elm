@@ -1,7 +1,7 @@
 module Output.All exposing (..)
 
 import Common.Constants exposing (quizIdParam)
-import Common.Types exposing (QuizInfo, TeamQuery)
+import Common.Types exposing (Labels, QuizInfo, TeamQuery)
 import Common.Util as Util exposing (getAllWith)
 import Html exposing (Html, a, div, text)
 import Html.Attributes exposing (class, href, id)
@@ -11,6 +11,7 @@ import Output.OutputUtil exposing (fragmentUrl, mkFullQuizName)
 
 type alias Model =
     { teamQueryCandidate : Maybe TeamQuery
+    , labelsCandidate : Maybe Labels
     , quizInfos : List QuizInfo
     }
 
@@ -24,9 +25,9 @@ type Msg
     = GotAllQuizzes (ErrorOr (List QuizInfo))
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( { teamQueryCandidate = Nothing, quizInfos = [] }, getAllQuizzes )
+init : Maybe Labels -> Maybe TeamQuery -> ( Model, Cmd Msg )
+init mLabels mTeamQuery =
+    ( { teamQueryCandidate = mTeamQuery, labelsCandidate = mLabels, quizInfos = [] }, getAllQuizzes )
 
 
 view : Model -> Html Msg

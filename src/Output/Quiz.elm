@@ -1,7 +1,7 @@
 module Output.Quiz exposing (Model, Msg, init, update, view)
 
 import Chartjs.Chart exposing (chart)
-import Common.ConnectionUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith)
+import Common.ConnectionUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, useOrFetchWith)
 import Common.Ranking exposing (RoundRankings, rankingToPlacement, ratingsToRankings, roundRankingsToRoundWinners)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamQuery)
 import Common.Util as Util
@@ -81,15 +81,18 @@ type Msg
     | GotQuizInfo (ErrorOr QuizInfo)
 
 
-init : DbQuizId -> ( Model, Cmd Msg )
-init qid =
-    ( { labels = Input.defaultLabels
-      , teamQueryCandidate = Nothing
+init : Maybe Labels -> Maybe TeamQuery -> DbQuizId -> ( Model, Cmd Msg )
+init mLabels mTeamQuery qid =
+    ( { labels = Maybe.withDefault Input.defaultLabels mLabels
+      , teamQueryCandidate = mTeamQuery
       , quizRatings = Output.Model.testRatings
       , quizInfo = Input.defaultQuizInfo
-      , status = loading
+      , status = { loading | labelsSet = Util.isDefined mLabels }
       }
-    , Cmd.batch [ getQuizInfoWith GotQuizInfo qid, getLabelsWith GotLabels qid, getQuizRatingsWith GotQuizRatings qid ]
+    , Cmd.batch [
+    getQuizInfoWith GotQuizInfo qid,
+    useOrFetchWith (getLabelsWith GotLabels) mLabels qid,
+    getQuizRatingsWith GotQuizRatings qid ]
     )
 
 

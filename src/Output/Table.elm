@@ -1,12 +1,13 @@
 module Output.Table exposing (Model, Msg, init, update, view)
 
 import Color.Convert
-import Common.ConnectionUtil exposing (getLabelsWith, getQuizInfoWith)
+import Common.ConnectionUtil exposing (getLabelsWith, getQuizInfoWith, useOrFetchWith)
 import Common.Constants exposing (teamQueryParam, teamTableApi)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine, TeamQuery, TeamTable, TeamTableInfo, jsonDecTeamTableInfo, jsonEncTeamQuery)
 import Common.Util as Util exposing (getMsgWith)
 import Html exposing (Html, button, div, h1, table, td, text, th, tr)
 import Html.Attributes exposing (class, id, style)
+import Html.Events exposing (onClick)
 import Input.Model as Input exposing (ErrorOr)
 import List.Extra
 import Output.Colors exposing (mkColors)
@@ -103,6 +104,7 @@ type Msg
     = GotTeamTableInfo (ErrorOr TeamTableInfo)
     | GotLabels (ErrorOr Labels)
     | GotQuizInfo (ErrorOr QuizInfo)
+    | GetQuizRatings TeamQuery
 
 
 view : Model -> Html Msg
@@ -144,8 +146,7 @@ view model =
             , div [ id "quizRatings" ]
                 [ button
                     [ class "quizRatingsButton"
-
-                    {- , onClick (GetQuizRatings model.quizInfo.quizId) -}
+                    , onClick (GetQuizRatings model.teamQuery)
                     ]
                     [ text model.labels.backToChartView ]
                 ]
@@ -165,6 +166,9 @@ update msg model =
 
                 GotQuizInfo quizInfoCandidate ->
                     Util.foldResult model (updateQuizInfo model) quizInfoCandidate
+
+                _ ->
+                    model
     in
     ( newModel, Cmd.none )
 
@@ -197,8 +201,3 @@ mkCell str =
 getTeamTableInfo : TeamQuery -> Cmd Msg
 getTeamTableInfo =
     getMsgWith jsonEncTeamQuery teamQueryParam teamTableApi GotTeamTableInfo jsonDecTeamTableInfo
-
-
-useOrFetchWith : (DbQuizId -> Cmd Msg) -> Maybe a -> DbQuizId -> Cmd Msg
-useOrFetchWith dft mA qid =
-    Util.foldMaybe (dft qid) (always Cmd.none) mA
