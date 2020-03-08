@@ -1,8 +1,9 @@
 module Common.Util exposing (..)
 
-import Common.Constants exposing (allApi, quizIdParam)
-import Common.Types exposing (DbQuizId, QuizInfo, TeamRating, jsonDecQuizInfo, jsonEncDbQuizId)
+import Common.Constants exposing (allApi, getLabelsApi, getQuizInfoApi, getQuizRatingsApi, quizIdParam)
+import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamRating, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings, jsonEncDbQuizId)
 import Http exposing (Error)
+import Input.Model exposing (ErrorOr)
 import Json.Decode as Decode
 import Json.Encode as Encode exposing (Value)
 import List.Extra
@@ -135,6 +136,21 @@ getAllWith mkMsg =
         { url = allApi
         , expect = Http.expectJson mkMsg (Decode.list jsonDecQuizInfo)
         }
+
+
+getLabelsWith : (ErrorOr Labels -> msg) -> DbQuizId -> Cmd msg
+getLabelsWith f =
+    getMsg getLabelsApi f jsonDecLabels
+
+
+getQuizInfoWith : (ErrorOr QuizInfo -> msg) -> DbQuizId -> Cmd msg
+getQuizInfoWith f =
+    getMsg getQuizInfoApi f jsonDecQuizInfo
+
+
+getQuizRatingsWith : (ErrorOr QuizRatings -> msg) -> DbQuizId -> Cmd msg
+getQuizRatingsWith f =
+    getMsg getQuizRatingsApi f jsonDecQuizRatings
 
 
 uncurry3 : (a -> b -> c -> d) -> ( a, b, c ) -> d
