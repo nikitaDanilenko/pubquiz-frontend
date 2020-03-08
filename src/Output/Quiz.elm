@@ -1,4 +1,4 @@
-module Output.Quiz exposing (..)
+module Output.Quiz exposing (Model, Msg, init, update, view)
 
 import Chartjs.Chart exposing (chart)
 import Common.ConnectionUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith)
@@ -22,6 +22,20 @@ type alias Model =
     , status : Status
     }
 
+
+updateLabels : Model -> Labels -> Model
+updateLabels model labels =
+    { model | labels = labels, status = updateLabelsSet model.status True }
+
+
+updateQuizRatings : Model -> QuizRatings -> Model
+updateQuizRatings model quizRatings =
+    { model | quizRatings = quizRatings, status = updateQuizRatingsSet model.status True }
+
+
+updateQuizInfo : Model -> QuizInfo -> Model
+updateQuizInfo model quizInfo =
+    { model | quizInfo = quizInfo, status = updateQuizInfoSet model.status True }
 
 
 -- | Without the status, the charts are initialised with whatever values are contained in the initial
@@ -61,21 +75,6 @@ updateQuizInfoSet s b =
     { s | quizInfoSet = b }
 
 
-updateLabels : Model -> Labels -> Model
-updateLabels model labels =
-    { model | labels = labels, status = updateLabelsSet model.status True }
-
-
-updateQuizRatings : Model -> QuizRatings -> Model
-updateQuizRatings model quizRatings =
-    { model | quizRatings = quizRatings, status = updateQuizRatingsSet model.status True }
-
-
-updateQuizInfo : Model -> QuizInfo -> Model
-updateQuizInfo model quizInfo =
-    { model | quizInfo = quizInfo, status = updateQuizInfoSet model.status True }
-
-
 type Msg
     = GotQuizRatings (ErrorOr QuizRatings)
     | GotLabels (ErrorOr Labels)
@@ -97,6 +96,7 @@ init qid =
 view : Model -> Html Msg
 view model =
     if not (isFinished model.status) then
+        -- todo add loading symbol
         div [] []
 
     else
@@ -160,16 +160,19 @@ view model =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    let newModel = case msg of
-                    GotQuizRatings quizRatingsCandidate ->
-                        Util.foldResult model (updateQuizRatings model) quizRatingsCandidate
+    let
+        newModel =
+            case msg of
+                GotQuizRatings quizRatingsCandidate ->
+                    Util.foldResult model (updateQuizRatings model) quizRatingsCandidate
 
-                    GotLabels labelsCandidate ->
-                        Util.foldResult model (updateLabels model) labelsCandidate
+                GotLabels labelsCandidate ->
+                    Util.foldResult model (updateLabels model) labelsCandidate
 
-                    GotQuizInfo quizInfoCandidate ->
-                        Util.foldResult model (updateQuizInfo model) quizInfoCandidate
-    in (newModel, Cmd.none)
+                GotQuizInfo quizInfoCandidate ->
+                    Util.foldResult model (updateQuizInfo model) quizInfoCandidate
+    in
+    ( newModel, Cmd.none )
 
 
 mkPlacements : RoundRankings -> String -> String -> String -> Html Msg
