@@ -4,10 +4,10 @@ import Chartjs.Chart exposing (chart)
 import Common.ConnectionUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, linkButton, useOrFetchWith)
 import Common.Constants exposing (quizIdParam, teamCodeParam, teamNumberParam)
 import Common.QuizRatings as QuizRatings
-import Common.Ranking exposing (RoundRankings, rankingToPlacement, ratingsToRankings, roundRankingsToRoundWinners)
+import Common.Ranking exposing (RoundRankings, TeamsRanking, rankingToPlacement, ratingsToRankings, roundRankingsToRoundWinners)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamQuery)
 import Common.Util as Util
-import Html exposing (Html, div, label, text)
+import Html exposing (Html, div, label, table, td, text, tr)
 import Html.Attributes exposing (class, for, id, value)
 import Input.Model as Input exposing (ErrorOr)
 import List.Extra exposing (maximumBy)
@@ -199,27 +199,30 @@ mkPlacements rrs wordForPlacement wordForPlace wordForPoints =
             rankingToPlacement currentRanking
     in
     div [ id "placements" ]
-        (label [ for "placementsLabel" ] [ text wordForPlacement ]
-            :: List.map
-                (\tr ->
-                    div [ id "place" ]
-                        [ text
-                            (String.join " "
-                                [ String.concat
-                                    [ String.join " "
-                                        [ wordForPlace
-                                        , String.fromInt tr.position
-                                        , String.concat [ "(", String.fromFloat tr.points, " ", wordForPoints, ")" ]
-                                        ]
-                                    , ":"
-                                    ]
-                                , String.join ", " tr.teamNames
-                                ]
-                            )
+        [ label [ for "placementsLabel" ] [ text wordForPlacement ]
+        , table [ id "placementsTable"]
+            (List.map (mkTableLine wordForPlace wordForPoints) placement)
+        ]
+
+
+mkTableLine : String -> String -> TeamsRanking -> Html Msg
+mkTableLine wordForPlace wordForPoints teamsRanking =
+    tr []
+        [ td []
+            [ text
+                (String.concat
+                    [ String.join " "
+                        [ wordForPlace
+                        , String.fromInt teamsRanking.position
+                        , String.concat [ "(", String.fromFloat teamsRanking.points, " ", wordForPoints, ")" ]
                         ]
+                    , ":"
+                    ]
                 )
-                placement
-        )
+            ]
+        , td []
+            [ text (String.join ", " teamsRanking.teamNames) ]
+        ]
 
 
 mkRoundWinners : RoundRankings -> String -> String -> String -> Html Msg
