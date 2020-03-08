@@ -182,3 +182,11 @@ groupBy equal l =
 
         x :: xs ->
             List.Extra.takeWhile (equal x) l :: groupBy equal (List.Extra.dropWhile (equal x) xs)
+
+isDefined : Maybe a -> Bool
+isDefined m =
+  case m of
+    Just _ -> True
+
+
+    Nothing -> False
