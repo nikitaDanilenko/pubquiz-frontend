@@ -5,8 +5,8 @@ import Common.ConnectionUtil exposing (getLabelsWith, getQuizInfoWith, linkButto
 import Common.Constants exposing (quizIdParam, teamQueryParam, teamTableApi)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine, TeamQuery, TeamTable, TeamTableInfo, jsonDecTeamTableInfo, jsonEncTeamQuery)
 import Common.Util as Util exposing (getMsgWith)
-import Html exposing (Html, div, h1, table, td, text, th, tr)
-import Html.Attributes exposing (class, id, style, value)
+import Html exposing (Html, div, h1, label, table, td, text, th, tr)
+import Html.Attributes exposing (class, for, id, style, value)
 import Input.Model as Input exposing (ErrorOr)
 import List.Extra
 import Output.Colors exposing (mkColors)
@@ -125,19 +125,21 @@ view model =
         div [ id "tableView" ]
             [ div [ id "ownPoints" ]
                 [ h1 colorSetting
-                    [ text model.teamTableInfo.teamTableInfoTeamName
-                    , text ": "
-                    , text (showStanding (standing model.teamTableInfo.teamTable))
+                    [ label [ for "ownPointsLabel" ]
+                        [ text model.teamTableInfo.teamTableInfoTeamName
+                        , text ": "
+                        , text (showStanding (standing model.teamTableInfo.teamTable))
+                        ]
                     ]
                 ]
             , div [ id "pointsTable" ]
                 [ table
                     []
                     (tr []
-                        [ th [] [ text model.labels.roundLabel ]
-                        , th [] [ text model.labels.ownPointsLabel ]
-                        , th [] [ text model.labels.maxReachedLabel ]
-                        , th [] [ text model.labels.maxReachableLabel ]
+                        [ th [] [ label [for "roundLabel"] [ text model.labels.roundLabel] ]
+                        , th [] [ label [for "ownPointsLabel"] [ text model.labels.ownPointsLabel] ]
+                        , th [] [ label [for "maxReachedLabel"] [ text model.labels.maxReachedLabel] ]
+                        , th [] [ label [for "maxReachableLabelt"] [ text model.labels.maxReachableLabel] ]
                         ]
                         :: List.map mkHTMLLine model.teamTableInfo.teamTable
                     )
@@ -164,7 +166,6 @@ update msg model =
 
                 GotQuizInfo quizInfoCandidate ->
                     Util.foldResult model (updateQuizInfo model) quizInfoCandidate
-
     in
     ( newModel, Cmd.none )
 

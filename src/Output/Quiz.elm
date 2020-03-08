@@ -7,8 +7,8 @@ import Common.QuizRatings as QuizRatings
 import Common.Ranking exposing (RoundRankings, rankingToPlacement, ratingsToRankings, roundRankingsToRoundWinners)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamQuery)
 import Common.Util as Util
-import Html exposing (Html, div, text)
-import Html.Attributes exposing (class, id, value)
+import Html exposing (Html, div, label, text)
+import Html.Attributes exposing (class, for, id, value)
 import Input.Model as Input exposing (ErrorOr)
 import List.Extra exposing (maximumBy)
 import Output.Charts as Charts
@@ -143,8 +143,8 @@ view model =
                 mkColors (List.length model.quizRatings.header)
         in
         div [ id "quizView" ]
-            ( div [ id "quizTitle" ] [ text (mkFullQuizName model.quizInfo.quizIdentifier) ]
-                :: div [ id "placements" ]
+            (div [ id "quizTitle" ] [ label [ for "quizTitleLabel" ] [ text (mkFullQuizName model.quizInfo.quizIdentifier) ] ]
+                :: div [ id "rankings" ]
                     [ mkPlacements rankings.cumulative model.labels.placementLabel model.labels.placeLabel model.labels.pointsLabel
                     , mkRoundWinners rankings.perRound model.labels.roundWinnerLabel model.labels.roundLabel model.labels.pointsLabel
                     ]
@@ -199,23 +199,25 @@ mkPlacements rrs wordForPlacement wordForPlace wordForPoints =
             rankingToPlacement currentRanking
     in
     div [ id "placements" ]
-        (text wordForPlacement
+        (label [ for "placementsLabel" ] [ text wordForPlacement ]
             :: List.map
                 (\tr ->
                     div [ id "place" ]
-                        [ text
-                            (String.join " "
-                                [ String.concat
-                                    [ String.join " "
-                                        [ wordForPlace
-                                        , String.fromInt tr.position
-                                        , String.concat [ "(", String.fromFloat tr.teamRating.rating, " ", wordForPoints, ")" ]
+                        [ label [ for "placement" ]
+                            [ text
+                                (String.join " "
+                                    [ String.concat
+                                        [ String.join " "
+                                            [ wordForPlace
+                                            , String.fromInt tr.position
+                                            , String.concat [ "(", String.fromFloat tr.teamRating.rating, " ", wordForPoints, ")" ]
+                                            ]
+                                        , ":"
                                         ]
-                                    , ":"
+                                    , tr.teamName
                                     ]
-                                , tr.teamName
-                                ]
-                            )
+                                )
+                            ]
                         ]
                 )
                 placement
