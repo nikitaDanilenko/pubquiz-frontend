@@ -1,16 +1,16 @@
 module Output.Table exposing (Model, Msg, init, update, view)
 
 import Color.Convert
-import Common.ConnectionUtil exposing (getLabelsWith, getQuizInfoWith, useOrFetchWith)
-import Common.Constants exposing (teamQueryParam, teamTableApi)
+import Common.ConnectionUtil exposing (getLabelsWith, getQuizInfoWith, linkButton, useOrFetchWith)
+import Common.Constants exposing (quizIdParam, teamQueryParam, teamTableApi)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine, TeamQuery, TeamTable, TeamTableInfo, jsonDecTeamTableInfo, jsonEncTeamQuery)
 import Common.Util as Util exposing (getMsgWith)
-import Html exposing (Html, button, div, h1, table, td, text, th, tr)
-import Html.Attributes exposing (class, id, style)
-import Html.Events exposing (onClick)
+import Html exposing (Html, div, h1, table, td, text, th, tr)
+import Html.Attributes exposing (class, id, style, value)
 import Input.Model as Input exposing (ErrorOr)
 import List.Extra
 import Output.Colors exposing (mkColors)
+import Output.OutputUtil exposing (fragmentUrl)
 
 
 type alias Model =
@@ -104,7 +104,6 @@ type Msg
     = GotTeamTableInfo (ErrorOr TeamTableInfo)
     | GotLabels (ErrorOr Labels)
     | GotQuizInfo (ErrorOr QuizInfo)
-    | GetQuizRatings TeamQuery
 
 
 view : Model -> Html Msg
@@ -144,11 +143,10 @@ view model =
                     )
                 ]
             , div [ id "quizRatings" ]
-                [ button
-                    [ class "quizRatingsButton"
-                    , onClick (GetQuizRatings model.teamQuery)
-                    ]
-                    [ text model.labels.backToChartView ]
+                [ linkButton
+                    (fragmentUrl [ quizIdParam, String.fromInt model.teamQuery.teamQueryQuizId ])
+                    [ class "quizRatingsButton", value model.labels.backToChartView ]
+                    []
                 ]
             ]
 
@@ -167,8 +165,6 @@ update msg model =
                 GotQuizInfo quizInfoCandidate ->
                     Util.foldResult model (updateQuizInfo model) quizInfoCandidate
 
-                _ ->
-                    model
     in
     ( newModel, Cmd.none )
 
