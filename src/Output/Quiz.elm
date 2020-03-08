@@ -3,6 +3,7 @@ module Output.Quiz exposing (Model, Msg, init, update, view)
 import Chartjs.Chart exposing (chart)
 import Common.ConnectionUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, linkButton, useOrFetchWith)
 import Common.Constants exposing (quizIdParam, teamCodeParam, teamNumberParam)
+import Common.QuizRatings as QuizRatings
 import Common.Ranking exposing (RoundRankings, rankingToPlacement, ratingsToRankings, roundRankingsToRoundWinners)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamQuery)
 import Common.Util as Util
@@ -12,7 +13,6 @@ import Input.Model as Input exposing (ErrorOr)
 import List.Extra exposing (maximumBy)
 import Output.Charts as Charts
 import Output.Colors exposing (mkColors)
-import Output.Model
 import Output.OutputUtil exposing (fragmentUrl, mkFullQuizName)
 
 
@@ -86,7 +86,7 @@ init : Maybe Labels -> Maybe TeamQuery -> DbQuizId -> ( Model, Cmd Msg )
 init mLabels mTeamQuery qid =
     ( { labels = Maybe.withDefault Input.defaultLabels mLabels
       , teamQueryCandidate = mTeamQuery
-      , quizRatings = Output.Model.testRatings
+      , quizRatings = QuizRatings.empty
       , quizInfo = Input.defaultQuizInfo
       , status = { loading | labelsSet = Util.isDefined mLabels }
       }
