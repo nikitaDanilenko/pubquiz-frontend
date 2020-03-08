@@ -81,10 +81,10 @@ addNamedTeamRatings tr1 tr2 =
     { tr1 | rating = tr1.rating + tr2.rating }
 
 
-type alias TeamRanking =
-    { teamRating : TeamRating
-    , teamName : TeamName
-    , position : Int
+type alias TeamsRanking =
+    { position : Int
+    , points : Float
+    , teamNames : List TeamName
     }
 
 
@@ -102,7 +102,9 @@ roundRankingsToRoundWinners rankings =
             let
                 max =
                     ratings |> maximumBy (.teamRating >> .rating) |> Maybe.withDefault { roundNumber = 1, teamName = "", teamRating = defaultTeamRating }
-                maxPoints = max.teamRating.rating
+
+                maxPoints =
+                    max.teamRating.rating
             in
             { points = maxPoints
             , teamNames = ratings |> List.filter (\t -> t.teamRating.rating == maxPoints) |> List.map .teamName
@@ -112,17 +114,20 @@ roundRankingsToRoundWinners rankings =
     List.map findWinner rearranged
 
 
-rankingToPlacement : List NamedTeamRating -> List TeamRanking
+rankingToPlacement : List NamedTeamRating -> List TeamsRanking
 rankingToPlacement numberedTeamRatings =
     let
         rating =
             .teamRating >> .rating
+
+        pointsOf =
+            List.head >> Util.foldMaybe 0 rating
+
         placed =
             numberedTeamRatings
                 |> List.sortBy rating
                 |> List.reverse
                 |> Util.groupBy (\x y -> rating x == rating y)
-                |> List.indexedMap (\i -> List.map (\c -> { teamRating = c.teamRating, teamName = c.teamName, position = 1 + i }))
-                |> List.concat
+                |> List.indexedMap (\i cs -> { position = 1 + i, points = pointsOf cs, teamNames = List.map .teamName cs })
     in
     placed

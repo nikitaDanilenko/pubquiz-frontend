@@ -209,11 +209,11 @@ mkPlacements rrs wordForPlacement wordForPlace wordForPoints =
                                     [ String.join " "
                                         [ wordForPlace
                                         , String.fromInt tr.position
-                                        , String.concat [ "(", String.fromFloat tr.teamRating.rating, " ", wordForPoints, ")" ]
+                                        , String.concat [ "(", String.fromFloat tr.points, " ", wordForPoints, ")" ]
                                         ]
                                     , ":"
                                     ]
-                                , tr.teamName
+                                , String.join ", " tr.teamNames
                                 ]
                             )
                         ]
