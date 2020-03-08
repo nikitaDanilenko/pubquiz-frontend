@@ -3,18 +3,15 @@ module Output.QuizOutput exposing (..)
 import Basics.Extra exposing (flip)
 import Browser exposing (UrlRequest)
 import Browser.Navigation as Nav
-import Common.Constants exposing (getLabelsApi, getQuizInfoApi, getQuizRatingsApi, quizIdParam, teamQueryParam, teamTableApi)
-import Common.Types exposing (DbQuizId, QuizInfo, TeamQuery, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings, jsonDecTeamTableInfo, jsonEncTeamQuery)
-import Common.Util as Util exposing (getAllWith, getMsg, getMsgWith, uncurry3)
+import Common.Constants exposing (quizIdParam)
+import Common.Types exposing (DbQuizId, QuizInfo, TeamQuery)
 import Html exposing (Html, div)
-import Input.Model exposing (ErrorOr)
 import Output.All as All
 import Output.OutputUtil exposing (mkFullQuizName)
 import Output.Quiz as Quiz
 import Output.Table as Table
 import Url exposing (Protocol(..), Url)
 import Url.Parser as Parser exposing ((</>), (<?>), Parser, oneOf, s)
-import Url.Parser.Query as Query
 
 
 main : Program () Model Msg
@@ -88,51 +85,6 @@ view model =
             div [] []
 
 
-stepTo : Url -> Model -> ( Model, Cmd Msg )
-stepTo url model =
-  case Parser.parse (parser model) (fragmentToPath url) of
-    Just answer -> answer
-    Nothing -> ({model | page = Void}, Cmd.none)
-
-
-stepAll : Model -> ( All.Model, Cmd All.Msg ) -> ( Model, Cmd Msg )
-stepAll model ( all, cmd ) =
-    ( { model | page = All all }, Cmd.map AllMsg cmd )
-
-
-stepQuiz : Model -> ( Quiz.Model, Cmd Quiz.Msg ) -> ( Model, Cmd Msg )
-stepQuiz model ( quiz, cmd ) =
-    ( { model | page = Quiz quiz }, Cmd.map QuizMsg cmd )
-
-
-stepTable : Model -> ( Table.Model, Cmd Table.Msg ) -> ( Model, Cmd Msg )
-stepTable model ( table, cmd ) =
-    ( { model | page = Table table }, Cmd.map TableMsg cmd )
-
-
-parser : Model -> Parser (( Model, Cmd Msg ) -> c) c
-parser model =
-    let
-        quizIdParser =
-           s quizIdParam </> Parser.int
-
-        teamParser =
-            quizIdParser </> s "teamNumber" </> Parser.int </> s "teamCode" </> Parser.string
-    in
-    oneOf
-        [ route Parser.top (stepAll model All.init)
-        , route quizIdParser (Quiz.init >> stepQuiz model)
-        , route teamParser (\qid tn tc -> TeamQuery qid tn tc |> Table.init |> stepTable model)
-        ]
-
-
-route : Parser a b -> a -> Parser (b -> c) c
-route =
-    flip Parser.map
-
-fragmentToPath : Url -> Url
-fragmentToPath url = {url | path = Maybe.withDefault "" url.fragment, fragment = Nothing}
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -144,17 +96,33 @@ update msg model =
                 Browser.External _ ->
                     ( model, Cmd.none )
 
-        ChangedUrl url -> stepTo url model
+        ChangedUrl url ->
+            stepTo url model
 
         AllMsg allMsg ->
-          case model.page of
-            All all -> stepAll model (All.update allMsg all)
-            _ -> (model, Cmd.none)
+            case model.page of
+                All all ->
+                    stepAll model (All.update allMsg all)
+
+                _ ->
+                    ( model, Cmd.none )
 
         QuizMsg quizMsg ->
-          case model.page of
-            Quiz quiz -> stepQuiz model (Quiz.update quizMsg quiz)
-            _ -> (model, Cmd.none)
+            case model.page of
+                Quiz quiz ->
+                    stepQuiz model (Quiz.update quizMsg quiz)
+
+                _ ->
+                    ( model, Cmd.none )
+
+        TableMsg tableMsg ->
+            case model.page of
+                Table table ->
+                    stepTable model (Table.update tableMsg table)
+
+                _ ->
+                    ( model, Cmd.none )
+
         --( GetQuizRatings quizInfo, _ ) ->
         --    ( model, getQuizRatings quizInfo )
         --
@@ -179,16 +147,62 @@ update msg model =
         --( GotLabels qid labelsCandidate, _ ) ->
         --  (Result.withDefault model (Result.map (updateLabels model) labelsCandidate), getQuizInfo qid)
         --( GotQuizInfo quizInfoCandidate, _) ->
-        _ ->
-            ( model, Cmd.none )
+        --_ ->
+        --    ( model, Cmd.none )
 
 
+stepTo : Url -> Model -> ( Model, Cmd Msg )
+stepTo url model =
+    case Parser.parse (parser model) (fragmentToPath url) of
+        Just answer ->
+            answer
 
--- todo: check
---updateSubModel : ErrorOr Model -> Model -> Model
---updateSubModel newModel model = Result.withDefault model newModel
---getQuizRatings : QuizInfo -> Cmd Msg
--- todo: check
---getTeamTable : TeamQuery -> Cmd Msg
---getTeamTable =
---    getMsgWith jsonEncTeamQuery teamQueryParam teamTableApi GotTeamTable jsonDecTeamTableInfo
+        Nothing ->
+            ( { model | page = Void }, Cmd.none )
+
+
+stepAll : Model -> ( All.Model, Cmd All.Msg ) -> ( Model, Cmd Msg )
+stepAll model ( all, cmd ) =
+    ( { model | page = All all }, Cmd.map AllMsg cmd )
+
+
+stepQuiz : Model -> ( Quiz.Model, Cmd Quiz.Msg ) -> ( Model, Cmd Msg )
+stepQuiz model ( quiz, cmd ) =
+    ( { model | page = Quiz quiz }, Cmd.map QuizMsg cmd )
+
+
+stepTable : Model -> ( Table.Model, Cmd Table.Msg ) -> ( Model, Cmd Msg )
+stepTable model ( table, cmd ) =
+    ( { model | page = Table table }, Cmd.map TableMsg cmd )
+
+
+parser : Model -> Parser (( Model, Cmd Msg ) -> c) c
+parser model =
+    let
+        quizIdParser =
+            s quizIdParam </> Parser.int
+
+        teamParser =
+            quizIdParser </> s "teamNumber" </> Parser.int </> s "teamCode" </> Parser.string
+
+        (currentLabels, currentQuizInfo) =
+          case model.page of
+            Quiz quiz -> (Just quiz.labels, Just quiz.quizInfo)
+            Table table -> (Just table.labels, Just table.quizInfo)
+            _ -> (Nothing, Nothing)
+    in
+    oneOf
+        [ route Parser.top (stepAll model All.init)
+        , route quizIdParser (Quiz.init >> stepQuiz model)
+        , route teamParser (\qid tn tc -> TeamQuery qid tn tc |> Table.init currentLabels currentQuizInfo |> stepTable model)
+        ]
+
+
+route : Parser a b -> a -> Parser (b -> c) c
+route =
+    flip Parser.map
+
+
+fragmentToPath : Url -> Url
+fragmentToPath url =
+    { url | path = Maybe.withDefault "" url.fragment, fragment = Nothing }
