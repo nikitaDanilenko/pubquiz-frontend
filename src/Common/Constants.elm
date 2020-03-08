@@ -69,6 +69,9 @@ getQuizRatingsApi = mkPath [quizApi, "getQuizRatings"]
 getLabelsApi : String
 getLabelsApi = mkPath [quizApi, "getLabels"]
 
+getQuizInfoApi : String
+getQuizInfoApi = mkPath [quizApi, "getQuizInfo"]
+
 updateQuizSettingsApi : String
 updateQuizSettingsApi = mkPath [quizApi, "updateQuizSettings"]
 
