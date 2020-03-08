@@ -203,21 +203,19 @@ mkPlacements rrs wordForPlacement wordForPlace wordForPoints =
             :: List.map
                 (\tr ->
                     div [ id "place" ]
-                        [ label [ for "placement" ]
-                            [ text
-                                (String.join " "
-                                    [ String.concat
-                                        [ String.join " "
-                                            [ wordForPlace
-                                            , String.fromInt tr.position
-                                            , String.concat [ "(", String.fromFloat tr.teamRating.rating, " ", wordForPoints, ")" ]
-                                            ]
-                                        , ":"
+                        [ text
+                            (String.join " "
+                                [ String.concat
+                                    [ String.join " "
+                                        [ wordForPlace
+                                        , String.fromInt tr.position
+                                        , String.concat [ "(", String.fromFloat tr.teamRating.rating, " ", wordForPoints, ")" ]
                                         ]
-                                    , tr.teamName
+                                    , ":"
                                     ]
-                                )
-                            ]
+                                , tr.teamName
+                                ]
+                            )
                         ]
                 )
                 placement
@@ -231,7 +229,7 @@ mkRoundWinners rr wordForRoundWinner wordForRound wordForPoints =
             roundRankingsToRoundWinners rr
     in
     div [ id "roundWinners" ]
-        (text wordForRoundWinner
+        (label [ for "roundWinnersLabel" ] [ text wordForRoundWinner ]
             :: List.map
                 (\rw ->
                     div [ id "roundWinner" ]
