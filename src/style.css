@@ -260,12 +260,12 @@ table {
   background-color: rgb(80, 80, 80);
 }
 
-#pointsTable tr:not(.tableHeader):hover, #placementsTable tr:hover {
+#pointsTable tr:not(.tableHeader):hover, #placementsTable tr:hover, #roundWinnersTable tr:hover {
   background-color: rgb(100, 100, 100);
   color: rgb(180, 180, 180);
 }
 
-#placementsTable td {
+#placementsTable td, #roundWinnersTable td {
   text-align: left;
   padding: 8px;
 }
