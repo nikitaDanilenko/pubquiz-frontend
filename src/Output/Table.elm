@@ -135,11 +135,11 @@ view model =
             , div [ id "pointsTable" ]
                 [ table
                     []
-                    (tr []
-                        [ th [] [ label [for "roundLabel"] [ text model.labels.roundLabel] ]
-                        , th [] [ label [for "ownPointsLabel"] [ text model.labels.ownPointsLabel] ]
-                        , th [] [ label [for "maxReachedLabel"] [ text model.labels.maxReachedLabel] ]
-                        , th [] [ label [for "maxReachableLabelt"] [ text model.labels.maxReachableLabel] ]
+                    (tr [ class "tableHeader" ]
+                        [ th [] [ label [ for "roundLabel" ] [ text model.labels.roundLabel ] ]
+                        , th [] [ label [ for "ownPointsLabel" ] [ text model.labels.ownPointsLabel ] ]
+                        , th [] [ label [ for "maxReachedLabel" ] [ text model.labels.maxReachedLabel ] ]
+                        , th [] [ label [ for "maxReachableLabel" ] [ text model.labels.maxReachableLabel ] ]
                         ]
                         :: List.map mkHTMLLine model.teamTableInfo.teamTable
                     )
