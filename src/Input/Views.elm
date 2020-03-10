@@ -129,8 +129,6 @@ editingView md =
                     , disabled (not (Validity.isValid md.isValidQuizUpdate))
                     ]
                     [ text "Update" ]
-
-               -- todo: Fix these links according to new structure. This holds twice: once for top level sheets, and once for RESTview
                , mkLinkToSheet "answerSheet" "Get quiz sheet" md.currentQuizInfo.fullSheetPath
                , mkLinkToSheet "qrSheet" "Get QR codes only" md.currentQuizInfo.qrOnlyPath
                -- todo: Adjust this path using a proper REST request
