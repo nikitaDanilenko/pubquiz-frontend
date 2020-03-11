@@ -1,7 +1,7 @@
 module Input.QuizValues exposing (..)
 
 import Common.Copy exposing (LabelsField(..))
-import Common.Types exposing (Labels, Place, QuizDate, QuizName, QuizSettings)
+import Common.Types exposing (Labels, Place, QuizDate, QuizIdentifier, QuizName, QuizSettings)
 import Html exposing (Html, div, input, label, text)
 import Html.Attributes exposing (class, for, id, placeholder, step, type_, value)
 import Html.Events exposing (onInput)
@@ -169,3 +169,12 @@ mkQuestionsForm updateQuestions createOnEnter rs =
                 rs
             )
         )
+
+
+isValidQuizIdentifier : QuizIdentifier -> Bool
+isValidQuizIdentifier quizIdentifier =
+    List.all (String.isEmpty >> not)
+        [ quizIdentifier.name
+        , quizIdentifier.place
+        , quizIdentifier.date
+        ]
