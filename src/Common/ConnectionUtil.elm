@@ -3,8 +3,8 @@ module Common.ConnectionUtil exposing (..)
 import Common.Constants exposing (getLabelsApi, getQuizInfoApi, getQuizRatingsApi)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings)
 import Common.Util as Util exposing (getMsg)
-import Html exposing (Attribute, Html, form, input)
-import Html.Attributes exposing (action, type_)
+import Html exposing (Attribute, Html, div, form, input, label, text)
+import Html.Attributes exposing (action, for, id, type_)
 import Input.Model exposing (ErrorOr)
 
 
@@ -32,3 +32,8 @@ linkButton : String -> List (Attribute msg) -> List (Html msg) -> Html msg
 linkButton link attrs children =
     form [ action link ]
         [ input (type_ "submit" :: attrs) children ]
+
+addFeedbackLabel : String -> Html msg
+addFeedbackLabel feedback =
+    div [ id "feedbackArea" ]
+        [ label [ for "feedbackLabel" ] [ text feedback ] ]
