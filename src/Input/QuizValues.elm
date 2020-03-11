@@ -16,12 +16,12 @@ type Msg
     | SetTeamsInQuiz String
 
 
-mkCreationFormWith :
+mkCreationForm :
     QuizSettings
     -> Html.Attribute Msg
     -> Labels
     -> List (Html Msg)
-mkCreationFormWith quizSettings createOnEnter labels =
+mkCreationForm quizSettings createOnEnter labels =
     let
         associations =
             [ ( "Label for rounds", RoundField, labels.roundLabel )
