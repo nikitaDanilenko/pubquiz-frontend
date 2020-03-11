@@ -7,23 +7,21 @@ import Html.Attributes exposing (class, for, id, placeholder, step, type_, value
 import Html.Events exposing (onInput)
 
 
-type alias MsgFunctions msg =
-    { labelsUpdate : LabelsField -> String -> msg
-    , setQuizName : QuizName -> msg
-    , setQuizDate : QuizDate -> msg
-    , setQuizPlace : Place -> msg
-    , setRoundsNumber : String -> msg
-    , setTeamsInQuiz : String -> msg
-    }
+type Msg
+    = LabelsUpdate LabelsField String
+    | SetQuizName QuizName
+    | SetQuizDate QuizDate
+    | SetQuizPlace Place
+    | SetRoundsNumber String
+    | SetTeamsInQuiz String
 
 
 mkCreationFormWith :
-    MsgFunctions msg
-    -> QuizSettings
-    -> Html.Attribute msg
+    QuizSettings
+    -> Html.Attribute Msg
     -> Labels
-    -> List (Html msg)
-mkCreationFormWith msgFs quizSettings createOnEnter labels =
+    -> List (Html Msg)
+mkCreationFormWith quizSettings createOnEnter labels =
     let
         associations =
             [ ( "Label for rounds", RoundField, labels.roundLabel )
@@ -43,28 +41,28 @@ mkCreationFormWith msgFs quizSettings createOnEnter labels =
             , ( "Label for round winner", RoundWinnerField, labels.roundWinnerLabel )
             ]
 
-        mkInput : String -> LabelsField -> String -> Html msg
+        mkInput : String -> LabelsField -> String -> Html Msg
         mkInput lbl fld dft =
             div [ id (createIdByField fld) ]
                 [ label [] [ text lbl ]
-                , input [ onInput (msgFs.labelsUpdate fld), type_ "text", value dft, createOnEnter ] []
+                , input [ onInput (LabelsUpdate fld), type_ "text", value dft, createOnEnter ] []
                 ]
 
-        mkIdentifierPart : String -> String -> String -> String -> String -> (String -> msg) -> Html msg
+        mkIdentifierPart : String -> String -> String -> String -> String -> (String -> Msg) -> Html Msg
         mkIdentifierPart divId labelFor description inputType example onInputFct =
             div [ id divId ]
                 [ label [ for labelFor ] [ text description ]
                 , input [ onInput onInputFct, type_ inputType, createOnEnter, placeholder example ] []
                 ]
     in
-    [ mkIdentifierPart "quizNameDiv" "quizName" "Quiz name" "text" "e.g. Quiz" msgFs.setQuizName
-    , mkIdentifierPart "quizDateDiv" "quizDate" "Quiz date" "date" "e.g. 2020-01-01" msgFs.setQuizDate
-    , mkIdentifierPart "quizPlaceDiv" "quizPlace" "Quiz place" "text" "e.g. Cheers" msgFs.setQuizPlace
+    [ mkIdentifierPart "quizNameDiv" "quizName" "Quiz name" "text" "e.g. Quiz" SetQuizName
+    , mkIdentifierPart "quizDateDiv" "quizDate" "Quiz date" "date" "e.g. 2020-01-01" SetQuizDate
+    , mkIdentifierPart "quizPlaceDiv" "quizPlace" "Quiz place" "text" "e.g. Cheers" SetQuizPlace
     , div [ id "roundsNumberDiv" ]
         [ label [ for "roundsNumber" ]
             [ text "Number of rounds" ]
         , input
-            [ onInput msgFs.setRoundsNumber
+            [ onInput SetRoundsNumber
             , class "roundsSpinner"
             , type_ "number"
             , min "1"
@@ -83,7 +81,7 @@ mkCreationFormWith msgFs quizSettings createOnEnter labels =
     , div [ id "teamNumberArea" ]
         [ label [ for "teamNumber" ] [ text "Number of teams" ]
         , input
-            [ onInput msgFs.setTeamsInQuiz
+            [ onInput SetTeamsInQuiz
             , class "teamsSpinner"
             , type_ "number"
             , min "1"
