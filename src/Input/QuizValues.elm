@@ -178,3 +178,54 @@ isValidQuizIdentifier quizIdentifier =
         , quizIdentifier.place
         , quizIdentifier.date
         ]
+
+
+defaultQuizIdentifier : QuizIdentifier
+defaultQuizIdentifier =
+    { place = ""
+    , date = ""
+    , name = ""
+    }
+
+
+defaultQuizSettings : QuizSettings
+defaultQuizSettings =
+    { rounds = defaultRounds
+    , numberOfTeams = defaultNumberOfTeams
+    , labels = defaultLabels
+    }
+
+
+defaultLabels : Labels
+defaultLabels =
+    { roundLabel = "Runde"
+    , teamLabel = "Gruppe"
+    , ownPointsLabel = "Erreichte Punkte"
+    , maxReachedLabel = String.concat [ "Erreichte H", String.fromChar (Char.fromCode 246), "chstpunktzahl" ]
+    , maxReachableLabel = "Erreichbare Punkte"
+    , backToChartView = "Gesamtwertung"
+    , ownPageLabel = "Eigene Punkte"
+    , viewPrevious = "Alle Quizzes"
+    , cumulativeLabel = "Gesamtpunktzahl"
+    , individualRoundsLabel = "Punkte pro Runde"
+    , progressionLabel = "Verlauf"
+    , placementLabel = "Platzierung"
+    , placeLabel = "Platz"
+    , pointsLabel = "Punkte"
+    , roundWinnerLabel = "Rundensieger"
+    }
+
+
+defaultNumberOfTeams : Int
+defaultNumberOfTeams =
+    8
+
+
+defaultQuestionNumber : Int
+defaultQuestionNumber =
+    8
+
+
+defaultRounds : List Int
+defaultRounds =
+    List.repeat 4 defaultQuestionNumber
