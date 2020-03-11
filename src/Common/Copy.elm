@@ -1,66 +1,116 @@
 module Common.Copy exposing (..)
 
+import Common.Types exposing (Activity, DbQuizId, Labels, Place, QuizDate, QuizIdentifier, QuizInfo, QuizName, QuizSettings)
 import Date exposing (Date)
-import Common.Types exposing (Activity, DbQuizId, Labels, Place, QuizDate, QuizInfo, QuizName, QuizIdentifier, QuizSettings)
 
-type LabelsField = RoundField
-                 | TeamField
-                 | OwnPointsField
-                 | MaxReachedField
-                 | MaxReachableField
-                 | BackField
-                 | OwnPageField
-                 | ViewPreviousField
-                 | CumulativeField
-                 | IndividualRoundsField
-                 | ProgressionField
-                 | PlacementField
-                 | PlaceField
-                 | PointsField
-                 | RoundWinnerField
 
-updateLabelsByField : LabelsField -> String -> Labels -> Labels
-updateLabelsByField field text lbls =
+type LabelsField
+    = RoundField
+    | TeamField
+    | OwnPointsField
+    | MaxReachedField
+    | MaxReachableField
+    | BackField
+    | OwnPageField
+    | ViewPreviousField
+    | CumulativeField
+    | IndividualRoundsField
+    | ProgressionField
+    | PlacementField
+    | PlaceField
+    | PointsField
+    | RoundWinnerField
+
+
+updateLabelsByField : Labels -> LabelsField -> String -> Labels
+updateLabelsByField labels field text =
     case field of
-        RoundField -> { lbls | roundLabel = text }
-        TeamField -> { lbls | teamLabel = text }
-        OwnPointsField -> { lbls | ownPointsLabel = text }
-        MaxReachedField -> { lbls | maxReachedLabel = text }
-        MaxReachableField -> { lbls | maxReachableLabel = text }
-        BackField -> { lbls | backToChartView = text }
-        OwnPageField -> { lbls | ownPageLabel = text }
-        ViewPreviousField -> { lbls | viewPrevious = text }
-        CumulativeField -> { lbls | cumulativeLabel = text }
-        IndividualRoundsField -> { lbls | individualRoundsLabel = text }
-        ProgressionField -> { lbls | progressionLabel = text }
-        PlacementField -> { lbls | placementLabel = text }
-        PlaceField -> { lbls | placeLabel = text }
-        PointsField -> { lbls | pointsLabel = text }
-        RoundWinnerField -> { lbls | roundWinnerLabel = text }
+        RoundField ->
+            { labels | roundLabel = text }
+
+        TeamField ->
+            { labels | teamLabel = text }
+
+        OwnPointsField ->
+            { labels | ownPointsLabel = text }
+
+        MaxReachedField ->
+            { labels | maxReachedLabel = text }
+
+        MaxReachableField ->
+            { labels | maxReachableLabel = text }
+
+        BackField ->
+            { labels | backToChartView = text }
+
+        OwnPageField ->
+            { labels | ownPageLabel = text }
+
+        ViewPreviousField ->
+            { labels | viewPrevious = text }
+
+        CumulativeField ->
+            { labels | cumulativeLabel = text }
+
+        IndividualRoundsField ->
+            { labels | individualRoundsLabel = text }
+
+        ProgressionField ->
+            { labels | progressionLabel = text }
+
+        PlacementField ->
+            { labels | placementLabel = text }
+
+        PlaceField ->
+            { labels | placeLabel = text }
+
+        PointsField ->
+            { labels | pointsLabel = text }
+
+        RoundWinnerField ->
+            { labels | roundWinnerLabel = text }
+
 
 updateQuizIdentifierPlace : QuizIdentifier -> Place -> QuizIdentifier
-updateQuizIdentifierPlace q p = { q | place = p }
+updateQuizIdentifierPlace q p =
+    { q | place = p }
+
 
 updateQuizIdentifierDate : QuizIdentifier -> Date -> QuizIdentifier
-updateQuizIdentifierDate q d = { q | date = Date.toIsoString d }
+updateQuizIdentifierDate q d =
+    { q | date = Date.toIsoString d }
+
 
 updateQuizIdentifierName : QuizIdentifier -> QuizName -> QuizIdentifier
-updateQuizIdentifierName q n = { q | name = n }
+updateQuizIdentifierName q n =
+    { q | name = n }
+
 
 updateQuizSettingsRounds : QuizSettings -> List Int -> QuizSettings
-updateQuizSettingsRounds qs rs = { qs | rounds = rs }
+updateQuizSettingsRounds qs rs =
+    { qs | rounds = rs }
+
 
 updateQuizSettingsNumberOfTeams : QuizSettings -> Int -> QuizSettings
-updateQuizSettingsNumberOfTeams qs ts = { qs | numberOfTeams = ts }
+updateQuizSettingsNumberOfTeams qs ts =
+    { qs | numberOfTeams = ts }
+
 
 updateQuizSettingsLabels : QuizSettings -> Labels -> QuizSettings
-updateQuizSettingsLabels qs ls = { qs | labels = ls }
+updateQuizSettingsLabels qs ls =
+    { qs | labels = ls }
+
 
 updateQuizInfoQuizId : QuizInfo -> DbQuizId -> QuizInfo
-updateQuizInfoQuizId qi qid = { qi | quizId = qid }
+updateQuizInfoQuizId qi qid =
+    { qi | quizId = qid }
+
 
 updateQuizInfoQuizIdentifier : QuizInfo -> QuizIdentifier -> QuizInfo
-updateQuizInfoQuizIdentifier qi idf = { qi | quizIdentifier = idf }
+updateQuizInfoQuizIdentifier qi idf =
+    { qi | quizIdentifier = idf }
+
 
 updateQuizInfoQuizActivity : QuizInfo -> Activity -> QuizInfo
-updateQuizInfoQuizActivity qi a = { qi | active = a }
+updateQuizInfoQuizActivity qi a =
+    { qi | active = a }
