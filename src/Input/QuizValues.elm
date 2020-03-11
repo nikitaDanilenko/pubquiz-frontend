@@ -5,6 +5,7 @@ import Common.Types exposing (Labels, Place, QuizDate, QuizIdentifier, QuizName,
 import Html exposing (Html, div, input, label, text)
 import Html.Attributes exposing (class, for, id, placeholder, step, type_, value)
 import Html.Events exposing (onInput)
+import Parser exposing (int, run)
 
 
 type Msg
@@ -229,3 +230,17 @@ defaultQuestionNumber =
 defaultRounds : List Int
 defaultRounds =
     List.repeat 4 defaultQuestionNumber
+
+
+validatePositiveNatural : String -> Maybe Int
+validatePositiveNatural txt =
+    case run int txt of
+        Ok n ->
+            if n > 0 then
+                Just n
+
+            else
+                Nothing
+
+        _ ->
+            Nothing
