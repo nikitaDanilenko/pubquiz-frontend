@@ -1,9 +1,10 @@
 module Input.RequestUtils exposing (..)
 
+import Common.Authentication exposing (Authentication)
 import Common.Constants exposing (credentialsParam)
 import Common.Types exposing (jsonEncCredentials)
 import Crypto.Hash exposing (sha512)
-import Json.Encode as Encode exposing (encode, object)
+import Json.Encode as Encode exposing (encode)
 import Url.Builder
 
 
@@ -27,20 +28,18 @@ type alias RestKey =
     String
 
 
-
--- | Takes the list of all parameters and adds a credentials parameter,
---   where the user is the supplied user and the signature is computed from
---   the given session key and the encoded values (in this order).
-
-
-encodeWithSignature : User -> SessionKey -> List ( String, Encode.Value ) -> RestParam
-encodeWithSignature u sk params =
+{-| Takes the list of all parameters and adds a credentials parameter,
+where the user is the supplied user and the signature is computed from
+the given session key and the encoded values (in this order).
+-}
+encodeWithSignature : Authentication -> List ( String, Encode.Value ) -> RestParam
+encodeWithSignature authentication params =
     let
         signature =
-            sha512 (String.concat [ sk, mkJSONParams params ])
+            sha512 (String.concat [ authentication.sessionKey, mkJSONParams params ])
 
         credentials =
-            { user = u, signature = signature }
+            { user = authentication.userName, signature = signature }
     in
     mkJSONParams (( credentialsParam, jsonEncCredentials credentials ) :: params)
 
