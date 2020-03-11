@@ -56,12 +56,9 @@ foldResult empty f r =
     Result.withDefault empty (Result.map f r)
 
 
-
-{- Fills a list with zeroes in the back if the list is not long enough,
-   otherwise return the prefix of the list with the given length.
+{-| Fills a list with zeroes in the back if the list is not long enough,
+otherwise return the prefix of the list with the given length.
 -}
-
-
 adjustToSize : Int -> List TeamRating -> List TeamRating
 adjustToSize n =
     adjustToSizeWith (List.indexedMap (\i r -> { teamNumber = i, rating = r }) (List.repeat n 0))
@@ -183,10 +180,12 @@ groupBy equal l =
         x :: xs ->
             List.Extra.takeWhile (equal x) l :: groupBy equal (List.Extra.dropWhile (equal x) xs)
 
+
 isDefined : Maybe a -> Bool
 isDefined m =
-  case m of
-    Just _ -> True
+    case m of
+        Just _ ->
+            True
 
-
-    Nothing -> False
+        Nothing ->
+            False
