@@ -15,6 +15,7 @@ type Msg
     | SetQuizPlace Place
     | SetRoundsNumber String
     | SetTeamsInQuiz String
+    | SetQuestions Int String
 
 
 mkCreationForm :
