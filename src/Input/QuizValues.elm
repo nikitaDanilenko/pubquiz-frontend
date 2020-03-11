@@ -1,4 +1,4 @@
-module Input.QuizValuesUtil exposing (..)
+module Input.QuizValues exposing (..)
 
 import Common.Copy exposing (LabelsField(..))
 import Common.Types exposing (Labels, Place, QuizDate, QuizName, QuizSettings)
