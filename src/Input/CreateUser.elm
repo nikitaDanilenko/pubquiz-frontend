@@ -1,6 +1,7 @@
 module Input.CreateUser exposing (..)
 
-import Common.Authentication as Authentication exposing (Authentication)
+import Basics.Extra exposing (flip)
+import Common.Authentication exposing (Authentication)
 import Common.ConnectionUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Common.Constants exposing (newUserApi, userCreationParam)
 import Common.Types exposing (jsonEncUserCreation)
@@ -26,11 +27,6 @@ updateNewUser model newUser =
     { model | newUser = newUser }
 
 
-updateAuthentication : Model -> Authentication -> Model
-updateAuthentication model authentication =
-    { model | authentication = authentication }
-
-
 updateFeedback : Model -> String -> Model
 updateFeedback model feedback =
     { model | feedback = feedback }
@@ -43,10 +39,10 @@ type Msg
     | Done
 
 
-init : Model
-init =
+init : Authentication -> Model
+init authentication =
     { newUser = NewUser.empty
-    , authentication = Authentication.empty
+    , authentication = authentication
     , feedback = ""
     }
 
@@ -98,7 +94,13 @@ update msg model =
         CreatedUser errorOr ->
             case errorOr of
                 Ok _ ->
-                    ( updateFeedback init (String.join " " [ "Created user", model.newUser.user ]), Cmd.none )
+                    let
+                        newModel =
+                            model
+                                |> flip updateFeedback (String.join " " [ "Created user", model.newUser.user ])
+                                |> flip updateNewUser NewUser.empty
+                    in
+                    ( newModel, Cmd.none )
 
                 Err error ->
                     let
