@@ -8,8 +8,8 @@ type alias NewUser = {
         password2 : Password
     }
 
-emptyUser : NewUser
-emptyUser = {
+empty : NewUser
+empty = {
     user = "",
     password1 = "",
     password2 = ""  
@@ -17,8 +17,8 @@ emptyUser = {
 
 type NewUserField = UserField | PasswordField1 | PasswordField2
 
-update : NewUserField -> String -> NewUser -> NewUser
-update fld text nu = 
+update : NewUser -> NewUserField -> String -> NewUser
+update nu fld text =
     case fld of
         UserField -> { nu | user = text }
         PasswordField1 -> { nu | password1 = text }
