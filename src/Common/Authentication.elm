@@ -10,6 +10,13 @@ type alias Authentication =
     }
 
 
+empty : Authentication
+empty =
+    { userName = ""
+    , sessionKey = ""
+    }
+
+
 updateUserName : Authentication -> UserName -> Authentication
 updateUserName authentication userName =
     { authentication | userName = userName }
