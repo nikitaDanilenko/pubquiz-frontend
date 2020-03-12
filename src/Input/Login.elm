@@ -1,11 +1,15 @@
 module Input.Login exposing (..)
 
-import Common.ConnectionUtil exposing (addFeedbackLabel)
-import Common.Types exposing (Password, UserName)
+import Common.ConnectionUtil exposing (addFeedbackLabel, encodeBody)
+import Common.Constants exposing (loginApi, passwordParam, userParam)
+import Common.Types exposing (Password, UserName, jsonDecUserHash, jsonEncPassword, jsonEncUserName)
 import Html exposing (Html, button, div, input, label, text)
 import Html.Attributes exposing (autocomplete, class, for, id, type_)
 import Html.Events exposing (onClick, onInput)
 import Html.Events.Extra exposing (onEnter)
+import Http
+import Input.Model exposing (ErrorOr)
+import Input.RequestUtils exposing (SessionKey, mkJSONParams)
 
 
 type alias Model =
@@ -19,6 +23,7 @@ type Msg
     = SetUser UserName
     | SetPassword Password
     | Login
+    | LoggedIn (ErrorOr SessionKey)
 
 
 init : Model
@@ -48,16 +53,24 @@ view md =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    let
-        newModel =
-            case msg of
-                SetUser userName ->
-                    { model | user = userName }
+    case msg of
+        SetUser userName ->
+            ( { model | user = userName }, Cmd.none )
 
-                SetPassword password ->
-                    { model | password = password }
+        SetPassword password ->
+            ( { model | password = password }, Cmd.none )
 
-                Login ->
-                    model
-    in
-    ( newModel, Cmd.none )
+        Login ->
+            ( model, login model.user model.password )
+
+        LoggedIn _ ->
+            ( model, Cmd.none )
+
+
+login : UserName -> Password -> Cmd Msg
+login user password =
+    Http.post
+        { url = loginApi
+        , expect = Http.expectJson LoggedIn jsonDecUserHash
+        , body = encodeBody (mkJSONParams [ ( userParam, jsonEncUserName user ), ( passwordParam, jsonEncPassword password ) ])
+        }
