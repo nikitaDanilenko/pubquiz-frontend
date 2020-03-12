@@ -27,8 +27,8 @@ adjustTo n qr =
     { qr | ratings = List.map (\( rn, rr ) -> ( rn, RoundRating.adjustTo n rr )) qr.ratings }
 
 
-update : RoundNumber -> TeamNumber -> Float -> QuizRatings -> QuizRatings
-update round team points quiz =
+update : QuizRatings -> RoundNumber -> TeamNumber -> Float ->  QuizRatings
+update quizRatings round team points  =
     let
         change : RoundNumber -> RoundRating -> RoundRating
         change rn rr =
@@ -39,9 +39,9 @@ update round team points quiz =
                 rr
 
         updatedRatings =
-            List.map (\( rn, rr ) -> ( rn, change rn rr )) quiz.ratings
+            List.map (\( rn, rr ) -> ( rn, change rn rr )) quizRatings.ratings
     in
-    { quiz | ratings = updatedRatings }
+    { quizRatings | ratings = updatedRatings }
 
 
 updateMax : Int -> Float -> QuizRatings -> QuizRatings
