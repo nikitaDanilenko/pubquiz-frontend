@@ -25,6 +25,11 @@ type Msg
     | Locked (ErrorOr ())
 
 
+init : QuizInfo -> Authentication -> Model
+init quizInfo authentication =
+    { quizInfo = quizInfo, authentication = authentication, feedback = "" }
+
+
 view : Model -> Html Msg
 view md =
     div [ id "confirmView" ]
