@@ -1,5 +1,6 @@
 module Input.PointInput exposing (..)
 
+import Basics.Extra exposing (flip)
 import Common.Authentication exposing (Authentication)
 import Common.ConnectionUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Common.Constants exposing (mkPath, quizIdParam, quizRatingsParam, sheetPDFPrefix, updateApi)
@@ -9,7 +10,7 @@ import Common.RoundRating as RoundRating
 import Common.Types exposing (DbQuizId, Header, QuizInfo, QuizRatings, QuizSettings, RoundNumber, RoundRating, TeamNumber, UserName, jsonEncDbQuizId, jsonEncQuizRatings)
 import Common.Util exposing (adjustToSize)
 import Html exposing (Html, a, button, div, input, label, text)
-import Html.Attributes exposing (class, disabled, for, href, id, step, target, type_, value)
+import Html.Attributes exposing (class, for, href, id, step, target, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Input.Model exposing (ErrorOr)
@@ -24,11 +25,6 @@ type alias Model =
     , authentication : Authentication
     , feedback : String
     }
-
-
-updateQuizInfo : Model -> QuizInfo -> Model
-updateQuizInfo model quizInfo =
-    { model | quizInfo = quizInfo }
 
 
 updateQuizSettings : Model -> QuizSettings -> Model
@@ -121,62 +117,25 @@ update msg model =
                 tu =
                     processTeamUpdate text model
 
-                newQuizRatings =
-                    QuizRatings.adjustTo tu.teams model.quizRatings
+                newModel =
+                    updateQuizSettingsNumberOfTeams model.quizSettings tu.teams
+                        |> updateQuizSettings model
+                        |> flip updateQuizRatings (QuizRatings.adjustTo tu.teams model.quizRatings)
+                        |> flip updateFeedback tu.feedback
             in
-            ( { model
-                | quizSettings = updateQuizSettingsNumberOfTeams model.quizSettings tu.teams
-                , quizRatings = newQuizRatings
-                , feedback = tu.response
-              }
-            , Cmd.none
-            )
+            ( newModel, Cmd.none )
 
         UpdatePoints rn tn ps ->
             let
-                ( np, response ) =
-                    case run float ps of
-                        Ok p ->
-                            let
-                                maxPs =
-                                    (QuizRatings.getRound rn model.quizRatings).reachableInRound
-                            in
-                            if p <= maxPs then
-                                ( p, "" )
+                newPoints =
+                    computeNewPoints rn tn ps model.quizRatings
 
-                            else
-                                ( maxPs
-                                , String.join " "
-                                    [ "The maximum number of points"
-                                    , "in this round is"
-                                    , String.fromFloat maxPs
-                                    ]
-                                )
-
-                        Err _ ->
-                            ( 0
-                            , String.join " "
-                                [ "Invalid decimal point number"
-                                , "at round ="
-                                , String.fromInt rn
-                                , "and team ="
-                                , String.concat
-                                    [ String.fromInt tn
-                                    , "."
-                                    ]
-                                , "Substituting 0."
-                                ]
-                            )
-
-                newQuiz =
-                    QuizRatings.update rn tn np model.quizRatings
+                newModel =
+                    QuizRatings.update model.quizRatings rn tn newPoints.points
+                        |> updateQuizRatings model
+                        |> flip updateFeedback newPoints.feedback
             in
-            ( { model
-                | quizRatings = newQuiz
-                , feedback = response
-              }
-            , Cmd.none
-            )
+            ( newModel, Cmd.none )
 
         AddRound ->
             let
@@ -195,7 +154,7 @@ update msg model =
                                 |> updateQuizRatings model
 
                         Err _ ->
-                            { model | feedback = "Not a decimal point number." }
+                            { model | feedback = "Not a decimal point number. Keeping old value." }
             in
             ( newModel, Cmd.none )
 
@@ -204,15 +163,12 @@ update msg model =
 
         SetTeamName tn teamName ->
             let
-                newQuizRatings =
+                newModel =
                     QuizRatings.updateTeamName tn teamName model.quizRatings
+                        |> updateQuizRatings model
+                        |> flip updateFeedback ""
             in
-            ( { model
-                | quizRatings = newQuizRatings
-                , feedback = ""
-              }
-            , Cmd.none
-            )
+            ( newModel, Cmd.none )
 
         UpdatedQuizRatings response ->
             let
@@ -236,10 +192,10 @@ update msg model =
             ( model, Cmd.none )
 
 
-processTeamUpdate : String -> Model -> { teams : Int, response : String }
+processTeamUpdate : String -> Model -> { teams : Int, feedback : String }
 processTeamUpdate text model =
     let
-        ( ts, r ) =
+        ( teams, feedback ) =
             case run int text of
                 Ok n ->
                     let
@@ -261,7 +217,47 @@ processTeamUpdate text model =
                 Err _ ->
                     ( 0, "Invalid team number. Substituting 0." )
     in
-    { teams = ts, response = r }
+    { teams = teams, feedback = feedback }
+
+
+computeNewPoints : RoundNumber -> TeamNumber -> String -> QuizRatings -> { points : Float, feedback : String }
+computeNewPoints roundNumber teamNumber points quizRatings =
+    let
+        ( newPoints, feedback ) =
+            case run float points of
+                Ok p ->
+                    let
+                        maxPs =
+                            (QuizRatings.getRound roundNumber quizRatings).reachableInRound
+                    in
+                    if p <= maxPs then
+                        ( p, "" )
+
+                    else
+                        ( maxPs
+                        , String.join " "
+                            [ "The maximum number of points"
+                            , "in this round is"
+                            , String.fromFloat maxPs
+                            ]
+                        )
+
+                Err _ ->
+                    ( 0
+                    , String.join " "
+                        [ "Invalid decimal point number"
+                        , "at round ="
+                        , String.fromInt roundNumber
+                        , "and team ="
+                        , String.concat
+                            [ String.fromInt teamNumber
+                            , "."
+                            ]
+                        , "Substituting 0."
+                        ]
+                    )
+    in
+    { points = newPoints, feedback = feedback }
 
 
 mkTeamNameInput : Header -> List (Html Msg)
