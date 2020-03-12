@@ -1,4 +1,4 @@
-module Input.CreateQuiz exposing (..)
+module Input.SetQuizSettings exposing (..)
 
 import Common.Authentication exposing (Authentication)
 import Common.ConnectionUtil exposing (addFeedbackLabel)
@@ -37,8 +37,8 @@ updateFeedback model feedback =
 
 
 type Msg
-    = CreateQuiz
-    | Done
+    = Commit
+    | Back
     | Value QuizValues.Msg
 
 
@@ -55,17 +55,17 @@ view : Model -> Html Msg
 view md =
     let
         createOnEnter =
-            onEnter CreateQuiz
+            onEnter Commit
     in
     div [ id "creatingQuizView" ]
         (QuizValues.mkCreationForm md.quizSettings createOnEnter md.quizSettings.labels
             ++ [ button
                     [ class "button"
-                    , onClick CreateQuiz
+                    , onClick Commit
                     , disabled (not (QuizValues.isValidQuizIdentifier md.quizIdentifier))
                     ]
                     [ text "Create" ]
-               , button [ class "backButton", onClick Done ] [ text "Back" ]
+               , button [ class "backButton", onClick Back ] [ text "Back" ]
                , addFeedbackLabel md.feedback
                ]
         )
@@ -74,10 +74,10 @@ view md =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        CreateQuiz ->
+        Commit ->
             ( model, Cmd.none )
 
-        Done ->
+        Back ->
             ( model, Cmd.none )
 
         Value valueMsg ->
