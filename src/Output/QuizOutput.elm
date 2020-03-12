@@ -125,35 +125,6 @@ update msg model =
                     ( model, Cmd.none )
 
 
-
---( GetQuizRatings quizInfo, _ ) ->
---    ( model, getQuizRatings quizInfo )
---
---( GotQuizRatings quizInfo qrCandidate, _ ) ->
---    ( updateSubModel (Result.map (\quizRatings -> QuizModel quizRatings quizInfo) qrCandidate) model, Cmd.none )
---
---( GetTeamTable, QuizModel _ tq _ _ ) ->
---    ( model, Util.foldMaybe Cmd.none getTeamTable tq )
---
---( GotTeamTable teamTableCandidate, QuizModel labels _ _ quizInfo ) ->
---    ( updateSubModel (Result.map (\table -> TableModel labels table quizInfo) teamTableCandidate) model, Cmd.none )
---
---( GetAllQuizzes, QuizModel _ _ _ _) ->
---    ( model, getAllQuizzes )
---
---( GotAllQuizzes quizzesCandidate, QuizModel _ mtq _ _) ->
---    ( updateSubModel (Result.map (AllModel mtq) quizzesCandidate) model, Cmd.none )
---
---( GetLabels qid, _) ->
---  (model, getLabels qid)
---
---( GotLabels qid labelsCandidate, _ ) ->
---  (Result.withDefault model (Result.map (updateLabels model) labelsCandidate), getQuizInfo qid)
---( GotQuizInfo quizInfoCandidate, _) ->
---_ ->
---    ( model, Cmd.none )
-
-
 stepTo : Url -> Model -> ( Model, Cmd Msg )
 stepTo url model =
     case Parser.parse (parser model) (fragmentToPath url) of
