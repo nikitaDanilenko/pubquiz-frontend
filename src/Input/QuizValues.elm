@@ -1,7 +1,7 @@
 module Input.QuizValues exposing (..)
 
 import Common.Copy exposing (LabelsField(..))
-import Common.Types exposing (Labels, Place, QuizDate, QuizIdentifier, QuizName, QuizSettings)
+import Common.Types exposing (Activity(..), Labels, Place, QuizDate, QuizIdentifier, QuizInfo, QuizName, QuizSettings)
 import Html exposing (Html, div, input, label, text)
 import Html.Attributes exposing (class, for, id, placeholder, step, type_, value)
 import Html.Events exposing (onInput)
@@ -232,6 +232,14 @@ defaultRounds : List Int
 defaultRounds =
     List.repeat 4 defaultQuestionNumber
 
+defaultQuizInfo : QuizInfo
+defaultQuizInfo =
+    { quizId = -1
+    , quizIdentifier = defaultQuizIdentifier
+    , active = Inactive
+    , fullSheetPath = ""
+    , qrOnlyPath = ""
+    }
 
 validatePositiveNatural : String -> Maybe Int
 validatePositiveNatural txt =
