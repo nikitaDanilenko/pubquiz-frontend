@@ -9,7 +9,8 @@ import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamQuery
 import Common.Util as Util
 import Html exposing (Html, div, label, table, td, text, tr)
 import Html.Attributes exposing (class, for, id, value)
-import Input.Model as Input exposing (ErrorOr)
+import Input.Model exposing (ErrorOr)
+import Input.QuizValues as QuizValues
 import List.Extra exposing (maximumBy)
 import Output.Charts as Charts
 import Output.Colors exposing (mkColors)
@@ -84,10 +85,10 @@ type Msg
 
 init : Maybe Labels -> Maybe TeamQuery -> DbQuizId -> ( Model, Cmd Msg )
 init mLabels mTeamQuery qid =
-    ( { labels = Maybe.withDefault Input.defaultLabels mLabels
+    ( { labels = Maybe.withDefault QuizValues.defaultLabels mLabels
       , teamQueryCandidate = mTeamQuery
       , quizRatings = QuizRatings.empty
-      , quizInfo = Input.defaultQuizInfo
+      , quizInfo = QuizValues.defaultQuizInfo
       , status = { loading | labelsSet = Util.isDefined mLabels }
       }
     , Cmd.batch
