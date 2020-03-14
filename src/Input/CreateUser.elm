@@ -36,7 +36,7 @@ type Msg
     = SetNewUserField NewUserField String
     | CreateUser
     | CreatedUser (ErrorOr ())
-    | Done
+    | Back
 
 
 init : Authentication -> Model
@@ -72,7 +72,7 @@ view md =
             , disabled (not (NewUser.isValid md.newUser))
             ]
             [ text "Create" ]
-        , button [ class "backButton", onClick Done ] [ text "Back" ]
+        , button [ class "backButton", onClick Back ] [ text "Back" ]
         , addFeedbackLabel md.feedback
         ]
 
@@ -115,7 +115,7 @@ update msg model =
                     in
                     ( updateFeedback model feedback, Cmd.none )
 
-        Done ->
+        Back ->
             ( model, Cmd.none )
 
 
