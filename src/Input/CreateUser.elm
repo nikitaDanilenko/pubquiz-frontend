@@ -39,12 +39,14 @@ type Msg
     | Back
 
 
-init : Authentication -> Model
+init : Authentication -> ( Model, Cmd Msg )
 init authentication =
-    { newUser = NewUser.empty
-    , authentication = authentication
-    , feedback = ""
-    }
+    ( { newUser = NewUser.empty
+      , authentication = authentication
+      , feedback = ""
+      }
+    , Cmd.none
+    )
 
 
 view : Model -> Html Msg
