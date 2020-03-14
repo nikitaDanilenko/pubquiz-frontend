@@ -2,9 +2,9 @@ module Input.CreateUser exposing (..)
 
 import Basics.Extra exposing (flip)
 import Common.Authentication exposing (Authentication, encodeWithSignature)
-import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Common.Constants exposing (newUserApi, userCreationParam)
 import Common.Types exposing (jsonEncUserCreation)
+import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Html exposing (Html, button, div, input, label, text)
 import Html.Attributes exposing (class, disabled, for, id, type_)
 import Html.Events exposing (onClick, onInput)
@@ -90,7 +90,11 @@ update msg model =
             ( newModel, Cmd.none )
 
         CreateUser ->
-            ( model, createNewUser model.authentication model.newUser )
+            if NewUser.isValid model.newUser then
+                ( model, createNewUser model.authentication model.newUser )
+
+            else
+                ( updateFeedback model "Invalid user", Cmd.none )
 
         CreatedUser errorOr ->
             case errorOr of
@@ -109,8 +113,8 @@ update msg model =
                             String.join " "
                                 [ "Failed to create user"
                                 , model.newUser.user
-                                , "."
-                                , "Reason:"
+                                , "-"
+                                , "reason:"
                                 , errorToString error
                                 ]
                     in
