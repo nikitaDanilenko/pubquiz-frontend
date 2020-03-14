@@ -26,9 +26,7 @@ type alias Model =
     }
 
 
-updateQuiz : Model -> QuizSettings -> Model
-
-
+updateQuizSettings : Model -> QuizSettings -> Model
 updateQuizSettings model quizSettings =
     { model | quizSettings = quizSettings }
 
