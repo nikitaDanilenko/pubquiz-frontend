@@ -53,31 +53,31 @@ type Msg
 
 type InitialiseAs
     = CreateInitial
-    | UpdateInitial DbQuizId QuizIdentifier QuizSettings
+    | UpdateInitial QuizInfo QuizSettings
 
 
 type UseAs
     = CreateUsage
-    | UpdateUsage DbQuizId
+    | UpdateUsage QuizInfo
 
 
 init : Authentication -> InitialiseAs -> ( Model, Cmd Msg )
 init authentication usage =
     let
-        ( quizIdentifier, quizSettings, usagePlain ) =
+        ( quizIdentifier, quizSettings, useAs ) =
             case usage of
                 CreateInitial ->
                     ( QuizValues.defaultQuizIdentifier, QuizValues.defaultQuizSettings, CreateUsage )
 
-                UpdateInitial qid quizIdentifier quizSettings ->
-                    ( quizIdentifier, quizSettings, UpdateUsage qid )
+                UpdateInitial quizInfo quizSettings ->
+                    ( quizInfo.quizIdentifier, quizSettings, UpdateUsage quizInfo )
 
         initialModel =
             { quizIdentifier = quizIdentifier
             , quizSettings = quizSettings
             , authentication = authentication
             , feedback = ""
-            , usage = usagePlain
+            , usage = useAs
             }
     in
     ( initialModel, Cmd.none )
@@ -121,8 +121,8 @@ update msg model =
                         CreateUsage ->
                             createQuiz model.authentication model.quizIdentifier model.quizSettings
 
-                        UpdateUsage qid ->
-                            updateQuiz model.authentication qid model.quizIdentifier model.quizSettings
+                        UpdateUsage quizInfo ->
+                            updateQuiz model.authentication quizInfo.quizId model.quizIdentifier model.quizSettings
             in
             ( model, command )
 
