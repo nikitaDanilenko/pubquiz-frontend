@@ -13,11 +13,11 @@ import Common.Util as Util exposing (adjustToSizeWith, getAllWith, getMsg, isVal
 import Date
 import Html exposing (Html)
 import Http exposing (Error)
-import Input.ConfirmLock as ConfirmLock
+import Input.ConfirmLock as ConfirmLock exposing (Msg(..))
 import Input.CreateUser as CreateUser exposing (Msg(..))
 import Input.Login as Login exposing (Msg(..))
 import Input.NewUser as NewUser exposing (NewUser)
-import Input.PointInput as PointInput
+import Input.PointInput as PointInput exposing (Msg(..))
 import Input.RequestUtils exposing (RestKey, RestParam, RestValue, encodeWithSignature, mkJSONParams)
 import Input.Selection as Selection exposing (Msg(..))
 import Input.SetQuizSettings as SetQuizSettings exposing (Usage(..))
@@ -90,7 +90,7 @@ update msg model =
         case model.page of
           CreateUser createUser ->
             case createUserMsg of
-              Back -> stepSelection model Selection.init
+              CreateUser.Back -> stepSelection model Selection.init
               other -> stepCreateUser model (CreateUser.update other createUser)
           _ -> (model, Cmd.none)
 
@@ -105,13 +105,34 @@ update msg model =
               otherMsg -> stepSelection model (Selection.update otherMsg selection)
           _ -> (model, Cmd.none)
 
-      ConfirmLockMsg msg ->
+      ConfirmLockMsg confirmLockMsg ->
+        case model.page of
+          ConfirmLock confirmLock ->
+            case confirmLockMsg of
+              ConfirmLock.Back -> stepPointInput model (PointInput.init model.authentication confirmLock.quizInfo)
+              Locked response ->
+                          case response of
+                              Ok _ ->
+                                  stepSelection model Selection.init
 
+                              Err error ->
+                                  stepConfirmLock model (ConfirmLock.updateFeedback confirmLock (errorToString error), Cmd.none)
+              otherConfirmLockMsg -> stepConfirmLock model (ConfirmLock.update otherConfirmLockMsg confirmLock)
+          _ -> (model, Cmd.none)
 
-      PointInputMsg msg ->
+      PointInputMsg pointInputMsg ->
+        case model.page of
+          PointInput pointInput ->
+            case pointInputMsg of
+              PointInput.Back -> stepSelection model Selection.init
+              AcknowledgeLock -> stepConfirmLock model (ConfirmLock.init pointInput.quizInfo model.authentication)
+              otherPointInputMsg -> stepPointInput model (PointInput.update otherPointInputMsg pointInput)
+
+          _ -> (model, Cmd.none)
 
 
       CreateQuizMsg msg ->
+
 
 
       UpdateQuizMsg msg ->
@@ -177,14 +198,7 @@ stepUpdateQuiz model (updateQuiz, cmd) =
 getAll : Cmd Msg
 getAll = getAllWith (GotAll >> ResponseF)
 
-getLabels : DbQuizId -> Cmd Msg
-getLabels =
-    getMsg getLabelsApi (GotLabels >> ResponseF) jsonDecLabels
 
-
-getQuizRatings : DbQuizId -> Cmd Msg
-getQuizRatings =
-    getMsg getQuizRatingsApi (GotQuizRatings >> ResponseF) jsonDecQuizRatings
 
 
 
