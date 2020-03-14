@@ -4,7 +4,6 @@ import Basics.Extra exposing (flip)
 import Common.Authentication exposing (Authentication)
 import Common.ConnectionUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Common.Constants exposing (getLabelsApi, getQuizRatingsApi, mkPath, quizIdParam, quizRatingsParam, sheetPDFPrefix, updateApi)
-import Common.Copy exposing (updateQuizSettingsNumberOfTeams)
 import Common.QuizRatings as QuizRatings
 import Common.RoundRating as RoundRating
 import Common.Types exposing (DbQuizId, Header, Labels, QuizInfo, QuizRatings, QuizSettings, RoundNumber, RoundRating, TeamNumber, UserName, jsonDecLabels, jsonDecQuizRatings, jsonEncDbQuizId, jsonEncQuizRatings)
@@ -14,24 +13,25 @@ import Html.Attributes exposing (class, for, href, id, step, target, type_, valu
 import Html.Events exposing (onClick, onInput)
 import Http
 import Input.Model exposing (ErrorOr)
-import Input.QuizValues exposing (defaultQuizSettings)
+import Input.QuizValues exposing (defaultLabels)
 import Input.RequestUtils exposing (SessionKey, encodeWithSignature)
 import Parser exposing (float, int, run)
 
 
 type alias Model =
     { quizInfo : QuizInfo
-    , quizSettings : QuizSettings
+    , labels : Labels
     , quizRatings : QuizRatings
+    , numberOfTeams : Int
     , authentication : Authentication
     , feedback : String
     , status : Status
     }
 
 
-updateQuizSettings : Model -> QuizSettings -> Model
-updateQuizSettings model quizSettings =
-    { model | quizSettings = quizSettings }
+updateLabels : Model -> Labels -> Model
+updateLabels model labels =
+    { model | labels = labels }
 
 
 updateQuizRatings : Model -> QuizRatings -> Model
@@ -49,22 +49,27 @@ updateStatus model status =
     { model | status = status }
 
 
+updateNumberOfTeams : Model -> Int -> Model
+updateNumberOfTeams model numberOfTeams =
+    { model | numberOfTeams = numberOfTeams }
+
+
 type alias Status =
-    { quizSettingsLoaded : Bool
+    { labelsLoaded : Bool
     , quizRatingsLoaded : Bool
     }
 
 
 initialStatus : Status
 initialStatus =
-    { quizSettingsLoaded = False
+    { labelsLoaded = False
     , quizRatingsLoaded = False
     }
 
 
-updateQuizSettingsLoaded : Status -> Bool -> Status
-updateQuizSettingsLoaded status b =
-    { status | quizSettingsLoaded = b }
+updateLabelsLoaded : Status -> Bool -> Status
+updateLabelsLoaded status b =
+    { status | labelsLoaded = b }
 
 
 updateQuizRatingsLoaded : Status -> Bool -> Status
@@ -74,7 +79,7 @@ updateQuizRatingsLoaded status b =
 
 hasFinishedLoading : Status -> Bool
 hasFinishedLoading status =
-    List.all identity [ status.quizSettingsLoaded, status.quizRatingsLoaded ]
+    List.all identity [ status.labelsLoaded, status.quizRatingsLoaded ]
 
 
 type Msg
@@ -94,63 +99,76 @@ type Msg
 
 init : Authentication -> QuizInfo -> ( Model, Cmd Msg )
 init authentication quizInfo =
-    ( { quizInfo = quizInfo, quizSettings = defaultQuizSettings, quizRatings = QuizRatings.empty, authentication = authentication, feedback = "", status = initialStatus }
+    ( { quizInfo = quizInfo
+      , labels = defaultLabels
+      , quizRatings = QuizRatings.empty
+      , numberOfTeams = 0
+      , authentication = authentication
+      , feedback = ""
+      , status = initialStatus
+      }
     , Cmd.batch [ getLabels quizInfo.quizId, getQuizRatings quizInfo.quizId ]
     )
 
 
 view : Model -> Html Msg
-view md =
+view model =
     let
         quizName =
-            md.quizInfo.quizIdentifier.name
+            model.quizInfo.quizIdentifier.name
 
         numberOfTeams =
-            md.quizSettings.numberOfTeams
+            model.numberOfTeams
 
         quizRatings =
-            md.quizRatings
+            model.quizRatings
     in
-    div [ id "singleQuiz" ]
-        ([ div [ id "editingLabel" ]
-            [ label [ for "editingQuiz" ]
-                [ text (String.join " " [ "Editing", quizName ]) ]
-            ]
-         , div [ id "teamsInQuiz" ]
-            [ label [ for "teamInQuizLabel" ] [ text "Teams in the quiz" ]
-            , input
-                [ value (String.fromInt numberOfTeams)
-                , type_ "number"
-                , min "1"
-                , step "1"
-                , max (String.fromInt (QuizRatings.maxNumberOfTeams quizRatings))
-                , onInput SetTeamsInQuiz
-                ]
-                []
-            ]
-         , div [ id "teamNames" ]
-            (label [ for "teamNamesLabel" ] [ text "Team names" ]
-                :: mkTeamNameInput (List.take numberOfTeams quizRatings.header)
-            )
-         ]
-            ++ List.map (\( rn, rr ) -> mkRoundForm rn numberOfTeams rr) quizRatings.ratings
-            ++ [ button [ class "button", onClick AddRound ] [ text "Add round" ]
-               , button [ class "button", onClick EditSettings ] [ text "Edit settings" ]
-               , button [ class "backButton", onClick Back ] [ text "Back" ]
-               , button [ class "lockButton", onClick AcknowledgeLock ] [ text "Lock" ]
-               , button
-                    [ class "button"
-                    , onClick UpdateQuizRatings
-                    ]
-                    [ text "Update" ]
-               , mkLinkToSheet "answerSheet" "Get quiz sheet" md.quizInfo.fullSheetPath
-               , mkLinkToSheet "qrSheet" "Get QR codes only" md.quizInfo.qrOnlyPath
+    if not (hasFinishedLoading model.status) then
+        div [] []
 
-               -- todo: Adjust this path using a proper REST request
-               , mkLinkToSheet "mainGraphPage" "View main graph page" ""
-               , addFeedbackLabel md.feedback
-               ]
-        )
+    else
+        div [ id "singleQuiz" ]
+            ([ div [ id "editingLabel" ]
+                [ label [ for "editingQuiz" ]
+                    [ text (String.join " " [ "Editing", quizName ]) ]
+                ]
+             , div [ id "teamsInQuiz" ]
+                [ label [ for "teamInQuizLabel" ] [ text "Teams in the quiz" ]
+                , input
+                    [ value (String.fromInt numberOfTeams)
+                    , type_ "number"
+                    , min "1"
+                    , step "1"
+                    , max (String.fromInt (QuizRatings.maxNumberOfTeams quizRatings))
+                    , onInput SetTeamsInQuiz
+                    ]
+                    []
+                ]
+
+             -- todo: Adjust to set teams inactive.
+             , div [ id "teamNames" ]
+                (label [ for "teamNamesLabel" ] [ text "Team names" ]
+                    :: mkTeamNameInput (List.take numberOfTeams quizRatings.header)
+                )
+             ]
+                ++ List.map (\( rn, rr ) -> mkRoundForm rn numberOfTeams rr) quizRatings.ratings
+                ++ [ button [ class "button", onClick AddRound ] [ text "Add round" ]
+                   , button [ class "button", onClick EditSettings ] [ text "Edit settings" ]
+                   , button [ class "backButton", onClick Back ] [ text "Back" ]
+                   , button [ class "lockButton", onClick AcknowledgeLock ] [ text "Lock" ]
+                   , button
+                        [ class "button"
+                        , onClick UpdateQuizRatings
+                        ]
+                        [ text "Update" ]
+                   , mkLinkToSheet "answerSheet" "Get quiz sheet" model.quizInfo.fullSheetPath
+                   , mkLinkToSheet "qrSheet" "Get QR codes only" model.quizInfo.qrOnlyPath
+
+                   -- todo: Adjust this path using a proper REST request
+                   , mkLinkToSheet "mainGraphPage" "View main graph page" ""
+                   , addFeedbackLabel model.feedback
+                   ]
+            )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -162,8 +180,7 @@ update msg model =
                     processTeamUpdate text model
 
                 newModel =
-                    updateQuizSettingsNumberOfTeams model.quizSettings tu.teams
-                        |> updateQuizSettings model
+                    updateNumberOfTeams model tu.teams
                         |> flip updateQuizRatings (QuizRatings.adjustTo tu.teams model.quizRatings)
                         |> flip updateFeedback tu.feedback
             in
@@ -184,7 +201,7 @@ update msg model =
         AddRound ->
             let
                 newModel =
-                    QuizRatings.addRound (RoundRating.emptyOfSize model.quizSettings.numberOfTeams) model.quizRatings
+                    QuizRatings.addRound (RoundRating.emptyOfSize model.numberOfTeams) model.quizRatings
                         |> updateQuizRatings model
             in
             ( newModel, Cmd.none )
@@ -234,6 +251,44 @@ update msg model =
 
         Back ->
             ( model, Cmd.none )
+
+        GotLabels labelsCandidate ->
+            case labelsCandidate of
+                Ok labels ->
+                    let
+                        newModel =
+                            updateLabelsLoaded model.status True
+                                |> updateStatus model
+                                |> flip updateLabels labels
+                    in
+                    ( newModel, Cmd.none )
+
+                Err error ->
+                    ( updateFeedback model (errorToString error), Cmd.none )
+
+        GotQuizRatings quizRatingsCandidate ->
+            case quizRatingsCandidate of
+                Ok quizRatings ->
+                    let
+                        estimate =
+                            QuizRatings.numberOfTeams quizRatings
+
+                        clamped =
+                            if estimate == 0 then
+                                model.numberOfTeams
+
+                            else
+                                estimate
+
+                        newModel =
+                            updateNumberOfTeams model clamped
+                                |> flip updateQuizRatings quizRatings
+                                |> (\md -> updateQuizRatingsLoaded md.status True |> updateStatus md)
+                    in
+                    ( newModel, Cmd.none )
+
+                Err error ->
+                    ( updateFeedback model (errorToString error), Cmd.none )
 
 
 processTeamUpdate : String -> Model -> { teams : Int, feedback : String }
