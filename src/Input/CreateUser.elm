@@ -6,7 +6,7 @@ import Common.Constants exposing (newUserApi, userCreationParam)
 import Common.Types exposing (jsonEncUserCreation)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Html exposing (Html, button, div, input, label, text)
-import Html.Attributes exposing (class, disabled, for, id, type_)
+import Html.Attributes exposing (class, disabled, for, id, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Html.Events.Extra exposing (onEnter)
 import Http
@@ -57,15 +57,32 @@ view md =
     div [ id "creatingUserView" ]
         [ div [ id "creatingUser" ]
             [ label [ for "username" ] [ text "User name" ]
-            , input [ onInput (SetNewUserField UserField), createOnEnter ] []
+            , input
+                [ onInput (SetNewUserField UserField)
+                , value md.newUser.user
+                , createOnEnter
+                ]
+                []
             ]
         , div [ id "creatingPassword1" ]
             [ label [ for "password1" ] [ text "Password" ]
-            , input [ onInput (SetNewUserField PasswordField1), type_ "password", createOnEnter ] []
+            , input
+                [ onInput (SetNewUserField PasswordField1)
+                , value md.newUser.password1
+                , type_ "password"
+                , createOnEnter
+                ]
+                []
             ]
         , div [ id "creatingPassword2" ]
             [ label [ for "password2" ] [ text "Repeat password" ]
-            , input [ onInput (SetNewUserField PasswordField2), type_ "password", createOnEnter ] []
+            , input
+                [ onInput (SetNewUserField PasswordField2)
+                , value md.newUser.password2
+                , type_ "password"
+                , createOnEnter
+                ]
+                []
             ]
         , button
             [ class "button"
