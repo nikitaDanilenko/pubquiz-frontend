@@ -1,9 +1,8 @@
 module Input.Selection exposing (..)
 
+import Common.Types exposing (DbQuizId, QuizInfo, QuizRatings)
+import Common.Util exposing (getAllWith)
 import Common.WireUtil exposing (addFeedbackLabel, errorToString)
-import Common.Constants exposing (getQuizRatingsApi)
-import Common.Types exposing (DbQuizId, QuizInfo, QuizRatings, jsonDecQuizRatings)
-import Common.Util exposing (getAllWith, getMsg)
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
@@ -16,31 +15,42 @@ type alias Model =
     }
 
 
+updateFeedback : Model -> String -> Model
+updateFeedback model feedback =
+    { model | feedback = feedback }
+
+
+updateQuizzes : Model -> List QuizInfo -> Model
+updateQuizzes model quizzes =
+    { model | quizzes = quizzes }
+
+
 type Msg
-    = GetQuizRatings DbQuizId
-    | GotQuizRatings (ErrorOr QuizRatings)
+    = StartPointInput QuizInfo
     | StartCreatingQuiz
     | StartCreatingUser
     | GotAll (ErrorOr (List QuizInfo))
 
 
-init : (Model, Cmd Msg)
-init  =
-    ({ quizzes = []
-    , feedback = ""
-    }, getAllWith GotAll)
+init : ( Model, Cmd Msg )
+init =
+    ( { quizzes = []
+      , feedback = ""
+      }
+    , getAllWith GotAll
+    )
 
 
 view : Model -> Html Msg
 view md =
     let
         mkButton : QuizInfo -> Html Msg
-        mkButton qi =
+        mkButton quizInfo =
             button
                 [ class "quizButton"
-                , onClick (GetQuizRatings qi.quizId)
+                , onClick (StartPointInput quizInfo)
                 ]
-                [ text qi.quizIdentifier.name ]
+                [ text quizInfo.quizIdentifier.name ]
     in
     div [ id "quizSelectionMain" ]
         [ div [ id "selectExistingQuizzesMain" ]
@@ -56,21 +66,13 @@ view md =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        GetQuizRatings qid ->
-            ( { model | feedback = "" }, getQuizRatings qid )
-
-        GotAll candidate ->
-            case candidate of
-                Ok quizInfos ->
-                    ( { model | quizzes = quizInfos }, Cmd.none )
+        GotAll quizzesCandidate ->
+            case quizzesCandidate of
+                Ok quizzes ->
+                    ( updateQuizzes model quizzes, Cmd.none )
 
                 Err error ->
-                    ( { model | feedback = errorToString error }, Cmd.none )
+                    ( updateFeedback model (errorToString error), Cmd.none )
 
         _ ->
             ( model, Cmd.none )
-
-
-getQuizRatings : DbQuizId -> Cmd Msg
-getQuizRatings =
-    getMsg getQuizRatingsApi GotQuizRatings jsonDecQuizRatings
