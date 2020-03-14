@@ -1,18 +1,20 @@
 module Input.SetQuizSettings exposing (..)
 
 import Common.Authentication exposing (Authentication)
-import Common.ConnectionUtil exposing (addFeedbackLabel, errorToString)
-import Common.Constants exposing (getQuizInfoApi)
+import Common.ConnectionUtil exposing (addFeedbackLabel, encodeBody, errorToString)
+import Common.Constants exposing (actionParam, newApi, quizIdParam, quizIdentifierParam, quizSettingsParam, updateQuizApi)
 import Common.Copy as Copy
-import Common.Types exposing (DbQuizId, Labels, QuizIdentifier, QuizSettings, jsonDecQuizInfo)
-import Common.Util as Util exposing (getMsg)
+import Common.Types exposing (Action(..), DbQuizId, Labels, QuizIdentifier, QuizInfo, QuizSettings, jsonDecQuizInfo, jsonEncAction, jsonEncDbQuizId, jsonEncQuizIdentifier, jsonEncQuizSettings)
+import Common.Util as Util
 import Date
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (class, disabled, id)
 import Html.Events exposing (onClick)
 import Html.Events.Extra exposing (onEnter)
+import Http
 import Input.Model exposing (ErrorOr)
 import Input.QuizValues as QuizValues
+import Input.RequestUtils exposing (encodeWithSignature)
 
 
 type alias Model =
@@ -20,11 +22,13 @@ type alias Model =
     , quizSettings : QuizSettings
     , authentication : Authentication
     , feedback : String
-    , usage : UsagePlain
+    , usage : UseAs
     }
 
 
-updateQuizSettings : Model -> QuizSettings -> Model
+updateQuiz : Model -> QuizSettings -> Model
+
+
 updateQuizSettings model quizSettings =
     { model | quizSettings = quizSettings }
 
@@ -41,33 +45,32 @@ updateFeedback model feedback =
 
 type Msg
     = Commit
-    | GotUpdate UpdatePart
     | Back
     | Value QuizValues.Msg
+    | Updated (ErrorOr ())
+    | Created (ErrorOr QuizInfo)
 
 
-type UpdatePart
-    = QuizIdentifierPart (ErrorOr QuizIdentifier)
-    | QuizSettingsPart (ErrorOr QuizSettings)
+type InitialiseAs
+    = CreateInitial
+    | UpdateInitial DbQuizId QuizIdentifier QuizSettings
 
 
-type Usage
-    = Create
-    | Update QuizIdentifier QuizSettings
+type UseAs
+    = CreateUsage
+    | UpdateUsage DbQuizId
 
-type UsagePlain = CreatePlain | UpdatePlain
 
-init : Authentication -> Usage -> ( Model, Cmd Msg )
+init : Authentication -> InitialiseAs -> ( Model, Cmd Msg )
 init authentication usage =
     let
-        (quizIdentifier, quizSettings, usagePlain) =
-          case usage of
-            Create -> (QuizValues.defaultQuizIdentifier, QuizValues.defaultQuizSettings, CreatePlain)
+        ( quizIdentifier, quizSettings, usagePlain ) =
+            case usage of
+                CreateInitial ->
+                    ( QuizValues.defaultQuizIdentifier, QuizValues.defaultQuizSettings, CreateUsage )
 
-
-            Update quizIdentifier quizSettings ->
-              (quizIdentifier, quizSettings, UpdatePlain)
-
+                UpdateInitial qid quizIdentifier quizSettings ->
+                    ( quizIdentifier, quizSettings, UpdateUsage qid )
 
         initialModel =
             { quizIdentifier = quizIdentifier
@@ -76,7 +79,6 @@ init authentication usage =
             , feedback = ""
             , usage = usagePlain
             }
-
     in
     ( initialModel, Cmd.none )
 
@@ -86,13 +88,14 @@ view md =
     let
         createOnEnter =
             onEnter Commit
+
         buttonText =
-          case md.usage of
-            CreatePlain -> "Create"
+            case md.usage of
+                CreateUsage ->
+                    "Create"
 
-
-            UpdatePlain -> "Update"
-
+                UpdateUsage _ ->
+                    "Update"
     in
     div [ id "creatingQuizView" ]
         (QuizValues.mkCreationForm md.quizSettings createOnEnter md.quizSettings.labels
@@ -112,7 +115,16 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Commit ->
-            ( model, Cmd.none )
+            let
+                command =
+                    case model.usage of
+                        CreateUsage ->
+                            createQuiz model.authentication model.quizIdentifier model.quizSettings
+
+                        UpdateUsage qid ->
+                            updateQuiz model.authentication qid model.quizIdentifier model.quizSettings
+            in
+            ( model, command )
 
         Back ->
             ( model, Cmd.none )
@@ -174,28 +186,51 @@ update msg model =
             in
             ( newModel, Cmd.none )
 
-        GotUpdate updatePart ->
+        Updated response ->
             let
-                newModel =
-                    case updatePart of
-                        QuizIdentifierPart quizIdentifierCandidate ->
-                            case quizIdentifierCandidate of
-                                Ok quizIdentifier ->
-                                    updateQuizIdentifier model quizIdentifier
+                feedback =
+                    case response of
+                        Ok _ ->
+                            "Update successful."
 
-                                Err error ->
-                                    updateFeedback model (errorToString error)
-
-                        QuizSettingsPart quizSettingsCandidate ->
-                            case quizSettingsCandidate of
-                                Ok quizSettings ->
-                                    updateQuizSettings model quizSettings
-
-                                Err error ->
-                                    updateFeedback model (errorToString error)
+                        Err error ->
+                            errorToString error
             in
-            ( newModel, Cmd.none )
+            ( updateFeedback model feedback, Cmd.none )
 
-getQuizIdentifier : DbQuizId -> Cmd Msg
-getQuizIdentifier =
-  getMsg getQuizInfoApi (Result.map .quizIdentifier >> QuizIdentifierPart >> GotUpdate) jsonDecQuizInfo
+        Created _ ->
+            ( model, Cmd.none )
+
+
+createQuiz : Authentication -> QuizIdentifier -> QuizSettings -> Cmd Msg
+createQuiz authentication idf s =
+    Http.post
+        { url = newApi
+        , body =
+            encodeBody
+                (encodeWithSignature authentication
+                    [ ( quizIdentifierParam, jsonEncQuizIdentifier idf )
+                    , ( quizSettingsParam, jsonEncQuizSettings s )
+                    , ( actionParam, jsonEncAction CreateQuizA )
+                    ]
+                )
+        , expect = Http.expectJson Created jsonDecQuizInfo
+        }
+
+
+updateQuiz : Authentication -> DbQuizId -> QuizIdentifier -> QuizSettings -> Cmd Msg
+updateQuiz authentication qid quizIdentifier quizSettings =
+    let
+        params =
+            encodeWithSignature authentication
+                [ ( quizIdParam, jsonEncDbQuizId qid )
+                , ( quizIdentifierParam, jsonEncQuizIdentifier quizIdentifier )
+                , ( quizSettingsParam, jsonEncQuizSettings quizSettings )
+                , ( actionParam, jsonEncAction UpdateSettingsA )
+                ]
+    in
+    Http.post
+        { url = updateQuizApi
+        , body = encodeBody params
+        , expect = Http.expectWhatever Updated
+        }
