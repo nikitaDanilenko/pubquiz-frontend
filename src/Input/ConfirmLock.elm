@@ -1,6 +1,6 @@
 module Input.ConfirmLock exposing (..)
 
-import Common.Authentication exposing (Authentication)
+import Common.Authentication exposing (Authentication, encodeWithSignature)
 import Common.WireUtil exposing (encodeBody, errorToString)
 import Common.Constants exposing (actionParam, lockApi, quizIdParam)
 import Common.Types exposing (Action(..), DbQuizId, QuizInfo, jsonEncAction, jsonEncDbQuizId)
@@ -9,7 +9,6 @@ import Html.Attributes exposing (class, for, id)
 import Html.Events exposing (onClick)
 import Http
 import Input.Model exposing (ErrorOr)
-import Input.RequestUtils exposing (encodeWithSignature)
 
 
 type alias Model =

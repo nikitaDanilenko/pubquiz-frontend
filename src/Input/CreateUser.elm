@@ -1,7 +1,7 @@
 module Input.CreateUser exposing (..)
 
 import Basics.Extra exposing (flip)
-import Common.Authentication exposing (Authentication)
+import Common.Authentication exposing (Authentication, encodeWithSignature)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Common.Constants exposing (newUserApi, userCreationParam)
 import Common.Types exposing (jsonEncUserCreation)
@@ -12,7 +12,6 @@ import Html.Events.Extra exposing (onEnter)
 import Http
 import Input.Model exposing (ErrorOr)
 import Input.NewUser as NewUser exposing (NewUser, NewUserField(..))
-import Input.RequestUtils exposing (encodeWithSignature)
 
 
 type alias Model =

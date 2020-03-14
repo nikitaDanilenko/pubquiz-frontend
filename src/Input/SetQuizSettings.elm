@@ -15,8 +15,7 @@ module Input.SetQuizSettings exposing
     , viewUpdate
     )
 
-import Common.Authentication exposing (Authentication)
-import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
+import Common.Authentication exposing (Authentication, encodeWithSignature)
 import Common.Constants
     exposing
         ( actionParam
@@ -42,6 +41,7 @@ import Common.Types
         , jsonEncQuizSettings
         )
 import Common.Util as Util
+import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Date
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (class, disabled, id)
@@ -50,7 +50,6 @@ import Html.Events.Extra exposing (onEnter)
 import Http
 import Input.Model exposing (ErrorOr)
 import Input.QuizValues as QuizValues
-import Input.RequestUtils exposing (encodeWithSignature)
 
 
 type alias Base =
@@ -160,7 +159,7 @@ viewWith baseOf commitButtonText md =
             onEnter Commit
     in
     div [ id "creatingQuizView" ]
-        (QuizValues.mkCreationForm (baseOf md).quizSettings createOnEnter (baseOf md).quizSettings.labels
+        ((QuizValues.mkCreationForm Value (baseOf md).quizSettings createOnEnter (baseOf md).quizSettings.labels)
             ++ [ button
                     [ class "button"
                     , onClick Commit
