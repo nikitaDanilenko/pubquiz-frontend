@@ -1,9 +1,9 @@
 module Input.Selection exposing (..)
 
-import Common.ConnectionUtil exposing (addFeedbackLabel)
+import Common.ConnectionUtil exposing (addFeedbackLabel, errorToString)
 import Common.Constants exposing (getQuizRatingsApi)
 import Common.Types exposing (DbQuizId, QuizInfo, QuizRatings, jsonDecQuizRatings)
-import Common.Util exposing (getMsg)
+import Common.Util exposing (getAllWith, getMsg)
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
@@ -21,13 +21,14 @@ type Msg
     | GotQuizRatings (ErrorOr QuizRatings)
     | StartCreatingQuiz
     | StartCreatingUser
+    | GotAll (ErrorOr (List QuizInfo))
 
 
-init : List QuizInfo -> Model
-init quizzes =
-    { quizzes = quizzes
+init : (Model, Cmd Msg)
+init  =
+    ({ quizzes = []
     , feedback = ""
-    }
+    }, getAllWith GotAll)
 
 
 view : Model -> Html Msg
@@ -57,6 +58,14 @@ update msg model =
     case msg of
         GetQuizRatings qid ->
             ( { model | feedback = "" }, getQuizRatings qid )
+
+        GotAll candidate ->
+            case candidate of
+                Ok quizInfos ->
+                    ( { model | quizzes = quizInfos }, Cmd.none )
+
+                Err error ->
+                    ( { model | feedback = errorToString error }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
