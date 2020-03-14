@@ -27,9 +27,9 @@ type Msg
     | Locked (ErrorOr ())
 
 
-init : QuizInfo -> Authentication -> Model
+init : QuizInfo -> Authentication -> (Model, Cmd Msg)
 init quizInfo authentication =
-    { quizInfo = quizInfo, authentication = authentication, feedback = "" }
+    ({ quizInfo = quizInfo, authentication = authentication, feedback = "" }, Cmd.none)
 
 
 view : Model -> Html Msg
