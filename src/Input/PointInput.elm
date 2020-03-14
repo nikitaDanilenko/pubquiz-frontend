@@ -3,7 +3,7 @@ module Input.PointInput exposing (..)
 import Basics.Extra exposing (flip)
 import Common.Authentication exposing (Authentication)
 import Common.ConnectionUtil exposing (addFeedbackLabel, encodeBody, errorToString)
-import Common.Constants exposing (getLabelsApi, getQuizRatingsApi, mkPath, quizIdParam, quizRatingsParam, sheetPDFPrefix, updateApi)
+import Common.Constants exposing (getLabelsApi, getQuizRatingsApi, mkPath, quizIdParam, quizRatingsParam, sheetPDFPrefix, updateQuizRatingsApi)
 import Common.QuizRatings as QuizRatings
 import Common.RoundRating as RoundRating
 import Common.Types exposing (DbQuizId, Header, Labels, QuizInfo, QuizRatings, QuizSettings, RoundNumber, RoundRating, TeamNumber, UserName, jsonDecLabels, jsonDecQuizRatings, jsonEncDbQuizId, jsonEncQuizRatings)
@@ -457,7 +457,7 @@ postUpdate authentication qid quizRatings =
                 ]
     in
     Http.post
-        { url = updateApi
+        { url = updateQuizRatingsApi
         , body = encodeBody params
         , expect = Http.expectWhatever UpdatedQuizRatings
         }
