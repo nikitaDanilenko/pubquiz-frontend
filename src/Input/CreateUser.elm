@@ -2,7 +2,7 @@ module Input.CreateUser exposing (..)
 
 import Basics.Extra exposing (flip)
 import Common.Authentication exposing (Authentication)
-import Common.ConnectionUtil exposing (addFeedbackLabel, encodeBody, errorToString)
+import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Common.Constants exposing (newUserApi, userCreationParam)
 import Common.Types exposing (jsonEncUserCreation)
 import Html exposing (Html, button, div, input, label, text)

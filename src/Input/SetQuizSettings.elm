@@ -16,7 +16,7 @@ module Input.SetQuizSettings exposing
     )
 
 import Common.Authentication exposing (Authentication)
-import Common.ConnectionUtil exposing (addFeedbackLabel, encodeBody, errorToString)
+import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Common.Constants
     exposing
         ( actionParam

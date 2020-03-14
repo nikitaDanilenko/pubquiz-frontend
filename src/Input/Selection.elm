@@ -1,6 +1,6 @@
 module Input.Selection exposing (..)
 
-import Common.ConnectionUtil exposing (addFeedbackLabel, errorToString)
+import Common.WireUtil exposing (addFeedbackLabel, errorToString)
 import Common.Constants exposing (getQuizRatingsApi)
 import Common.Types exposing (DbQuizId, QuizInfo, QuizRatings, jsonDecQuizRatings)
 import Common.Util exposing (getAllWith, getMsg)

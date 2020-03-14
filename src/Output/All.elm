@@ -1,6 +1,6 @@
 module Output.All exposing (..)
 
-import Common.ConnectionUtil exposing (linkButton)
+import Common.WireUtil exposing (linkButton)
 import Common.Constants exposing (quizIdParam)
 import Common.Types exposing (Labels, QuizInfo, TeamQuery)
 import Common.Util as Util exposing (getAllWith)

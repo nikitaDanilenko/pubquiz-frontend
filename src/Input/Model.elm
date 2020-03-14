@@ -1,11 +1,10 @@
 module Input.Model exposing (..)
 
 import Common.Copy exposing (LabelsField)
-import Common.QuizRatings as QuizRatings
 import Common.Types exposing (Activity(..), DbQuizId, Header, Labels, Password, Place, QuizDate, QuizIdentifier, QuizInfo, QuizName, QuizRatings, QuizSettings, Ratings, RoundNumber, TeamNumber, UserHash, UserName)
 import Http exposing (Error(..))
-import Input.NewUser as NewUser exposing (NewUser, NewUserField)
-import Input.Validity as Validity exposing (Validity)
+import Input.NewUser exposing (NewUser, NewUserField)
+import Input.Validity exposing (Validity)
 
 
 
@@ -27,86 +26,17 @@ type alias Model =
     }
 
 
-initialModelFunction : () -> ( Model, Cmd Msg )
-initialModelFunction () =
-    ( initialModel, Cmd.none )
 
 
-initialModel : Model
-initialModel =
-    { user = ""
-    , password = ""
-    , oneWayHash = ""
-    , quizzes = []
-    , currentQuizInfo = defaultQuizInfo
-    , currentQuizSettings = defaultQuizSettings
-    , currentQuizRatings = QuizRatings.empty
-    , isValidQuizUpdate = Validity.default
-    , displayState = Initial
-    , newUser = NewUser.emptyUser
-    , feedback = ""
-    }
 
 
-defaultQuizInfo : QuizInfo
-defaultQuizInfo =
-    { quizId = -1
-    , quizIdentifier = defaultQuizIdentifier
-    , active = Inactive
-    , fullSheetPath = ""
-    , qrOnlyPath = ""
-    }
 
 
-defaultQuizIdentifier : QuizIdentifier
-defaultQuizIdentifier =
-    { place = ""
-    , date = "2100-01-01"
-    , name = "Quiz"
-    }
 
 
-defaultQuizSettings : QuizSettings
-defaultQuizSettings =
-    { rounds = defaultRounds
-    , numberOfTeams = defaultNumberOfTeams
-    , labels = defaultLabels
-    }
 
 
-defaultLabels : Labels
-defaultLabels =
-    { roundLabel = "Runde"
-    , teamLabel = "Gruppe"
-    , ownPointsLabel = "Erreichte Punkte"
-    , maxReachedLabel = String.concat [ "Erreichte H", String.fromChar (Char.fromCode 246), "chstpunktzahl" ]
-    , maxReachableLabel = "Erreichbare Punkte"
-    , backToChartView = "Gesamtwertung"
-    , ownPageLabel = "Eigene Punkte"
-    , viewPrevious = "Alle Quizzes"
-    , cumulativeLabel = "Gesamtpunktzahl"
-    , individualRoundsLabel = "Punkte pro Runde"
-    , progressionLabel = "Verlauf"
-    , placementLabel = "Platzierung"
-    , placeLabel = "Platz"
-    , pointsLabel = "Punkte"
-    , roundWinnerLabel = "Rundensieger"
-    }
 
-
-defaultNumberOfTeams : Int
-defaultNumberOfTeams =
-    8
-
-
-defaultQuestionNumber : Int
-defaultQuestionNumber =
-    8
-
-
-defaultRounds : List Int
-defaultRounds =
-    List.repeat 4 defaultQuestionNumber
 
 
 type Edited
@@ -182,20 +112,4 @@ type Msg
     | ResponseP ResponsePure (ErrorOr ())
 
 
-errorToString : Http.Error -> String
-errorToString err =
-    case err of
-        BadUrl url ->
-            String.concat [ "Bad URL: ", url ]
 
-        Timeout ->
-            "Timeout"
-
-        NetworkError ->
-            "Network error"
-
-        BadStatus s ->
-            String.concat [ "Bad status: ", String.fromInt s ]
-
-        BadBody str ->
-            String.concat [ "Bad body: ", str ]

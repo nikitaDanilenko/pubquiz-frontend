@@ -1,7 +1,7 @@
 module Input.ConfirmLock exposing (..)
 
 import Common.Authentication exposing (Authentication)
-import Common.ConnectionUtil exposing (encodeBody, errorToString)
+import Common.WireUtil exposing (encodeBody, errorToString)
 import Common.Constants exposing (actionParam, lockApi, quizIdParam)
 import Common.Types exposing (Action(..), DbQuizId, QuizInfo, jsonEncAction, jsonEncDbQuizId)
 import Html exposing (Html, button, div, label, text)

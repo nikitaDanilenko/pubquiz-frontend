@@ -1,7 +1,7 @@
 module Output.Quiz exposing (Model, Msg, init, update, view)
 
 import Chartjs.Chart exposing (chart)
-import Common.ConnectionUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, linkButton, useOrFetchWith)
+import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, linkButton, useOrFetchWith)
 import Common.Constants exposing (quizIdParam, teamCodeParam, teamNumberParam)
 import Common.QuizRatings as QuizRatings
 import Common.Ranking exposing (RoundRankingPerTeam, RoundRankings, RoundWinner, TeamsRanking, rankingToPlacement, ratingsToRankings, roundRankingsToRoundWinners)

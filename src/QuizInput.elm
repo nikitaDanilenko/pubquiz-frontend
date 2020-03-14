@@ -3,7 +3,7 @@ module QuizInput exposing (main)
 import Basics.Extra exposing (flip)
 import Browser
 import Common.Authentication as Authentication exposing (Authentication)
-import Common.ConnectionUtil exposing (errorToString)
+import Common.WireUtil exposing (errorToString)
 import Common.Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizIdentifier, QuizName, QuizRatings, QuizSettings, UserHash, UserName)
 import Html exposing (Html, div, node)
 import Html.Attributes exposing (href, id, rel, type_)

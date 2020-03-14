@@ -2,7 +2,7 @@ module Input.PointInput exposing (..)
 
 import Basics.Extra exposing (flip)
 import Common.Authentication exposing (Authentication)
-import Common.ConnectionUtil exposing (addFeedbackLabel, encodeBody, errorToString)
+import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Common.Constants exposing (getLabelsApi, getQuizRatingsApi, mkPath, quizIdParam, quizRatingsParam, sheetPDFPrefix, updateQuizRatingsApi)
 import Common.QuizRatings as QuizRatings
 import Common.RoundRating as RoundRating

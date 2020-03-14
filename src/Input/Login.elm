@@ -1,6 +1,6 @@
 module Input.Login exposing (..)
 
-import Common.ConnectionUtil exposing (addFeedbackLabel, encodeBody)
+import Common.WireUtil exposing (addFeedbackLabel, encodeBody)
 import Common.Constants exposing (loginApi, passwordParam, userParam)
 import Common.Types exposing (Password, UserName, jsonDecUserHash, jsonEncPassword, jsonEncUserName)
 import Html exposing (Html, button, div, input, label, text)

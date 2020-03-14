@@ -1,7 +1,7 @@
 module Output.Table exposing (Model, Msg, init, update, view)
 
 import Color.Convert
-import Common.ConnectionUtil exposing (getLabelsWith, getQuizInfoWith, linkButton, useOrFetchWith)
+import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, linkButton, useOrFetchWith)
 import Common.Constants exposing (quizIdParam, teamQueryParam, teamTableApi)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine, TeamQuery, TeamTable, TeamTableInfo, jsonDecTeamTableInfo, jsonEncTeamQuery)
 import Common.Util as Util exposing (getMsgWith)
