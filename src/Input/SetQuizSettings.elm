@@ -1,15 +1,17 @@
 module Input.SetQuizSettings exposing (..)
 
 import Common.Authentication exposing (Authentication)
-import Common.ConnectionUtil exposing (addFeedbackLabel)
+import Common.ConnectionUtil exposing (addFeedbackLabel, errorToString)
+import Common.Constants exposing (getQuizInfoApi)
 import Common.Copy as Copy
-import Common.Types exposing (Labels, QuizIdentifier, QuizSettings)
-import Common.Util as Util
+import Common.Types exposing (DbQuizId, Labels, QuizIdentifier, QuizSettings, jsonDecQuizInfo)
+import Common.Util as Util exposing (getMsg)
 import Date
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (class, disabled, id)
 import Html.Events exposing (onClick)
 import Html.Events.Extra exposing (onEnter)
+import Input.Model exposing (ErrorOr)
 import Input.QuizValues as QuizValues
 
 
@@ -38,17 +40,42 @@ updateFeedback model feedback =
 
 type Msg
     = Commit
+    | GotUpdate UpdatePart
     | Back
     | Value QuizValues.Msg
 
 
-init : Authentication -> Model
-init authentication =
-    { quizIdentifier = QuizValues.defaultQuizIdentifier
-    , quizSettings = QuizValues.defaultQuizSettings
-    , authentication = authentication
-    , feedback = ""
-    }
+type UpdatePart
+    = QuizIdentifierPart (ErrorOr QuizIdentifier)
+    | QuizSettingsPart (ErrorOr QuizSettings)
+
+
+type Usage
+    = Create
+    | Update QuizIdentifier QuizSettings
+
+
+init : Authentication -> Usage -> ( Model, Cmd Msg )
+init authentication usage =
+    let
+        (quizIdentifier, quizSettings) =
+          case usage of
+            Create -> (QuizValues.defaultQuizIdentifier, QuizValues.defaultQuizSettings)
+
+
+            Update quizIdentifier quizSettings ->
+              (quizIdentifier, quizSettings)
+
+
+        initialModel =
+            { quizIdentifier = quizIdentifier
+            , quizSettings = quizSettings
+            , authentication = authentication
+            , feedback = ""
+            }
+
+    in
+    ( initialModel, Cmd.none )
 
 
 view : Model -> Html Msg
@@ -109,9 +136,9 @@ update msg model =
                         QuizValues.SetRoundsNumber string ->
                             case QuizValues.validatePositiveNatural string of
                                 Just n ->
-                                  Util.adjustToSizeWith (List.repeat n QuizValues.defaultQuestionNumber) model.quizSettings.rounds
-                                    |> Copy.updateQuizSettingsRounds model.quizSettings
-                                    |> updateQuizSettings model
+                                    Util.adjustToSizeWith (List.repeat n QuizValues.defaultQuestionNumber) model.quizSettings.rounds
+                                        |> Copy.updateQuizSettingsRounds model.quizSettings
+                                        |> updateQuizSettings model
 
                                 Nothing ->
                                     model
@@ -136,3 +163,29 @@ update msg model =
                                     model
             in
             ( newModel, Cmd.none )
+
+        GotUpdate updatePart ->
+            let
+                newModel =
+                    case updatePart of
+                        QuizIdentifierPart quizIdentifierCandidate ->
+                            case quizIdentifierCandidate of
+                                Ok quizIdentifier ->
+                                    updateQuizIdentifier model quizIdentifier
+
+                                Err error ->
+                                    updateFeedback model (errorToString error)
+
+                        QuizSettingsPart quizSettingsCandidate ->
+                            case quizSettingsCandidate of
+                                Ok quizSettings ->
+                                    updateQuizSettings model quizSettings
+
+                                Err error ->
+                                    updateFeedback model (errorToString error)
+            in
+            ( newModel, Cmd.none )
+
+getQuizIdentifier : DbQuizId -> Cmd Msg
+getQuizIdentifier =
+  getMsg getQuizInfoApi (Result.map .quizIdentifier >> QuizIdentifierPart >> GotUpdate) jsonDecQuizInfo
