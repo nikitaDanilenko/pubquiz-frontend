@@ -159,7 +159,7 @@ viewWith baseOf commitButtonText md =
             onEnter Commit
     in
     div [ id "creatingQuizView" ]
-        ((QuizValues.mkCreationForm Value (baseOf md).quizSettings createOnEnter (baseOf md).quizSettings.labels)
+        (QuizValues.mkCreationForm Value (baseOf md).quizIdentifier (baseOf md).quizSettings createOnEnter (baseOf md).quizSettings.labels
             ++ [ button
                     [ class "button"
                     , onClick Commit
@@ -210,8 +210,8 @@ updateWith commitCommand msg base =
                                     Copy.updateQuizIdentifierDate base.quizIdentifier date
                                         |> updateQuizIdentifier base
 
-                                Err _ ->
-                                    base
+                                Err error -> let _ = Debug.log "dateError" error
+                                    in base
 
                         QuizValues.SetQuizPlace place ->
                             Copy.updateQuizIdentifierPlace base.quizIdentifier place

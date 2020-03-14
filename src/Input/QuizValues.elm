@@ -21,11 +21,12 @@ type Msg
 
 mkCreationForm :
     (Msg -> msg)
+    -> QuizIdentifier
     -> QuizSettings
     -> Html.Attribute msg
     -> Labels
     -> List (Html msg)
-mkCreationForm wrapMsg quizSettings createOnEnter labels =
+mkCreationForm wrapMsg quizIdentifier quizSettings createOnEnter labels =
     let
         associations =
             [ ( "Label for rounds", RoundField, labels.roundLabel )
@@ -52,16 +53,23 @@ mkCreationForm wrapMsg quizSettings createOnEnter labels =
                 , input [ onInput (LabelsUpdate fld >> wrapMsg), type_ "text", value dft, createOnEnter ] []
                 ]
 
-        mkIdentifierPart : String -> String -> String -> String -> String -> (String -> msg) -> Html msg
-        mkIdentifierPart divId labelFor description inputType example onInputFct =
+        mkIdentifierPart : String -> String -> String -> String -> String -> String -> (String -> msg) -> Html msg
+        mkIdentifierPart divId labelFor description inputType example currentValue onInputFct =
             div [ id divId ]
                 [ label [ for labelFor ] [ text description ]
-                , input [ onInput onInputFct, type_ inputType, createOnEnter, placeholder example ] []
+                , input
+                    [ onInput onInputFct
+                    , value currentValue
+                    , type_ inputType
+                    , createOnEnter
+                    , placeholder example
+                    ]
+                    []
                 ]
     in
-    [ mkIdentifierPart "quizNameDiv" "quizName" "Quiz name" "text" "e.g. Quiz" (SetQuizName >> wrapMsg)
-    , mkIdentifierPart "quizDateDiv" "quizDate" "Quiz date" "date" "e.g. 2020-01-01" (SetQuizDate >> wrapMsg)
-    , mkIdentifierPart "quizPlaceDiv" "quizPlace" "Quiz place" "text" "e.g. Cheers" (SetQuizPlace >> wrapMsg)
+    [ mkIdentifierPart "quizNameDiv" "quizName" "Quiz name" "text" "e.g. Quiz" quizIdentifier.name (SetQuizName >> wrapMsg)
+    , mkIdentifierPart "quizDateDiv" "quizDate" "Quiz date" "date" "e.g. 2020-01-01" quizIdentifier.date (SetQuizDate >> wrapMsg)
+    , mkIdentifierPart "quizPlaceDiv" "quizPlace" "Quiz place" "text" "e.g. Cheers" quizIdentifier.place (SetQuizPlace >> wrapMsg)
     , div [ id "roundsNumberDiv" ]
         [ label [ for "roundsNumber" ]
             [ text "Number of rounds" ]
