@@ -66,8 +66,8 @@ newUserApi = mkPath [userApi, "createUser"]
 lockApi : String
 lockApi = mkPath [quizApi, "lock"]
 
-updateApi : String
-updateApi = mkPath [quizApi, "update"]
+updateQuizRatingsApi : String
+updateQuizRatingsApi = mkPath [quizApi, "updateQuizRatings"]
 
 getQuizRatingsApi : String
 getQuizRatingsApi = mkPath [quizApi, "getQuizRatings"]
@@ -78,8 +78,8 @@ getLabelsApi = mkPath [quizApi, "getLabels"]
 getQuizInfoApi : String
 getQuizInfoApi = mkPath [quizApi, "getQuizInfo"]
 
-updateQuizSettingsApi : String
-updateQuizSettingsApi = mkPath [quizApi, "updateQuizSettings"]
+updateQuizApi : String
+updateQuizApi = mkPath [quizApi, "updateQuiz"]
 
 teamTableApi : String
 teamTableApi = mkPath [quizApi, "teamTable"]
@@ -91,5 +91,4 @@ loginApi : String
 loginApi = mkPath [apiLocation, "secrets"]
 
 sheetPDFPrefix : String
---sheetPDFPrefix = mkPath [ serverLocation ]
-sheetPDFPrefix = mkPath ["file://", "media", "nda", "DATA", "Programme", "pubquiz-server"]
+sheetPDFPrefix = String.join "" [ serverLocation, ":", "9876" ]
