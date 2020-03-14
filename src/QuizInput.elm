@@ -3,8 +3,8 @@ module QuizInput exposing (main)
 import Basics.Extra exposing (flip)
 import Browser
 import Common.Authentication as Authentication exposing (Authentication)
-import Common.WireUtil exposing (errorToString)
 import Common.Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizIdentifier, QuizName, QuizRatings, QuizSettings, UserHash, UserName)
+import Common.WireUtil exposing (errorToString)
 import Html exposing (Html, div, node)
 import Html.Attributes exposing (href, id, rel, type_)
 import Input.ConfirmLock as ConfirmLock exposing (Msg(..))
@@ -156,6 +156,9 @@ update msg model =
 
                         StartCreatingUser ->
                             stepCreateUser model (CreateUser.init model.authentication)
+
+                        Selection.StartPointInput quizInfo ->
+                            stepPointInput model (PointInput.init model.authentication quizInfo)
 
                         otherMsg ->
                             stepSelection model (Selection.update otherMsg selection)
