@@ -3,17 +3,18 @@ module Input.PointInput exposing (..)
 import Basics.Extra exposing (flip)
 import Common.Authentication exposing (Authentication)
 import Common.ConnectionUtil exposing (addFeedbackLabel, encodeBody, errorToString)
-import Common.Constants exposing (mkPath, quizIdParam, quizRatingsParam, sheetPDFPrefix, updateApi)
+import Common.Constants exposing (getLabelsApi, getQuizRatingsApi, mkPath, quizIdParam, quizRatingsParam, sheetPDFPrefix, updateApi)
 import Common.Copy exposing (updateQuizSettingsNumberOfTeams)
 import Common.QuizRatings as QuizRatings
 import Common.RoundRating as RoundRating
-import Common.Types exposing (DbQuizId, Header, QuizInfo, QuizRatings, QuizSettings, RoundNumber, RoundRating, TeamNumber, UserName, jsonEncDbQuizId, jsonEncQuizRatings)
-import Common.Util exposing (adjustToSize)
+import Common.Types exposing (DbQuizId, Header, Labels, QuizInfo, QuizRatings, QuizSettings, RoundNumber, RoundRating, TeamNumber, UserName, jsonDecLabels, jsonDecQuizRatings, jsonEncDbQuizId, jsonEncQuizRatings)
+import Common.Util exposing (adjustToSize, getMsg)
 import Html exposing (Html, a, button, div, input, label, text)
 import Html.Attributes exposing (class, for, href, id, step, target, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Input.Model exposing (ErrorOr)
+import Input.QuizValues exposing (defaultQuizSettings)
 import Input.RequestUtils exposing (SessionKey, encodeWithSignature)
 import Parser exposing (float, int, run)
 
@@ -24,6 +25,7 @@ type alias Model =
     , quizRatings : QuizRatings
     , authentication : Authentication
     , feedback : String
+    , status : Status
     }
 
 
@@ -42,6 +44,39 @@ updateFeedback model feedback =
     { model | feedback = feedback }
 
 
+updateStatus : Model -> Status -> Model
+updateStatus model status =
+    { model | status = status }
+
+
+type alias Status =
+    { quizSettingsLoaded : Bool
+    , quizRatingsLoaded : Bool
+    }
+
+
+initialStatus : Status
+initialStatus =
+    { quizSettingsLoaded = False
+    , quizRatingsLoaded = False
+    }
+
+
+updateQuizSettingsLoaded : Status -> Bool -> Status
+updateQuizSettingsLoaded status b =
+    { status | quizSettingsLoaded = b }
+
+
+updateQuizRatingsLoaded : Status -> Bool -> Status
+updateQuizRatingsLoaded status b =
+    { status | quizRatingsLoaded = b }
+
+
+hasFinishedLoading : Status -> Bool
+hasFinishedLoading status =
+    List.all identity [ status.quizSettingsLoaded, status.quizRatingsLoaded ]
+
+
 type Msg
     = SetTeamsInQuiz String
     | AddRound
@@ -53,6 +88,15 @@ type Msg
     | SetTeamName TeamNumber String
     | SetMaxPoints RoundNumber String
     | UpdatePoints RoundNumber TeamNumber String
+    | GotLabels (ErrorOr Labels)
+    | GotQuizRatings (ErrorOr QuizRatings)
+
+
+init : Authentication -> QuizInfo -> ( Model, Cmd Msg )
+init authentication quizInfo =
+    ( { quizInfo = quizInfo, quizSettings = defaultQuizSettings, quizRatings = QuizRatings.empty, authentication = authentication, feedback = "", status = initialStatus }
+    , Cmd.batch [ getLabels quizInfo.quizId, getQuizRatings quizInfo.quizId ]
+    )
 
 
 view : Model -> Html Msg
@@ -362,3 +406,13 @@ postUpdate authentication qid quizRatings =
         , body = encodeBody params
         , expect = Http.expectWhatever UpdatedQuizRatings
         }
+
+
+getLabels : DbQuizId -> Cmd Msg
+getLabels =
+    getMsg getLabelsApi GotLabels jsonDecLabels
+
+
+getQuizRatings : DbQuizId -> Cmd Msg
+getQuizRatings =
+    getMsg getQuizRatingsApi GotQuizRatings jsonDecQuizRatings
