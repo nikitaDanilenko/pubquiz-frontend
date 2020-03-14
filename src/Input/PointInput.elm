@@ -2,14 +2,39 @@ module Input.PointInput exposing (..)
 
 import Basics.Extra exposing (flip)
 import Common.Authentication exposing (Authentication, encodeWithSignature)
-import Common.Constants exposing (getLabelsApi, getQuizRatingsApi, mkPath, quizIdParam, quizRatingsParam, sheetPDFPrefix, updateQuizRatingsApi)
+import Common.Constants
+    exposing
+        ( getLabelsApi
+        , getQuizRatingsApi
+        , mkPath
+        , quizIdParam
+        , quizRatingsParam
+        , sheetPDFPrefix
+        , updateQuizRatingsApi
+        )
 import Common.QuizRatings as QuizRatings
 import Common.RoundRating as RoundRating
-import Common.Types exposing (DbQuizId, Header, Labels, QuizInfo, QuizRatings, QuizSettings, RoundNumber, RoundRating, TeamNumber, UserName, jsonDecLabels, jsonDecQuizRatings, jsonEncDbQuizId, jsonEncQuizRatings)
+import Common.Types
+    exposing
+        ( DbQuizId
+        , Header
+        , Labels
+        , QuizInfo
+        , QuizRatings
+        , QuizSettings
+        , RoundNumber
+        , RoundRating
+        , TeamNumber
+        , UserName
+        , jsonDecLabels
+        , jsonDecQuizRatings
+        , jsonEncDbQuizId
+        , jsonEncQuizRatings
+        )
 import Common.Util exposing (adjustToSize, getMsg)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Html exposing (Html, a, button, div, input, label, text)
-import Html.Attributes exposing (class, for, href, id, step, target, type_, value)
+import Html.Attributes exposing (class, for, href, id, min, step, target, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Input.Model exposing (ErrorOr)
