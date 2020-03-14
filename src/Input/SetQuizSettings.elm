@@ -17,26 +17,62 @@ import Input.QuizValues as QuizValues
 import Input.RequestUtils exposing (encodeWithSignature)
 
 
-type alias Model =
+type alias Base =
     { quizIdentifier : QuizIdentifier
     , quizSettings : QuizSettings
     , authentication : Authentication
     , feedback : String
-    , usage : UseAs
     }
 
 
-updateQuizSettings : Model -> QuizSettings -> Model
+type alias CreateModel =
+    { base : Base
+    }
+
+
+updateCreateBase : CreateModel -> Base -> CreateModel
+updateCreateBase model base =
+    { model | base = base }
+
+
+type alias UpdateModel =
+    { quizSettings : QuizSettings
+    , quizInfo : QuizInfo
+    , authentication : Authentication
+    , feedback : String
+    }
+
+
+baseOfUpdate : UpdateModel -> Base
+baseOfUpdate updateModel =
+    { quizIdentifier = updateModel.quizInfo.quizIdentifier
+    , quizSettings = updateModel.quizSettings
+    , authentication = updateModel.authentication
+    , feedback = updateModel.feedback
+    }
+
+
+updateUpdateBase : UpdateModel -> Base -> UpdateModel
+updateUpdateBase model base =
+    { model
+        | quizSettings = base.quizSettings
+        , quizInfo = Copy.updateQuizInfoQuizIdentifier model.quizInfo base.quizIdentifier
+        , authentication = base.authentication
+        , feedback = base.feedback
+    }
+
+
+updateQuizSettings : Base -> QuizSettings -> Base
 updateQuizSettings model quizSettings =
     { model | quizSettings = quizSettings }
 
 
-updateQuizIdentifier : Model -> QuizIdentifier -> Model
-updateQuizIdentifier model quizIdentifier =
-    { model | quizIdentifier = quizIdentifier }
+updateQuizIdentifier : Base -> QuizIdentifier -> Base
+updateQuizIdentifier base quizIdentifier =
+    { base | quizIdentifier = quizIdentifier }
 
 
-updateFeedback : Model -> String -> Model
+updateFeedback : Base -> String -> Base
 updateFeedback model feedback =
     { model | feedback = feedback }
 
@@ -49,138 +85,131 @@ type Msg
     | Created (ErrorOr QuizInfo)
 
 
-type InitialiseAs
-    = CreateInitial
-    | UpdateInitial QuizInfo QuizSettings
+initWith : (Authentication -> model) -> Authentication -> ( model, Cmd Msg )
+initWith initial authentication =
+    ( initial authentication, Cmd.none )
 
 
-type UseAs
-    = CreateUsage
-    | UpdateUsage QuizInfo
-
-
-init : Authentication -> InitialiseAs -> ( Model, Cmd Msg )
-init authentication usage =
-    let
-        ( quizIdentifier, quizSettings, useAs ) =
-            case usage of
-                CreateInitial ->
-                    ( QuizValues.defaultQuizIdentifier, QuizValues.defaultQuizSettings, CreateUsage )
-
-                UpdateInitial quizInfo quizSettings ->
-                    ( quizInfo.quizIdentifier, quizSettings, UpdateUsage quizInfo )
-
-        initialModel =
-            { quizIdentifier = quizIdentifier
-            , quizSettings = quizSettings
-            , authentication = authentication
-            , feedback = ""
-            , usage = useAs
+initCreate : Authentication -> ( CreateModel, Cmd Msg )
+initCreate =
+    initWith
+        (\authentication ->
+            { base =
+                { quizSettings = QuizValues.defaultQuizSettings
+                , quizIdentifier = QuizValues.defaultQuizIdentifier
+                , authentication = authentication
+                , feedback = ""
+                }
             }
-    in
-    ( initialModel, Cmd.none )
+        )
 
 
-view : Model -> Html Msg
-view md =
+initUpdate : Authentication -> QuizInfo -> QuizSettings -> ( UpdateModel, Cmd Msg )
+initUpdate authentication quizInfo quizSettings =
+    initWith
+        (\auth ->
+            { quizSettings = quizSettings
+            , quizInfo = quizInfo
+            , authentication = auth
+            , feedback = ""
+            }
+        )
+        authentication
+
+
+viewWith : (model -> Base) -> String -> model -> Html Msg
+viewWith baseOf commitButtonText md =
     let
         createOnEnter =
             onEnter Commit
-
-        buttonText =
-            case md.usage of
-                CreateUsage ->
-                    "Create"
-
-                UpdateUsage _ ->
-                    "Update"
     in
     div [ id "creatingQuizView" ]
-        (QuizValues.mkCreationForm md.quizSettings createOnEnter md.quizSettings.labels
+        (QuizValues.mkCreationForm (baseOf md).quizSettings createOnEnter (baseOf md).quizSettings.labels
             ++ [ button
                     [ class "button"
                     , onClick Commit
-                    , disabled (not (QuizValues.isValidQuizIdentifier md.quizIdentifier))
+                    , disabled (not (QuizValues.isValidQuizIdentifier (baseOf md).quizIdentifier))
                     ]
-                    [ text buttonText ]
+                    [ text commitButtonText ]
                , button [ class "backButton", onClick Back ] [ text "Back" ]
-               , addFeedbackLabel md.feedback
+               , addFeedbackLabel (baseOf md).feedback
                ]
         )
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+viewCreate : CreateModel -> Html Msg
+viewCreate =
+    viewWith .base "Create"
+
+
+viewUpdate : UpdateModel -> Html Msg
+viewUpdate =
+    viewWith baseOfUpdate "Update"
+
+
+updateWith : (Base -> Cmd Msg) -> Msg -> Base -> ( Base, Cmd Msg )
+updateWith commitCommand msg base =
     case msg of
         Commit ->
-            let
-                command =
-                    case model.usage of
-                        CreateUsage ->
-                            createQuiz model.authentication model.quizIdentifier model.quizSettings
-
-                        UpdateUsage quizInfo ->
-                            updateQuiz model.authentication quizInfo.quizId model.quizIdentifier model.quizSettings
-            in
-            ( model, command )
+            ( base, commitCommand base )
 
         Back ->
-            ( model, Cmd.none )
+            ( base, Cmd.none )
 
         Value valueMsg ->
             let
                 newModel =
                     case valueMsg of
                         QuizValues.LabelsUpdate labelsField string ->
-                            Copy.updateLabelsByField model.quizSettings.labels labelsField string
-                                |> Copy.updateQuizSettingsLabels model.quizSettings
-                                |> updateQuizSettings model
+                            Copy.updateLabelsByField base.quizSettings.labels labelsField string
+                                |> Copy.updateQuizSettingsLabels base.quizSettings
+                                |> updateQuizSettings base
 
                         QuizValues.SetQuizName quizName ->
-                            Copy.updateQuizIdentifierName model.quizIdentifier quizName
-                                |> updateQuizIdentifier model
+                            Copy.updateQuizIdentifierName base.quizIdentifier quizName
+                                |> updateQuizIdentifier base
 
                         QuizValues.SetQuizDate quizDate ->
                             case Date.fromIsoString quizDate of
                                 Ok date ->
-                                    Copy.updateQuizIdentifierDate model.quizIdentifier date
-                                        |> updateQuizIdentifier model
+                                    Copy.updateQuizIdentifierDate base.quizIdentifier date
+                                        |> updateQuizIdentifier base
 
                                 Err _ ->
-                                    model
+                                    base
 
                         QuizValues.SetQuizPlace place ->
-                            Copy.updateQuizIdentifierPlace model.quizIdentifier place
-                                |> updateQuizIdentifier model
+                            Copy.updateQuizIdentifierPlace base.quizIdentifier place
+                                |> updateQuizIdentifier base
 
                         QuizValues.SetRoundsNumber string ->
                             case QuizValues.validatePositiveNatural string of
                                 Just n ->
-                                    Util.adjustToSizeWith (List.repeat n QuizValues.defaultQuestionNumber) model.quizSettings.rounds
-                                        |> Copy.updateQuizSettingsRounds model.quizSettings
-                                        |> updateQuizSettings model
+                                    Util.adjustToSizeWith (List.repeat n QuizValues.defaultQuestionNumber) base.quizSettings.rounds
+                                        |> Copy.updateQuizSettingsRounds base.quizSettings
+                                        |> updateQuizSettings base
 
                                 Nothing ->
-                                    model
+                                    base
 
                         QuizValues.SetTeamsInQuiz string ->
                             case QuizValues.validatePositiveNatural string of
                                 Just n ->
-                                    Copy.updateQuizSettingsNumberOfTeams model.quizSettings n
-                                        |> updateQuizSettings model
+                                    Copy.updateQuizSettingsNumberOfTeams base.quizSettings n
+                                        |> updateQuizSettings base
 
                                 Nothing ->
-                                    model
+                                    base
 
                         QuizValues.SetQuestions int string ->
                             case QuizValues.validatePositiveNatural string of
                                 Just qs ->
-                                    Util.updateIndex int qs model.quizSettings.rounds
-                                        |> Copy.updateQuizSettingsRounds model.quizSettings
-                                        |> updateQuizSettings model
+                                    Util.updateIndex int qs base.quizSettings.rounds
+                                        |> Copy.updateQuizSettingsRounds base.quizSettings
+                                        |> updateQuizSettings base
 
                                 Nothing ->
-                                    model
+                                    base
             in
             ( newModel, Cmd.none )
 
@@ -194,10 +223,28 @@ update msg model =
                         Err error ->
                             errorToString error
             in
-            ( updateFeedback model feedback, Cmd.none )
+            ( updateFeedback base feedback, Cmd.none )
 
         Created _ ->
-            ( model, Cmd.none )
+            ( base, Cmd.none )
+
+
+updateCreate : Msg -> CreateModel -> ( CreateModel, Cmd Msg )
+updateCreate msg createModel =
+    let
+        ( updatedBase, cmd ) =
+            updateWith (\base -> createQuiz base.authentication base.quizIdentifier base.quizSettings) msg createModel.base
+    in
+    ( updatedBase |> updateCreateBase createModel, cmd )
+
+
+updateUpdate : Msg -> UpdateModel -> ( UpdateModel, Cmd Msg )
+updateUpdate msg updateModel =
+    let
+        ( updatedBase, cmd ) =
+            updateWith (\base -> updateQuiz base.authentication updateModel.quizInfo.quizId base.quizIdentifier base.quizSettings) msg (baseOfUpdate updateModel)
+    in
+    ( updatedBase |> updateUpdateBase updateModel, cmd )
 
 
 createQuiz : Authentication -> QuizIdentifier -> QuizSettings -> Cmd Msg
