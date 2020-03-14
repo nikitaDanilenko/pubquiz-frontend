@@ -84,25 +84,25 @@ view model =
         currentView =
             case model.page of
                 Login login ->
-                    Login.view login
+                    Html.map LoginMsg (Login.view login)
 
                 CreateUser createUser ->
-                    CreateUser.view createUser
+                    Html.map CreateUserMsg (CreateUser.view createUser)
 
                 Selection selection ->
-                    Selection.view selection
+                    Html.map SelectionMsg (Selection.view selection)
 
                 ConfirmLock confirmLock ->
-                    ConfirmLock.view confirmLock
+                    Html.map ConfirmLockMsg (ConfirmLock.view confirmLock)
 
                 PointInput pointInput ->
-                    PointInput.view pointInput
+                    Html.map PointInputMsg (PointInput.view pointInput)
 
                 CreateQuiz createQuiz ->
-                    SetQuizSettings.viewCreate createQuiz
+                    Html.map CreateQuizMsg (SetQuizSettings.viewCreate createQuiz)
 
                 UpdateQuiz updateQuiz ->
-                    SetQuizSettings.viewUpdate updateQuiz
+                    Html.map UpdateQuizMsg (SetQuizSettings.viewUpdate updateQuiz)
     in
     wrapView currentView model
 
