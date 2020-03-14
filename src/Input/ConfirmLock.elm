@@ -18,6 +18,8 @@ type alias Model =
     , feedback : String
     }
 
+updateFeedback : Model -> String -> Model
+updateFeedback model feedback = { model | feedback = feedback }
 
 type Msg
     = Back
