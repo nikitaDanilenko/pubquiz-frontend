@@ -34,7 +34,7 @@ import Common.Types
 import Common.Util exposing (adjustToSize, getMsg)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Html exposing (Html, a, button, div, input, label, text)
-import Html.Attributes exposing (class, for, href, id, min, step, target, type_, value)
+import Html.Attributes exposing (class, for, href, id, min, max, step, target, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Input.Model exposing (ErrorOr)
