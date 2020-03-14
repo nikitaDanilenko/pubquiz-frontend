@@ -1,10 +1,46 @@
-module Input.SetQuizSettings exposing (..)
+module Input.SetQuizSettings exposing
+    ( CreateModel
+    , Msg(..)
+    , UpdateModel
+    , initCreate
+    , initUpdate
+    , updateCreate
+    , updateCreateBase
+    , updateFeedback
+    , updateQuizIdentifier
+    , updateQuizSettings
+    , updateUpdate
+    , updateUpdateBase
+    , viewCreate
+    , viewUpdate
+    )
 
 import Common.Authentication exposing (Authentication)
 import Common.ConnectionUtil exposing (addFeedbackLabel, encodeBody, errorToString)
-import Common.Constants exposing (actionParam, newApi, quizIdParam, quizIdentifierParam, quizSettingsParam, updateQuizApi)
+import Common.Constants
+    exposing
+        ( actionParam
+        , newApi
+        , quizIdParam
+        , quizIdentifierParam
+        , quizSettingsParam
+        , updateQuizApi
+        )
 import Common.Copy as Copy
-import Common.Types exposing (Action(..), DbQuizId, Labels, QuizIdentifier, QuizInfo, QuizSettings, jsonDecQuizInfo, jsonEncAction, jsonEncDbQuizId, jsonEncQuizIdentifier, jsonEncQuizSettings)
+import Common.Types
+    exposing
+        ( Action(..)
+        , DbQuizId
+        , Labels
+        , QuizIdentifier
+        , QuizInfo
+        , QuizSettings
+        , jsonDecQuizInfo
+        , jsonEncAction
+        , jsonEncDbQuizId
+        , jsonEncQuizIdentifier
+        , jsonEncQuizSettings
+        )
 import Common.Util as Util
 import Date
 import Html exposing (Html, button, div, text)
