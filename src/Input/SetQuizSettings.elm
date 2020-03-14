@@ -20,6 +20,7 @@ type alias Model =
     , quizSettings : QuizSettings
     , authentication : Authentication
     , feedback : String
+    , usage : UsagePlain
     }
 
 
@@ -54,17 +55,18 @@ type Usage
     = Create
     | Update QuizIdentifier QuizSettings
 
+type UsagePlain = CreatePlain | UpdatePlain
 
 init : Authentication -> Usage -> ( Model, Cmd Msg )
 init authentication usage =
     let
-        (quizIdentifier, quizSettings) =
+        (quizIdentifier, quizSettings, usagePlain) =
           case usage of
-            Create -> (QuizValues.defaultQuizIdentifier, QuizValues.defaultQuizSettings)
+            Create -> (QuizValues.defaultQuizIdentifier, QuizValues.defaultQuizSettings, CreatePlain)
 
 
             Update quizIdentifier quizSettings ->
-              (quizIdentifier, quizSettings)
+              (quizIdentifier, quizSettings, UpdatePlain)
 
 
         initialModel =
@@ -72,6 +74,7 @@ init authentication usage =
             , quizSettings = quizSettings
             , authentication = authentication
             , feedback = ""
+            , usage = usagePlain
             }
 
     in
@@ -83,6 +86,13 @@ view md =
     let
         createOnEnter =
             onEnter Commit
+        buttonText =
+          case md.usage of
+            CreatePlain -> "Create"
+
+
+            UpdatePlain -> "Update"
+
     in
     div [ id "creatingQuizView" ]
         (QuizValues.mkCreationForm md.quizSettings createOnEnter md.quizSettings.labels
@@ -91,7 +101,7 @@ view md =
                     , onClick Commit
                     , disabled (not (QuizValues.isValidQuizIdentifier md.quizIdentifier))
                     ]
-                    [ text "Create" ]
+                    [ text buttonText ]
                , button [ class "backButton", onClick Back ] [ text "Back" ]
                , addFeedbackLabel md.feedback
                ]
