@@ -104,7 +104,7 @@ view model =
                 UpdateQuiz updateQuiz ->
                     Html.map UpdateQuizMsg (SetQuizSettings.viewUpdate updateQuiz)
     in
-    wrapView currentView model
+    wrapView currentView
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -285,9 +285,9 @@ stepUpdateQuiz model ( updateQuiz, cmd ) =
     ( updatePage model (UpdateQuiz updateQuiz), Cmd.map UpdateQuizMsg cmd )
 
 
-wrapView : (model -> Html Msg) -> model -> Html Msg
-wrapView viewOf model =
+wrapView : Html Msg -> Html Msg
+wrapView innerView =
     div [ id "mainPage" ]
         [ node "link" [ rel "stylesheet", type_ "text/css", href "style.css" ] []
-        , viewOf model
+        , innerView
         ]
