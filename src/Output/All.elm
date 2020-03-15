@@ -1,9 +1,9 @@
 module Output.All exposing (..)
 
-import Common.WireUtil exposing (linkButton)
 import Common.Constants exposing (quizIdParam)
 import Common.Types exposing (Labels, QuizInfo, TeamQuery)
-import Common.Util as Util exposing (getAllWith)
+import Common.Util as Util exposing (ErrorOr, getAllWith)
+import Common.WireUtil exposing (linkButton)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class, id, value)
 import Input.Model exposing (ErrorOr)

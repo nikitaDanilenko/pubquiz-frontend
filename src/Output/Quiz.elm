@@ -1,15 +1,14 @@
 module Output.Quiz exposing (Model, Msg, init, update, view)
 
 import Chartjs.Chart exposing (chart)
-import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, linkButton, useOrFetchWith)
 import Common.Constants exposing (quizIdParam, teamCodeParam, teamNumberParam)
 import Common.QuizRatings as QuizRatings
 import Common.Ranking exposing (RoundRankingPerTeam, RoundRankings, RoundWinner, TeamsRanking, rankingToPlacement, ratingsToRankings, roundRankingsToRoundWinners)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamQuery)
-import Common.Util as Util
+import Common.Util as Util exposing (ErrorOr)
+import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, linkButton, useOrFetchWith)
 import Html exposing (Html, div, label, table, td, text, tr)
 import Html.Attributes exposing (class, for, id, value)
-import Input.Model exposing (ErrorOr)
 import Input.QuizValues as QuizValues
 import List.Extra exposing (maximumBy)
 import Output.Charts as Charts

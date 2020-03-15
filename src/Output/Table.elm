@@ -1,13 +1,13 @@
 module Output.Table exposing (Model, Msg, init, update, view)
 
 import Color.Convert
-import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, linkButton, useOrFetchWith)
 import Common.Constants exposing (quizIdParam, teamQueryParam, teamTableApi)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine, TeamQuery, TeamTable, TeamTableInfo, jsonDecTeamTableInfo, jsonEncTeamQuery)
-import Common.Util as Util exposing (getMsgWith)
+import Common.Util as Util exposing (ErrorOr, getMsgWith)
+import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, linkButton, useOrFetchWith)
 import Html exposing (Html, div, h1, label, table, td, text, th, tr)
 import Html.Attributes exposing (class, for, id, style, value)
-import Input.Model as Input exposing (ErrorOr)
+import Input.QuizValues as QuizValues
 import List.Extra
 import Output.Colors exposing (mkColors)
 import Output.OutputUtil exposing (fragmentUrl)
@@ -77,7 +77,7 @@ updateTeamTableInfoSet status b =
 
 init : Maybe Labels -> Maybe QuizInfo -> TeamQuery -> ( Model, Cmd Msg )
 init mLabels mQuizInfo teamQuery =
-    ( { labels = Maybe.withDefault Input.defaultLabels mLabels
+    ( { labels = Maybe.withDefault QuizValues.defaultLabels mLabels
       , teamQuery = teamQuery
       , teamTableInfo =
             { teamTable = []
@@ -85,7 +85,7 @@ init mLabels mQuizInfo teamQuery =
             , teamTableInfoNumberOfTeams = 0
             , teamTableInfoTeamNumber = 0
             }
-      , quizInfo = Maybe.withDefault Input.defaultQuizInfo mQuizInfo
+      , quizInfo = Maybe.withDefault QuizValues.defaultQuizInfo mQuizInfo
       , status =
             { teamTableInfoSet = False
             , quizInfoSet = Util.isDefined mQuizInfo
