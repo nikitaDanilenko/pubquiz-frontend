@@ -13,6 +13,7 @@ import Common.Constants
         , updateQuizRatingsApi
         )
 import Common.QuizRatings as QuizRatings
+import Common.Ranking exposing (ratingsToRankings)
 import Common.RoundRating as RoundRating
 import Common.Types
     exposing
@@ -32,7 +33,7 @@ import Common.Types
         , jsonEncQuizRatings
         )
 import Common.Util exposing (ErrorOr, adjustToSize, getMsg)
-import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
+import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString, mkPlacementTables)
 import Html exposing (Html, a, button, div, input, label, text)
 import Html.Attributes exposing (class, for, href, id, max, min, step, target, type_, value)
 import Html.Events exposing (onClick, onInput)
@@ -145,6 +146,9 @@ view model =
 
         quizRatings =
             model.quizRatings
+
+        rankings =
+          ratingsToRankings quizRatings
     in
     if not (hasFinishedLoading model.status) then
         div [] []
@@ -190,6 +194,7 @@ view model =
                    -- todo: Adjust this path using a proper REST request
                    , mkLinkToSheet "mainGraphPage" "View main graph page" ""
                    , addFeedbackLabel model.feedback
+                   , div [ id "pointInputRankings" ] (mkPlacementTables rankings model.labels)
                    ]
             )
 
