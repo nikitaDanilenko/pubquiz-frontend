@@ -444,7 +444,7 @@ mkRoundForm rn gs rr =
                             ]
                         ]
                 )
-                (adjustToSize gs rr.points)
+                (adjustToSize gs (List.sortBy .teamNumber rr.points))
         )
 
 
