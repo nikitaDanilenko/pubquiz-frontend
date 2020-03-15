@@ -1,12 +1,31 @@
-module Common.WireUtil exposing (..)
+module Common.WireUtil exposing
+    ( RestKey
+    , RestParam
+    , RestValue
+    , SessionKey
+    , User
+    , addFeedbackLabel
+    , encodeBody
+    , errorToString
+    , getLabelsWith
+    , getQuizInfoWith
+    , getQuizRatingsWith
+    , linkButton
+    , mkJSONParams
+    , mkParams
+    , mkPlacementTables
+    , useOrFetchWith
+    )
 
 import Common.Constants exposing (getLabelsApi, getQuizInfoApi, getQuizRatingsApi)
-import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings)
+import Common.Ranking exposing (RoundRankings, RoundWinner, TeamsRanking, rankingToPlacement, roundRankingsToRoundWinners)
+import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, Ratings, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings)
 import Common.Util as Util exposing (ErrorOr, getMsg)
-import Html exposing (Attribute, Html, div, form, input, label, text)
+import Html exposing (Attribute, Html, div, form, input, label, table, td, text, tr)
 import Html.Attributes exposing (action, for, id, type_)
 import Http exposing (Error(..))
 import Json.Encode as Encode exposing (encode)
+import List.Extra exposing (maximumBy)
 import Url.Builder
 
 
@@ -98,3 +117,86 @@ errorToString err =
 
         BadBody str ->
             String.concat [ "Bad body: ", str ]
+
+
+mkPlacementTables : { sortedRatings : Ratings, perRound : RoundRankings, cumulative : RoundRankings } -> Labels -> List (Html msg)
+mkPlacementTables rankings labels =
+    [ mkPlacements rankings.cumulative labels.placementLabel labels.placeLabel labels.pointsLabel
+    , mkRoundWinners rankings.perRound labels.roundWinnerLabel labels.roundLabel labels.pointsLabel
+    ]
+
+
+mkPlacements : RoundRankings -> String -> String -> String -> Html msg
+mkPlacements rrs wordForPlacement wordForPlace wordForPoints =
+    let
+        zeroRating =
+            ( 1, { teamNumber = 1, rating = 0 } )
+
+        findCurrent =
+            .teamRatings >> maximumBy Tuple.first >> Maybe.withDefault zeroRating >> Tuple.second
+
+        currentRanking =
+            List.map (\perTeam -> { teamName = perTeam.teamName, teamRating = findCurrent perTeam }) rrs
+
+        placement =
+            rankingToPlacement currentRanking
+    in
+    div [ id "placements" ]
+        [ label [ for "placementsLabel" ] [ text wordForPlacement ]
+        , table [ id "placementsTable" ]
+            (List.map (mkPlacementsTableLine wordForPlace wordForPoints) placement)
+        ]
+
+
+mkPlacementsTableLine : String -> String -> TeamsRanking -> Html msg
+mkPlacementsTableLine wordForPlace wordForPoints teamsRanking =
+    tr []
+        [ td []
+            [ text
+                (String.concat
+                    [ String.join " "
+                        [ wordForPlace
+                        , String.fromInt teamsRanking.position
+                        , String.concat [ "(", String.fromFloat teamsRanking.points, " ", wordForPoints, ")" ]
+                        ]
+                    , ":"
+                    ]
+                )
+            ]
+        , td []
+            [ text (String.join ", " teamsRanking.teamNames) ]
+        ]
+
+
+mkRoundWinners : RoundRankings -> String -> String -> String -> Html msg
+mkRoundWinners rr wordForRoundWinner wordForRound wordForPoints =
+    let
+        roundWinners =
+            roundRankingsToRoundWinners rr
+    in
+    div [ id "roundWinners" ]
+        [ label [ for "roundWinnersLabel" ] [ text wordForRoundWinner ]
+        , table [ id "roundWinnersTable" ]
+            (List.map (mkRoundWinnersTableLine wordForRound wordForPoints) roundWinners)
+        ]
+
+
+mkRoundWinnersTableLine : String -> String -> RoundWinner -> Html msg
+mkRoundWinnersTableLine wordForRound wordForPoints rw =
+    tr []
+        [ td []
+            [ text
+                (String.concat
+                    [ wordForRound
+                    , " "
+                    , String.fromInt rw.roundNumber
+                    , " ("
+                    , String.fromFloat rw.points
+                    , " "
+                    , wordForPoints
+                    , "):"
+                    ]
+                )
+            ]
+        , td [] [ text (String.join ", " rw.teamNames) ]
+        ]

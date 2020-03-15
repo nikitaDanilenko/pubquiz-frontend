@@ -3,14 +3,13 @@ module Output.Quiz exposing (Model, Msg, init, update, view)
 import Chartjs.Chart exposing (chart)
 import Common.Constants exposing (quizIdParam, teamCodeParam, teamNumberParam)
 import Common.QuizRatings as QuizRatings
-import Common.Ranking exposing (RoundRankingPerTeam, RoundRankings, RoundWinner, TeamsRanking, rankingToPlacement, ratingsToRankings, roundRankingsToRoundWinners)
+import Common.Ranking exposing (RoundRankingPerTeam, RoundRankings, RoundWinner, TeamsRanking, ratingsToRankings)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamQuery)
 import Common.Util as Util exposing (ErrorOr)
-import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, linkButton, useOrFetchWith)
-import Html exposing (Html, div, label, table, td, text, tr)
+import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, linkButton, mkPlacementTables, useOrFetchWith)
+import Html exposing (Html, div, label, text)
 import Html.Attributes exposing (class, for, id, value)
 import Input.QuizValues as QuizValues
-import List.Extra exposing (maximumBy)
 import Output.Charts as Charts
 import Output.Colors exposing (mkColors)
 import Output.OutputUtil exposing (fragmentUrl, mkFullQuizName)
@@ -144,10 +143,7 @@ view model =
         in
         div [ id "quizView" ]
             (div [ id "quizTitle" ] [ label [ for "quizTitleLabel" ] [ text (mkFullQuizName model.quizInfo.quizIdentifier) ] ]
-                :: div [ id "rankings" ]
-                    [ mkPlacements rankings.cumulative model.labels.placementLabel model.labels.placeLabel model.labels.pointsLabel
-                    , mkRoundWinners rankings.perRound model.labels.roundWinnerLabel model.labels.roundLabel model.labels.pointsLabel
-                    ]
+                :: div [ id "rankings" ] (mkPlacementTables rankings model.labels)
                 :: div [ id "charts" ]
                     [ div [ id "cumulativeChart" ]
                         [ chart 800 600 cumulativeChart ]
@@ -181,82 +177,6 @@ update msg model =
                     Util.foldResult model (updateQuizInfo model) quizInfoCandidate
     in
     ( newModel, Cmd.none )
-
-
-mkPlacements : RoundRankings -> String -> String -> String -> Html Msg
-mkPlacements rrs wordForPlacement wordForPlace wordForPoints =
-    let
-        zeroRating =
-            ( 1, { teamNumber = 1, rating = 0 } )
-
-        findCurrent =
-            .teamRatings >> maximumBy Tuple.first >> Maybe.withDefault zeroRating >> Tuple.second
-
-        currentRanking =
-            List.map (\perTeam -> { teamName = perTeam.teamName, teamRating = findCurrent perTeam }) rrs
-
-        placement =
-            rankingToPlacement currentRanking
-    in
-    div [ id "placements" ]
-        [ label [ for "placementsLabel" ] [ text wordForPlacement ]
-        , table [ id "placementsTable" ]
-            (List.map (mkPlacementsTableLine wordForPlace wordForPoints) placement)
-        ]
-
-
-mkPlacementsTableLine : String -> String -> TeamsRanking -> Html Msg
-mkPlacementsTableLine wordForPlace wordForPoints teamsRanking =
-    tr []
-        [ td []
-            [ text
-                (String.concat
-                    [ String.join " "
-                        [ wordForPlace
-                        , String.fromInt teamsRanking.position
-                        , String.concat [ "(", String.fromFloat teamsRanking.points, " ", wordForPoints, ")" ]
-                        ]
-                    , ":"
-                    ]
-                )
-            ]
-        , td []
-            [ text (String.join ", " teamsRanking.teamNames) ]
-        ]
-
-
-mkRoundWinners : RoundRankings -> String -> String -> String -> Html Msg
-mkRoundWinners rr wordForRoundWinner wordForRound wordForPoints =
-    let
-        roundWinners =
-            roundRankingsToRoundWinners rr
-    in
-    div [ id "roundWinners" ]
-        [ label [ for "roundWinnersLabel" ] [ text wordForRoundWinner ]
-        , table [ id "roundWinnersTable" ]
-            (List.map (mkRoundWinnersTableLine wordForRound wordForPoints) roundWinners)
-        ]
-
-
-mkRoundWinnersTableLine : String -> String -> RoundWinner -> Html Msg
-mkRoundWinnersTableLine wordForRound wordForPoints rw =
-    tr []
-        [ td []
-            [ text
-                (String.concat
-                    [ wordForRound
-                    , " "
-                    , String.fromInt rw.roundNumber
-                    , " ("
-                    , String.fromFloat rw.points
-                    , " "
-                    , wordForPoints
-                    , "):"
-                    ]
-                )
-            ]
-        , td [] [ text (String.join ", " rw.teamNames) ]
-        ]
 
 
 mkTeamQueryLink : TeamQuery -> String

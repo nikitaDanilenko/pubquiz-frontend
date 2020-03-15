@@ -1,6 +1,6 @@
 module Common.Ranking exposing (..)
 
-import Common.Types exposing (Header, Ratings, RoundNumber, TeamName, TeamNumber, TeamRating)
+import Common.Types exposing (Header, QuizRatings, Ratings, RoundNumber, TeamName, TeamNumber, TeamRating)
 import Common.Util as Util
 import List.Extra exposing (maximumBy, scanl, transpose)
 
@@ -21,16 +21,16 @@ type alias RoundRankings =
     List RoundRankingPerTeam
 
 
-ratingsToRankings : Ratings -> Header -> { sortedRatings : Ratings, perRound : RoundRankings, cumulative : RoundRankings }
-ratingsToRankings ratings header =
+ratingsToRankings : QuizRatings -> { sortedRatings : Ratings, perRound : RoundRankings, cumulative : RoundRankings }
+ratingsToRankings quizRatings =
     let
         sortedRatings =
-            ratings
+            quizRatings.ratings
                 |> List.sortBy Tuple.first
                 |> List.map (Tuple.mapSecond (\tr -> { tr | points = List.sortBy .teamNumber tr.points }))
 
         sortedHeader =
-            List.sortBy .teamInfoNumber header
+            List.sortBy .teamInfoNumber quizRatings.header
 
         rearranged =
             transpose (List.map (\( rn, rat ) -> rat.points |> List.sortBy .teamNumber |> List.map (\x -> ( rn, x ))) sortedRatings)
