@@ -4,13 +4,13 @@ import Basics.Extra exposing (flip)
 import Common.Authentication exposing (Authentication, encodeWithSignature)
 import Common.Constants exposing (newUserApi, userCreationParam)
 import Common.Types exposing (jsonEncUserCreation)
+import Common.Util exposing (ErrorOr)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Html exposing (Html, button, div, input, label, text)
 import Html.Attributes exposing (class, disabled, for, id, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Html.Events.Extra exposing (onEnter)
 import Http
-import Input.Model exposing (ErrorOr)
 import Input.NewUser as NewUser exposing (NewUser, NewUserField(..))
 
 

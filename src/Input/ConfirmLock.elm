@@ -1,14 +1,14 @@
 module Input.ConfirmLock exposing (..)
 
 import Common.Authentication exposing (Authentication, encodeWithSignature)
-import Common.WireUtil exposing (encodeBody, errorToString)
 import Common.Constants exposing (actionParam, lockApi, quizIdParam)
 import Common.Types exposing (Action(..), DbQuizId, QuizInfo, jsonEncAction, jsonEncDbQuizId)
+import Common.Util exposing (ErrorOr)
+import Common.WireUtil exposing (encodeBody, errorToString)
 import Html exposing (Html, button, div, label, text)
 import Html.Attributes exposing (class, for, id)
 import Html.Events exposing (onClick)
 import Http
-import Input.Model exposing (ErrorOr)
 
 
 type alias Model =
@@ -17,8 +17,11 @@ type alias Model =
     , feedback : String
     }
 
+
 updateFeedback : Model -> String -> Model
-updateFeedback model feedback = { model | feedback = feedback }
+updateFeedback model feedback =
+    { model | feedback = feedback }
+
 
 type Msg
     = Back
@@ -26,9 +29,9 @@ type Msg
     | Locked (ErrorOr ())
 
 
-init : QuizInfo -> Authentication -> (Model, Cmd Msg)
+init : QuizInfo -> Authentication -> ( Model, Cmd Msg )
 init quizInfo authentication =
-    ({ quizInfo = quizInfo, authentication = authentication, feedback = "" }, Cmd.none)
+    ( { quizInfo = quizInfo, authentication = authentication, feedback = "" }, Cmd.none )
 
 
 view : Model -> Html Msg

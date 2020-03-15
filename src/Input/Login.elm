@@ -2,13 +2,13 @@ module Input.Login exposing (..)
 
 import Common.Constants exposing (loginApi, passwordParam, userParam)
 import Common.Types exposing (Password, UserName, jsonDecUserHash, jsonEncPassword, jsonEncUserName)
+import Common.Util exposing (ErrorOr)
 import Common.WireUtil exposing (SessionKey, addFeedbackLabel, encodeBody, mkJSONParams)
 import Html exposing (Html, button, div, input, label, text)
 import Html.Attributes exposing (autocomplete, class, for, id, type_)
 import Html.Events exposing (onClick, onInput)
 import Html.Events.Extra exposing (onEnter)
 import Http
-import Input.Model exposing (ErrorOr)
 
 
 type alias Model =

@@ -40,7 +40,7 @@ import Common.Types
         , jsonEncQuizIdentifier
         , jsonEncQuizSettings
         )
-import Common.Util as Util
+import Common.Util as Util exposing (ErrorOr)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Date
 import Html exposing (Html, button, div, text)
@@ -48,7 +48,6 @@ import Html.Attributes exposing (class, disabled, id)
 import Html.Events exposing (onClick)
 import Html.Events.Extra exposing (onEnter)
 import Http
-import Input.Model exposing (ErrorOr)
 import Input.QuizValues as QuizValues
 
 
@@ -210,8 +209,12 @@ updateWith commitCommand msg base =
                                     Copy.updateQuizIdentifierDate base.quizIdentifier date
                                         |> updateQuizIdentifier base
 
-                                Err error -> let _ = Debug.log "dateError" error
-                                    in base
+                                Err error ->
+                                    let
+                                        _ =
+                                            Debug.log "dateError" error
+                                    in
+                                    base
 
                         QuizValues.SetQuizPlace place ->
                             Copy.updateQuizIdentifierPlace base.quizIdentifier place

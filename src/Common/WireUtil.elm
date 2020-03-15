@@ -2,11 +2,10 @@ module Common.WireUtil exposing (..)
 
 import Common.Constants exposing (getLabelsApi, getQuizInfoApi, getQuizRatingsApi)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings)
-import Common.Util as Util exposing (getMsg)
+import Common.Util as Util exposing (ErrorOr, getMsg)
 import Html exposing (Attribute, Html, div, form, input, label, text)
 import Html.Attributes exposing (action, for, id, type_)
 import Http exposing (Error(..))
-import Input.Model exposing (ErrorOr)
 import Json.Encode as Encode exposing (encode)
 import Url.Builder
 

@@ -189,3 +189,5 @@ isDefined m =
 
         Nothing ->
             False
+
+type alias ErrorOr a = Result Error a

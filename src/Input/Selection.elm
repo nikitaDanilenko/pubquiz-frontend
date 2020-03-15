@@ -1,12 +1,11 @@
 module Input.Selection exposing (..)
 
 import Common.Types exposing (DbQuizId, QuizInfo, QuizRatings)
-import Common.Util exposing (getAllWith)
+import Common.Util exposing (ErrorOr, getAllWith)
 import Common.WireUtil exposing (addFeedbackLabel, errorToString)
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
-import Input.Model exposing (ErrorOr)
 
 
 type alias Model =

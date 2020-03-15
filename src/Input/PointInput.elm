@@ -31,13 +31,12 @@ import Common.Types
         , jsonEncDbQuizId
         , jsonEncQuizRatings
         )
-import Common.Util exposing (adjustToSize, getMsg)
+import Common.Util exposing (ErrorOr, adjustToSize, getMsg)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Html exposing (Html, a, button, div, input, label, text)
-import Html.Attributes exposing (class, for, href, id, min, max, step, target, type_, value)
+import Html.Attributes exposing (class, for, href, id, max, min, step, target, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
-import Input.Model exposing (ErrorOr)
 import Input.QuizValues exposing (defaultLabels)
 import Parser exposing (float, int, run)
 
