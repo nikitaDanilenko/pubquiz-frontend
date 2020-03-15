@@ -90,5 +90,6 @@ allApi = mkPath [quizApi, "all"]
 loginApi : String
 loginApi = mkPath [apiLocation, "secrets"]
 
+-- todo: remove the port.
 sheetPDFPrefix : String
-sheetPDFPrefix = String.join "" [ serverLocation, ":", "9876" ]
+sheetPDFPrefix = String.join ":" [ serverLocation, "9876" ]
