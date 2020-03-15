@@ -97,10 +97,6 @@ updateIndex i y =
         )
 
 
-isValidQuizName : String -> Bool
-isValidQuizName n =
-    not (String.isEmpty n)
-
 
 find : (a -> Bool) -> List a -> Maybe a
 find p l =
@@ -135,11 +131,6 @@ getAllWith mkMsg =
         { url = allApi
         , expect = Http.expectJson mkMsg (Decode.list jsonDecQuizInfo)
         }
-
-
-uncurry3 : (a -> b -> c -> d) -> ( a, b, c ) -> d
-uncurry3 f ( a, b, c ) =
-    f a b c
 
 
 intersectWith : (a -> b -> c) -> (x -> Int) -> (x -> a) -> (y -> Int) -> (y -> b) -> List x -> List y -> List c
