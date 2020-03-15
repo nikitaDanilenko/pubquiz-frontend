@@ -61,6 +61,9 @@ otherwise return the prefix of the list with the given length.
 -}
 adjustToSize : Int -> List TeamRating -> List TeamRating
 adjustToSize n =
+  {- todo: The logic is wonky, and should be rethought.
+           In case of removing and adding teams the below implementation is
+           wrong, when the teams drop to one. -}
     adjustToSizeWith (List.indexedMap (\i r -> { teamNumber = 1 + i, rating = r }) (List.repeat n 0))
 
 
