@@ -2,7 +2,7 @@ module Input.QuizValues exposing (..)
 
 import Basics
 import Common.Copy exposing (LabelsField(..))
-import Common.Types exposing (Activity(..), Labels, Place, QuizDate, QuizIdentifier, QuizInfo, QuizName, QuizSettings)
+import Common.Types exposing (Activity(..), Labels, NumberOfQuestions, Place, QuestionsInQuiz, QuestionsInRound, QuizDate, QuizIdentifier, QuizInfo, QuizName, QuizSettings, RoundNumber)
 import Html exposing (Html, div, input, label, text)
 import Html.Attributes exposing (class, for, id, min, placeholder, step, type_, value)
 import Html.Events exposing (onInput)
@@ -80,7 +80,7 @@ mkCreationForm wrapMsg quizIdentifier quizSettings createOnEnter labels =
             , min "1"
             , step "1"
             , createOnEnter
-            , value (String.fromInt (List.length quizSettings.rounds))
+            , value (String.fromInt (List.length quizSettings.questionsInQuiz))
             ]
             []
         ]
@@ -89,7 +89,7 @@ mkCreationForm wrapMsg quizIdentifier quizSettings createOnEnter labels =
             [ text "Questions per round" ]
         ]
     , div [ id "questionArea" ]
-        [ mkQuestionsForm (\i -> SetQuestions i >> wrapMsg) createOnEnter quizSettings.rounds ]
+        [ mkQuestionsForm (\i -> SetQuestions i >> wrapMsg) createOnEnter quizSettings.questionsInQuiz ]
     , div [ id "teamNumberArea" ]
         [ label [ for "teamNumber" ] [ text "Number of teams" ]
         , input
@@ -156,18 +156,18 @@ createIdByField fld =
             "roundWinnerField"
 
 
-mkQuestionsForm : (Int -> String -> msg) -> Html.Attribute msg -> List Int -> Html msg
-mkQuestionsForm updateQuestions createOnEnter rs =
+mkQuestionsForm : (Int -> String -> msg) -> Html.Attribute msg -> QuestionsInQuiz -> Html msg
+mkQuestionsForm updateQuestions createOnEnter questionsInQuiz =
     div [ id "perRound" ]
         (List.concat
-            (List.indexedMap
-                (\i qs ->
+            (List.map
+                (\questionsInRound ->
                     [ div [ class "roundQuestionLine" ]
                         [ label [ class "roundNumber" ]
-                            [ text (String.join " " [ "Round", String.fromInt (1 + i) ]) ]
+                            [ text (String.join " " [ "Round", String.fromInt questionsInRound.questionsInRoundRoundNumber ]) ]
                         , input
-                            [ value (String.fromInt qs)
-                            , onInput (updateQuestions i)
+                            [ value (String.fromInt questionsInRound.questionsInRoundNumberOfQuestions)
+                            , onInput (updateQuestions questionsInRound.questionsInRoundRoundNumber)
                             , class "questionSpinner"
                             , type_ "number"
                             , min "1"
@@ -178,7 +178,7 @@ mkQuestionsForm updateQuestions createOnEnter rs =
                         ]
                     ]
                 )
-                rs
+                (List.sortBy .questionsInRoundRoundNumber questionsInQuiz)
             )
         )
 
@@ -199,10 +199,40 @@ defaultQuizIdentifier =
     , name = ""
     }
 
+mkQuestionsInRound : RoundNumber -> NumberOfQuestions -> QuestionsInRound
+mkQuestionsInRound roundNumber numberOfQuestions =
+  {questionsInRoundRoundNumber = roundNumber, questionsInRoundNumberOfQuestions = numberOfQuestions}
+
+
+defaultQuestionsInQuiz : QuestionsInQuiz
+defaultQuestionsInQuiz =
+    List.indexedMap (\i -> mkQuestionsInRound (1 + i))
+        (List.repeat defaultRoundsNumber defaultQuestionNumber)
+
+
+updateQuestionsInQuizAt : QuestionsInQuiz -> QuestionsInRound -> QuestionsInQuiz
+updateQuestionsInQuizAt questionsInQuiz questionsInRound =
+    List.map
+        (\qir ->
+            if qir.questionsInRoundRoundNumber == questionsInRound.questionsInRoundRoundNumber then
+                questionsInRound
+
+            else
+                qir
+        )
+        questionsInQuiz
+
+adjustToSize : QuestionsInQuiz -> Int -> QuestionsInQuiz
+adjustToSize questionsInQuiz n =
+  let sorted = List.sortBy .questionsInRoundRoundNumber questionsInQuiz
+      length = List.length sorted
+      make = n - length
+      made = List.indexedMap (\i -> mkQuestionsInRound (1 + length + i) ) (List.repeat make defaultQuestionNumber)
+  in List.take n sorted ++ made
 
 defaultQuizSettings : QuizSettings
 defaultQuizSettings =
-    { rounds = defaultRounds
+    { questionsInQuiz = defaultQuestionsInQuiz
     , numberOfTeams = defaultNumberOfTeams
     , labels = defaultLabels
     }
@@ -238,9 +268,9 @@ defaultQuestionNumber =
     8
 
 
-defaultRounds : List Int
-defaultRounds =
-    List.repeat 4 defaultQuestionNumber
+defaultRoundsNumber : Int
+defaultRoundsNumber =
+    4
 
 
 defaultQuizInfo : QuizInfo

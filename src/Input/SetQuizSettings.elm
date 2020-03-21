@@ -15,32 +15,12 @@ module Input.SetQuizSettings exposing
     , viewUpdate
     )
 
+import Basics.Extra exposing (flip)
 import Common.Authentication exposing (Authentication, encodeWithSignature)
-import Common.Constants
-    exposing
-        ( actionParam
-        , newApi
-        , quizIdParam
-        , quizIdentifierParam
-        , quizSettingsParam
-        , updateQuizApi
-        )
+import Common.Constants exposing (actionParam, getQuizSettingsApi, newApi, quizIdParam, quizIdentifierParam, quizSettingsParam, updateQuizApi)
 import Common.Copy as Copy
-import Common.Types
-    exposing
-        ( Action(..)
-        , DbQuizId
-        , Labels
-        , QuizIdentifier
-        , QuizInfo
-        , QuizSettings
-        , jsonDecQuizInfo
-        , jsonEncAction
-        , jsonEncDbQuizId
-        , jsonEncQuizIdentifier
-        , jsonEncQuizSettings
-        )
-import Common.Util as Util exposing (ErrorOr)
+import Common.Types exposing (Action(..), DbQuizId, Labels, QuizIdentifier, QuizInfo, QuizSettings, jsonDecQuizInfo, jsonDecQuizSettings, jsonEncAction, jsonEncDbQuizId, jsonEncQuizIdentifier, jsonEncQuizSettings)
+import Common.Util exposing (ErrorOr, getMsg)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
 import Date
 import Html exposing (Html, button, div, text)
@@ -55,8 +35,34 @@ type alias Base =
     { quizIdentifier : QuizIdentifier
     , quizSettings : QuizSettings
     , authentication : Authentication
+    , status : Status
     , feedback : String
     }
+
+
+type alias Status =
+    { quizSettingsLoaded : Bool
+    }
+
+
+hasFinishedLoading : Status -> Bool
+hasFinishedLoading status =
+    status.quizSettingsLoaded
+
+
+updateStatusQuizSettingsLoaded : Status -> Bool -> Status
+updateStatusQuizSettingsLoaded status b =
+    { status | quizSettingsLoaded = b }
+
+
+loaded : Status
+loaded =
+    { quizSettingsLoaded = True }
+
+
+loading : Status
+loading =
+    { quizSettingsLoaded = True }
 
 
 type alias CreateModel =
@@ -73,6 +79,7 @@ type alias UpdateModel =
     { quizSettings : QuizSettings
     , quizInfo : QuizInfo
     , authentication : Authentication
+    , status : Status
     , feedback : String
     }
 
@@ -82,6 +89,7 @@ baseOfUpdate updateModel =
     { quizIdentifier = updateModel.quizInfo.quizIdentifier
     , quizSettings = updateModel.quizSettings
     , authentication = updateModel.authentication
+    , status = updateModel.status
     , feedback = updateModel.feedback
     }
 
@@ -97,8 +105,8 @@ updateUpdateBase model base =
 
 
 updateQuizSettings : Base -> QuizSettings -> Base
-updateQuizSettings model quizSettings =
-    { model | quizSettings = quizSettings }
+updateQuizSettings base quizSettings =
+    { base | quizSettings = quizSettings }
 
 
 updateQuizIdentifier : Base -> QuizIdentifier -> Base
@@ -107,8 +115,13 @@ updateQuizIdentifier base quizIdentifier =
 
 
 updateFeedback : Base -> String -> Base
-updateFeedback model feedback =
-    { model | feedback = feedback }
+updateFeedback base feedback =
+    { base | feedback = feedback }
+
+
+updateStatus : Base -> Status -> Base
+updateStatus base status =
+    { base | status = status }
 
 
 type Msg
@@ -117,6 +130,7 @@ type Msg
     | Value QuizValues.Msg
     | Updated (ErrorOr ())
     | Created (ErrorOr QuizInfo)
+    | GotQuizSettings (ErrorOr QuizSettings)
 
 
 initWith : (Authentication -> model) -> Authentication -> ( model, Cmd Msg )
@@ -132,23 +146,23 @@ initCreate =
                 { quizSettings = QuizValues.defaultQuizSettings
                 , quizIdentifier = QuizValues.defaultQuizIdentifier
                 , authentication = authentication
+                , status = loaded
                 , feedback = ""
                 }
             }
         )
 
 
-initUpdate : Authentication -> QuizInfo -> QuizSettings -> ( UpdateModel, Cmd Msg )
-initUpdate authentication quizInfo quizSettings =
-    initWith
-        (\auth ->
-            { quizSettings = quizSettings
-            , quizInfo = quizInfo
-            , authentication = auth
-            , feedback = ""
-            }
-        )
-        authentication
+initUpdate : Authentication -> QuizInfo -> ( UpdateModel, Cmd Msg )
+initUpdate authentication quizInfo =
+    ( { quizSettings = QuizValues.defaultQuizSettings
+      , quizInfo = quizInfo
+      , authentication = authentication
+      , status = loading
+      , feedback = ""
+      }
+    , getQuizSettings quizInfo.quizId
+    )
 
 
 viewWith : (model -> Base) -> String -> model -> Html Msg
@@ -157,18 +171,22 @@ viewWith baseOf commitButtonText md =
         createOnEnter =
             onEnter Commit
     in
-    div [ id "creatingQuizView" ]
-        (QuizValues.mkCreationForm Value (baseOf md).quizIdentifier (baseOf md).quizSettings createOnEnter (baseOf md).quizSettings.labels
-            ++ [ button
-                    [ class "button"
-                    , onClick Commit
-                    , disabled (not (QuizValues.isValidQuizIdentifier (baseOf md).quizIdentifier))
-                    ]
-                    [ text commitButtonText ]
-               , button [ class "backButton", onClick Back ] [ text "Back" ]
-               , addFeedbackLabel (baseOf md).feedback
-               ]
-        )
+    if not (hasFinishedLoading (baseOf md).status) then
+        div [] []
+
+    else
+        div [ id "creatingQuizView" ]
+            (QuizValues.mkCreationForm Value (baseOf md).quizIdentifier (baseOf md).quizSettings createOnEnter (baseOf md).quizSettings.labels
+                ++ [ button
+                        [ class "button"
+                        , onClick Commit
+                        , disabled (not (QuizValues.isValidQuizIdentifier (baseOf md).quizIdentifier))
+                        ]
+                        [ text commitButtonText ]
+                   , button [ class "backButton", onClick Back ] [ text "Back" ]
+                   , addFeedbackLabel (baseOf md).feedback
+                   ]
+            )
 
 
 viewCreate : CreateModel -> Html Msg
@@ -210,11 +228,7 @@ updateWith commitCommand msg base =
                                         |> updateQuizIdentifier base
 
                                 Err error ->
-                                    let
-                                        _ =
-                                            Debug.log "dateError" error
-                                    in
-                                    base
+                                    updateFeedback base error
 
                         QuizValues.SetQuizPlace place ->
                             Copy.updateQuizIdentifierPlace base.quizIdentifier place
@@ -223,8 +237,8 @@ updateWith commitCommand msg base =
                         QuizValues.SetRoundsNumber string ->
                             case QuizValues.validatePositiveNatural string of
                                 Just n ->
-                                    Util.adjustToSizeWith (List.repeat n QuizValues.defaultQuestionNumber) base.quizSettings.rounds
-                                        |> Copy.updateQuizSettingsRounds base.quizSettings
+                                    QuizValues.adjustToSize base.quizSettings.questionsInQuiz n
+                                        |> Copy.updateQuizSettingsQuestionsInQuiz base.quizSettings
                                         |> updateQuizSettings base
 
                                 Nothing ->
@@ -242,8 +256,12 @@ updateWith commitCommand msg base =
                         QuizValues.SetQuestions int string ->
                             case QuizValues.validatePositiveNatural string of
                                 Just qs ->
-                                    Util.updateIndex int qs base.quizSettings.rounds
-                                        |> Copy.updateQuizSettingsRounds base.quizSettings
+                                    QuizValues.updateQuestionsInQuizAt
+                                        base.quizSettings.questionsInQuiz
+                                        { questionsInRoundRoundNumber = int
+                                        , questionsInRoundNumberOfQuestions = qs
+                                        }
+                                        |> Copy.updateQuizSettingsQuestionsInQuiz base.quizSettings
                                         |> updateQuizSettings base
 
                                 Nothing ->
@@ -265,6 +283,20 @@ updateWith commitCommand msg base =
 
         Created _ ->
             ( base, Cmd.none )
+
+        GotQuizSettings quizSettingsCandidate ->
+            let
+                newBase =
+                    case quizSettingsCandidate of
+                        Ok quizSettings ->
+                            updateStatusQuizSettingsLoaded base.status True
+                                |> updateStatus base
+                                |> flip updateQuizSettings quizSettings
+
+                        Err error ->
+                            updateFeedback base (errorToString error)
+            in
+            ( newBase, Cmd.none )
 
 
 updateCreate : Msg -> CreateModel -> ( CreateModel, Cmd Msg )
@@ -317,3 +349,8 @@ updateQuiz authentication qid quizIdentifier quizSettings =
         , body = encodeBody params
         , expect = Http.expectWhatever Updated
         }
+
+
+getQuizSettings : DbQuizId -> Cmd Msg
+getQuizSettings =
+    getMsg getQuizSettingsApi GotQuizSettings jsonDecQuizSettings
