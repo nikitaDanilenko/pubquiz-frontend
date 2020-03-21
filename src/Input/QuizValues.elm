@@ -72,7 +72,7 @@ mkCreationForm wrapMsg quizIdentifier quizSettings createOnEnter labels =
     , mkIdentifierPart "quizPlaceDiv" "quizPlace" "Quiz place" "text" "e.g. Cheers" quizIdentifier.place (SetQuizPlace >> wrapMsg)
     , div [ id "roundsNumberDiv" ]
         [ label [ for "roundsNumber" ]
-            [ text "Number of rounds" ]
+            [ text "Number of regular rounds" ]
         , input
             [ onInput (SetRoundsNumber >> wrapMsg)
             , class "roundsSpinner"
