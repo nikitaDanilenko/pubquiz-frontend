@@ -1,6 +1,6 @@
 module Common.Copy exposing (..)
 
-import Common.Types exposing (Activity, DbQuizId, Labels, Place, QuizDate, QuizIdentifier, QuizInfo, QuizName, QuizSettings)
+import Common.Types exposing (Activity, DbQuizId, Labels, Place, QuestionsInQuiz, QuizDate, QuizIdentifier, QuizInfo, QuizName, QuizSettings)
 import Date exposing (Date)
 
 
@@ -86,9 +86,9 @@ updateQuizIdentifierName q n =
     { q | name = n }
 
 
-updateQuizSettingsRounds : QuizSettings -> List Int -> QuizSettings
-updateQuizSettingsRounds qs rs =
-    { qs | rounds = rs }
+updateQuizSettingsQuestionsInQuiz : QuizSettings -> QuestionsInQuiz -> QuizSettings
+updateQuizSettingsQuestionsInQuiz qs questionsInQuiz =
+    { qs | questionsInQuiz = questionsInQuiz }
 
 
 updateQuizSettingsNumberOfTeams : QuizSettings -> Int -> QuizSettings
