@@ -366,22 +366,22 @@ jsonEncCredentials  val =
 
 
 type alias QuizSettings  =
-   { rounds: (List Int)
+   { questionsInQuiz: QuestionsInQuiz
    , numberOfTeams: Int
    , labels: Labels
    }
 
 jsonDecQuizSettings : Json.Decode.Decoder ( QuizSettings )
 jsonDecQuizSettings =
-   Json.Decode.succeed (\prounds pnumberOfTeams plabels -> {rounds = prounds, numberOfTeams = pnumberOfTeams, labels = plabels})
-   |> required "rounds" (Json.Decode.list (Json.Decode.int))
+   Json.Decode.succeed (\pquestionsInQuiz pnumberOfTeams plabels -> {questionsInQuiz = pquestionsInQuiz, numberOfTeams = pnumberOfTeams, labels = plabels})
+   |> required "questionsInQuiz" (jsonDecQuestionsInQuiz)
    |> required "numberOfTeams" (Json.Decode.int)
    |> required "labels" (jsonDecLabels)
 
 jsonEncQuizSettings : QuizSettings -> Value
 jsonEncQuizSettings  val =
    Json.Encode.object
-   [ ("rounds", (Json.Encode.list Json.Encode.int) val.rounds)
+   [ ("questionsInQuiz", jsonEncQuestionsInQuiz val.questionsInQuiz)
    , ("numberOfTeams", Json.Encode.int val.numberOfTeams)
    , ("labels", jsonEncLabels val.labels)
    ]
@@ -716,5 +716,47 @@ jsonEncUserCreation  val =
    Json.Encode.object
    [ ("userCreationUser", jsonEncUserName val.userCreationUser)
    , ("userCreationPassword", jsonEncPassword val.userCreationPassword)
+   ]
+
+
+
+type alias NumberOfQuestions  = Int
+
+jsonDecNumberOfQuestions : Json.Decode.Decoder ( NumberOfQuestions )
+jsonDecNumberOfQuestions =
+    Json.Decode.int
+
+jsonEncNumberOfQuestions : NumberOfQuestions -> Value
+jsonEncNumberOfQuestions  val = Json.Encode.int val
+
+
+
+type alias QuestionsInQuiz  = (List QuestionsInRound)
+
+jsonDecQuestionsInQuiz : Json.Decode.Decoder ( QuestionsInQuiz )
+jsonDecQuestionsInQuiz =
+    Json.Decode.list (jsonDecQuestionsInRound)
+
+jsonEncQuestionsInQuiz : QuestionsInQuiz -> Value
+jsonEncQuestionsInQuiz  val = (Json.Encode.list jsonEncQuestionsInRound) val
+
+
+
+type alias QuestionsInRound  =
+   { questionsInRoundRoundNumber: RoundNumber
+   , questionsInRoundNumberOfQuestions: NumberOfQuestions
+   }
+
+jsonDecQuestionsInRound : Json.Decode.Decoder ( QuestionsInRound )
+jsonDecQuestionsInRound =
+   Json.Decode.succeed (\pquestionsInRoundRoundNumber pquestionsInRoundNumberOfQuestions -> {questionsInRoundRoundNumber = pquestionsInRoundRoundNumber, questionsInRoundNumberOfQuestions = pquestionsInRoundNumberOfQuestions})
+   |> required "questionsInRoundRoundNumber" (jsonDecRoundNumber)
+   |> required "questionsInRoundNumberOfQuestions" (jsonDecNumberOfQuestions)
+
+jsonEncQuestionsInRound : QuestionsInRound -> Value
+jsonEncQuestionsInRound  val =
+   Json.Encode.object
+   [ ("questionsInRoundRoundNumber", jsonEncRoundNumber val.questionsInRoundRoundNumber)
+   , ("questionsInRoundNumberOfQuestions", jsonEncNumberOfQuestions val.questionsInRoundNumberOfQuestions)
    ]
 
