@@ -67,7 +67,7 @@ getRound : RoundNumber -> QuizRatings -> RoundRating
 getRound n q =
     Util.foldMaybe RoundRating.empty Tuple.second (Util.find (\( tn, _ ) -> tn == n) q.ratings)
 
-
+-- todo: check necessity
 arePointsValid : QuizRatings -> Bool
 arePointsValid q =
     List.all (\p -> p |> Tuple.second |> RoundRating.arePointsValid) q.ratings
