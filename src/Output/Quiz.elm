@@ -106,7 +106,7 @@ view model =
     else
         let
             rankings =
-                ratingsToRankings model.quizRatings.ratings model.quizRatings.header
+                ratingsToRankings model.quizRatings
 
             roundLabels =
                 List.map (\( n, _ ) -> String.join " " [ model.labels.roundLabel, String.fromInt n ]) rankings.sortedRatings
