@@ -2,6 +2,7 @@ module Common.Ranking exposing (..)
 
 import Common.Types exposing (Activity(..), Header, QuizRatings, Ratings, RoundNumber, RoundRating, TeamName, TeamNumber, TeamRating)
 import Common.Util as Util
+import Input.QuizValues as QuizValues
 import List.Extra exposing (maximumBy, scanl, transpose)
 
 
@@ -71,7 +72,7 @@ ratingsToRankings quizRatings =
 removeInactive : Header -> List TeamRating -> List TeamRating
 removeInactive sortedHeader teamRatings =
     Util.intersectWith Tuple.pair .teamNumber identity .teamInfoNumber .teamInfoActivity teamRatings sortedHeader
-        |> List.filter (\t -> Tuple.second t == Active)
+        |> List.filter (Tuple.second >> QuizValues.isActive)
         |> List.map Tuple.first
 
 

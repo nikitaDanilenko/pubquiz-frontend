@@ -295,3 +295,12 @@ validatePositiveNatural txt =
 
         _ ->
             Nothing
+
+isActive : Activity -> Bool
+isActive activity =
+  case activity of
+    Active ->
+      True
+
+    Inactive ->
+      False
