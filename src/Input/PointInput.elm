@@ -15,38 +15,21 @@ import Common.Constants
 import Common.QuizRatings as QuizRatings
 import Common.Ranking exposing (ratingsToRankings)
 import Common.RoundRating as RoundRating
-import Common.Types
-    exposing
-        ( DbQuizId
-        , Header
-        , Labels
-        , QuizInfo
-        , QuizRatings
-        , QuizSettings
-        , RoundNumber
-        , RoundRating
-        , TeamNumber
-        , UserName
-        , jsonDecLabels
-        , jsonDecQuizRatings
-        , jsonEncDbQuizId
-        , jsonEncQuizRatings
-        )
+import Common.Types exposing (Activity, DbQuizId, Header, Labels, QuizInfo, QuizRatings, QuizSettings, RoundNumber, RoundRating, TeamInfo, TeamNumber, UserName, jsonDecLabels, jsonDecQuizRatings, jsonEncDbQuizId, jsonEncQuizRatings)
 import Common.Util exposing (ErrorOr, adjustToSize, getMsg)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString, mkPlacementTables)
 import Html exposing (Html, a, button, div, input, label, text)
 import Html.Attributes exposing (class, for, href, id, max, min, step, target, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
-import Input.QuizValues exposing (defaultLabels)
-import Parser exposing (float, int, run)
+import Input.QuizValues as QuizValues exposing (defaultLabels)
+import Parser exposing (float, run)
 
 
 type alias Model =
     { quizInfo : QuizInfo
     , labels : Labels
     , quizRatings : QuizRatings
-    , numberOfTeams : Int
     , authentication : Authentication
     , feedback : String
     , status : Status
@@ -71,11 +54,6 @@ updateFeedback model feedback =
 updateStatus : Model -> Status -> Model
 updateStatus model status =
     { model | status = status }
-
-
-updateNumberOfTeams : Model -> Int -> Model
-updateNumberOfTeams model numberOfTeams =
-    { model | numberOfTeams = numberOfTeams }
 
 
 type alias Status =
@@ -107,8 +85,7 @@ hasFinishedLoading status =
 
 
 type Msg
-    = SetTeamsInQuiz String
-    | AddRound
+    = AddRound
     | EditSettings
     | Back
     | AcknowledgeLock
@@ -117,6 +94,7 @@ type Msg
     | SetTeamName TeamNumber String
     | SetMaxPoints RoundNumber String
     | UpdatePoints RoundNumber TeamNumber String
+    | UpdateTeamActivity TeamNumber Activity
     | GotLabels (ErrorOr Labels)
     | GotQuizRatings (ErrorOr QuizRatings)
 
@@ -126,7 +104,6 @@ init authentication quizInfo =
     ( { quizInfo = quizInfo
       , labels = defaultLabels
       , quizRatings = QuizRatings.empty
-      , numberOfTeams = 0
       , authentication = authentication
       , feedback = ""
       , status = initialStatus
@@ -141,14 +118,16 @@ view model =
         quizName =
             model.quizInfo.quizIdentifier.name
 
-        numberOfTeams =
-            model.numberOfTeams
+        numberOfActiveTeams =
+            model.quizRatings.header
+                |> activeTeams
+                |> List.length
 
         quizRatings =
             model.quizRatings
 
         rankings =
-          ratingsToRankings quizRatings
+            ratingsToRankings quizRatings
     in
     if not (hasFinishedLoading model.status) then
         div [] []
@@ -159,26 +138,15 @@ view model =
                 [ label [ for "editingQuiz" ]
                     [ text (String.join " " [ "Editing", quizName ]) ]
                 ]
-             , div [ id "teamsInQuiz" ]
-                [ label [ for "teamInQuizLabel" ] [ text "Teams in the quiz" ]
-                , input
-                    [ value (String.fromInt numberOfTeams)
-                    , type_ "number"
-                    , min "1"
-                    , step "1"
-                    , max (String.fromInt (QuizRatings.maxNumberOfTeams quizRatings))
-                    , onInput SetTeamsInQuiz
-                    ]
-                    []
-                ]
 
              -- todo: Adjust to set teams inactive.
              , div [ id "teamNames" ]
                 (label [ for "teamNamesLabel" ] [ text "Team names" ]
-                    :: mkTeamNameInput (List.take numberOfTeams quizRatings.header)
+                    :: mkTeamNameInput quizRatings.header
                 )
              ]
-                ++ List.map (\( rn, rr ) -> mkRoundForm rn numberOfTeams rr) quizRatings.ratings
+                -- todo: Change round form so that the name of the team is displayed
+                ++ List.map (\( rn, rr ) -> mkRoundForm rn numberOfActiveTeams rr) quizRatings.ratings
                 ++ [ button [ class "button", onClick AddRound ] [ text "Add round" ]
                    , button [ class "button", onClick EditSettings ] [ text "Edit settings" ]
                    , button [ class "backButton", onClick Back ] [ text "Back" ]
@@ -202,18 +170,6 @@ view model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SetTeamsInQuiz text ->
-            let
-                tu =
-                    processTeamUpdate text model
-
-                newModel =
-                    updateNumberOfTeams model tu.teams
-                        |> flip updateQuizRatings (QuizRatings.adjustTo tu.teams model.quizRatings)
-                        |> flip updateFeedback tu.feedback
-            in
-            ( newModel, Cmd.none )
-
         UpdatePoints rn tn ps ->
             let
                 newPoints =
@@ -229,7 +185,7 @@ update msg model =
         AddRound ->
             let
                 newModel =
-                    QuizRatings.addRound (RoundRating.emptyOfSize model.numberOfTeams) model.quizRatings
+                    QuizRatings.addRound (RoundRating.emptyOfSize (List.length (activeTeams model.quizRatings.header))) model.quizRatings
                         |> updateQuizRatings model
             in
             ( newModel, Cmd.none )
@@ -298,19 +254,8 @@ update msg model =
             case quizRatingsCandidate of
                 Ok quizRatings ->
                     let
-                        estimate =
-                            QuizRatings.numberOfTeams quizRatings
-
-                        clamped =
-                            if estimate == 0 then
-                                model.numberOfTeams
-
-                            else
-                                estimate
-
                         newModel =
-                            updateNumberOfTeams model clamped
-                                |> flip updateQuizRatings quizRatings
+                            updateQuizRatings model quizRatings
                                 |> (\md -> updateQuizRatingsLoaded md.status True |> updateStatus md)
                     in
                     ( newModel, Cmd.none )
@@ -318,33 +263,9 @@ update msg model =
                 Err error ->
                     ( updateFeedback model (errorToString error), Cmd.none )
 
-
-processTeamUpdate : String -> Model -> { teams : Int, feedback : String }
-processTeamUpdate text model =
-    let
-        ( teams, feedback ) =
-            case run int text of
-                Ok n ->
-                    let
-                        maxTeams =
-                            QuizRatings.maxNumberOfTeams model.quizRatings
-                    in
-                    if n <= maxTeams then
-                        ( n, "" )
-
-                    else
-                        ( maxTeams
-                        , String.join " "
-                            [ "Quiz supports only"
-                            , String.fromInt maxTeams
-                            , "teams. Please edit the quiz settings to increase the number of teams."
-                            ]
-                        )
-
-                Err _ ->
-                    ( 0, "Invalid team number. Substituting 0." )
-    in
-    { teams = teams, feedback = feedback }
+        UpdateTeamActivity teamNumber activity ->
+          -- todo: implement this case
+            ( model, Cmd.none )
 
 
 computeNewPoints : RoundNumber -> TeamNumber -> String -> QuizRatings -> { points : Float, feedback : String }
@@ -468,6 +389,11 @@ mkLinkToSheet divId linkText file =
             ]
             [ text linkText ]
         ]
+
+
+activeTeams : Header -> Header
+activeTeams =
+    List.filter (.teamInfoActivity >> QuizValues.isActive)
 
 
 pointInputAttributes : List (Html.Attribute Msg)
