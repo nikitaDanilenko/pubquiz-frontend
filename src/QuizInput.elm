@@ -3,7 +3,6 @@ module QuizInput exposing (main)
 import Basics.Extra exposing (flip)
 import Browser
 import Common.Authentication as Authentication exposing (Authentication)
-import Common.Types exposing (Action(..), Credentials, DbQuizId, Labels, Password, QuizIdentifier, QuizName, QuizRatings, QuizSettings, UserHash, UserName)
 import Common.WireUtil exposing (errorToString)
 import Html exposing (Html, div, node)
 import Html.Attributes exposing (href, id, rel, type_)
@@ -11,7 +10,6 @@ import Input.ConfirmLock as ConfirmLock exposing (Msg(..))
 import Input.CreateUser as CreateUser exposing (Msg(..))
 import Input.Login as Login exposing (Msg(..))
 import Input.PointInput as PointInput exposing (Msg(..))
-import Input.QuizValues as QuizValues
 import Input.Selection as Selection exposing (Msg(..))
 import Input.SetQuizSettings as SetQuizSettings
 
@@ -195,15 +193,7 @@ update msg model =
                             stepSelection model Selection.init
 
                         EditSettings ->
-                            let
-                                quizSettings =
-                                    { -- todo: This is not right - it should be the current value. But where to get it from?
-                                      rounds = QuizValues.defaultRounds
-                                    , numberOfTeams = pointInput.numberOfTeams
-                                    , labels = pointInput.labels
-                                    }
-                            in
-                            stepUpdateQuiz model (SetQuizSettings.initUpdate model.authentication pointInput.quizInfo quizSettings)
+                            stepUpdateQuiz model (SetQuizSettings.initUpdate model.authentication pointInput.quizInfo)
 
                         AcknowledgeLock ->
                             stepConfirmLock model (ConfirmLock.init pointInput.quizInfo model.authentication)
