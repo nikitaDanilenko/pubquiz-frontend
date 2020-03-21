@@ -1,6 +1,6 @@
 module Common.Ranking exposing (..)
 
-import Common.Types exposing (Header, QuizRatings, Ratings, RoundNumber, TeamName, TeamNumber, TeamRating)
+import Common.Types exposing (Activity(..), Header, QuizRatings, Ratings, RoundNumber, RoundRating, TeamName, TeamNumber, TeamRating)
 import Common.Util as Util
 import List.Extra exposing (maximumBy, scanl, transpose)
 
@@ -24,13 +24,23 @@ type alias RoundRankings =
 ratingsToRankings : QuizRatings -> { sortedRatings : Ratings, perRound : RoundRankings, cumulative : RoundRankings }
 ratingsToRankings quizRatings =
     let
+        sortedHeader =
+            List.sortBy .teamInfoNumber quizRatings.header
+
         sortedRatings =
             quizRatings.ratings
                 |> List.sortBy Tuple.first
-                |> List.map (Tuple.mapSecond (\tr -> { tr | points = List.sortBy .teamNumber tr.points }))
-
-        sortedHeader =
-            List.sortBy .teamInfoNumber quizRatings.header
+                |> List.map
+                    (Tuple.mapSecond
+                        (\rr ->
+                            { rr
+                                | points =
+                                    rr.points
+                                        |> List.sortBy .teamNumber
+                                        |> removeInactive sortedHeader
+                            }
+                        )
+                    )
 
         rearranged =
             transpose (List.map (\( rn, rat ) -> rat.points |> List.sortBy .teamNumber |> List.map (\x -> ( rn, x ))) sortedRatings)
@@ -56,6 +66,13 @@ ratingsToRankings quizRatings =
                 sortedHeader
     in
     { sortedRatings = sortedRatings, perRound = roundRankings, cumulative = cumulativeRankings }
+
+
+removeInactive : Header -> List TeamRating -> List TeamRating
+removeInactive sortedHeader teamRatings =
+    Util.intersectWith Tuple.pair .teamNumber identity .teamInfoNumber .teamInfoActivity teamRatings sortedHeader
+        |> List.filter (\t -> Tuple.second t == Active)
+        |> List.map Tuple.first
 
 
 type alias RoundWinner =
