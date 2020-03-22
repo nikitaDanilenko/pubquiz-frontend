@@ -23,7 +23,7 @@ type alias RoundRankings =
     List RoundRankingPerTeam
 
 
-ratingsToRankings : QuizRatings -> { sortedRatings : Ratings, perRound : RoundRankings, cumulative : RoundRankings }
+ratingsToRankings : QuizRatings -> { sortedHeader : Header, sortedRatings : Ratings, perRound : RoundRankings, cumulative : RoundRankings }
 ratingsToRankings quizRatings =
     let
         sortedHeader =
@@ -65,7 +65,7 @@ ratingsToRankings quizRatings =
                 rearranged
                 sortedHeader
     in
-    { sortedRatings = sortedRatings, perRound = roundRankings, cumulative = cumulativeRankings }
+    { sortedHeader = sortedHeader, sortedRatings = sortedRatings, perRound = roundRankings, cumulative = cumulativeRankings }
 
 
 removeInactive : Header -> List TeamRating -> List TeamRating
