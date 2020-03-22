@@ -12,6 +12,7 @@ import Common.Constants
         , sheetPDFPrefix
         , updateQuizRatingsApi
         )
+import Common.Copy exposing (updateHeaderTeamInfo, updateTeamInfoActivity)
 import Common.QuizRatings as QuizRatings
 import Common.Ranking exposing (ratingsToRankings)
 import Common.RoundRating as RoundRating
@@ -19,7 +20,7 @@ import Common.Types exposing (Activity, DbQuizId, Header, Labels, QuizInfo, Quiz
 import Common.Util exposing (ErrorOr, adjustToSize, getMsg)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString, mkPlacementTables)
 import Html exposing (Html, a, button, div, input, label, text)
-import Html.Attributes exposing (class, for, href, id, max, min, step, target, type_, value)
+import Html.Attributes exposing (checked, class, for, href, id, max, min, step, target, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Input.QuizValues as QuizValues exposing (defaultLabels)
@@ -94,7 +95,7 @@ type Msg
     | SetTeamName TeamNumber String
     | SetMaxPoints RoundNumber String
     | UpdatePoints RoundNumber TeamNumber String
-    | UpdateTeamActivity TeamNumber Activity
+    | SwapTeamActivity TeamNumber
     | GotLabels (ErrorOr Labels)
     | GotQuizRatings (ErrorOr QuizRatings)
 
@@ -103,7 +104,7 @@ init : Authentication -> QuizInfo -> ( Model, Cmd Msg )
 init authentication quizInfo =
     ( { quizInfo = quizInfo
       , labels = defaultLabels
-      , quizRatings = QuizRatings.empty
+      , quizRatings = QuizRatings.default
       , authentication = authentication
       , feedback = ""
       , status = initialStatus
@@ -263,9 +264,25 @@ update msg model =
                 Err error ->
                     ( updateFeedback model (errorToString error), Cmd.none )
 
-        UpdateTeamActivity teamNumber activity ->
-          -- todo: implement this case
-            ( model, Cmd.none )
+        SwapTeamActivity teamNumber ->
+            -- This list should always contains exactly one element.
+            let
+                teamInfoList =
+                    List.filter (\ti -> ti.teamInfoNumber == teamNumber) model.quizRatings.header
+
+                newModel =
+                    List.foldr
+                        (\ti md ->
+                            QuizValues.swapActivity ti.teamInfoActivity
+                                |> updateTeamInfoActivity ti
+                                |> updateHeaderTeamInfo md.quizRatings.header
+                                |> QuizRatings.updateHeader md.quizRatings
+                                |> updateQuizRatings md
+                        )
+                        model
+                        teamInfoList
+            in
+            ( newModel, Cmd.none )
 
 
 computeNewPoints : RoundNumber -> TeamNumber -> String -> QuizRatings -> { points : Float, feedback : String }
@@ -309,19 +326,24 @@ computeNewPoints roundNumber teamNumber points quizRatings =
 
 
 mkTeamNameInput : Header -> List (Html Msg)
-mkTeamNameInput h =
-    h
-        |> List.sortBy .teamInfoNumber
-        |> List.map (\ti -> mkSingleTeamNameInput ti.teamInfoNumber ti.teamInfoName)
+mkTeamNameInput =
+    List.sortBy .teamInfoNumber >> List.map mkSingleTeamNameInput
 
 
-mkSingleTeamNameInput : TeamNumber -> String -> Html Msg
-mkSingleTeamNameInput tn name =
+mkSingleTeamNameInput : TeamInfo -> Html Msg
+mkSingleTeamNameInput teamInfo =
     div [ class "teamNameInputArea" ]
-        [ label [ for "teamName" ] [ text (mkTeamNumber tn "Team") ]
+        [ label [ for "teamName" ] [ text (mkTeamNumber teamInfo.teamInfoNumber "Team") ]
         , input
-            [ value name
-            , onInput (SetTeamName tn)
+            [ value teamInfo.teamInfoName
+            , onInput (SetTeamName teamInfo.teamInfoNumber)
+            ]
+            []
+        , label [ for "teamActivity" ] [ text "Active?" ]
+        , input
+            [ type_ "checkbox"
+            , checked (QuizValues.isActive teamInfo.teamInfoActivity)
+            , onClick (SwapTeamActivity teamInfo.teamInfoNumber)
             ]
             []
         ]
