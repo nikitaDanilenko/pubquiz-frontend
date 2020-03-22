@@ -1,5 +1,6 @@
 module Common.Ranking exposing (..)
 
+import Common.RoundRating as RoundRating
 import Common.Types exposing (Activity(..), Header, QuizRatings, Ratings, RoundNumber, RoundRating, TeamName, TeamNumber, TeamRating)
 import Common.Util as Util
 import Input.QuizValues as QuizValues
@@ -34,12 +35,10 @@ ratingsToRankings quizRatings =
                 |> List.map
                     (Tuple.mapSecond
                         (\rr ->
-                            { rr
-                                | points =
-                                    rr.points
-                                        |> List.sortBy .teamNumber
-                                        |> removeInactive sortedHeader
-                            }
+                            rr.points
+                                |> List.sortBy .teamNumber
+                                |> removeInactive sortedHeader
+                                |> RoundRating.updatePoints rr
                         )
                     )
 
