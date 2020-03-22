@@ -219,11 +219,21 @@ updateQuestionsInQuizAt questionsInQuiz questionsInRound =
 
 adjustToSize : QuestionsInQuiz -> Int -> QuestionsInQuiz
 adjustToSize questionsInQuiz n =
-  let sorted = List.sortBy .questionsInRoundRoundNumber questionsInQuiz
-      length = List.length sorted
-      make = n - length
-      made = List.indexedMap (\i -> mkQuestionsInRound (1 + length + i) ) (List.repeat make defaultQuestionNumber)
-  in List.take n sorted ++ made
+    let
+        sorted =
+            List.sortBy .questionsInRoundRoundNumber questionsInQuiz
+
+        length =
+            List.length sorted
+
+        make =
+            n - length
+
+        made =
+            List.indexedMap (\i -> mkQuestionsInRound (1 + length + i)) (List.repeat make defaultQuestionNumber)
+    in
+    List.take n sorted ++ made
+
 
 defaultQuizSettings : QuizSettings
 defaultQuizSettings =
@@ -291,11 +301,22 @@ validatePositiveNatural txt =
         _ ->
             Nothing
 
+
 isActive : Activity -> Bool
 isActive activity =
-  case activity of
-    Active ->
-      True
+    case activity of
+        Active ->
+            True
 
-    Inactive ->
-      False
+        Inactive ->
+            False
+
+
+swapActivity : Activity -> Activity
+swapActivity activity =
+    case activity of
+        Active ->
+            Inactive
+
+        Inactive ->
+            Active
