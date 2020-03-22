@@ -37,19 +37,8 @@ defaultHeader =
 
 update : QuizRatings -> RoundNumber -> TeamNumber -> Float -> QuizRatings
 update quizRatings round team points =
-    let
-        change : RoundNumber -> RoundRating -> RoundRating
-        change rn rr =
-            if rn == round then
-                RoundRating.update team points rr
-
-            else
-                rr
-
-        updatedRatings =
-            List.map (\( rn, rr ) -> ( rn, change rn rr )) quizRatings.ratings
-    in
-    updateQuizRatingsRatings quizRatings updatedRatings
+    updateIf (\( rn, _ ) -> rn == round) (Tuple.mapSecond (RoundRating.update team points)) quizRatings.ratings
+        |> updateQuizRatingsRatings quizRatings
 
 
 updateMax : Int -> Float -> QuizRatings -> QuizRatings
@@ -74,6 +63,7 @@ updateMax rd m quizRatings =
 getRound : RoundNumber -> QuizRatings -> RoundRating
 getRound n q =
     Util.foldMaybe RoundRating.empty Tuple.second (Util.find (\( tn, _ ) -> tn == n) q.ratings)
+
 
 
 -- todo: check empty team names
