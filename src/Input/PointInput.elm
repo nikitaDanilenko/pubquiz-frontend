@@ -1,6 +1,6 @@
 module Input.PointInput exposing (..)
 
-import Basics.Extra exposing (flip)
+import Basics.Extra exposing (flip, uncurry)
 import Common.Authentication exposing (Authentication, encodeWithSignature)
 import Common.Constants
     exposing
@@ -14,10 +14,10 @@ import Common.Constants
         )
 import Common.Copy exposing (updateHeaderTeamInfo, updateTeamInfoActivity)
 import Common.QuizRatings as QuizRatings
-import Common.Ranking exposing (ratingsToRankings)
+import Common.Ranking exposing (NamedTeamRating, ratingsToRankings, removeInactive)
 import Common.RoundRating as RoundRating
 import Common.Types exposing (Activity, DbQuizId, Header, Labels, QuizInfo, QuizRatings, QuizSettings, RoundNumber, RoundRating, TeamInfo, TeamNumber, UserName, jsonDecLabels, jsonDecQuizRatings, jsonEncDbQuizId, jsonEncQuizRatings)
-import Common.Util exposing (ErrorOr, adjustToSize, getMsg)
+import Common.Util exposing (ErrorOr, getMsg)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString, mkPlacementTables)
 import Html exposing (Html, a, button, div, input, label, text)
 import Html.Attributes exposing (checked, class, for, href, id, max, min, step, target, type_, value)
@@ -116,19 +116,11 @@ init authentication quizInfo =
 view : Model -> Html Msg
 view model =
     let
-        quizName =
-            model.quizInfo.quizIdentifier.name
-
-        numberOfActiveTeams =
-            model.quizRatings.header
-                |> activeTeams
-                |> List.length
-
-        quizRatings =
-            model.quizRatings
-
         rankings =
-            ratingsToRankings quizRatings
+            ratingsToRankings model.quizRatings
+
+        namedRatings =
+            List.map (\( rn, roundRating ) -> ( rn, { reachableInRound = roundRating.reachableInRound, points = removeInactive rankings.sortedHeader roundRating.points } )) rankings.sortedRatings
     in
     if not (hasFinishedLoading model.status) then
         div [] []
@@ -137,17 +129,15 @@ view model =
         div [ id "singleQuiz" ]
             ([ div [ id "editingLabel" ]
                 [ label [ for "editingQuiz" ]
-                    [ text (String.join " " [ "Editing", quizName ]) ]
+                    [ text (String.join " " [ "Editing", model.quizInfo.quizIdentifier.name ]) ]
                 ]
-
-             -- todo: Adjust to set teams inactive.
              , div [ id "teamNames" ]
                 (label [ for "teamNamesLabel" ] [ text "Team names" ]
-                    :: mkTeamNameInput quizRatings.header
+                    :: mkTeamNameInput rankings.sortedHeader
                 )
              ]
                 -- todo: Change round form so that the name of the team is displayed
-                ++ List.map (\( rn, rr ) -> mkRoundForm rn numberOfActiveTeams rr) quizRatings.ratings
+                ++ List.map (uncurry mkRoundForm) namedRatings
                 ++ [ button [ class "button", onClick AddRound ] [ text "Add round" ]
                    , button [ class "button", onClick EditSettings ] [ text "Edit settings" ]
                    , button [ class "backButton", onClick Back ] [ text "Back" ]
@@ -354,45 +344,45 @@ mkTeamNumber i wordForTeam =
     String.join " " [ wordForTeam, String.fromInt i ]
 
 
-mkRoundForm : RoundNumber -> Int -> RoundRating -> Html Msg
-mkRoundForm rn gs rr =
+type alias NamedRoundRating =
+    { reachableInRound : Float
+    , points : List NamedTeamRating
+    }
+
+
+mkRoundForm : RoundNumber -> NamedRoundRating -> Html Msg
+mkRoundForm roundNumber sortedNamedRoundRating =
     div [ id "roundPoints" ]
         (label [ class "roundNumber" ]
-            [ text (String.join " " [ "Round", String.fromInt rn ]) ]
+            [ text (String.join " " [ "Round", String.fromInt roundNumber ]) ]
             :: div [ id "maxPointsArea" ]
                 [ label [ class "maxPoints" ] [ text "Obtainable" ]
                 , input
-                    (value (String.fromFloat rr.reachableInRound)
-                        :: onInput (SetMaxPoints rn)
+                    (value (String.fromFloat sortedNamedRoundRating.reachableInRound)
+                        :: onInput (SetMaxPoints roundNumber)
                         :: pointInputAttributes
                     )
                     []
                 ]
             :: List.map
-                (\tr ->
+                (\namedRoundRating ->
                     div [ class "teamPointsArea" ]
                         [ div [ class "label" ]
                             [ label [ class "pointsPerTeamLabel" ]
-                                [ text
-                                    (String.join " "
-                                        [ "Team"
-                                        , String.fromInt tr.teamNumber
-                                        ]
-                                    )
-                                ]
+                                [ text namedRoundRating.teamName ]
                             ]
                         , div [ class "input" ]
                             [ input
-                                (value (String.fromFloat tr.rating)
-                                    :: onInput (UpdatePoints rn tr.teamNumber)
-                                    :: max (String.fromFloat rr.reachableInRound)
+                                (value (String.fromFloat namedRoundRating.teamRating.rating)
+                                    :: onInput (UpdatePoints roundNumber namedRoundRating.teamRating.teamNumber)
+                                    :: max (String.fromFloat sortedNamedRoundRating.reachableInRound)
                                     :: pointInputAttributes
                                 )
                                 []
                             ]
                         ]
                 )
-                (adjustToSize gs (List.sortBy .teamNumber rr.points))
+                sortedNamedRoundRating.points
         )
 
 
