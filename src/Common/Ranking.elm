@@ -22,8 +22,10 @@ roundRankingPerTeamToPointsPerTeam =
 type alias RoundRankings =
     List RoundRankingPerTeam
 
+type alias RankingsWithSorted =
+  { sortedHeader : Header, sortedRatings : Ratings, perRound : RoundRankings, cumulative : RoundRankings }
 
-ratingsToRankings : QuizRatings -> { sortedHeader : Header, sortedRatings : Ratings, perRound : RoundRankings, cumulative : RoundRankings }
+ratingsToRankings : QuizRatings -> RankingsWithSorted
 ratingsToRankings quizRatings =
     let
         sortedHeader =
@@ -38,6 +40,7 @@ ratingsToRankings quizRatings =
                             rr.points
                                 |> List.sortBy .teamNumber
                                 |> removeInactive sortedHeader
+                                |> List.map .teamRating
                                 |> RoundRating.updatePoints rr
                         )
                     )
@@ -68,11 +71,11 @@ ratingsToRankings quizRatings =
     { sortedHeader = sortedHeader, sortedRatings = sortedRatings, perRound = roundRankings, cumulative = cumulativeRankings }
 
 
-removeInactive : Header -> List TeamRating -> List TeamRating
+removeInactive : Header -> List TeamRating -> List NamedTeamRating
 removeInactive sortedHeader teamRatings =
-    Util.intersectWith Tuple.pair .teamNumber identity .teamInfoNumber .teamInfoActivity teamRatings sortedHeader
-        |> List.filter (Tuple.second >> QuizValues.isActive)
-        |> List.map Tuple.first
+    Util.intersectWith Tuple.pair .teamNumber identity .teamInfoNumber (\ti -> ( ti.teamInfoName, ti.teamInfoActivity )) teamRatings sortedHeader
+        |> List.filter (Tuple.second >> Tuple.second >> QuizValues.isActive)
+        |> List.map (\( teamRating, ( teamName, _ ) ) -> { teamRating = teamRating, teamName = teamName })
 
 
 type alias RoundWinner =

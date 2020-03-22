@@ -18,7 +18,7 @@ module Common.WireUtil exposing
     )
 
 import Common.Constants exposing (getLabelsApi, getQuizInfoApi, getQuizRatingsApi)
-import Common.Ranking exposing (RoundRankings, RoundWinner, TeamsRanking, rankingToPlacement, roundRankingsToRoundWinners)
+import Common.Ranking exposing (RankingsWithSorted, RoundRankings, RoundWinner, TeamsRanking, rankingToPlacement, roundRankingsToRoundWinners)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, Ratings, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings)
 import Common.Util as Util exposing (ErrorOr, getMsg)
 import Html exposing (Attribute, Html, div, form, input, label, table, td, text, tr)
@@ -119,7 +119,7 @@ errorToString err =
             String.concat [ "Bad body: ", str ]
 
 
-mkPlacementTables : { sortedRatings : Ratings, perRound : RoundRankings, cumulative : RoundRankings } -> Labels -> List (Html msg)
+mkPlacementTables : RankingsWithSorted -> Labels -> List (Html msg)
 mkPlacementTables rankings labels =
     [ mkPlacements rankings.cumulative labels.placementLabel labels.placeLabel labels.pointsLabel
     , mkRoundWinners rankings.perRound labels.roundWinnerLabel labels.roundLabel labels.pointsLabel
