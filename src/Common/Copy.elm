@@ -1,7 +1,8 @@
 module Common.Copy exposing (..)
 
-import Common.Types exposing (Activity, DbQuizId, Labels, Place, QuestionsInQuiz, QuizDate, QuizIdentifier, QuizInfo, QuizName, QuizSettings)
+import Common.Types exposing (Activity, DbQuizId, Header, Labels, Place, QuestionsInQuiz, QuizDate, QuizIdentifier, QuizInfo, QuizName, QuizRatings, QuizSettings, Ratings, TeamInfo)
 import Date exposing (Date)
+import List.Extra exposing (setIf)
 
 
 type LabelsField
@@ -114,3 +115,18 @@ updateQuizInfoQuizIdentifier qi idf =
 updateQuizInfoQuizActivity : QuizInfo -> Activity -> QuizInfo
 updateQuizInfoQuizActivity qi a =
     { qi | active = a }
+
+
+updateHeaderTeamInfo : Header -> TeamInfo -> Header
+updateHeaderTeamInfo header teamInfo =
+    setIf (\ti -> ti.teamInfoNumber == teamInfo.teamInfoNumber) teamInfo header
+
+
+updateQuizRatingsRatings : QuizRatings -> Ratings -> QuizRatings
+updateQuizRatingsRatings quizRatings ratings =
+    { quizRatings | ratings = ratings }
+
+
+updateQuizRatingsHeader : QuizRatings -> Header -> QuizRatings
+updateQuizRatingsHeader quizRatings header =
+    { quizRatings | header = header }
