@@ -35,11 +35,6 @@ defaultHeader =
     []
 
 
-adjustTo : Int -> QuizRatings -> QuizRatings
-adjustTo n qr =
-    { qr | ratings = List.map (\( rn, rr ) -> ( rn, RoundRating.adjustTo n rr )) qr.ratings }
-
-
 update : QuizRatings -> RoundNumber -> TeamNumber -> Float -> QuizRatings
 update quizRatings round team points =
     let
@@ -81,16 +76,6 @@ getRound n q =
     Util.foldMaybe RoundRating.empty Tuple.second (Util.find (\( tn, _ ) -> tn == n) q.ratings)
 
 
-
--- todo: check necessity
-
-
-arePointsValid : QuizRatings -> Bool
-arePointsValid q =
-    List.all (\p -> p |> Tuple.second |> RoundRating.arePointsValid) q.ratings
-
-
-
 -- todo: check empty team names
 
 
@@ -108,17 +93,3 @@ addRound r q =
             1 + Maybe.withDefault 0 (List.maximum (List.map Tuple.first q.ratings))
     in
     { q | ratings = q.ratings ++ [ ( rNum, r ) ] }
-
-
-maxNumberOfTeams : QuizRatings -> Int
-maxNumberOfTeams quiz =
-    List.length quiz.header
-
-
-numberOfTeams : QuizRatings -> Int
-numberOfTeams quiz =
-    let
-        max =
-            maxNumberOfTeams quiz
-    in
-    Maybe.withDefault max (List.maximum (List.map (\( _, rr ) -> List.length rr.points) quiz.ratings))
