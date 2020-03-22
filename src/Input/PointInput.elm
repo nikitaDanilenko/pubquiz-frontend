@@ -136,7 +136,6 @@ view model =
                     :: mkTeamNameInput rankings.sortedHeader
                 )
              ]
-                -- todo: Change round form so that the name of the team is displayed
                 ++ List.map (uncurry mkRoundForm) namedRatings
                 ++ [ button [ class "button", onClick AddRound ] [ text "Add round" ]
                    , button [ class "button", onClick EditSettings ] [ text "Edit settings" ]
