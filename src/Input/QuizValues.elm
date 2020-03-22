@@ -6,6 +6,7 @@ import Common.Types exposing (Activity(..), Labels, NumberOfQuestions, Place, Qu
 import Html exposing (Html, div, input, label, text)
 import Html.Attributes exposing (class, for, id, min, placeholder, step, type_, value)
 import Html.Events exposing (onInput)
+import List.Extra exposing (setIf)
 import Parser exposing (int, run)
 
 
@@ -199,9 +200,10 @@ defaultQuizIdentifier =
     , name = ""
     }
 
+
 mkQuestionsInRound : RoundNumber -> NumberOfQuestions -> QuestionsInRound
 mkQuestionsInRound roundNumber numberOfQuestions =
-  {questionsInRoundRoundNumber = roundNumber, questionsInRoundNumberOfQuestions = numberOfQuestions}
+    { questionsInRoundRoundNumber = roundNumber, questionsInRoundNumberOfQuestions = numberOfQuestions }
 
 
 defaultQuestionsInQuiz : QuestionsInQuiz
@@ -212,15 +214,8 @@ defaultQuestionsInQuiz =
 
 updateQuestionsInQuizAt : QuestionsInQuiz -> QuestionsInRound -> QuestionsInQuiz
 updateQuestionsInQuizAt questionsInQuiz questionsInRound =
-    List.map
-        (\qir ->
-            if qir.questionsInRoundRoundNumber == questionsInRound.questionsInRoundRoundNumber then
-                questionsInRound
+    setIf (\qir -> qir.questionsInRoundRoundNumber == questionsInRound.questionsInRoundRoundNumber) questionsInRound questionsInQuiz
 
-            else
-                qir
-        )
-        questionsInQuiz
 
 adjustToSize : QuestionsInQuiz -> Int -> QuestionsInQuiz
 adjustToSize questionsInQuiz n =
