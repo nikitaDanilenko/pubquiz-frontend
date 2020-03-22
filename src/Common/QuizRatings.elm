@@ -8,8 +8,8 @@ import Common.Util as Util
 import List.Extra exposing (updateIf)
 
 
-empty : QuizRatings
-empty =
+default : QuizRatings
+default =
     { header = defaultHeader
     , ratings = defaultRatings
     }
