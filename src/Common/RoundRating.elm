@@ -1,12 +1,24 @@
 module Common.RoundRating exposing (..)
 
-import Common.Types exposing (RoundRating, TeamNumber)
-import Common.Util exposing (adjustToSize)
+import Basics.Extra exposing (flip)
+import Common.Copy exposing (updateTeamRatingPoints)
+import Common.Types exposing (RoundRating, TeamNumber, TeamRating)
+import List.Extra exposing (updateIf)
 
 
 empty : RoundRating
 empty =
     { reachableInRound = 0, points = [] }
+
+
+updateReachableInRound : RoundRating -> Float -> RoundRating
+updateReachableInRound roundRating reachableInRound =
+    { roundRating | reachableInRound = reachableInRound }
+
+
+updatePoints : RoundRating -> List TeamRating -> RoundRating
+updatePoints roundRating points =
+    { roundRating | points = points }
 
 
 emptyOfSize : Int -> RoundRating
@@ -16,20 +28,7 @@ emptyOfSize n =
     }
 
 
-adjustTo : Int -> RoundRating -> RoundRating
-adjustTo n rr =
-    { rr | points = adjustToSize n rr.points }
-
-
-arePointsValid : RoundRating -> Bool
-arePointsValid rr =
-    List.all (\x -> x.rating <= rr.reachableInRound) rr.points
-
-
 update : TeamNumber -> Float -> RoundRating -> RoundRating
 update tn ps rr =
-    let
-        newPoints =
-            List.map (\tr -> if tr.teamNumber == tn then { tr | rating = ps } else tr) rr.points
-    in
-    { rr | points = newPoints }
+    updateIf (\teamRating -> teamRating.teamNumber == tn) (flip updateTeamRatingPoints ps) rr.points
+        |> updatePoints rr
