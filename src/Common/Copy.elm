@@ -1,6 +1,6 @@
 module Common.Copy exposing (..)
 
-import Common.Types exposing (Activity, DbQuizId, Header, Labels, Place, QuestionsInQuiz, QuizDate, QuizIdentifier, QuizInfo, QuizName, QuizRatings, QuizSettings, Ratings, TeamInfo)
+import Common.Types exposing (Activity, DbQuizId, Header, Labels, Place, QuestionsInQuiz, QuizDate, QuizIdentifier, QuizInfo, QuizName, QuizRatings, QuizSettings, Ratings, TeamInfo, TeamName)
 import Date exposing (Date)
 import List.Extra exposing (setIf)
 
@@ -120,3 +120,9 @@ updateQuizInfoQuizActivity qi a =
 updateHeaderTeamInfo : Header -> TeamInfo -> Header
 updateHeaderTeamInfo header teamInfo =
     setIf (\ti -> ti.teamInfoNumber == teamInfo.teamInfoNumber) teamInfo header
+
+updateTeamInfoActivity : TeamInfo -> Activity -> TeamInfo
+updateTeamInfoActivity teamInfo activity = { teamInfo | teamInfoActivity = activity }
+
+updateTeamInfoTeamName : TeamInfo -> TeamName -> TeamInfo
+updateTeamInfoTeamName teamInfo teamName = { teamInfo | teamInfoName = teamName }
