@@ -15,13 +15,13 @@ empty =
     }
 
 
-updateQuizRatingsRatings : QuizRatings -> Ratings -> QuizRatings
-updateQuizRatingsRatings quizRatings ratings =
+updateRatings : QuizRatings -> Ratings -> QuizRatings
+updateRatings quizRatings ratings =
     { quizRatings | ratings = ratings }
 
 
-updateQuizRatingsHeader : QuizRatings -> Header -> QuizRatings
-updateQuizRatingsHeader quizRatings header =
+updateHeader : QuizRatings -> Header -> QuizRatings
+updateHeader quizRatings header =
     { quizRatings | header = header }
 
 
@@ -38,13 +38,13 @@ defaultHeader =
 update : QuizRatings -> RoundNumber -> TeamNumber -> Float -> QuizRatings
 update quizRatings round team points =
     updateIf (\( rn, _ ) -> rn == round) (Tuple.mapSecond (RoundRating.update team points)) quizRatings.ratings
-        |> updateQuizRatingsRatings quizRatings
+        |> updateRatings quizRatings
 
 
 updateMax : RoundNumber -> Float -> QuizRatings -> QuizRatings
 updateMax roundNumber maxPoints quizRatings =
     updateIf (\( rn, _ ) -> rn == roundNumber) (Tuple.mapSecond (flip RoundRating.updateReachableInRound maxPoints)) quizRatings.ratings
-        |> updateQuizRatingsRatings quizRatings
+        |> updateRatings quizRatings
 
 
 getRound : RoundNumber -> QuizRatings -> RoundRating
@@ -60,7 +60,7 @@ updateTeamName : TeamNumber -> TeamName -> QuizRatings -> QuizRatings
 updateTeamName teamNumber teamName quizRatings =
     quizRatings.header
         |> updateIf (\teamInfo -> teamInfo.teamInfoNumber == teamNumber) (flip updateTeamInfoTeamName teamName)
-        |> updateQuizRatingsHeader quizRatings
+        |> updateHeader quizRatings
 
 
 addRound : RoundRating -> QuizRatings -> QuizRatings
