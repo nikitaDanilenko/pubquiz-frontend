@@ -11,6 +11,14 @@ empty =
     , ratings = defaultRatings
     }
 
+updateQuizRatingsRatings : QuizRatings -> Ratings -> QuizRatings
+updateQuizRatingsRatings quizRatings ratings =
+    { quizRatings | ratings = ratings }
+
+
+updateQuizRatingsHeader : QuizRatings -> Header -> QuizRatings
+updateQuizRatingsHeader quizRatings header =
+    { quizRatings | header = header }
 
 defaultRatings : Ratings
 defaultRatings =
@@ -27,8 +35,8 @@ adjustTo n qr =
     { qr | ratings = List.map (\( rn, rr ) -> ( rn, RoundRating.adjustTo n rr )) qr.ratings }
 
 
-update : QuizRatings -> RoundNumber -> TeamNumber -> Float ->  QuizRatings
-update quizRatings round team points  =
+update : QuizRatings -> RoundNumber -> TeamNumber -> Float -> QuizRatings
+update quizRatings round team points =
     let
         change : RoundNumber -> RoundRating -> RoundRating
         change rn rr =
@@ -41,11 +49,11 @@ update quizRatings round team points  =
         updatedRatings =
             List.map (\( rn, rr ) -> ( rn, change rn rr )) quizRatings.ratings
     in
-    { quizRatings | ratings = updatedRatings }
+    updateQuizRatingsRatings quizRatings updatedRatings
 
 
 updateMax : Int -> Float -> QuizRatings -> QuizRatings
-updateMax rd m quiz =
+updateMax rd m quizRatings =
     let
         updatedRatings =
             List.map
@@ -58,16 +66,20 @@ updateMax rd m quiz =
                         rr
                     )
                 )
-                quiz.ratings
+                quizRatings.ratings
     in
-    { quiz | ratings = updatedRatings }
+    updateQuizRatingsRatings quizRatings updatedRatings
 
 
 getRound : RoundNumber -> QuizRatings -> RoundRating
 getRound n q =
     Util.foldMaybe RoundRating.empty Tuple.second (Util.find (\( tn, _ ) -> tn == n) q.ratings)
 
+
+
 -- todo: check necessity
+
+
 arePointsValid : QuizRatings -> Bool
 arePointsValid q =
     List.all (\p -> p |> Tuple.second |> RoundRating.arePointsValid) q.ratings
@@ -115,4 +127,3 @@ numberOfTeams quiz =
             maxNumberOfTeams quiz
     in
     Maybe.withDefault max (List.maximum (List.map (\( _, rr ) -> List.length rr.points) quiz.ratings))
-

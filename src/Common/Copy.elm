@@ -120,13 +120,3 @@ updateQuizInfoQuizActivity qi a =
 updateHeaderTeamInfo : Header -> TeamInfo -> Header
 updateHeaderTeamInfo header teamInfo =
     setIf (\ti -> ti.teamInfoNumber == teamInfo.teamInfoNumber) teamInfo header
-
-
-updateQuizRatingsRatings : QuizRatings -> Ratings -> QuizRatings
-updateQuizRatingsRatings quizRatings ratings =
-    { quizRatings | ratings = ratings }
-
-
-updateQuizRatingsHeader : QuizRatings -> Header -> QuizRatings
-updateQuizRatingsHeader quizRatings header =
-    { quizRatings | header = header }
