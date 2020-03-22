@@ -85,7 +85,7 @@ init : Maybe Labels -> Maybe TeamQuery -> DbQuizId -> ( Model, Cmd Msg )
 init mLabels mTeamQuery qid =
     ( { labels = Maybe.withDefault QuizValues.defaultLabels mLabels
       , teamQueryCandidate = mTeamQuery
-      , quizRatings = QuizRatings.empty
+      , quizRatings = QuizRatings.default
       , quizInfo = QuizValues.defaultQuizInfo
       , status = { loading | labelsSet = Util.isDefined mLabels }
       }
