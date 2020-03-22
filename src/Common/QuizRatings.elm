@@ -41,23 +41,10 @@ update quizRatings round team points =
         |> updateQuizRatingsRatings quizRatings
 
 
-updateMax : Int -> Float -> QuizRatings -> QuizRatings
-updateMax rd m quizRatings =
-    let
-        updatedRatings =
-            List.map
-                (\( rn, rr ) ->
-                    ( rn
-                    , if rn == rd then
-                        { rr | reachableInRound = m }
-
-                      else
-                        rr
-                    )
-                )
-                quizRatings.ratings
-    in
-    updateQuizRatingsRatings quizRatings updatedRatings
+updateMax : RoundNumber -> Float -> QuizRatings -> QuizRatings
+updateMax roundNumber maxPoints quizRatings =
+    updateIf (\( rn, _ ) -> rn == roundNumber) (Tuple.mapSecond (flip RoundRating.updateReachableInRound maxPoints)) quizRatings.ratings
+        |> updateQuizRatingsRatings quizRatings
 
 
 getRound : RoundNumber -> QuizRatings -> RoundRating
