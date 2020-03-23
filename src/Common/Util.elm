@@ -55,36 +55,6 @@ foldResult : b -> (a -> b) -> Result e a -> b
 foldResult empty f r =
     Result.withDefault empty (Result.map f r)
 
-
-{-| Fills a list with zeroes in the back if the list is not long enough,
-otherwise return the prefix of the list with the given length.
--}
-adjustToSize : Int -> List TeamRating -> List TeamRating
-adjustToSize n =
-  {- todo: The logic is wonky, and should be rethought.
-           In case of removing and adding teams the below implementation is
-           wrong, when the teams drop to one. -}
-    adjustToSizeWith (List.indexedMap (\i r -> { teamNumber = 1 + i, rating = r }) (List.repeat n 0))
-
-
-adjustToSizeWith : List a -> List a -> List a
-adjustToSizeWith dft lst =
-    let
-        combine : List a -> List a -> List a
-        combine l r =
-            case ( l, r ) of
-                ( [], rest ) ->
-                    rest
-
-                ( _, [] ) ->
-                    []
-
-                ( x :: xs, _ :: ys ) ->
-                    x :: combine xs ys
-    in
-    combine lst dft
-
-
 updateIndex : Int -> a -> List a -> List a
 updateIndex i y =
     List.indexedMap
