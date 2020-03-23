@@ -56,6 +56,16 @@ foldResult empty f r =
     Result.withDefault empty (Result.map f r)
 
 
+foldResultWith : (e -> b) -> (a -> b) -> Result e a -> b
+foldResultWith errorFunction okFunction result =
+    case result of
+        Ok value ->
+            okFunction value
+
+        Err error ->
+            errorFunction error
+
+
 getMsg : String -> (Result Error a -> msg) -> Decode.Decoder a -> DbQuizId -> Cmd msg
 getMsg =
     getMsgWith jsonEncDbQuizId quizIdParam

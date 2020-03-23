@@ -3,7 +3,7 @@ module Input.ConfirmLock exposing (..)
 import Common.Authentication exposing (Authentication, encodeWithSignature)
 import Common.Constants exposing (actionParam, lockApi, quizIdParam)
 import Common.Types exposing (Action(..), DbQuizId, QuizInfo, jsonEncAction, jsonEncDbQuizId)
-import Common.Util exposing (ErrorOr)
+import Common.Util as Util exposing (ErrorOr)
 import Common.WireUtil exposing (encodeBody, errorToString)
 import Html exposing (Html, button, div, label, text)
 import Html.Attributes exposing (class, for, id)
@@ -64,12 +64,7 @@ update msg model =
             ( model, postLock model.authentication model.quizInfo.quizId )
 
         Locked response ->
-            case response of
-                Ok _ ->
-                    ( model, Cmd.none )
-
-                Err error ->
-                    ( updateFeedback model (errorToString error), Cmd.none )
+            ( Util.foldResultWith (errorToString >> updateFeedback model) (always model) response, Cmd.none )
 
 
 postLock : Authentication -> DbQuizId -> Cmd Msg
