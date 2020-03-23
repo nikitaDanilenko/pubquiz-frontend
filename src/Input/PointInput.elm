@@ -2,7 +2,7 @@ module Input.PointInput exposing (..)
 
 import Basics.Extra exposing (flip, uncurry)
 import Common.Authentication exposing (Authentication, encodeWithSignature)
-import Common.Constants exposing (getLabelsApi, getQuizRatingsApi, mkPath, quizIdParam, quizRatingsParam, serverQuizzesFolder, sheetPDFPrefix, updateQuizRatingsApi)
+import Common.Constants exposing (getLabelsApi, getQuizRatingsApi, mkPath, quizIdParam, quizRatingsParam, serverLocation, serverQuizzesFolder, updateQuizRatingsApi)
 import Common.Copy exposing (updateHeaderTeamInfo, updateTeamInfoActivity)
 import Common.QuizRatings as QuizRatings
 import Common.Ranking exposing (NamedTeamRating, ratingsToRankings, removeInactive)
@@ -388,7 +388,7 @@ mkRoundForm roundNumber sortedNamedRoundRating =
 
 mkLinkToSheet : String -> String -> String -> Html Msg
 mkLinkToSheet divId linkText file =
-    mkLinkWith divId linkText (mkPath [ sheetPDFPrefix, file ])
+    mkLinkWith divId linkText (mkPath [ serverLocation, file ])
 
 
 mkLinkWith : String -> String -> String -> Html Msg
