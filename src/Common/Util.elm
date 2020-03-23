@@ -56,32 +56,6 @@ foldResult empty f r =
     Result.withDefault empty (Result.map f r)
 
 
-updateIndex : Int -> a -> List a -> List a
-updateIndex i y =
-    List.indexedMap
-        (\j x ->
-            if i == j then
-                y
-
-            else
-                x
-        )
-
-
-find : (a -> Bool) -> List a -> Maybe a
-find p l =
-    case l of
-        [] ->
-            Nothing
-
-        x :: xs ->
-            if p x then
-                Just x
-
-            else
-                find p xs
-
-
 getMsg : String -> (Result Error a -> msg) -> Decode.Decoder a -> DbQuizId -> Cmd msg
 getMsg =
     getMsgWith jsonEncDbQuizId quizIdParam
