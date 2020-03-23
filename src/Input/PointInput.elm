@@ -2,16 +2,7 @@ module Input.PointInput exposing (..)
 
 import Basics.Extra exposing (flip, uncurry)
 import Common.Authentication exposing (Authentication, encodeWithSignature)
-import Common.Constants
-    exposing
-        ( getLabelsApi
-        , getQuizRatingsApi
-        , mkPath
-        , quizIdParam
-        , quizRatingsParam
-        , sheetPDFPrefix
-        , updateQuizRatingsApi
-        )
+import Common.Constants exposing (getLabelsApi, getQuizRatingsApi, mkPath, quizIdParam, quizRatingsParam, serverQuizzesFolder, sheetPDFPrefix, updateQuizRatingsApi)
 import Common.Copy exposing (updateHeaderTeamInfo, updateTeamInfoActivity)
 import Common.QuizRatings as QuizRatings
 import Common.Ranking exposing (NamedTeamRating, ratingsToRankings, removeInactive)
@@ -24,6 +15,7 @@ import Html.Attributes exposing (checked, class, disabled, for, href, id, max, m
 import Html.Events exposing (onClick, onInput)
 import Http
 import Input.QuizValues as QuizValues exposing (defaultLabels)
+import Output.OutputUtil exposing (fromServerUrl)
 import Parser exposing (float, run)
 
 
@@ -157,9 +149,9 @@ view model =
                         [ text "Update" ]
                    , mkLinkToSheet "answerSheet" "Get quiz sheet" model.quizInfo.fullSheetPath
                    , mkLinkToSheet "qrSheet" "Get QR codes only" model.quizInfo.qrOnlyPath
-
-                   -- todo: Adjust this path using a proper REST request
-                   , mkLinkToSheet "mainGraphPage" "View main graph page" ""
+                   , mkLinkWith "mainGraphPage"
+                        "View main graph page"
+                        (fromServerUrl [ serverQuizzesFolder ] [ quizIdParam, String.fromInt model.quizInfo.quizId ])
                    , addFeedbackLabel model.feedback
                    , div [ id "pointInputRankings" ] (mkPlacementTables rankings model.labels)
                    ]
@@ -396,15 +388,15 @@ mkRoundForm roundNumber sortedNamedRoundRating =
 
 mkLinkToSheet : String -> String -> String -> Html Msg
 mkLinkToSheet divId linkText file =
+    mkLinkWith divId linkText (mkPath [ sheetPDFPrefix, file ])
+
+
+mkLinkWith : String -> String -> String -> Html Msg
+mkLinkWith divId linkText path =
     div [ id divId ]
         [ a
             [ class "link"
-            , href
-                (mkPath
-                    [ sheetPDFPrefix
-                    , file
-                    ]
-                )
+            , href path
             , target "_blank"
             ]
             [ text linkText ]
