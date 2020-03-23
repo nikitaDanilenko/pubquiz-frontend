@@ -3,9 +3,9 @@ module Input.QuizValues exposing (..)
 import Basics
 import Common.Copy exposing (LabelsField(..))
 import Common.Types exposing (Activity(..), Labels, NumberOfQuestions, Place, QuestionsInQuiz, QuestionsInRound, QuizDate, QuizIdentifier, QuizInfo, QuizName, QuizSettings, RoundNumber)
-import Html exposing (Html, div, input, label, text)
+import Html exposing (Html, button, div, input, label, text)
 import Html.Attributes exposing (class, for, id, min, placeholder, step, type_, value)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onClick, onInput)
 import List.Extra exposing (setIf)
 import Parser exposing (int, run)
 
@@ -22,12 +22,13 @@ type Msg
 
 mkCreationForm :
     (Msg -> msg)
+    -> Mode
     -> QuizIdentifier
     -> QuizSettings
     -> Html.Attribute msg
     -> Labels
     -> List (Html msg)
-mkCreationForm wrapMsg quizIdentifier quizSettings createOnEnter labels =
+mkCreationForm wrapMsg mode quizIdentifier quizSettings createOnEnter labels =
     let
         associations =
             [ ( "Label for rounds", RoundField, labels.roundLabel )
@@ -92,20 +93,49 @@ mkCreationForm wrapMsg quizIdentifier quizSettings createOnEnter labels =
     , div [ id "questionArea" ]
         [ mkQuestionsForm (\i -> SetQuestions i >> wrapMsg) createOnEnter quizSettings.questionsInQuiz ]
     , div [ id "teamNumberArea" ]
-        [ label [ for "teamNumber" ] [ text "Number of teams" ]
-        , input
-            [ onInput (SetTeamsInQuiz >> wrapMsg)
-            , class "teamsSpinner"
-            , type_ "number"
-            , min "1"
-            , createOnEnter
-            , value (String.fromInt quizSettings.numberOfTeams)
-            ]
-            []
-        ]
+        (label [ for "teamNumber" ] [ text "Number of teams" ]
+            :: teamNumberAdjustment mode quizSettings.numberOfTeams wrapMsg createOnEnter
+        )
     , div [ id "labelsForm" ]
         (List.map (\( lbl, fld, dft ) -> mkInput lbl fld dft) associations)
     ]
+
+
+type Mode
+    = Create
+    | Update
+
+
+teamNumberAdjustment : Mode -> Int -> (Msg -> msg) -> Html.Attribute msg -> List (Html msg)
+teamNumberAdjustment mode numberOfTeams wrapMsg createOnEnter =
+    let
+        create =
+            [ input
+                [ onInput (SetTeamsInQuiz >> wrapMsg)
+                , class "teamsSpinner"
+                , type_ "number"
+                , min "1"
+                , createOnEnter
+                , value (String.fromInt numberOfTeams)
+                ]
+                []
+            ]
+
+        update =
+            [ text (String.fromInt numberOfTeams)
+            , button
+                [ class "addTeamButton"
+                , onClick (wrapMsg (SetTeamsInQuiz (String.fromInt (1 + numberOfTeams))))
+                ]
+                [ text "Add a team" ]
+            ]
+    in
+    case mode of
+        Create ->
+            create
+
+        Update ->
+            update
 
 
 createIdByField : LabelsField -> String
