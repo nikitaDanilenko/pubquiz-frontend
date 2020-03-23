@@ -20,7 +20,7 @@ import Common.Types exposing (Activity, DbQuizId, Header, Labels, QuizInfo, Quiz
 import Common.Util exposing (ErrorOr, getMsg)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString, mkPlacementTables)
 import Html exposing (Html, a, button, div, input, label, text)
-import Html.Attributes exposing (checked, class, for, href, id, max, min, step, target, type_, value)
+import Html.Attributes exposing (checked, class, disabled, for, href, id, max, min, step, target, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Input.QuizValues as QuizValues exposing (defaultLabels)
@@ -144,6 +144,7 @@ view model =
                    , button
                         [ class "button"
                         , onClick UpdateQuizRatings
+                        , disabled (List.any (.teamInfoName >> String.isEmpty) model.quizRatings.header)
                         ]
                         [ text "Update" ]
                    , mkLinkToSheet "answerSheet" "Get quiz sheet" model.quizInfo.fullSheetPath
