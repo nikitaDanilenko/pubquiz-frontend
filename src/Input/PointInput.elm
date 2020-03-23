@@ -120,7 +120,15 @@ view model =
             ratingsToRankings model.quizRatings
 
         namedRatings =
-            List.map (\( rn, roundRating ) -> ( rn, { reachableInRound = roundRating.reachableInRound, points = removeInactive rankings.sortedHeader roundRating.points } )) rankings.sortedRatings
+            List.map
+                (Tuple.mapSecond
+                    (\roundRating ->
+                        { reachableInRound = roundRating.reachableInRound
+                        , points = removeInactive rankings.sortedHeader roundRating.points
+                        }
+                    )
+                )
+                rankings.sortedRatings
     in
     if not (hasFinishedLoading model.status) then
         div [] []
@@ -190,7 +198,7 @@ update msg model =
                                 |> updateQuizRatings model
 
                         Err _ ->
-                            { model | feedback = "Not a decimal point number. Keeping old value." }
+                            updateFeedback model "Not a decimal point number. Keeping old value."
             in
             ( newModel, Cmd.none )
 
