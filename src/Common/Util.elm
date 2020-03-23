@@ -55,6 +55,7 @@ foldResult : b -> (a -> b) -> Result e a -> b
 foldResult empty f r =
     Result.withDefault empty (Result.map f r)
 
+
 updateIndex : Int -> a -> List a -> List a
 updateIndex i y =
     List.indexedMap
@@ -65,7 +66,6 @@ updateIndex i y =
             else
                 x
         )
-
 
 
 find : (a -> Bool) -> List a -> Maybe a
@@ -154,4 +154,6 @@ isDefined m =
         Nothing ->
             False
 
-type alias ErrorOr a = Result Error a
+
+type alias ErrorOr a =
+    Result Error a
