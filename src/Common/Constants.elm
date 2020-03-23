@@ -8,8 +8,11 @@ serverPort : String
 -- serverPort = "8000"
 serverPort = "9000"
 
+serverLocationWithPort : String
+serverLocationWithPort = String.concat [serverLocation, ":", serverPort]
+
 apiLocation : String
-apiLocation = mkPath [ String.concat [serverLocation, ":", serverPort], "api" ]
+apiLocation = mkPath [ serverLocationWithPort, "api" ]
 
 actionParam : String
 actionParam = "action"
@@ -96,3 +99,6 @@ loginApi = mkPath [apiLocation, "secrets"]
 -- todo: remove the port.
 sheetPDFPrefix : String
 sheetPDFPrefix = String.join ":" [ serverLocation, "9876" ]
+
+serverQuizzesFolder : String
+serverQuizzesFolder = "quizzes"
