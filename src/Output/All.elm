@@ -6,7 +6,6 @@ import Common.Util as Util exposing (ErrorOr, getAllWith)
 import Common.WireUtil exposing (linkButton)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class, id, value)
-import Input.Model exposing (ErrorOr)
 import Output.OutputUtil exposing (fragmentUrl, mkFullQuizName)
 
 
