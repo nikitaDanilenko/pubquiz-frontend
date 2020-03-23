@@ -28,7 +28,7 @@ import Html.Attributes exposing (class, disabled, id)
 import Html.Events exposing (onClick)
 import Html.Events.Extra exposing (onEnter)
 import Http
-import Input.QuizValues as QuizValues
+import Input.QuizValues as QuizValues exposing (Mode(..))
 
 
 type alias Base =
@@ -165,8 +165,8 @@ initUpdate authentication quizInfo =
     )
 
 
-viewWith : (model -> Base) -> String -> model -> Html Msg
-viewWith baseOf commitButtonText md =
+viewWith : (model -> Base) -> Mode -> String -> model -> Html Msg
+viewWith baseOf mode commitButtonText md =
     let
         createOnEnter =
             onEnter Commit
@@ -176,7 +176,7 @@ viewWith baseOf commitButtonText md =
 
     else
         div [ id "creatingQuizView" ]
-            (QuizValues.mkCreationForm Value (baseOf md).quizIdentifier (baseOf md).quizSettings createOnEnter (baseOf md).quizSettings.labels
+            (QuizValues.mkCreationForm Value mode (baseOf md).quizIdentifier (baseOf md).quizSettings createOnEnter (baseOf md).quizSettings.labels
                 ++ [ button
                         [ class "button"
                         , onClick Commit
@@ -191,12 +191,12 @@ viewWith baseOf commitButtonText md =
 
 viewCreate : CreateModel -> Html Msg
 viewCreate =
-    viewWith .base "Create"
+    viewWith .base Create "Create"
 
 
 viewUpdate : UpdateModel -> Html Msg
 viewUpdate =
-    viewWith baseOfUpdate "Update"
+    viewWith baseOfUpdate Update "Update"
 
 
 updateWith : (Base -> Cmd Msg) -> Msg -> Base -> ( Base, Cmd Msg )
