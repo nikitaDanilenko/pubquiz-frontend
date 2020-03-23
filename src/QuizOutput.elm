@@ -1,4 +1,4 @@
-module Output.QuizOutput exposing (..)
+module QuizOutput exposing (..)
 
 import Basics.Extra exposing (flip)
 import Browser exposing (UrlRequest(..))
