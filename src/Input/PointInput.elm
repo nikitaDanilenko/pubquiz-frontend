@@ -175,7 +175,7 @@ update msg model =
         AddRound ->
             let
                 newModel =
-                    QuizRatings.addRound (RoundRating.emptyOfSize (List.length (activeTeams model.quizRatings.header))) model.quizRatings
+                    QuizRatings.addRound (RoundRating.emptyForHeader model.quizRatings.header) model.quizRatings
                         |> updateQuizRatings model
             in
             ( newModel, Cmd.none )
