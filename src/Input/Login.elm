@@ -18,6 +18,16 @@ type alias Model =
     }
 
 
+updateUser : Model -> UserName -> Model
+updateUser model userName =
+    { model | user = userName }
+
+
+updatePassword : Model -> Password -> Model
+updatePassword model password =
+    { model | password = password }
+
+
 type Msg
     = SetUser UserName
     | SetPassword Password
@@ -54,10 +64,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         SetUser userName ->
-            ( { model | user = userName }, Cmd.none )
+            ( updateUser model userName, Cmd.none )
 
         SetPassword password ->
-            ( { model | password = password }, Cmd.none )
+            ( updatePassword model password, Cmd.none )
 
         Login ->
             ( model, login model.user model.password )
