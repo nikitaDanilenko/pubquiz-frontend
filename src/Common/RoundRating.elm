@@ -2,7 +2,7 @@ module Common.RoundRating exposing (..)
 
 import Basics.Extra exposing (flip)
 import Common.Copy exposing (updateTeamRatingPoints)
-import Common.Types exposing (RoundRating, TeamNumber, TeamRating)
+import Common.Types exposing (Header, RoundRating, TeamNumber, TeamRating)
 import List.Extra exposing (updateIf)
 
 
@@ -21,10 +21,10 @@ updatePoints roundRating points =
     { roundRating | points = points }
 
 
-emptyOfSize : Int -> RoundRating
-emptyOfSize n =
+emptyForHeader : Header -> RoundRating
+emptyForHeader header =
     { reachableInRound = 0
-    , points = List.map (\i -> { teamNumber = i, rating = 0 }) (List.range 1 n)
+    , points = List.map (\teamInfo -> { teamNumber = teamInfo.teamInfoNumber, rating = 0 }) header
     }
 
 
