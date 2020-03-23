@@ -15,7 +15,7 @@ serverFrontendPort = "9876"
 serverLocationWithBackendPort : String
 serverLocationWithBackendPort = String.join ":" [serverLocation, serverBackendPort]
 
-serverLocationWithFrontEndPort : String
+serverLocationWithFrontendPort : String
 serverLocationWithFrontendPort = String.join ":" [serverLocation, serverFrontendPort]
 
 apiLocation : String
