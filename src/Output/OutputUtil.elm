@@ -1,5 +1,6 @@
 module Output.OutputUtil exposing (..)
 
+import Common.Constants exposing (serverLocationWithPort)
 import Common.Types exposing (DbQuizId, Labels, QuizIdentifier, QuizInfo)
 import Url.Builder exposing (Root(..))
 
@@ -12,5 +13,12 @@ mkFullQuizName idf =
         , String.concat [ "(", idf.place, ")" ]
         ]
 
+
 fragmentUrl : List String -> String
-fragmentUrl parts = Url.Builder.custom Relative [] [] (Just (Url.Builder.absolute parts []))
+fragmentUrl parts =
+    Url.Builder.custom Relative [] [] (Just (Url.Builder.absolute parts []))
+
+
+fromServerUrl : List String -> List String -> String
+fromServerUrl pathSegments parts =
+    Url.Builder.custom (CrossOrigin serverLocationWithPort) (pathSegments ++ [ "" ]) [] (Just (Url.Builder.absolute parts []))
