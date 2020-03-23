@@ -21,7 +21,7 @@ import Common.Constants exposing (actionParam, getQuizSettingsApi, newApi, quizI
 import Common.Copy as Copy
 import Common.Types exposing (Action(..), DbQuizId, Labels, QuizIdentifier, QuizInfo, QuizSettings, jsonDecQuizInfo, jsonDecQuizSettings, jsonEncAction, jsonEncDbQuizId, jsonEncQuizIdentifier, jsonEncQuizSettings)
 import Common.Util exposing (ErrorOr, getMsg)
-import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
+import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString, loadingSymbol)
 import Date
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (class, disabled, id)
@@ -172,7 +172,7 @@ viewWith baseOf mode commitButtonText md =
             onEnter Commit
     in
     if not (hasFinishedLoading (baseOf md).status) then
-        div [] []
+        div [] [loadingSymbol]
 
     else
         div [ id "creatingQuizView" ]

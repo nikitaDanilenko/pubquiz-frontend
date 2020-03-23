@@ -6,7 +6,7 @@ import Common.QuizRatings as QuizRatings
 import Common.Ranking exposing (RoundRankingPerTeam, RoundRankings, RoundWinner, TeamsRanking, ratingsToRankings)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamQuery)
 import Common.Util as Util exposing (ErrorOr)
-import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, linkButton, mkPlacementTables, useOrFetchWith)
+import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, linkButton, loadingSymbol, mkPlacementTables, useOrFetchWith)
 import Html exposing (Html, div, label, text)
 import Html.Attributes exposing (class, for, id, value)
 import Input.QuizValues as QuizValues
@@ -100,8 +100,8 @@ init mLabels mTeamQuery qid =
 view : Model -> Html Msg
 view model =
     if not (isFinished model.status) then
-        -- todo add loading symbol
-        div [] []
+        div []
+            [ loadingSymbol ]
 
     else
         let

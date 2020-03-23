@@ -4,7 +4,7 @@ import Color.Convert
 import Common.Constants exposing (quizIdParam, teamQueryParam, teamTableApi)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine, TeamQuery, TeamTable, TeamTableInfo, jsonDecTeamTableInfo, jsonEncTeamQuery)
 import Common.Util as Util exposing (ErrorOr, getMsgWith)
-import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, linkButton, useOrFetchWith)
+import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, linkButton, loadingSymbol, useOrFetchWith)
 import Html exposing (Html, div, h1, label, table, td, text, th, tr)
 import Html.Attributes exposing (class, for, id, style, value)
 import Input.QuizValues as QuizValues
@@ -109,8 +109,7 @@ type Msg
 view : Model -> Html Msg
 view model =
     if not (isFinished model.status) then
-        -- todo add loading symbol
-        div [] []
+        div [] [ loadingSymbol ]
 
     else
         let

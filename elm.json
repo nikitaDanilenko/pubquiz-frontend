@@ -21,9 +21,11 @@
             "elm-community/list-extra": "8.2.3",
             "justinmimbs/date": "3.2.0",
             "ktonon/elm-crypto": "1.1.2",
-            "noahzgordon/elm-color-extra": "1.0.2"
+            "noahzgordon/elm-color-extra": "1.0.2",
+            "perzanko/elm-loading": "2.0.4"
         },
         "indirect": {
+            "Skinney/murmur3": "2.0.8",
             "elm/bytes": "1.0.8",
             "elm/file": "1.0.5",
             "elm/regex": "1.0.0",
@@ -31,6 +33,8 @@
             "elm/virtual-dom": "1.0.2",
             "fredcy/elm-parseint": "2.0.1",
             "ktonon/elm-word": "2.1.2",
+            "rtfeldman/elm-css": "16.0.1",
+            "rtfeldman/elm-hex": "1.0.0",
             "rtfeldman/elm-iso8601-date-strings": "1.1.3"
         }
     },

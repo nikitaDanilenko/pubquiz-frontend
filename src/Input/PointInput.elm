@@ -18,7 +18,7 @@ import Common.Ranking exposing (NamedTeamRating, ratingsToRankings, removeInacti
 import Common.RoundRating as RoundRating
 import Common.Types exposing (Activity, DbQuizId, Header, Labels, QuizInfo, QuizRatings, QuizSettings, RoundNumber, RoundRating, TeamInfo, TeamNumber, UserName, jsonDecLabels, jsonDecQuizRatings, jsonEncDbQuizId, jsonEncQuizRatings)
 import Common.Util exposing (ErrorOr, getMsg)
-import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString, mkPlacementTables)
+import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString, loadingSymbol, mkPlacementTables)
 import Html exposing (Html, a, button, div, input, label, text)
 import Html.Attributes exposing (checked, class, disabled, for, href, id, max, min, step, target, type_, value)
 import Html.Events exposing (onClick, onInput)
@@ -131,7 +131,7 @@ view model =
                 rankings.sortedRatings
     in
     if not (hasFinishedLoading model.status) then
-        div [] []
+        div [] [ loadingSymbol ]
 
     else
         div [ id "singleQuiz" ]

@@ -15,6 +15,7 @@ module Common.WireUtil exposing
     , mkParams
     , mkPlacementTables
     , useOrFetchWith
+    , loadingSymbol
     )
 
 import Common.Constants exposing (getLabelsApi, getQuizInfoApi, getQuizRatingsApi)
@@ -26,6 +27,7 @@ import Html.Attributes exposing (action, for, id, type_)
 import Http exposing (Error(..))
 import Json.Encode as Encode exposing (encode)
 import List.Extra exposing (maximumBy)
+import Loading
 import Url.Builder
 
 
@@ -200,3 +202,6 @@ mkRoundWinnersTableLine wordForRound wordForPoints rw =
             ]
         , td [] [ text (String.join ", " rw.teamNames) ]
         ]
+
+loadingSymbol : Html msg
+loadingSymbol = Loading.render Loading.Spinner Loading.defaultConfig Loading.On
