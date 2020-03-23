@@ -52,10 +52,6 @@ getRound n q =
     Util.foldMaybe RoundRating.empty Tuple.second (Util.find (\( tn, _ ) -> tn == n) q.ratings)
 
 
-
--- todo: check empty team names
-
-
 updateTeamName : TeamNumber -> TeamName -> QuizRatings -> QuizRatings
 updateTeamName teamNumber teamName quizRatings =
     quizRatings.header
