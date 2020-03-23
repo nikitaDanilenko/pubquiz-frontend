@@ -4,15 +4,22 @@ serverLocation : String
 -- serverLocation = "https://www.danilenko.io"
 serverLocation = "http://localhost"
 
-serverPort : String
--- serverPort = "8000"
-serverPort = "9000"
+serverBackendPort : String
+-- serverBackendPort = "8000"
+serverBackendPort = "9000"
 
-serverLocationWithPort : String
-serverLocationWithPort = String.concat [serverLocation, ":", serverPort]
+-- todo: Adjust this port.
+serverFrontendPort : String
+serverFrontendPort = "9876"
+
+serverLocationWithBackendPort : String
+serverLocationWithBackendPort = String.join ":" [serverLocation, serverBackendPort]
+
+serverLocationWithFrontEndPort : String
+serverLocationWithFrontendPort = String.join ":" [serverLocation, serverFrontendPort]
 
 apiLocation : String
-apiLocation = mkPath [ serverLocationWithPort, "api" ]
+apiLocation = mkPath [ serverLocationWithBackendPort, "api" ]
 
 actionParam : String
 actionParam = "action"
@@ -95,10 +102,6 @@ allApi = mkPath [quizApi, "all"]
 
 loginApi : String
 loginApi = mkPath [apiLocation, "secrets"]
-
--- todo: remove the port.
-sheetPDFPrefix : String
-sheetPDFPrefix = String.join ":" [ serverLocation, "9876" ]
 
 serverQuizzesFolder : String
 serverQuizzesFolder = "quizzes"
