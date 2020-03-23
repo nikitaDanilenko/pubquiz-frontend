@@ -402,11 +402,6 @@ mkLinkToSheet divId linkText file =
         ]
 
 
-activeTeams : Header -> Header
-activeTeams =
-    List.filter (.teamInfoActivity >> QuizValues.isActive)
-
-
 pointInputAttributes : List (Html.Attribute Msg)
 pointInputAttributes =
     [ class "labeledInput", type_ "number", min "0", step "0.5" ]
