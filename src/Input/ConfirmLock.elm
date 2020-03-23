@@ -43,7 +43,7 @@ view md =
                     [ "You are about to lock "
                     , md.quizInfo.quizIdentifier.name
                     , ". "
-                    , "This cannot be undone. Please confirm. "
+                    , "This cannot be undone. Please confirm."
                     ]
                 )
             ]
@@ -69,7 +69,7 @@ update msg model =
                     ( model, Cmd.none )
 
                 Err error ->
-                    ( { model | feedback = errorToString error }, Cmd.none )
+                    ( updateFeedback model (errorToString error), Cmd.none )
 
 
 postLock : Authentication -> DbQuizId -> Cmd Msg
