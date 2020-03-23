@@ -49,7 +49,7 @@ updateMax roundNumber maxPoints quizRatings =
 
 getRound : RoundNumber -> QuizRatings -> RoundRating
 getRound n q =
-    Util.foldMaybe RoundRating.empty Tuple.second (Util.find (\( tn, _ ) -> tn == n) q.ratings)
+    Util.foldMaybe RoundRating.empty Tuple.second (List.Extra.find (\( tn, _ ) -> tn == n) q.ratings)
 
 
 updateTeamName : TeamNumber -> TeamName -> QuizRatings -> QuizRatings
