@@ -368,7 +368,7 @@ mkRoundForm roundNumber sortedNamedRoundRating =
                 (\namedRoundRating ->
                     div [ class "teamPointsArea" ]
                         [ div [ class "label" ]
-                            [ label [ class "pointsPerTeamLabel" ]
+                            [ label [ for "pointsPerTeamLabel" ]
                                 [ text namedRoundRating.teamName ]
                             ]
                         , div [ class "input" ]
