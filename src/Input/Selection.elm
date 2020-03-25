@@ -54,10 +54,10 @@ view md =
     div [ id "quizSelectionMain" ]
         [ div [ id "selectExistingQuizzesMain" ]
             (List.map mkButton (List.filter (\q -> not (String.isEmpty q.quizIdentifier.name)) md.quizzes))
-        , div [ id "createNewQuiz" ]
-            [ button [ class "newQuizButton", onClick StartCreatingQuiz ] [ text "New quiz" ] ]
-        , div [ id "createNewUser" ]
-            [ button [ class "newUserButton", onClick StartCreatingUser ] [ text "New user" ] ]
+        , div [ id "createNewArea" ]
+            [ button [ class "newQuizButton", onClick StartCreatingQuiz ] [ text "New quiz" ]
+            , button [ class "newUserButton", onClick StartCreatingUser ] [ text "New user" ]
+            ]
         , addFeedbackLabel md.feedback
         ]
 
