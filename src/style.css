@@ -57,7 +57,6 @@ label, input {
 
 .quizButton{
   display: block;
-  float: center;
   text-align: center;
   width: 30%;
 	margin-top: 0.7%;
@@ -168,7 +167,6 @@ body {
 #creatingQuizView label, #creatingQuizView input, #editingLabelsView label, #editingLabelsView input {
   width: 20%;
   display: inline-block;
-  vertical-align: center;
 }
 
 #creatingQuizView label {
@@ -205,10 +203,7 @@ html, head, body {
   width: 75%;
 }
 
-body, #quizTitle {
-  color: rgb(200, 200, 200);
-  background: rgb(40, 40, 40);
-}
+
 
 body, #quizTitle, .quizRatingsButton, .quizLinkButton {
   font-family: arial, sans-serif;
@@ -219,6 +214,8 @@ div {
   padding-bottom: 10pt;
 }
 
+
+
 #quizTitle, #ownPoints {
   text-align: center;
   font-weight: bold;
@@ -227,8 +224,6 @@ div {
 #quizTitle {
   font-size: large;
 }
-
-
 
 #placements label, #roundWinners label {
   font-size: large;
@@ -337,8 +332,6 @@ table {
 
   #userField input, #passwordField input {
     font-size: 32pt;
-    float: bottom;
-    /*width: 100%;*/
   }
 
   #initialMain .button {
