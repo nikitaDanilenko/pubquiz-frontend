@@ -211,7 +211,9 @@ html, head, body {
   width: 75%;
 }
 
-
+.teamPointsArea label {
+  max-width: 5%;
+}
 
 body, #quizTitle, .quizRatingsButton, .quizLinkButton {
   font-family: arial, sans-serif;
