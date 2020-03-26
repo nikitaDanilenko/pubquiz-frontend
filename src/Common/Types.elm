@@ -250,6 +250,28 @@ jsonEncRoundWinnerLabel  val = Json.Encode.string val
 
 
 
+type alias PlaceInRoundLabel  = String
+
+jsonDecPlaceInRoundLabel : Json.Decode.Decoder ( PlaceInRoundLabel )
+jsonDecPlaceInRoundLabel =
+    Json.Decode.string
+
+jsonEncPlaceInRoundLabel : PlaceInRoundLabel -> Value
+jsonEncPlaceInRoundLabel  val = Json.Encode.string val
+
+
+
+type alias PlaceAfterRoundLabel  = String
+
+jsonDecPlaceAfterRoundLabel : Json.Decode.Decoder ( PlaceAfterRoundLabel )
+jsonDecPlaceAfterRoundLabel =
+    Json.Decode.string
+
+jsonEncPlaceAfterRoundLabel : PlaceAfterRoundLabel -> Value
+jsonEncPlaceAfterRoundLabel  val = Json.Encode.string val
+
+
+
 type alias UserName  = String
 
 jsonDecUserName : Json.Decode.Decoder ( UserName )
@@ -456,11 +478,13 @@ type alias Labels  =
    , placeLabel: PlaceLabel
    , pointsLabel: PointsLabel
    , roundWinnerLabel: RoundWinnerLabel
+   , placeInRoundLabel: PlaceInRoundLabel
+   , placeAfterRoundLabel: PlaceAfterRoundLabel
    }
 
 jsonDecLabels : Json.Decode.Decoder ( Labels )
 jsonDecLabels =
-   Json.Decode.succeed (\proundLabel pteamLabel pownPointsLabel pmaxReachedLabel pmaxReachableLabel pbackToChartView pownPageLabel pviewPrevious pcumulativeLabel pindividualRoundsLabel pprogressionLabel pplacementLabel pplaceLabel ppointsLabel proundWinnerLabel -> {roundLabel = proundLabel, teamLabel = pteamLabel, ownPointsLabel = pownPointsLabel, maxReachedLabel = pmaxReachedLabel, maxReachableLabel = pmaxReachableLabel, backToChartView = pbackToChartView, ownPageLabel = pownPageLabel, viewPrevious = pviewPrevious, cumulativeLabel = pcumulativeLabel, individualRoundsLabel = pindividualRoundsLabel, progressionLabel = pprogressionLabel, placementLabel = pplacementLabel, placeLabel = pplaceLabel, pointsLabel = ppointsLabel, roundWinnerLabel = proundWinnerLabel})
+   Json.Decode.succeed (\proundLabel pteamLabel pownPointsLabel pmaxReachedLabel pmaxReachableLabel pbackToChartView pownPageLabel pviewPrevious pcumulativeLabel pindividualRoundsLabel pprogressionLabel pplacementLabel pplaceLabel ppointsLabel proundWinnerLabel pplaceInRoundLabel pplaceAfterRoundLabel -> {roundLabel = proundLabel, teamLabel = pteamLabel, ownPointsLabel = pownPointsLabel, maxReachedLabel = pmaxReachedLabel, maxReachableLabel = pmaxReachableLabel, backToChartView = pbackToChartView, ownPageLabel = pownPageLabel, viewPrevious = pviewPrevious, cumulativeLabel = pcumulativeLabel, individualRoundsLabel = pindividualRoundsLabel, progressionLabel = pprogressionLabel, placementLabel = pplacementLabel, placeLabel = pplaceLabel, pointsLabel = ppointsLabel, roundWinnerLabel = proundWinnerLabel, placeInRoundLabel = pplaceInRoundLabel, placeAfterRoundLabel = pplaceAfterRoundLabel})
    |> required "roundLabel" (jsonDecRoundLabel)
    |> required "teamLabel" (jsonDecTeamLabel)
    |> required "ownPointsLabel" (jsonDecOwnPointsLabel)
@@ -476,6 +500,8 @@ jsonDecLabels =
    |> required "placeLabel" (jsonDecPlaceLabel)
    |> required "pointsLabel" (jsonDecPointsLabel)
    |> required "roundWinnerLabel" (jsonDecRoundWinnerLabel)
+   |> required "placeInRoundLabel" (jsonDecPlaceInRoundLabel)
+   |> required "placeAfterRoundLabel" (jsonDecPlaceAfterRoundLabel)
 
 jsonEncLabels : Labels -> Value
 jsonEncLabels  val =
@@ -495,6 +521,8 @@ jsonEncLabels  val =
    , ("placeLabel", jsonEncPlaceLabel val.placeLabel)
    , ("pointsLabel", jsonEncPointsLabel val.pointsLabel)
    , ("roundWinnerLabel", jsonEncRoundWinnerLabel val.roundWinnerLabel)
+   , ("placeInRoundLabel", jsonEncPlaceInRoundLabel val.placeInRoundLabel)
+   , ("placeAfterRoundLabel", jsonEncPlaceAfterRoundLabel val.placeAfterRoundLabel)
    ]
 
 
