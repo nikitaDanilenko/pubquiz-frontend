@@ -175,7 +175,7 @@ viewWith baseOf mode commitButtonText md =
         div [] [loadingSymbol]
 
     else
-        div [ id "creatingQuizView" ]
+        div [ id "quizSettingsView" ]
             (QuizValues.mkCreationForm Value mode (baseOf md).quizIdentifier (baseOf md).quizSettings createOnEnter (baseOf md).quizSettings.labels
                 ++ [ button
                         [ class "button"

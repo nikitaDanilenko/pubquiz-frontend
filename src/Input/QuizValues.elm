@@ -92,11 +92,11 @@ mkCreationForm wrapMsg mode quizIdentifier quizSettings createOnEnter labels =
         ]
     , div [ id "questionArea" ]
         [ mkQuestionsForm (\i -> SetQuestions i >> wrapMsg) createOnEnter quizSettings.questionsInQuiz ]
-    , div [ id "teamNumberArea" ]
-        (label [ for "teamNumber" ] [ text "Number of teams" ]
-            :: teamNumberAdjustment mode quizSettings.numberOfTeams wrapMsg createOnEnter
-        )
-    , div [ id "labelsForm" ]
+    ]
+    ++
+      (teamNumberAdjustment mode (label [ class "teamNumber" ] [ text "Number of teams" ]) quizSettings.numberOfTeams wrapMsg createOnEnter)
+    ++
+    [ div [ id "labelsForm" ]
         (List.map (\( lbl, fld, dft ) -> mkInput lbl fld dft) associations)
     ]
 
@@ -106,8 +106,8 @@ type Mode
     | Update
 
 
-teamNumberAdjustment : Mode -> Int -> (Msg -> msg) -> Html.Attribute msg -> List (Html msg)
-teamNumberAdjustment mode numberOfTeams wrapMsg createOnEnter =
+teamNumberAdjustment : Mode -> Html msg -> Int -> (Msg -> msg) -> Html.Attribute msg -> List (Html msg)
+teamNumberAdjustment mode teamNumberLabel numberOfTeams wrapMsg createOnEnter =
     let
         create =
             [ input
@@ -122,20 +122,24 @@ teamNumberAdjustment mode numberOfTeams wrapMsg createOnEnter =
             ]
 
         update =
-            [ text (String.fromInt numberOfTeams)
-            , button
-                [ class "addTeamButton"
-                , onClick (wrapMsg (SetTeamsInQuiz (String.fromInt (1 + numberOfTeams))))
+            [ div [ id "increaseTeamNumber" ]
+                [ label [ class "teamNumber" ] [ text (String.fromInt numberOfTeams) ]
+                , button
+                    [ class "addTeamButton"
+                    , onClick (wrapMsg (SetTeamsInQuiz (String.fromInt (1 + numberOfTeams))))
+                    ]
+                    [ text "Add a team" ]
                 ]
-                [ text "Add a team" ]
             ]
     in
     case mode of
         Create ->
-            create
+            [ div [] (teamNumberLabel :: create) ]
 
         Update ->
-            update
+            [ div [] [ teamNumberLabel ]
+            , div [] update
+            ]
 
 
 createIdByField : LabelsField -> String

@@ -1,4 +1,4 @@
-.button, .lockButton, .quizButton, .newQuizButton, .newUserButton, .backButton {
+.button, .lockButton, .quizButton, .newQuizButton, .newUserButton, .backButton, .addTeamButton {
   background-color: rgb(150, 150, 150);
   border: none;
   border-radius: 4px;
@@ -24,11 +24,15 @@
 .button:enabled:hover {
   background-color: rgb(50, 180, 50);
 }
-
+  
 .button:disabled {
   color: rgb(100, 100, 100);
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.addTeamButton:hover {
+  background-color: rgb(255, 165, 00);
 }
 
 label, input {
@@ -40,7 +44,7 @@ label, input {
 }
 
 		
-#passwordField, #userField, #creatingUser, #creatingPassword1, #creatingPassword2, #creatingQuizView {
+#passwordField, #userField, #creatingUser, #creatingPassword1, #creatingPassword2, #quizSettingsView {
   margin-top: 1%;
   margin-bottom: 1%;
 }
@@ -138,19 +142,12 @@ body {
   font-style: italic;
 }
 
-.roundNumber {
+.roundNumber, .teamNumber, .addTeamButton {
   display: inline-block;
   padding: 5pt;
 }
 
-#teamsInQuiz > label {
-  font-size: 16pt;
-  margin-top: 5pt;
-  margin-bottom: 5pt;
-  display: inline-block;
-}
-
-.roundNumber {
+.roundNumber, .teamNumber {
   font-size: 12pt;
 }
 
@@ -168,20 +165,16 @@ body {
   display: inline-block;
 }
 
-#creatingQuizView {
+#quizSettingsView {
   text-align: center;
 }
 
-#creatingQuizView label, #creatingQuizView input, #editingLabelsView label, #editingLabelsView input {
+#quizSettingsView label, #quizSettingsView input {
   width: 20%;
   display: inline-block;
 }
 
-#creatingQuizView label {
-  text-align: left;
-}
-
-#creatingQuizView input {
+#quizSettingsView input {
   text-align: right;
 }
 
@@ -223,8 +216,6 @@ div {
   padding-top: 10pt;
   padding-bottom: 10pt;
 }
-
-
 
 #quizTitle, #ownPoints {
   text-align: center;
@@ -317,6 +308,10 @@ table {
 
 .quizInfoButton:hover {
   background-color: rgb(100, 149, 237);
+}
+
+#singleQuiz div, #quizSettingsView div, #creatingUserView div {
+  padding-top: .25%;
 }
 
 @media screen and (orientation: portrait) {
