@@ -290,6 +290,8 @@ defaultLabels =
     , placeLabel = "Platz"
     , pointsLabel = "Punkte"
     , roundWinnerLabel = "Rundensieger"
+    , placeInRoundLabel = "Platz in der Runde"
+    , placeAfterRoundLabel = "Platz nach der Runde"
     }
 
 
