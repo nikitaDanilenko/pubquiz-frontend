@@ -121,8 +121,15 @@ label, input {
 
 .teamPointsArea > .input > .labeledInput,
 #maxPointsArea > .labeledInput,
-#teamsInQuiz > input   {
-  max-width: 32pt;
+#teamsInQuiz > input {
+  max-width: 45pt;
+}
+
+.teamPointsArea .label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 65pt;
 }
 
 #questionArea .questionSpinner {
