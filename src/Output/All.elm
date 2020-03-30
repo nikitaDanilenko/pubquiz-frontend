@@ -1,11 +1,15 @@
 module Output.All exposing (..)
 
+import Bootstrap.Button as Button exposing (primary)
+import Bootstrap.ButtonGroup exposing (large, radioButton, radioButtonGroup)
 import Common.Constants exposing (quizIdParam)
+import Common.Sorting as Sorting exposing (SortBy(..), SortType(..), Sorting, selectAndSort)
 import Common.Types exposing (Labels, QuizInfo, TeamQuery)
 import Common.Util as Util exposing (ErrorOr, getAllWith)
 import Common.WireUtil exposing (linkButton)
-import Html exposing (Html, div)
+import Html exposing (Html, div, input, label, text)
 import Html.Attributes exposing (class, id, value)
+import Html.Events exposing (onClick, onInput)
 import Output.OutputUtil exposing (fragmentUrl, mkFullQuizName)
 
 
@@ -13,6 +17,7 @@ type alias Model =
     { teamQueryCandidate : Maybe TeamQuery
     , labelsCandidate : Maybe Labels
     , quizInfos : List QuizInfo
+    , sorting : Sorting
     }
 
 
@@ -21,19 +26,66 @@ updateQuizInfos model quizInfos =
     { model | quizInfos = quizInfos }
 
 
+updateSorting : Model -> Sorting -> Model
+updateSorting model sorting =
+    { model | sorting = sorting }
+
+
 type Msg
     = GotAllQuizzes (ErrorOr (List QuizInfo))
+    | SetSortType SortType
+    | SetSortBy SortBy
+    | SetSearchText String
 
 
 init : Maybe Labels -> Maybe TeamQuery -> ( Model, Cmd Msg )
 init mLabels mTeamQuery =
-    ( { teamQueryCandidate = mTeamQuery, labelsCandidate = mLabels, quizInfos = [] }, getAllQuizzes )
+    ( { teamQueryCandidate = mTeamQuery, labelsCandidate = mLabels, quizInfos = [], sorting = Sorting.default }, getAllQuizzes )
 
 
 view : Model -> Html Msg
 view model =
-    div [ id "allQuizzes" ]
-        (List.map mkQuizInfoButton model.quizInfos)
+    let
+        byName =
+            SetSortBy Name
+
+        byDate =
+            SetSortBy Date
+
+        ascending =
+            SetSortType Ascending
+
+        descending =
+            SetSortType Descending
+    in
+    div [ id "allQuizzesVies" ]
+        [ div [ id "sortingArea" ]
+            [ radioButtonGroup [ large ]
+                [ radioButton (model.sorting.sortBy == Name)
+                    [ primary, Button.onClick byName ]
+                    [ label [ onClick byName ] [ text (special 9872) ] ]
+                , radioButton (model.sorting.sortBy == Date)
+                    [ primary, Button.onClick byDate ]
+                    [ label [ onClick byDate ] [ text (special 128197) ] ]
+                ]
+            , radioButtonGroup [ large ]
+                [ radioButton (model.sorting.sortType == Ascending)
+                    [ primary, Button.onClick ascending ]
+                    [ label [ onClick ascending ] [ text (special 8593) ] ]
+                , radioButton (model.sorting.sortType == Descending)
+                    [ primary, Button.onClick descending ]
+                    [ label [ onClick descending ] [ text (special 8595) ] ]
+                ]
+            , input [ onInput SetSearchText ] []
+            ]
+        , div [ id "allQuizzes" ]
+            (List.map mkQuizInfoButton (selectAndSort model.sorting model.quizInfos))
+        ]
+
+
+special : Int -> String
+special =
+    Char.fromCode >> String.fromChar
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -41,6 +93,15 @@ update msg model =
     case msg of
         GotAllQuizzes quizInfosCandidate ->
             ( Util.foldResult model (updateQuizInfos model) quizInfosCandidate, Cmd.none )
+
+        SetSortType sortType ->
+            ( Sorting.updateSortType model.sorting sortType |> updateSorting model, Cmd.none )
+
+        SetSortBy sortBy ->
+            ( Sorting.updateSortBy model.sorting sortBy |> updateSorting model, Cmd.none )
+
+        SetSearchText searchText ->
+            ( Sorting.updateSearchText model.sorting searchText |> updateSorting model, Cmd.none )
 
 
 mkQuizInfoButton : QuizInfo -> Html Msg
