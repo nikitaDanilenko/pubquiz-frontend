@@ -6,6 +6,7 @@ import Common.WireUtil exposing (addFeedbackLabel, errorToString)
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
+import Output.OutputUtil as OutputUtil
 
 
 type alias Model =
@@ -49,7 +50,7 @@ view md =
                 [ class "quizButton"
                 , onClick (StartPointInput quizInfo)
                 ]
-                [ text quizInfo.quizIdentifier.name ]
+                [ text (OutputUtil.mkFullQuizName quizInfo.quizIdentifier) ]
     in
     div [ id "quizSelectionMain" ]
         [ div [ id "selectExistingQuizzesMain" ]

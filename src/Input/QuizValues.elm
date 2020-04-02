@@ -4,9 +4,10 @@ import Basics
 import Common.Copy exposing (LabelsField(..))
 import Common.Types exposing (Activity(..), Labels, NumberOfQuestions, Place, QuestionsInQuiz, QuestionsInRound, QuizDate, QuizIdentifier, QuizInfo, QuizName, QuizSettings, RoundNumber)
 import Html exposing (Html, button, div, input, label, text)
-import Html.Attributes exposing (class, for, id, min, placeholder, step, type_, value)
+import Html.Attributes exposing (class, disabled, for, id, min, placeholder, step, type_, value)
 import Html.Events exposing (onClick, onInput)
 import List.Extra exposing (setIf)
+import Output.OutputUtil as OutputUtil
 import Parser exposing (int, run)
 
 
@@ -72,6 +73,10 @@ mkCreationForm wrapMsg mode quizIdentifier quizSettings createOnEnter labels =
     [ mkIdentifierPart "quizNameDiv" "quizName" "Quiz name" "text" "e.g. Quiz" quizIdentifier.name (SetQuizName >> wrapMsg)
     , mkIdentifierPart "quizDateDiv" "quizDate" "Quiz date" "date" "e.g. 2020-01-01" quizIdentifier.date (SetQuizDate >> wrapMsg)
     , mkIdentifierPart "quizPlaceDiv" "quizPlace" "Quiz place" "text" "e.g. Cheers" quizIdentifier.place (SetQuizPlace >> wrapMsg)
+    , div [ id "quizTitleDiv" ]
+        [ label [ id "fullQuizTitleLabel" ] [ text "Full quiz title" ]
+        , label [ id "fullQuizTitle" ] [ text (OutputUtil.mkFullQuizName quizIdentifier) ]
+        ]
     , div [ id "roundsNumberDiv" ]
         [ label [ for "roundsNumber" ]
             [ text "Number of regular rounds" ]
@@ -93,12 +98,10 @@ mkCreationForm wrapMsg mode quizIdentifier quizSettings createOnEnter labels =
     , div [ id "questionArea" ]
         [ mkQuestionsForm (\i -> SetQuestions i >> wrapMsg) createOnEnter quizSettings.questionsInQuiz ]
     ]
-    ++
-      (teamNumberAdjustment mode (label [ class "teamNumber" ] [ text "Number of teams" ]) quizSettings.numberOfTeams wrapMsg createOnEnter)
-    ++
-    [ div [ id "labelsForm" ]
-        (List.map (\( lbl, fld, dft ) -> mkInput lbl fld dft) associations)
-    ]
+        ++ teamNumberAdjustment mode (label [ class "teamNumber" ] [ text "Number of teams" ]) quizSettings.numberOfTeams wrapMsg createOnEnter
+        ++ [ div [ id "labelsForm" ]
+                (List.map (\( lbl, fld, dft ) -> mkInput lbl fld dft) associations)
+           ]
 
 
 type Mode
