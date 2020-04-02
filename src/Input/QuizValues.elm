@@ -4,7 +4,7 @@ import Basics
 import Common.Copy exposing (LabelsField(..))
 import Common.Types exposing (Activity(..), Labels, NumberOfQuestions, Place, QuestionsInQuiz, QuestionsInRound, QuizDate, QuizIdentifier, QuizInfo, QuizName, QuizSettings, RoundNumber)
 import Html exposing (Html, button, div, input, label, text)
-import Html.Attributes exposing (class, disabled, for, id, min, placeholder, step, type_, value)
+import Html.Attributes exposing (class, for, id, min, placeholder, step, type_, value)
 import Html.Events exposing (onClick, onInput)
 import List.Extra exposing (setIf)
 import Output.OutputUtil as OutputUtil
