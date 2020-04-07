@@ -100,6 +100,9 @@ getQuizSettingsApi = mkPath [quizApi, "getQuizSettings"]
 allApi : String
 allApi = mkPath [quizApi, "all"]
 
+allActiveApi : String
+allActiveApi = mkPath [quizApi, "allActive"]
+
 loginApi : String
 loginApi = mkPath [apiLocation, "secrets"]
 

@@ -1,6 +1,6 @@
 module Common.Util exposing (..)
 
-import Common.Constants exposing (allApi, quizIdParam)
+import Common.Constants exposing (quizIdParam)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamRating, jsonDecQuizInfo, jsonEncDbQuizId)
 import Http exposing (Error)
 import Json.Decode as Decode
@@ -79,10 +79,10 @@ getMsgWith encoder param path action decoder v =
         }
 
 
-getAllWith : (Result Error (List QuizInfo) -> msg) -> Cmd msg
-getAllWith mkMsg =
+getAllWith : String -> (Result Error (List QuizInfo) -> msg) -> Cmd msg
+getAllWith pathToAllApi mkMsg =
     Http.get
-        { url = allApi
+        { url = pathToAllApi
         , expect = Http.expectJson mkMsg (Decode.list jsonDecQuizInfo)
         }
 

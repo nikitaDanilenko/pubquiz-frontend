@@ -1,5 +1,6 @@
 module Input.Selection exposing (..)
 
+import Common.Constants exposing (allActiveApi)
 import Common.Types exposing (DbQuizId, QuizInfo, QuizRatings)
 import Common.Util exposing (ErrorOr, getAllWith)
 import Common.WireUtil exposing (addFeedbackLabel, errorToString)
@@ -37,7 +38,7 @@ init =
     ( { quizzes = []
       , feedback = ""
       }
-    , getAllWith GotAll
+    , getAllWith allActiveApi GotAll
     )
 
 
