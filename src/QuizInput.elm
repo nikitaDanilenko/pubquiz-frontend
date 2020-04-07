@@ -281,6 +281,6 @@ stepUpdateQuiz model ( updateQuiz, cmd ) =
 wrapView : Html Msg -> Html Msg
 wrapView innerView =
     div [ id "mainPage" ]
-        [ node "link" [ rel "stylesheet", type_ "text/css", href "style.css" ] []
+        [ node "link" [ rel "stylesheet", type_ "text/css", href "../styles/style.css" ] []
         , innerView
         ]
