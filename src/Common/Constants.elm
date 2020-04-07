@@ -8,15 +8,16 @@ serverBackendPort : String
 -- serverBackendPort = "8000"
 serverBackendPort = "9000"
 
--- todo: Adjust this port.
-serverFrontendPort : String
-serverFrontendPort = "9876"
-
 serverLocationWithBackendPort : String
 serverLocationWithBackendPort = String.join ":" [serverLocation, serverBackendPort]
 
+localBuild : Bool
+localBuild = True
+
 serverLocationWithFrontendPort : String
-serverLocationWithFrontendPort = String.join ":" [serverLocation, serverFrontendPort]
+serverLocationWithFrontendPort =
+  let serverFrontendPort = "9876"
+  in String.join ":" (serverLocation :: if localBuild then [serverFrontendPort] else [])
 
 apiLocation : String
 apiLocation = mkPath [ serverLocationWithBackendPort, "api" ]
