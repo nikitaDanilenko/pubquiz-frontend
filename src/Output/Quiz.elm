@@ -139,7 +139,10 @@ view model =
                         []
 
             colors =
-                mkColors (List.length model.quizRatings.header)
+                model.quizRatings.header
+                  |> List.filter (.teamInfoActivity >> QuizValues.isActive)
+                  |> List.length
+                  |> mkColors
         in
         div [ id "quizView" ]
             (div [ id "quizTitle" ] [ label [ for "quizTitleLabel" ] [ text (mkFullQuizName model.quizInfo.quizIdentifier) ] ]
