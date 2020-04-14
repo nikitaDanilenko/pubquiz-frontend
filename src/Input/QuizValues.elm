@@ -70,13 +70,14 @@ mkCreationForm wrapMsg mode quizIdentifier quizSettings createOnEnter labels =
                     []
                 ]
     in
-    [ mkIdentifierPart "quizNameDiv" "quizName" "Quiz name" "text" "e.g. Quiz" quizIdentifier.name (SetQuizName >> wrapMsg)
+    [ div [ id "fullQuizTitleLabel" ]
+        [ label [] [ text "Full quiz title" ] ]
+    , div [ id "fullQuizTitle" ]
+        [ label [] [ text (OutputUtil.mkFullQuizName quizIdentifier) ]
+        ]
+    , mkIdentifierPart "quizNameDiv" "quizName" "Quiz name" "text" "e.g. Quiz" quizIdentifier.name (SetQuizName >> wrapMsg)
     , mkIdentifierPart "quizDateDiv" "quizDate" "Quiz date" "date" "e.g. 2020-01-01" quizIdentifier.date (SetQuizDate >> wrapMsg)
     , mkIdentifierPart "quizPlaceDiv" "quizPlace" "Quiz place" "text" "e.g. Cheers" quizIdentifier.place (SetQuizPlace >> wrapMsg)
-    , div [ id "quizTitleDiv" ]
-        [ label [ id "fullQuizTitleLabel" ] [ text "Full quiz title" ]
-        , label [ id "fullQuizTitle" ] [ text (OutputUtil.mkFullQuizName quizIdentifier) ]
-        ]
     , div [ id "roundsNumberDiv" ]
         [ label [ for "roundsNumber" ]
             [ text "Number of regular rounds" ]

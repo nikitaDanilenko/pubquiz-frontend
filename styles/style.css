@@ -136,7 +136,7 @@ label, input {
   max-width: 32pt;
 }
 
-#editingLabel, .link {
+#editingLabel, .link, #fullQuizTitleLabel, #fullQuizTitle {
   color: rgb(100, 149, 237);
 }
 
@@ -144,7 +144,7 @@ body {
   font-family: arial;
 }
 
-#editingLabel {
+#editingLabel, #fullQuizTitleLabel, #fullQuizTitle {
   font-size: 24pt;
   font-style: italic;
 }
@@ -181,12 +181,9 @@ body {
   display: inline-block;
 }
 
-#fullQuizTitle {
-  text-align: right;
-}
+#fullQuizTitle, #fullQuizTitleLabel {
+  text-align: center;
 
-#fullQuizTitleLabel {
-  text-align: left;
 }
 
 #quizSettingsView input {
