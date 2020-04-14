@@ -1,9 +1,10 @@
 module Output.Table exposing (Model, Msg, init, update, view)
 
 import Color.Convert
-import Common.Constants exposing (quizIdParam, teamQueryParam, teamTableApi)
-import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine, TeamQuery, TeamTable, TeamTableInfo, jsonDecTeamTableInfo, jsonEncTeamQuery)
-import Common.Util as Util exposing (ErrorOr, getMsgWith)
+import Common.Constants exposing (getQuizRatingsApi, quizIdParam, teamQueryParam, teamTableApi)
+import Common.QuizRatings as QuizRatings
+import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine, TeamQuery, TeamTable, TeamTableInfo, jsonDecQuizRatings, jsonDecTeamTableInfo, jsonEncTeamQuery)
+import Common.Util as Util exposing (ErrorOr, getMsg, getMsgWith)
 import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, linkButton, loadingSymbol, useOrFetchWith)
 import Html exposing (Html, div, h1, label, table, td, text, th, tr)
 import Html.Attributes exposing (class, for, id, style, value)
@@ -17,6 +18,7 @@ type alias Model =
     { labels : Labels
     , teamQuery : TeamQuery
     , teamTableInfo : TeamTableInfo
+    , quizRatings : QuizRatings
     , quizInfo : QuizInfo
     , status : Status
     }
@@ -43,6 +45,11 @@ updateQuizInfo model quizInfo =
         |> (\m -> { m | quizInfo = quizInfo })
 
 
+updateQuizRatings : Model -> QuizRatings -> Model
+updateQuizRatings model quizRatings =
+    { model | quizRatings = quizRatings }
+
+
 updateStatus : Model -> Status -> Model
 updateStatus model status =
     { model | status = status }
@@ -52,12 +59,13 @@ type alias Status =
     { labelsSet : Bool
     , quizInfoSet : Bool
     , teamTableInfoSet : Bool
+    , quizRatingsSet : Bool
     }
 
 
 isFinished : Status -> Bool
 isFinished s =
-    List.all identity [ s.labelsSet, s.quizInfoSet, s.teamTableInfoSet ]
+    List.all identity [ s.labelsSet, s.quizInfoSet, s.teamTableInfoSet, s.quizRatingsSet ]
 
 
 updateLabelsSet : Status -> Bool -> Status
@@ -85,15 +93,18 @@ init mLabels mQuizInfo teamQuery =
             , teamTableInfoNumberOfTeams = 0
             , teamTableInfoTeamNumber = 0
             }
+      , quizRatings = QuizRatings.default
       , quizInfo = Maybe.withDefault QuizValues.defaultQuizInfo mQuizInfo
       , status =
             { teamTableInfoSet = False
+            , quizRatingsSet = False
             , quizInfoSet = Util.isDefined mQuizInfo
             , labelsSet = Util.isDefined mLabels
             }
       }
     , Cmd.batch
         [ getTeamTableInfo teamQuery
+        , getQuizRatings teamQuery.teamQueryQuizId
         , useOrFetchWith (getLabelsWith GotLabels) mLabels teamQuery.teamQueryQuizId
         , useOrFetchWith (getQuizInfoWith GotQuizInfo) mQuizInfo teamQuery.teamQueryQuizId
         ]
@@ -104,6 +115,7 @@ type Msg
     = GotTeamTableInfo (ErrorOr TeamTableInfo)
     | GotLabels (ErrorOr Labels)
     | GotQuizInfo (ErrorOr QuizInfo)
+    | GotQuizRatings (ErrorOr QuizRatings)
 
 
 view : Model -> Html Msg
@@ -139,6 +151,8 @@ view model =
                         , th [] [ label [ for "ownPointsLabel" ] [ text model.labels.ownPointsLabel ] ]
                         , th [] [ label [ for "maxReachedLabel" ] [ text model.labels.maxReachedLabel ] ]
                         , th [] [ label [ for "maxReachableLabel" ] [ text model.labels.maxReachableLabel ] ]
+                        , th [] [ label [ for "placeInRound" ] [ text model.labels.placeInRoundLabel ] ]
+                        , th [] [ label [ for "placeAfterRound" ] [ text model.labels.placeAfterRoundLabel ] ]
                         ]
                         :: List.map mkHTMLLine model.teamTableInfo.teamTable
                     )
@@ -165,6 +179,9 @@ update msg model =
 
                 GotQuizInfo quizInfoCandidate ->
                     Util.foldResult model (updateQuizInfo model) quizInfoCandidate
+
+                GotQuizRatings quizRatingsCandidate ->
+                    Util.foldResult model (updateQuizRatings model) quizRatingsCandidate
     in
     ( newModel, Cmd.none )
 
@@ -197,3 +214,8 @@ mkCell str =
 getTeamTableInfo : TeamQuery -> Cmd Msg
 getTeamTableInfo =
     getMsgWith jsonEncTeamQuery teamQueryParam teamTableApi GotTeamTableInfo jsonDecTeamTableInfo
+
+
+getQuizRatings : DbQuizId -> Cmd Msg
+getQuizRatings =
+    getMsg getQuizRatingsApi GotQuizRatings jsonDecQuizRatings
