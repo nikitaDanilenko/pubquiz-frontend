@@ -17,6 +17,7 @@ import Output.OutputUtil exposing (fragmentUrl)
 type alias Model =
     { labels : Labels
     , teamQuery : TeamQuery
+
     -- todo: Do quizRatings contain all relevant information for the table?
     , teamTableInfo : TeamTableInfo
     , quizRatings : QuizRatings
@@ -48,7 +49,9 @@ updateQuizInfo model quizInfo =
 
 updateQuizRatings : Model -> QuizRatings -> Model
 updateQuizRatings model quizRatings =
-    { model | quizRatings = quizRatings }
+    updateQuizRatingsSet model.status True
+        |> updateStatus model
+        |> (\m -> { m | quizRatings = quizRatings })
 
 
 updateStatus : Model -> Status -> Model
@@ -82,6 +85,11 @@ updateQuizInfoSet status b =
 updateTeamTableInfoSet : Status -> Bool -> Status
 updateTeamTableInfoSet status b =
     { status | teamTableInfoSet = b }
+
+
+updateQuizRatingsSet : Status -> Bool -> Status
+updateQuizRatingsSet status b =
+    { status | quizRatingsSet = b }
 
 
 init : Maybe Labels -> Maybe QuizInfo -> TeamQuery -> ( Model, Cmd Msg )
