@@ -53,9 +53,6 @@ quizRatingsParam = "quizRatings"
 credentialsParam : String
 credentialsParam = "credentials"
 
-teamQueryParam : String
-teamQueryParam = "teamQuery"
-
 userCreationParam : String
 userCreationParam = "userCreation"
 
@@ -91,9 +88,6 @@ getQuizInfoApi = mkPath [quizApi, "getQuizInfo"]
 
 updateQuizApi : String
 updateQuizApi = mkPath [quizApi, "updateQuiz"]
-
-teamTableApi : String
-teamTableApi = mkPath [quizApi, "teamTable"]
 
 getQuizSettingsApi : String
 getQuizSettingsApi = mkPath [quizApi, "getQuizSettings"]
