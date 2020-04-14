@@ -2,8 +2,8 @@ module Output.Table exposing (Model, Msg, init, update, view)
 
 import Color.Convert
 import Common.Constants exposing (getQuizRatingsApi, quizIdParam, teamQueryParam, teamTableApi)
-import Common.QuizRatings as QuizRatings
-import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamLine, TeamQuery, TeamTable, TeamTableInfo, jsonDecQuizRatings, jsonDecTeamTableInfo, jsonEncTeamQuery)
+import Common.QuizRatings as QuizRatings exposing (cumulative)
+import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, Ratings, RoundNumber, TeamLine, TeamNumber, TeamQuery, TeamRating, TeamTable, TeamTableInfo, jsonDecQuizRatings, jsonDecTeamTableInfo, jsonEncTeamQuery)
 import Common.Util as Util exposing (ErrorOr, getMsg, getMsgWith)
 import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, linkButton, loadingSymbol, useOrFetchWith)
 import Html exposing (Html, div, h1, label, table, td, text, th, tr)
@@ -163,7 +163,10 @@ view model =
                         , th [] [ label [ for "placeInRound" ] [ text model.labels.placeInRoundLabel ] ]
                         , th [] [ label [ for "placeAfterRound" ] [ text model.labels.placeAfterRoundLabel ] ]
                         ]
-                        :: List.map mkHTMLLine model.teamTableInfo.teamTable
+                        :: List.map3 mkHTMLLine
+                            model.teamTableInfo.teamTable
+                            (findPositions model.quizRatings.ratings model.teamTableInfo.teamTableInfoTeamNumber)
+                            (findPositions (cumulative model.quizRatings).ratings model.teamTableInfo.teamTableInfoTeamNumber)
                     )
                 ]
             , div [ id "quizRatings" ]
@@ -205,13 +208,51 @@ showStanding ( reached, reachable ) =
     String.join "/" [ String.fromFloat reached, String.fromFloat reachable ]
 
 
-mkHTMLLine : TeamLine -> Html Msg
-mkHTMLLine ti =
+type alias PositionInRound =
+    { roundNumber : RoundNumber
+    , position : Int
+    }
+
+
+type alias Positioned =
+    { position : Int
+    , teams : List TeamNumber
+    }
+
+
+sortPoints : List TeamRating -> List Positioned
+sortPoints teamRatings =
+    teamRatings
+        |> List.sortBy .rating
+        |> Util.groupBy (\x y -> x.rating == y.rating)
+        |> List.reverse
+        |> List.indexedMap (\pos trs -> { position = 1 + pos, teams = List.map .teamNumber trs })
+
+
+findPositions : Ratings -> TeamNumber -> List PositionInRound
+findPositions ratings teamNumber =
+    ratings
+        |> List.map
+            (\( roundNumber, roundRating ) ->
+                { roundNumber = roundNumber
+                , position =
+                    roundRating.points
+                        |> sortPoints
+                        |> List.Extra.find (\positioned -> List.any ((==) teamNumber) positioned.teams)
+                        |> Util.foldMaybe 0 .position
+                }
+            )
+
+
+mkHTMLLine : TeamLine -> PositionInRound -> PositionInRound -> Html Msg
+mkHTMLLine teamLine perRound cumulative =
     tr []
-        [ mkCell (String.fromInt ti.roundNumber)
-        , mkCell (String.fromFloat ti.reachedPoints)
-        , mkCell (String.fromFloat ti.maximumPoints)
-        , mkCell (String.fromFloat ti.reachablePoints)
+        [ mkCell (String.fromInt teamLine.roundNumber)
+        , mkCell (String.fromFloat teamLine.reachedPoints)
+        , mkCell (String.fromFloat teamLine.maximumPoints)
+        , mkCell (String.fromFloat teamLine.reachablePoints)
+        , mkCell (String.fromInt perRound.position)
+        , mkCell (String.fromInt cumulative.position)
         ]
 
 
