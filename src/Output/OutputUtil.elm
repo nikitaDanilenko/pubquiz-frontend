@@ -8,9 +8,9 @@ import Url.Builder exposing (Root(..))
 mkFullQuizName : QuizIdentifier -> String
 mkFullQuizName idf =
     String.join " "
-        [ String.concat [ idf.date, ":" ]
+        [ if String.isEmpty idf.date then "" else String.concat [ idf.date, ":" ]
         , idf.name
-        , String.concat [ "(", idf.place, ")" ]
+        , if String.isEmpty idf.place then "" else String.concat [ "(", idf.place, ")" ]
         ]
 
 
