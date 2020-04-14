@@ -356,13 +356,15 @@ table {
   background-color: rgb(135,206,235);
 }
 
+.sortingButton:active, .sortingButton:focus {
+  outline: 0;
+}
+
 @media screen and (orientation: portrait) {
   
   #initialMain {
     width: 95%;
   }
-
-
 
   #userField, #passwordField {
   }
@@ -405,9 +407,28 @@ table {
    
   .quizInfoButton {
     padding: 10%;
-    width: 75%;
+    width: 95%;
     display: block;
     font-size: 40pt;
   }
+
+  #sortingArea input {
+    display: inline-block;
+    width: 75%;
+  }
+
+  #sortingArea input, #sortingArea label {
+    font-size: 48pt;
+  }
+
+  #sortingArea {
+    margin: auto;
+    width: 90%;
+  }
+
+  .sortingButton {
+    width: 45%;
+    font-size: 48pt;
+}
 
 }
