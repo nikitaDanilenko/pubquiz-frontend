@@ -7,8 +7,8 @@ import Common.Sorting as Sorting exposing (SortBy(..), SortType(..), Sorting, se
 import Common.Types exposing (Labels, QuizInfo, TeamQuery)
 import Common.Util as Util exposing (ErrorOr, getAllWith)
 import Common.WireUtil exposing (linkButton)
-import Html exposing (Html, div, input, label, text)
-import Html.Attributes exposing (class, id, value)
+import Html exposing (Html, button, div, input, label, text)
+import Html.Attributes exposing (class, disabled, id, value)
 import Html.Events exposing (onClick, onInput)
 import Output.OutputUtil exposing (fragmentUrl, mkFullQuizName)
 
@@ -57,26 +57,24 @@ view model =
 
         descending =
             SetSortType Descending
+
+        mkSortingButton action disabledWhen symbol =
+            button [ class "sortingButton", onClick action, disabled disabledWhen ] [ text (special symbol) ]
     in
     div [ id "allQuizzesVies" ]
         [ div [ id "sortingArea" ]
-            [ radioButtonGroup [ large ]
-                [ radioButton (model.sorting.sortBy == Name)
-                    [ primary, Button.onClick byName ]
-                    [ label [ onClick byName ] [ text (special 9872) ] ]
-                , radioButton (model.sorting.sortBy == Date)
-                    [ primary, Button.onClick byDate ]
-                    [ label [ onClick byDate ] [ text (special 128197) ] ]
+            [ div [ id "sortingType" ]
+                [ mkSortingButton byName (model.sorting.sortBy == Name) 9872
+                , mkSortingButton byDate (model.sorting.sortBy == Date) 128197
                 ]
-            , radioButtonGroup [ large ]
-                [ radioButton (model.sorting.sortType == Ascending)
-                    [ primary, Button.onClick ascending ]
-                    [ label [ onClick ascending ] [ text (special 8593) ] ]
-                , radioButton (model.sorting.sortType == Descending)
-                    [ primary, Button.onClick descending ]
-                    [ label [ onClick descending ] [ text (special 8595) ] ]
+            , div [ id "sortingDirection" ]
+                [ mkSortingButton ascending (model.sorting.sortType == Ascending) 8593
+                , mkSortingButton descending (model.sorting.sortType == Descending) 8595
                 ]
-            , input [ onInput SetSearchText ] []
+            , div [ id "searchField" ]
+                [ label [] [ text (special 128269) ]
+                , input [ onInput SetSearchText ] []
+                ]
             ]
         , div [ id "allQuizzes" ]
             (List.map mkQuizInfoButton (selectAndSort model.sorting model.quizInfos))

@@ -329,6 +329,33 @@ table {
   padding-top: .25%;
 }
 
+#sortingArea input {
+  display: inline-block;
+}
+
+#sortingArea {
+  margin: auto;
+  text-align: center;
+  width: 40%;
+}
+
+#sortingArea input[type=radio] {
+  /*width   : 50px;*/
+  display: inline-block;
+
+  /*border: 5px;*/
+    /*width: 50%;*/
+    /*height: 5em;*/
+}
+
+#sortingArea input[type=radio] {
+  display: block;
+}
+
+#sortingType, #sortingDirection {
+  font-size: xx-large;
+}
+
 @media screen and (orientation: portrait) {
   
   #initialMain {
