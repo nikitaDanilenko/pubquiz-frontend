@@ -15,6 +15,7 @@ module Common.WireUtil exposing
     , mkJSONParams
     , mkParams
     , mkPlacementTables
+    , mkPlacement
     , useOrFetchWith
     )
 
@@ -177,7 +178,7 @@ mkPlacementsTableLine wordForPlace wordForPoints teamsRanking =
                 )
             ]
         , td []
-            [ text (String.join ", " teamsRanking.teamNames) ]
+            [ text (String.join ", " (List.map .teamName teamsRanking.teamNamesWithNumbers)) ]
         ]
 
 

@@ -22,8 +22,10 @@ roundRankingPerTeamToPointsPerTeam =
 type alias RoundRankings =
     List RoundRankingPerTeam
 
+
 type alias RankingsWithSorted =
-  { sortedHeader : Header, sortedRatings : Ratings, perRound : RoundRankings, cumulative : RoundRankings }
+    { sortedHeader : Header, sortedRatings : Ratings, perRound : RoundRankings, cumulative : RoundRankings }
+
 
 ratingsToRankings : QuizRatings -> RankingsWithSorted
 ratingsToRankings quizRatings =
@@ -101,10 +103,16 @@ addNamedTeamRatings tr1 tr2 =
     { tr1 | rating = tr1.rating + tr2.rating }
 
 
+type alias TeamNameWithNumber =
+    { teamName : TeamName
+    , teamNumber : TeamNumber
+    }
+
+
 type alias TeamsRanking =
     { position : Int
     , points : Float
-    , teamNames : List TeamName
+    , teamNamesWithNumbers : List TeamNameWithNumber
     }
 
 
@@ -148,6 +156,6 @@ rankingToPlacement numberedTeamRatings =
                 |> List.sortBy rating
                 |> List.reverse
                 |> Util.groupBy (\x y -> rating x == rating y)
-                |> List.indexedMap (\i cs -> { position = 1 + i, points = pointsOf cs, teamNames = List.map .teamName cs })
+                |> List.indexedMap (\i cs -> { position = 1 + i, points = pointsOf cs, teamNamesWithNumbers = List.map (\c -> { teamName = c.teamName, teamNumber = c.teamRating.teamNumber }) cs })
     in
     placed
