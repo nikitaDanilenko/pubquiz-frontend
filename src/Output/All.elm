@@ -1,7 +1,5 @@
 module Output.All exposing (..)
 
-import Bootstrap.Button as Button exposing (primary)
-import Bootstrap.ButtonGroup exposing (large, radioButton, radioButtonGroup)
 import Common.Constants exposing (allApi, quizIdParam)
 import Common.Sorting as Sorting exposing (SortBy(..), SortType(..), Sorting, selectAndSort)
 import Common.Types exposing (Labels, QuizInfo, TeamQuery)
