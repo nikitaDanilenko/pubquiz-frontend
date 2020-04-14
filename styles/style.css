@@ -331,6 +331,7 @@ table {
 
 #sortingArea input {
   display: inline-block;
+  width: 70%;
 }
 
 #sortingArea {
@@ -339,21 +340,23 @@ table {
   width: 40%;
 }
 
-#sortingArea input[type=radio] {
-  /*width   : 50px;*/
-  display: inline-block;
-
-  /*border: 5px;*/
-    /*width: 50%;*/
-    /*height: 5em;*/
-}
-
-#sortingArea input[type=radio] {
-  display: block;
-}
-
-#sortingType, #sortingDirection {
+.sortingButton {
   font-size: xx-large;
+  border: none;
+
+  text-decoration: none;
+  text-align: center;
+  display: inline-block;
+  vertical-align: center;
+
+  background-color: rgb(255,165,0);
+  color: white;
+
+  width: 25%;
+}
+
+.sortingButton:disabled {
+  background-color: rgb(135,206,235);
 }
 
 @media screen and (orientation: portrait) {
@@ -365,16 +368,11 @@ table {
 
 
   #userField, #passwordField {
-    /*display: block;*/
-    /*display: inline-table;*/
-    /*float: top;*/
-    /*width: 100%;*/
   }
 
   #initialMain label {
     width: 100%;
     display: block;
-    /*float: top;*/
   }
 
   #userField input, #passwordField input {
