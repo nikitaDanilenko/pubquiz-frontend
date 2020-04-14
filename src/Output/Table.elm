@@ -17,6 +17,7 @@ import Output.OutputUtil exposing (fragmentUrl)
 type alias Model =
     { labels : Labels
     , teamQuery : TeamQuery
+    -- todo: Do quizRatings contain all relevant information for the table?
     , teamTableInfo : TeamTableInfo
     , quizRatings : QuizRatings
     , quizInfo : QuizInfo
