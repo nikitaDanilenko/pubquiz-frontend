@@ -1,10 +1,11 @@
 module Output.Table exposing (Model, Msg, init, update, view)
 
+import Basics.Extra exposing (uncurry)
 import Color.Convert
-import Common.Constants exposing (getQuizRatingsApi, quizIdParam, teamQueryParam, teamTableApi)
+import Common.Constants exposing (getQuizRatingsApi, quizIdParam)
 import Common.QuizRatings as QuizRatings exposing (cumulative)
-import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, Ratings, RoundNumber, TeamLine, TeamNumber, TeamQuery, TeamRating, TeamTable, TeamTableInfo, jsonDecQuizRatings, jsonDecTeamTableInfo, jsonEncTeamQuery)
-import Common.Util as Util exposing (ErrorOr, getMsg, getMsgWith)
+import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, Ratings, RoundNumber, RoundRating, TeamLine, TeamNumber, TeamQuery, TeamRating, TeamTable, TeamTableInfo, jsonDecQuizRatings)
+import Common.Util as Util exposing (ErrorOr, getMsg)
 import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, linkButton, loadingSymbol, useOrFetchWith)
 import Html exposing (Html, div, h1, label, table, td, text, th, tr)
 import Html.Attributes exposing (class, for, id, style, value)
@@ -17,9 +18,6 @@ import Output.OutputUtil exposing (fragmentUrl)
 type alias Model =
     { labels : Labels
     , teamQuery : TeamQuery
-
-    -- todo: Do quizRatings contain all relevant information for the table?
-    , teamTableInfo : TeamTableInfo
     , quizRatings : QuizRatings
     , quizInfo : QuizInfo
     , status : Status
@@ -31,13 +29,6 @@ updateLabels model labels =
     updateLabelsSet model.status True
         |> updateStatus model
         |> (\m -> { m | labels = labels })
-
-
-updateTeamTableInfo : Model -> TeamTableInfo -> Model
-updateTeamTableInfo model teamTableInfo =
-    updateTeamTableInfoSet model.status True
-        |> updateStatus model
-        |> (\m -> { m | teamTableInfo = teamTableInfo })
 
 
 updateQuizInfo : Model -> QuizInfo -> Model
@@ -62,14 +53,13 @@ updateStatus model status =
 type alias Status =
     { labelsSet : Bool
     , quizInfoSet : Bool
-    , teamTableInfoSet : Bool
     , quizRatingsSet : Bool
     }
 
 
 isFinished : Status -> Bool
 isFinished s =
-    List.all identity [ s.labelsSet, s.quizInfoSet, s.teamTableInfoSet, s.quizRatingsSet ]
+    List.all identity [ s.labelsSet, s.quizInfoSet, s.quizRatingsSet ]
 
 
 updateLabelsSet : Status -> Bool -> Status
@@ -82,38 +72,63 @@ updateQuizInfoSet status b =
     { status | quizInfoSet = b }
 
 
-updateTeamTableInfoSet : Status -> Bool -> Status
-updateTeamTableInfoSet status b =
-    { status | teamTableInfoSet = b }
-
-
 updateQuizRatingsSet : Status -> Bool -> Status
 updateQuizRatingsSet status b =
     { status | quizRatingsSet = b }
+
+
+teamTableInfoOfModel : Model -> TeamTableInfo
+teamTableInfoOfModel model =
+    teamTableInfoWith model.labels.teamLabel model.teamQuery model.quizRatings
+
+
+teamTableInfoWith : String -> TeamQuery -> QuizRatings -> TeamTableInfo
+teamTableInfoWith wordForTeam teamQuery quizRatings =
+    { teamTableInfoTeamName =
+        quizRatings.header
+            |> List.Extra.find (\teamInfo -> teamInfo.teamInfoNumber == teamQuery.teamQueryTeamNumber)
+            |> Util.foldMaybe
+                (String.join " " [ wordForTeam, String.fromInt teamQuery.teamQueryTeamNumber ])
+                .teamInfoName
+    , teamTableInfoNumberOfTeams =
+        quizRatings.header
+            |> List.filter (.teamInfoActivity >> QuizValues.isActive)
+            |> List.length
+    , teamTableInfoTeamNumber = teamQuery.teamQueryTeamNumber
+    , teamTable =
+        List.map (uncurry (roundRatingToTeamLine teamQuery.teamQueryTeamNumber)) quizRatings.ratings
+    }
+
+
+roundRatingToTeamLine : TeamNumber -> RoundNumber -> RoundRating -> TeamLine
+roundRatingToTeamLine teamNumber roundNumber roundRating =
+    { roundNumber = roundNumber
+    , reachedPoints =
+        roundRating.points
+            |> List.Extra.find (\teamRating -> teamRating.teamNumber == teamNumber)
+            |> Util.foldMaybe 0 .rating
+    , maximumPoints =
+        roundRating.points
+            |> List.Extra.maximumBy .rating
+            |> Util.foldMaybe 0 .rating
+    , reachablePoints = roundRating.reachableInRound
+    }
 
 
 init : Maybe Labels -> Maybe QuizInfo -> TeamQuery -> ( Model, Cmd Msg )
 init mLabels mQuizInfo teamQuery =
     ( { labels = Maybe.withDefault QuizValues.defaultLabels mLabels
       , teamQuery = teamQuery
-      , teamTableInfo =
-            { teamTable = []
-            , teamTableInfoTeamName = ""
-            , teamTableInfoNumberOfTeams = 0
-            , teamTableInfoTeamNumber = 0
-            }
       , quizRatings = QuizRatings.default
       , quizInfo = Maybe.withDefault QuizValues.defaultQuizInfo mQuizInfo
       , status =
-            { teamTableInfoSet = False
-            , quizRatingsSet = False
+            { quizRatingsSet = False
             , quizInfoSet = Util.isDefined mQuizInfo
             , labelsSet = Util.isDefined mLabels
             }
       }
     , Cmd.batch
-        [ getTeamTableInfo teamQuery
-        , getQuizRatings teamQuery.teamQueryQuizId
+        [ getQuizRatings teamQuery.teamQueryQuizId
         , useOrFetchWith (getLabelsWith GotLabels) mLabels teamQuery.teamQueryQuizId
         , useOrFetchWith (getQuizInfoWith GotQuizInfo) mQuizInfo teamQuery.teamQueryQuizId
         ]
@@ -121,8 +136,7 @@ init mLabels mQuizInfo teamQuery =
 
 
 type Msg
-    = GotTeamTableInfo (ErrorOr TeamTableInfo)
-    | GotLabels (ErrorOr Labels)
+    = GotLabels (ErrorOr Labels)
     | GotQuizInfo (ErrorOr QuizInfo)
     | GotQuizRatings (ErrorOr QuizRatings)
 
@@ -134,21 +148,24 @@ view model =
 
     else
         let
+            teamTableInfo =
+                teamTableInfoOfModel model
+
             colors =
-                mkColors model.teamTableInfo.teamTableInfoNumberOfTeams
+                mkColors teamTableInfo.teamTableInfoNumberOfTeams
 
             colorSetting =
                 Util.foldMaybe []
                     (\c -> [ style "color" (Color.Convert.colorToCssRgba c) ])
-                    (List.Extra.getAt model.teamTableInfo.teamTableInfoTeamNumber colors)
+                    (List.Extra.getAt teamTableInfo.teamTableInfoTeamNumber colors)
         in
         div [ id "tableView" ]
             [ div [ id "ownPoints" ]
                 [ h1 colorSetting
                     [ label [ for "ownPointsLabel" ]
-                        [ text model.teamTableInfo.teamTableInfoTeamName
+                        [ text teamTableInfo.teamTableInfoTeamName
                         , text ": "
-                        , text (showStanding (standing model.teamTableInfo.teamTable))
+                        , text (showStanding (standing teamTableInfo.teamTable))
                         ]
                     ]
                 ]
@@ -164,9 +181,9 @@ view model =
                         , th [] [ label [ for "placeAfterRound" ] [ text model.labels.placeAfterRoundLabel ] ]
                         ]
                         :: List.map3 mkHTMLLine
-                            model.teamTableInfo.teamTable
-                            (findPositions model.quizRatings.ratings model.teamTableInfo.teamTableInfoTeamNumber)
-                            (findPositions (cumulative model.quizRatings).ratings model.teamTableInfo.teamTableInfoTeamNumber)
+                            teamTableInfo.teamTable
+                            (findPositions model.quizRatings.ratings teamTableInfo.teamTableInfoTeamNumber)
+                            (findPositions (cumulative model.quizRatings).ratings teamTableInfo.teamTableInfoTeamNumber)
                     )
                 ]
             , div [ id "quizRatings" ]
@@ -183,9 +200,6 @@ update msg model =
     let
         newModel =
             case msg of
-                GotTeamTableInfo teamTableInfoCandidate ->
-                    Util.foldResult model (updateTeamTableInfo model) teamTableInfoCandidate
-
                 GotLabels labelsCandidate ->
                     Util.foldResult model (updateLabels model) labelsCandidate
 
@@ -259,11 +273,6 @@ mkHTMLLine teamLine perRound cumulative =
 mkCell : String -> Html Msg
 mkCell str =
     td [] [ text str ]
-
-
-getTeamTableInfo : TeamQuery -> Cmd Msg
-getTeamTableInfo =
-    getMsgWith jsonEncTeamQuery teamQueryParam teamTableApi GotTeamTableInfo jsonDecTeamTableInfo
 
 
 getQuizRatings : DbQuizId -> Cmd Msg
