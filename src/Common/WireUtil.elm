@@ -11,11 +11,11 @@ module Common.WireUtil exposing
     , getQuizInfoWith
     , getQuizRatingsWith
     , linkButton
+    , loadingSymbol
     , mkJSONParams
     , mkParams
     , mkPlacementTables
     , useOrFetchWith
-    , loadingSymbol
     )
 
 import Common.Constants exposing (getLabelsApi, getQuizInfoApi, getQuizRatingsApi)
@@ -123,13 +123,19 @@ errorToString err =
 
 mkPlacementTables : RankingsWithSorted -> Labels -> List (Html msg)
 mkPlacementTables rankings labels =
-    [ mkPlacements rankings.cumulative labels.placementLabel labels.placeLabel labels.pointsLabel
+    [ mkPlacementsHtml rankings.cumulative labels.placementLabel labels.placeLabel labels.pointsLabel
     , mkRoundWinners rankings.perRound labels.roundWinnerLabel labels.roundLabel labels.pointsLabel
     ]
 
 
-mkPlacements : RoundRankings -> String -> String -> String -> Html msg
-mkPlacements rrs wordForPlacement wordForPlace wordForPoints =
+type alias Placements =
+    { perRound : List TeamsRanking
+    , overall : List TeamsRanking
+    }
+
+
+mkPlacement : RoundRankings -> List TeamsRanking
+mkPlacement roundRankings =
     let
         zeroRating =
             ( 1, { teamNumber = 1, rating = 0 } )
@@ -138,15 +144,20 @@ mkPlacements rrs wordForPlacement wordForPlace wordForPoints =
             .teamRatings >> maximumBy Tuple.first >> Maybe.withDefault zeroRating >> Tuple.second
 
         currentRanking =
-            List.map (\perTeam -> { teamName = perTeam.teamName, teamRating = findCurrent perTeam }) rrs
+            List.map (\perTeam -> { teamName = perTeam.teamName, teamRating = findCurrent perTeam }) roundRankings
 
         placement =
             rankingToPlacement currentRanking
     in
+    placement
+
+
+mkPlacementsHtml : RoundRankings -> String -> String -> String -> Html msg
+mkPlacementsHtml rrs wordForPlacement wordForPlace wordForPoints =
     div [ id "placements" ]
         [ label [ for "placementsLabel" ] [ text wordForPlacement ]
         , table [ id "placementsTable" ]
-            (List.map (mkPlacementsTableLine wordForPlace wordForPoints) placement)
+            (List.map (mkPlacementsTableLine wordForPlace wordForPoints) (mkPlacement rrs))
         ]
 
 
@@ -203,5 +214,7 @@ mkRoundWinnersTableLine wordForRound wordForPoints rw =
         , td [] [ text (String.join ", " rw.teamNames) ]
         ]
 
+
 loadingSymbol : Html msg
-loadingSymbol = Loading.render Loading.Spinner Loading.defaultConfig Loading.On
+loadingSymbol =
+    Loading.render Loading.Spinner Loading.defaultConfig Loading.On
