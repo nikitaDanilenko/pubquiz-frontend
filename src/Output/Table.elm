@@ -157,7 +157,7 @@ view model =
             colorSetting =
                 Util.foldMaybe []
                     (\c -> [ style "color" (Color.Convert.colorToCssRgba c) ])
-                    (List.Extra.getAt teamTableInfo.teamTableInfoTeamNumber colors)
+                    (List.Extra.getAt (teamTableInfo.teamTableInfoTeamNumber - 1) colors)
         in
         div [ id "tableView" ]
             [ div [ id "ownPoints" ]
