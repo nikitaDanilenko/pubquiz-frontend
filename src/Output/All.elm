@@ -62,7 +62,7 @@ view model =
     div [ id "allQuizzesVies" ]
         [ div [ id "sortingArea" ]
             [ div [ id "sortingType" ]
-                [ mkSortingButton byName (model.sorting.sortBy == Name) 9872
+                [ mkSortingButton byName (model.sorting.sortBy == Name) 128292
                 , mkSortingButton byDate (model.sorting.sortBy == Date) 128197
                 ]
             , div [ id "sortingDirection" ]
