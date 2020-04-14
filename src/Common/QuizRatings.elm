@@ -73,7 +73,7 @@ cumulative quizRatings =
     let
         addTeamRatings : List TeamRating -> List TeamRating -> List TeamRating
         addTeamRatings =
-            Util.intersectWith (\x y -> { teamNumber = x.teamNumber, rating = x.rating + y.rating })
+            Util.intersectWith (\x y -> { x | rating = x.rating + y.rating })
                 .teamNumber
                 identity
                 .teamNumber
