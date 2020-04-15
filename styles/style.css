@@ -364,7 +364,7 @@ table {
   outline: 0;
 }
 
-input {
+input[type=submit] {
   -webkit-appearance: none;
 }
 
