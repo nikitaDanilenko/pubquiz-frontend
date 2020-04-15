@@ -259,7 +259,7 @@ table {
   margin-bottom: 35px;
 }
 
-#pointsTable table {
+#pointsTable table, .quizInfoButton {
   margin-left: auto; 
   margin-right: auto;
 }
