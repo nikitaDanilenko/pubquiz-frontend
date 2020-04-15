@@ -364,6 +364,10 @@ table {
   outline: 0;
 }
 
+.quizLinkButton, .quizRatingsButton {
+  -webkit-appearance: button;
+}
+
 @media screen and (orientation: portrait) {
   
   #initialMain {
