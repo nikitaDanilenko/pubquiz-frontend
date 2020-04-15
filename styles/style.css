@@ -365,7 +365,7 @@ table {
 }
 
 .quizLinkButton, .quizRatingsButton {
-  -webkit-appearance: button;
+  -webkit-appearance: none;
 }
 
 @media screen and (orientation: portrait) {
