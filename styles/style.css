@@ -251,14 +251,17 @@ div {
 
 table {
   border-collapse: collapse;
-  margin-left:auto; 
-  margin-right:auto;
 }
 
 #pointsTable {
   width: 100%;
 
   margin-bottom: 35px;
+}
+
+#pointsTable table {
+  margin-left: auto; 
+  margin-right: auto;
 }
 
 #pointsTable td, #pointsTable th {
@@ -346,7 +349,6 @@ table {
   text-decoration: none;
   text-align: center;
   display: inline-block;
-  vertical-align: center;
 
   background-color: rgb(255,165,0);
   color: white;
