@@ -364,7 +364,7 @@ table {
   outline: 0;
 }
 
-.quizLinkButton, .quizRatingsButton {
+input {
   -webkit-appearance: none;
 }
 
