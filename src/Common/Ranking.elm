@@ -33,6 +33,9 @@ ratingsToRankings quizRatings =
         sortedHeader =
             List.sortBy .teamInfoNumber quizRatings.header
 
+        activeHeader =
+            sortedHeader |> List.filter (.teamInfoActivity >> QuizValues.isActive)
+
         sortedRatings =
             quizRatings.ratings
                 |> List.sortBy Tuple.first
@@ -54,7 +57,7 @@ ratingsToRankings quizRatings =
         -- It is possible to achieve the same result with only one traversal,
         -- but the corresponding steps are more technical.
         roundRankings =
-            List.map2 (\l ti -> { teamNumber = ti.teamInfoNumber, teamName = ti.teamInfoName, teamRatings = l }) rearranged sortedHeader
+            List.map2 (\l ti -> { teamNumber = ti.teamInfoNumber, teamName = ti.teamInfoName, teamRatings = l }) rearranged activeHeader
 
         cumulativeRankings =
             List.map2
@@ -68,7 +71,7 @@ ratingsToRankings quizRatings =
                     }
                 )
                 rearranged
-                sortedHeader
+                activeHeader
     in
     { sortedHeader = sortedHeader, sortedRatings = sortedRatings, perRound = roundRankings, cumulative = cumulativeRankings }
 
