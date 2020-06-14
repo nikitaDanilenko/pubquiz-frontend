@@ -41,11 +41,6 @@ updateAuthentication model authentication =
     { model | authentication = authentication }
 
 
-updateFeedback : Model -> String -> Model
-updateFeedback model feedback =
-    { model | feedback = feedback }
-
-
 type Page
     = Login Login.Model
     | CreateUser CreateUser.Model
@@ -124,7 +119,9 @@ update msg model =
                                     stepSelection authenticated Selection.init
 
                                 Err error ->
-                                    ( updateFeedback model (errorToString error), Cmd.none )
+                                    errorToString error
+                                      |> Login.updateFeedback login
+                                      |> (\l -> stepLogin model (l, Cmd.none))
 
                         other ->
                             stepLogin model (Login.update other login)

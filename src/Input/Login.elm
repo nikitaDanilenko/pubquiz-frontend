@@ -28,6 +28,11 @@ updatePassword model password =
     { model | password = password }
 
 
+updateFeedback : Model -> String -> Model
+updateFeedback model feedback =
+    { model | feedback = feedback }
+
+
 type Msg
     = SetUser UserName
     | SetPassword Password
