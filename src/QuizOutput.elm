@@ -94,8 +94,8 @@ update msg model =
                 Browser.Internal url ->
                     ( model, Nav.pushUrl model.key (Url.toString url) )
 
-                Browser.External _ ->
-                    ( model, Cmd.none )
+                Browser.External href ->
+                    ( model, Nav.load (Debug.log "href" href) )
 
         ChangedUrl url ->
             stepTo url model
@@ -159,38 +159,36 @@ parser model =
         teamParser =
             quizIdParser </> s "teamNumber" </> Parser.int </> s "teamCode" </> Parser.string
 
-        ( currentLabels, currentQuizInfo ) =
+        current =
             case model.page of
                 Quiz quiz ->
-                    ( Just quiz.labels, Just quiz.quizInfo )
+                    { labels = Just quiz.labels
+                    , quizInfo = Just quiz.quizInfo
+                    , teamQuery = quiz.teamQueryCandidate
+                    }
 
                 Table table ->
-                    ( Just table.labels, Just table.quizInfo )
+                    { labels = Just table.labels
+                    , quizInfo = Just table.quizInfo
+                    , teamQuery = Just table.teamQuery
+                    }
 
                 All all ->
-                    ( all.labelsCandidate, Nothing )
+                    { labels = all.labelsCandidate
+                    , quizInfo = Nothing
+                    , teamQuery = all.teamQueryCandidate
+                    }
 
                 _ ->
-                    ( Nothing, Nothing )
-
-        currentTeamQuery =
-            case model.page of
-                Table table ->
-                    Just table.teamQuery
-
-                Quiz quiz ->
-                    quiz.teamQueryCandidate
-
-                All all ->
-                    all.teamQueryCandidate
-
-                _ ->
-                    Nothing
+                    { labels = Nothing
+                    , quizInfo = Nothing
+                    , teamQuery = Nothing
+                    }
     in
     oneOf
-        [ route Parser.top (stepAll model (All.init currentLabels currentTeamQuery))
-        , route quizIdParser (Quiz.init currentLabels currentTeamQuery >> stepQuiz model)
-        , route teamParser (\qid tn tc -> TeamQuery qid tn tc |> Table.init currentLabels currentQuizInfo |> stepTable model)
+        [ route Parser.top (stepAll model (All.init current.labels current.teamQuery))
+        , route quizIdParser (Quiz.init current.labels current.teamQuery >> stepQuiz model)
+        , route teamParser (\qid tn tc -> TeamQuery qid tn tc |> Table.init current.labels current.quizInfo |> stepTable model)
         ]
 
 
