@@ -6,7 +6,7 @@ import Common.Types exposing (Labels, QuizInfo, TeamQuery)
 import Common.Util as Util exposing (ErrorOr, getAllWith)
 import Common.WireUtil exposing (linkButton)
 import Html exposing (Html, button, div, input, label, text)
-import Html.Attributes exposing (class, disabled, id, value)
+import Html.Attributes exposing (class, disabled, id)
 import Html.Events exposing (onClick, onInput)
 import Output.OutputUtil exposing (fragmentUrl, mkFullQuizName)
 
@@ -105,8 +105,8 @@ mkQuizInfoButton quizInfo =
     div []
         [ linkButton
             (fragmentUrl [ quizIdParam, String.fromInt quizInfo.quizId ])
-            [ class "quizInfoButton", value (mkFullQuizName quizInfo.quizIdentifier) ]
-            []
+            [ class "quizInfoButton" ]
+            [ text (mkFullQuizName quizInfo.quizIdentifier) ]
         ]
 
 

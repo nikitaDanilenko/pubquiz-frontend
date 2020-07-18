@@ -14,17 +14,18 @@ module Common.WireUtil exposing
     , loadingSymbol
     , mkJSONParams
     , mkParams
-    , mkPlacementTables
     , mkPlacement
+    , mkPlacementTables
     , useOrFetchWith
     )
 
+import Bootstrap.Button
 import Common.Constants exposing (getLabelsApi, getQuizInfoApi, getQuizRatingsApi)
 import Common.Ranking exposing (RankingsWithSorted, RoundRankings, RoundWinner, TeamsRanking, rankingToPlacement, roundRankingsToRoundWinners)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, Ratings, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings)
 import Common.Util as Util exposing (ErrorOr, getMsg)
-import Html exposing (Attribute, Html, div, form, input, label, table, td, text, tr)
-import Html.Attributes exposing (action, for, id, type_)
+import Html exposing (Attribute, Html, div, label, table, td, text, tr)
+import Html.Attributes exposing (for, href, id)
 import Http exposing (Error(..))
 import Json.Encode as Encode exposing (encode)
 import List.Extra exposing (maximumBy)
@@ -93,8 +94,11 @@ encodeBody =
 
 linkButton : String -> List (Attribute msg) -> List (Html msg) -> Html msg
 linkButton link attrs children =
-    form [ action link ]
-        [ input (type_ "submit" :: attrs) children ]
+    Bootstrap.Button.linkButton
+        [ Bootstrap.Button.primary
+        , Bootstrap.Button.attrs (href link :: attrs)
+        ]
+        children
 
 
 addFeedbackLabel : String -> Html msg

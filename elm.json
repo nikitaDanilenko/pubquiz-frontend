@@ -22,7 +22,8 @@
             "justinmimbs/date": "3.2.0",
             "ktonon/elm-crypto": "1.1.2",
             "noahzgordon/elm-color-extra": "1.0.2",
-            "perzanko/elm-loading": "2.0.4"
+            "perzanko/elm-loading": "2.0.4",
+            "rundis/elm-bootstrap": "5.2.0"
         },
         "indirect": {
             "Skinney/murmur3": "2.0.8",

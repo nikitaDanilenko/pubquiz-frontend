@@ -8,7 +8,7 @@ import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, Ratings, 
 import Common.Util as Util exposing (ErrorOr, getMsg)
 import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, linkButton, loadingSymbol, useOrFetchWith)
 import Html exposing (Html, div, h1, label, table, td, text, th, tr)
-import Html.Attributes exposing (class, for, id, style, value)
+import Html.Attributes exposing (class, for, id, style)
 import Input.QuizValues as QuizValues
 import List.Extra
 import Output.Colors exposing (mkColors)
@@ -118,7 +118,7 @@ roundRatingToTeamLine teamNumber roundNumber roundRating =
 init : Maybe Labels -> Maybe QuizInfo -> TeamQuery -> ( Model, Cmd Msg )
 init mLabels mQuizInfo teamQuery =
     ( { labels = Maybe.withDefault QuizValues.defaultLabels mLabels
-      , teamQuery = teamQuery
+      , teamQuery = Debug.log "teamQuery in Table" teamQuery
       , quizRatings = QuizRatings.default
       , quizInfo = Maybe.withDefault QuizValues.defaultQuizInfo mQuizInfo
       , status =
@@ -190,10 +190,9 @@ view model =
                     )
                 ]
             , div [ id "quizRatings" ]
-                [ linkButton
-                    (fragmentUrl [ quizIdParam, String.fromInt model.teamQuery.teamQueryQuizId ])
-                    [ class "quizRatingsButton", value model.labels.backToChartView ]
-                    []
+                [ linkButton (fragmentUrl [ quizIdParam, String.fromInt model.teamQuery.teamQueryQuizId ])
+                    [ class "quizRatingsButton" ]
+                    [ text model.labels.backToChartView ]
                 ]
             ]
 

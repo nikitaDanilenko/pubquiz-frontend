@@ -8,7 +8,7 @@ import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamQuery
 import Common.Util as Util exposing (ErrorOr)
 import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, linkButton, loadingSymbol, mkPlacementTables, useOrFetchWith)
 import Html exposing (Html, div, label, text)
-import Html.Attributes exposing (class, for, id, value)
+import Html.Attributes exposing (class, for, id)
 import Input.QuizValues as QuizValues
 import Output.Charts as Charts
 import Output.Colors exposing (mkColors)
@@ -127,8 +127,8 @@ view model =
                             [ div [ id "backToTable" ]
                                 [ linkButton
                                     (mkTeamQueryLink teamQuery)
-                                    [ class "ownPointsButton", value model.labels.ownPointsLabel ]
-                                    []
+                                    [ class "ownPointsButton" ]
+                                    [ text model.labels.ownPointsLabel ]
                                 ]
                             ]
 
@@ -140,9 +140,9 @@ view model =
 
             colors =
                 model.quizRatings.header
-                  |> List.filter (.teamInfoActivity >> QuizValues.isActive)
-                  |> List.length
-                  |> mkColors
+                    |> List.filter (.teamInfoActivity >> QuizValues.isActive)
+                    |> List.length
+                    |> mkColors
         in
         div [ id "quizView" ]
             (div [ id "quizTitle" ] [ label [ for "quizTitleLabel" ] [ text (mkFullQuizName model.quizInfo.quizIdentifier) ] ]
@@ -158,8 +158,8 @@ view model =
                 :: div [ id "allQuizzes" ]
                     [ linkButton
                         (fragmentUrl [ "" ])
-                        [ class "allQuizzesButton", value model.labels.viewPrevious ]
-                        []
+                        [ class "allQuizzesButton" ]
+                        [ text model.labels.viewPrevious ]
                     ]
                 :: backToTable
             )
