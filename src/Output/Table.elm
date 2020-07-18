@@ -155,9 +155,12 @@ view model =
                 mkColors teamTableInfo.teamTableInfoNumberOfTeams
 
             colorSetting =
-                Util.foldMaybe []
-                    (\c -> [ style "color" (Color.Convert.colorToCssRgba c) ])
-                    (List.Extra.getAt (teamTableInfo.teamTableInfoTeamNumber - 1) colors)
+                model.quizRatings.header
+                    |> List.filter (.teamInfoActivity >> QuizValues.isActive)
+                    |> List.Extra.findIndex (\ti -> ti.teamInfoNumber == teamTableInfo.teamTableInfoTeamNumber)
+                    |> Maybe.andThen (\index -> List.Extra.getAt index colors)
+                    |> Maybe.map (\c -> [ style "color" (Color.Convert.colorToCssRgba c) ])
+                    |> Maybe.withDefault []
         in
         div [ id "tableView" ]
             [ div [ id "ownPoints" ]
