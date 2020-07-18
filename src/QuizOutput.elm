@@ -95,7 +95,7 @@ update msg model =
                     ( model, Nav.pushUrl model.key (Url.toString url) )
 
                 Browser.External href ->
-                    ( model, Nav.load (Debug.log "href" href) )
+                    ( model, Nav.load href )
 
         ChangedUrl url ->
             stepTo url model
