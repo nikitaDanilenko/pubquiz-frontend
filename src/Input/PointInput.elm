@@ -298,17 +298,20 @@ computeNewPoints roundNumber teamNumber points quizRatings =
                         )
 
                 Err _ ->
-                    ( 0
+                  let current = QuizRatings.getRatingFor quizRatings roundNumber teamNumber
+                  in
+                    ( current
                     , String.join " "
                         [ "Invalid decimal point number"
                         , "at round ="
                         , String.fromInt roundNumber
-                        , "and team ="
+                        , "and team number ="
                         , String.concat
                             [ String.fromInt teamNumber
                             , "."
                             ]
-                        , "Substituting 0."
+                        , "Using previous value"
+                        , String.fromFloat current
                         ]
                     )
     in

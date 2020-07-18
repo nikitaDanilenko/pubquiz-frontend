@@ -51,6 +51,9 @@ getRound : RoundNumber -> QuizRatings -> RoundRating
 getRound n q =
     Util.foldMaybe RoundRating.empty Tuple.second (List.Extra.find (\( tn, _ ) -> tn == n) q.ratings)
 
+getRatingFor : QuizRatings -> RoundNumber -> TeamNumber -> Float
+getRatingFor qr rn tn =
+  Util.foldMaybe 0 .rating (List.Extra.find (\tr -> tr.teamNumber == tn) (getRound rn qr).points)
 
 updateTeamName : TeamNumber -> TeamName -> QuizRatings -> QuizRatings
 updateTeamName teamNumber teamName quizRatings =
