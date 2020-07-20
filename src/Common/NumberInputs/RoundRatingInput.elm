@@ -1,4 +1,10 @@
-module Common.NumberInputs.RoundRatingInput exposing (..)
+module Common.NumberInputs.RoundRatingInput exposing
+    ( RoundRatingInput
+    , fromRoundRating
+    , toRoundRating
+    , updatePoints
+    , updateReachableInRound
+    )
 
 import Basics.Extra exposing (flip)
 import Common.FromInput as FromInput exposing (FromInput)
@@ -30,8 +36,14 @@ fromRoundRating rr =
 
 updateReachableInRound : RoundRatingInput -> String -> RoundRatingInput
 updateReachableInRound roundRating reachableInRound =
-    { roundRating | reachableInRound = FromInput.updateText roundRating.reachableInRound reachableInRound }
+    FromInput.lift updateReachableInRoundOnly roundRating.reachableInRound reachableInRound roundRating
 
-updatePoints: RoundRatingInput -> TeamNumber -> String -> RoundRatingInput
+
+updateReachableInRoundOnly : RoundRatingInput -> FromInput Float -> RoundRatingInput
+updateReachableInRoundOnly rri reachableInRound =
+    { rri | reachableInRound = reachableInRound }
+
+
+updatePoints : RoundRatingInput -> TeamNumber -> String -> RoundRatingInput
 updatePoints rri teamNumber rating =
-  {rri | points = updateIf (\tri -> tri.teamNumber == teamNumber) (flip TeamRatingInput.updateRating rating) rri.points}
+    { rri | points = updateIf (\tri -> tri.teamNumber == teamNumber) (flip TeamRatingInput.updateRating rating) rri.points }
