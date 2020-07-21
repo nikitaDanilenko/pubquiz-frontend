@@ -1,6 +1,6 @@
 module Common.NumberInputs.Util exposing (..)
 
-import Common.FromInput as FromInput exposing (FromInput)
+import Common.FromInput exposing (FromInput)
 import List.Extra
 import Parser
 
