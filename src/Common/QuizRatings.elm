@@ -40,21 +40,6 @@ update quizRatings round team points =
     updateIf (\( rn, _ ) -> rn == round) (Tuple.mapSecond (RoundRating.update team points)) quizRatings.ratings
         |> updateRatings quizRatings
 
-
-updateMax : RoundNumber -> Float -> QuizRatings -> QuizRatings
-updateMax roundNumber maxPoints quizRatings =
-    updateIf (\( rn, _ ) -> rn == roundNumber) (Tuple.mapSecond (flip RoundRating.updateReachableInRound maxPoints)) quizRatings.ratings
-        |> updateRatings quizRatings
-
-
-getRound : RoundNumber -> QuizRatings -> RoundRating
-getRound n q =
-    Util.foldMaybe RoundRating.empty Tuple.second (List.Extra.find (\( tn, _ ) -> tn == n) q.ratings)
-
-getRatingFor : QuizRatings -> RoundNumber -> TeamNumber -> Float
-getRatingFor qr rn tn =
-  Util.foldMaybe 0 .rating (List.Extra.find (\tr -> tr.teamNumber == tn) (getRound rn qr).points)
-
 updateTeamName : TeamNumber -> TeamName -> QuizRatings -> QuizRatings
 updateTeamName teamNumber teamName quizRatings =
     quizRatings.header
