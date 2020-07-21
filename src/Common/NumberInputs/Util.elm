@@ -25,9 +25,9 @@ partial str =
 
 pointsFromInput : Float -> FromInput Float
 pointsFromInput value =
-    FromInput.emptyText
         { ifEmptyValue = 0
         , value = value
+        , text = String.fromFloat value
         , parse = parsePoints
-        , isPartial = partial
+        , partial = partial
         }
