@@ -4,25 +4,28 @@ import Basics.Extra exposing (flip, uncurry)
 import Common.Authentication exposing (Authentication, encodeWithSignature)
 import Common.Constants exposing (getLabelsApi, getQuizRatingsApi, mkPath, quizIdParam, quizRatingsParam, serverLocation, serverQuizzesFolder, updateQuizRatingsApi)
 import Common.Copy exposing (updateHeaderTeamInfo, updateTeamInfoActivity)
+import Common.FromInput exposing (FromInput)
+import Common.NumberInputs.RatingsInput as RatingsInput exposing (RatingsInput)
+import Common.NumberInputs.TeamRatingInput exposing (TeamRatingInput)
 import Common.QuizRatings as QuizRatings
-import Common.Ranking exposing (NamedTeamRating, ratingsToRankings, removeInactive)
+import Common.Ranking exposing (NamedTeamRating, ratingsToRankings)
 import Common.RoundRating as RoundRating
 import Common.Types exposing (Activity, DbQuizId, Header, Labels, QuizInfo, QuizRatings, QuizSettings, RoundNumber, RoundRating, TeamInfo, TeamNumber, UserName, jsonDecLabels, jsonDecQuizRatings, jsonEncDbQuizId, jsonEncQuizRatings)
-import Common.Util exposing (ErrorOr, getMsg)
+import Common.Util as Util exposing (ErrorOr, getMsg)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString, loadingSymbol, mkPlacementTables)
 import Html exposing (Html, a, button, div, input, label, text)
-import Html.Attributes exposing (checked, class, disabled, for, href, id, max, min, step, target, type_, value)
+import Html.Attributes exposing (checked, class, disabled, for, href, id, max, target, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Input.QuizValues as QuizValues exposing (defaultLabels)
 import Output.OutputUtil exposing (fromServerUrl)
-import Parser exposing (float, run)
 
 
 type alias Model =
     { quizInfo : QuizInfo
     , labels : Labels
     , quizRatings : QuizRatings
+    , ratingsInput : RatingsInput
     , authentication : Authentication
     , feedback : String
     , status : Status
@@ -37,6 +40,11 @@ updateLabels model labels =
 updateQuizRatings : Model -> QuizRatings -> Model
 updateQuizRatings model quizRatings =
     { model | quizRatings = quizRatings }
+
+
+updateRatingsInput : Model -> RatingsInput -> Model
+updateRatingsInput model ratingsInput =
+    { model | ratingsInput = ratingsInput, quizRatings = RatingsInput.toRatings ratingsInput |> QuizRatings.updateRatings model.quizRatings }
 
 
 updateFeedback : Model -> String -> Model
@@ -97,12 +105,24 @@ init authentication quizInfo =
     ( { quizInfo = quizInfo
       , labels = defaultLabels
       , quizRatings = QuizRatings.default
+      , ratingsInput = RatingsInput.fromRatings QuizRatings.defaultRatings
       , authentication = authentication
       , feedback = ""
       , status = initialStatus
       }
     , Cmd.batch [ getLabels quizInfo.quizId, getQuizRatings quizInfo.quizId ]
     )
+
+
+
+-- todo: This is precisely the same function as in Ranking, but it operates on another type. Unify these?
+
+
+mkActiveAndNamed : Header -> List TeamRatingInput -> List { teamRating : TeamRatingInput, teamName : String }
+mkActiveAndNamed header tris =
+    Util.intersectWith Tuple.pair .teamNumber identity .teamInfoNumber (\ti -> ( ti.teamInfoName, ti.teamInfoActivity )) tris header
+        |> List.filter (Tuple.second >> Tuple.second >> QuizValues.isActive)
+        |> List.map (\( teamRating, ( teamName, _ ) ) -> { teamRating = teamRating, teamName = teamName })
 
 
 view : Model -> Html Msg
@@ -116,11 +136,11 @@ view model =
                 (Tuple.mapSecond
                     (\roundRating ->
                         { reachableInRound = roundRating.reachableInRound
-                        , points = removeInactive rankings.sortedHeader roundRating.points
+                        , points = mkActiveAndNamed rankings.sortedHeader roundRating.points
                         }
                     )
                 )
-                rankings.sortedRatings
+                model.ratingsInput
     in
     if not (hasFinishedLoading model.status) then
         div [] [ loadingSymbol ]
@@ -136,7 +156,7 @@ view model =
                     :: mkTeamNameInput rankings.sortedHeader
                 )
              ]
-                ++ List.map (uncurry mkRoundForm) namedRatings
+                ++ List.map (uncurry mkRoundForm) (Debug.log "nr" namedRatings)
                 ++ [ button [ class "button", onClick AddRound ] [ text "Add round" ]
                    , button [ class "button", onClick EditSettings ] [ text "Edit settings" ]
                    , button [ class "backButton", onClick Back ] [ text "Back" ]
@@ -163,13 +183,10 @@ update msg model =
     case msg of
         UpdatePoints rn tn ps ->
             let
-                newPoints =
-                    computeNewPoints rn tn ps model.quizRatings
-
                 newModel =
-                    QuizRatings.update model.quizRatings rn tn newPoints.points
-                        |> updateQuizRatings model
-                        |> flip updateFeedback newPoints.feedback
+                    model.ratingsInput
+                        |> RatingsInput.updatePoints rn tn ps
+                        |> updateRatingsInput model
             in
             ( newModel, Cmd.none )
 
@@ -183,14 +200,17 @@ update msg model =
 
         SetMaxPoints rd ps ->
             let
-                newModel =
-                    case run float ps of
-                        Ok p ->
-                            QuizRatings.updateMax rd p model.quizRatings
-                                |> updateQuizRatings model
+                newRatingsInput =
+                    model.ratingsInput |> RatingsInput.updateMax rd (Debug.log "maxPs" ps)
 
-                        Err _ ->
-                            updateFeedback model "Not a decimal point number. Keeping old value."
+                newRatings =
+                    RatingsInput.toRatings newRatingsInput
+
+                newModel =
+                    newRatings
+                        |> QuizRatings.updateRatings model.quizRatings
+                        |> updateQuizRatings model
+                        |> flip updateRatingsInput newRatingsInput
             in
             ( newModel, Cmd.none )
 
@@ -246,7 +266,9 @@ update msg model =
                 Ok quizRatings ->
                     let
                         newModel =
-                            updateQuizRatings model quizRatings
+                            RatingsInput.fromRatings quizRatings.ratings
+                                |> updateRatingsInput model
+                                |> (\md -> md.quizRatings |> flip QuizRatings.updateHeader quizRatings.header |> updateQuizRatings md)
                                 |> (\md -> updateQuizRatingsLoaded md.status True |> updateStatus md)
                     in
                     ( newModel, Cmd.none )
@@ -255,7 +277,7 @@ update msg model =
                     ( updateFeedback model (errorToString error), Cmd.none )
 
         SwapTeamActivity teamNumber ->
-            -- This list should always contains exactly one element.
+            -- This list should always contain exactly one element.
             let
                 teamInfoList =
                     List.filter (\ti -> ti.teamInfoNumber == teamNumber) model.quizRatings.header
@@ -273,49 +295,6 @@ update msg model =
                         teamInfoList
             in
             ( newModel, Cmd.none )
-
-
-computeNewPoints : RoundNumber -> TeamNumber -> String -> QuizRatings -> { points : Float, feedback : String }
-computeNewPoints roundNumber teamNumber points quizRatings =
-    let
-        ( newPoints, feedback ) =
-            case run float points of
-                Ok p ->
-                    let
-                        maxPs =
-                            (QuizRatings.getRound roundNumber quizRatings).reachableInRound
-                    in
-                    if p <= maxPs then
-                        ( p, "" )
-
-                    else
-                        ( maxPs
-                        , String.join " "
-                            [ "The maximum number of points"
-                            , "in this round is"
-                            , String.fromFloat maxPs
-                            ]
-                        )
-
-                Err _ ->
-                  let current = QuizRatings.getRatingFor quizRatings roundNumber teamNumber
-                  in
-                    ( current
-                    , String.join " "
-                        [ "Invalid decimal point number"
-                        , "at round ="
-                        , String.fromInt roundNumber
-                        , "and team number ="
-                        , String.concat
-                            [ String.fromInt teamNumber
-                            , "."
-                            ]
-                        , "Using previous value"
-                        , String.fromFloat current
-                        ]
-                    )
-    in
-    { points = newPoints, feedback = feedback }
 
 
 mkTeamNameInput : Header -> List (Html Msg)
@@ -353,7 +332,7 @@ type alias NamedRoundRating =
     }
 
 
-mkRoundForm : RoundNumber -> NamedRoundRating -> Html Msg
+mkRoundForm : RoundNumber -> { reachableInRound : FromInput Float, points : List { teamRating : TeamRatingInput, teamName : String } } -> Html Msg
 mkRoundForm roundNumber sortedNamedRoundRating =
     div [ id "roundPoints" ]
         (label [ class "roundNumber" ]
@@ -361,7 +340,7 @@ mkRoundForm roundNumber sortedNamedRoundRating =
             :: div [ id "maxPointsArea" ]
                 [ label [ class "maxPoints" ] [ text "Obtainable" ]
                 , input
-                    (value (String.fromFloat sortedNamedRoundRating.reachableInRound)
+                    (value (Debug.log "max" sortedNamedRoundRating.reachableInRound.text)
                         :: onInput (SetMaxPoints roundNumber)
                         :: pointInputAttributes
                     )
@@ -376,9 +355,9 @@ mkRoundForm roundNumber sortedNamedRoundRating =
                             ]
                         , div [ class "input" ]
                             [ input
-                                (value (String.fromFloat namedRoundRating.teamRating.rating)
+                                (value namedRoundRating.teamRating.rating.text
                                     :: onInput (UpdatePoints roundNumber namedRoundRating.teamRating.teamNumber)
-                                    :: max (String.fromFloat sortedNamedRoundRating.reachableInRound)
+                                    :: max sortedNamedRoundRating.reachableInRound.text
                                     :: pointInputAttributes
                                 )
                                 []
@@ -408,7 +387,7 @@ mkLinkWith divId linkText path =
 
 pointInputAttributes : List (Html.Attribute Msg)
 pointInputAttributes =
-    [ class "labeledInput", type_ "number", min "0", step "0.5" ]
+    [ class "labeledInput" ]
 
 
 postUpdate : Authentication -> DbQuizId -> QuizRatings -> Cmd Msg
