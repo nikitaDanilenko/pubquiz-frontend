@@ -28,3 +28,11 @@ updateMax roundNumber maxPoints =
 updatePoints : RoundNumber -> TeamNumber -> String -> RatingsInput -> RatingsInput
 updatePoints roundNumber tn ps =
     updateIf (\( rn, _ ) -> rn == roundNumber) (Tuple.mapSecond (\rri -> RoundRatingInput.updatePoints rri tn ps))
+
+addRound : RoundRatingInput -> RatingsInput -> RatingsInput
+addRound r ri =
+    let
+        rNum =
+            1 + Maybe.withDefault 0 (List.maximum (List.map Tuple.first ri))
+    in
+        ri ++ [ ( rNum, r ) ]
