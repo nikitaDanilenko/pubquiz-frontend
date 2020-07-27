@@ -6,10 +6,10 @@ import Common.Constants exposing (getLabelsApi, getQuizRatingsApi, mkPath, quizI
 import Common.Copy exposing (updateHeaderTeamInfo, updateTeamInfoActivity)
 import Common.FromInput exposing (FromInput)
 import Common.NumberInputs.RatingsInput as RatingsInput exposing (RatingsInput)
+import Common.NumberInputs.RoundRatingInput as RoundRatingInput
 import Common.NumberInputs.TeamRatingInput exposing (TeamRatingInput)
 import Common.QuizRatings as QuizRatings
 import Common.Ranking exposing (NamedTeamRating, ratingsToRankings)
-import Common.RoundRating as RoundRating
 import Common.Types exposing (Activity, DbQuizId, Header, Labels, QuizInfo, QuizRatings, QuizSettings, RoundNumber, RoundRating, TeamInfo, TeamNumber, UserName, jsonDecLabels, jsonDecQuizRatings, jsonEncDbQuizId, jsonEncQuizRatings)
 import Common.Util as Util exposing (ErrorOr, getMsg)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString, loadingSymbol, mkPlacementTables)
@@ -193,8 +193,8 @@ update msg model =
         AddRound ->
             let
                 newModel =
-                    QuizRatings.addRound (RoundRating.emptyForHeader model.quizRatings.header) model.quizRatings
-                        |> updateQuizRatings model
+                    RatingsInput.addRound (RoundRatingInput.emptyForHeader model.quizRatings.header) model.ratingsInput
+                        |> updateRatingsInput model
             in
             ( newModel, Cmd.none )
 
