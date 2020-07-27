@@ -1,4 +1,10 @@
-module Common.NumberInputs.TeamRatingInput exposing (TeamRatingInput, fromTeamRating, toTeamRating, updateRating)
+module Common.NumberInputs.TeamRatingInput exposing
+    ( TeamRatingInput
+    , fromTeamRating
+    , toTeamRating
+    , updateRating
+    , zeroTeamRating
+    )
 
 import Common.FromInput as FromInput exposing (FromInput)
 import Common.NumberInputs.Util exposing (pointsFromInput)
@@ -31,3 +37,8 @@ updateOnlyRating tri rating =
 updateRating : TeamRatingInput -> String -> TeamRatingInput
 updateRating tri rating =
     FromInput.lift updateOnlyRating tri.rating rating tri
+
+
+zeroTeamRating : TeamNumber -> TeamRatingInput
+zeroTeamRating tn =
+    { teamNumber = tn, rating = pointsFromInput 0 }
