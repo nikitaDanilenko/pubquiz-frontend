@@ -205,13 +205,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         UpdatePoints rn tn ps ->
-            let
-                newModel =
-                    model.ratingsInput
-                        |> RatingsInput.updatePoints rn tn ps
-                        |> updateRatingsInput model
-            in
-            ( newModel, Cmd.none )
+            ( updateTeamPointsInRound rn tn ps model, Cmd.none )
 
         AddRound ->
             let
@@ -320,7 +314,19 @@ update msg model =
             ( newModel, Cmd.none )
 
         ChangePoints roundNumber teamNumber direction ->
-            ( model, Cmd.none )
+            let
+                currentPoints =
+                    List.Extra.find (\( rn, _ ) -> rn == roundNumber) model.quizRatings.ratings
+                        |> Maybe.andThen (\( _, rr ) -> List.Extra.find (\( tn, _ ) -> tn == teamNumber) rr)
+                        |> Maybe.withDefault 0
+
+                newPoints =
+                    updateByDirection direction currentPoints
+
+                newModel =
+                    updateTeamPointsInRound roundNumber teamNumber (String.fromFloat newPoints) model
+            in
+            ( newModel, Cmd.none )
 
 
 updateMaxPointsInRound : RoundNumber -> String -> Model -> Model
@@ -333,6 +339,13 @@ updateMaxPointsInRound roundNumber newPoints model =
         |> QuizRatings.updateRatings model.quizRatings
         |> updateQuizRatings model
         |> flip updateRatingsInput newRatingsInput
+
+
+updateTeamPointsInRound : RoundNumber -> TeamNumber -> String -> Model -> Model
+updateTeamPointsInRound rn tn ps model =
+    model.ratingsInput
+        |> RatingsInput.updatePoints rn tn ps
+        |> updateRatingsInput model
 
 
 mkTeamNameInput : Header -> List (Html Msg)
