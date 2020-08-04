@@ -18,6 +18,7 @@ import Html.Attributes exposing (checked, class, disabled, for, href, id, max, t
 import Html.Events exposing (onClick, onInput)
 import Http
 import Input.QuizValues as QuizValues exposing (defaultLabels)
+import List.Extra
 import Output.OutputUtil exposing (fromServerUrl)
 
 
@@ -85,6 +86,26 @@ hasFinishedLoading status =
     List.all identity [ status.labelsLoaded, status.quizRatingsLoaded ]
 
 
+type Direction
+    = More
+    | Less
+
+
+step : Float
+step =
+    0.5
+
+
+updateByDirection : Direction -> Float -> Float
+updateByDirection direction x =
+    case direction of
+        More ->
+            x + step
+
+        Less ->
+            x - step
+
+
 type Msg
     = AddRound
     | EditSettings
@@ -98,6 +119,8 @@ type Msg
     | SwapTeamActivity TeamNumber
     | GotLabels (ErrorOr Labels)
     | GotQuizRatings (ErrorOr QuizRatings)
+    | ChangeMaxPoints RoundNumber Direction
+    | ChangePoints RoundNumber TeamNumber Direction
 
 
 init : Authentication -> QuizInfo -> ( Model, Cmd Msg )
@@ -199,20 +222,7 @@ update msg model =
             ( newModel, Cmd.none )
 
         SetMaxPoints rd ps ->
-            let
-                newRatingsInput =
-                    model.ratingsInput |> RatingsInput.updateMax rd (Debug.log "maxPs" ps)
-
-                newRatings =
-                    RatingsInput.toRatings newRatingsInput
-
-                newModel =
-                    newRatings
-                        |> QuizRatings.updateRatings model.quizRatings
-                        |> updateQuizRatings model
-                        |> flip updateRatingsInput newRatingsInput
-            in
-            ( newModel, Cmd.none )
+            ( updateMaxPointsInRound rd ps model, Cmd.none )
 
         UpdateQuizRatings ->
             ( model, postUpdate model.authentication model.quizInfo.quizId model.quizRatings )
@@ -295,6 +305,34 @@ update msg model =
                         teamInfoList
             in
             ( newModel, Cmd.none )
+
+        ChangeMaxPoints roundNumber direction ->
+            let
+                currentPoints =
+                    Util.foldMaybe 0 .reachableInRounds (List.Extra.find (\( rn, _ ) -> rn == roundNumber) model.quizRatings.ratings)
+
+                newPoints =
+                    updateByDirection direction currentPoints
+
+                newModel =
+                    updateMaxPointsInRound roundNumber (String.fromFloat newPoints) model
+            in
+            ( newModel, Cmd.none )
+
+        ChangePoints roundNumber teamNumber direction ->
+            ( model, Cmd.none )
+
+
+updateMaxPointsInRound : RoundNumber -> String -> Model -> Model
+updateMaxPointsInRound roundNumber newPoints model =
+    let
+        newRatingsInput =
+            model.ratingsInput |> RatingsInput.updateMax roundNumber newPoints
+    in
+    RatingsInput.toRatings newRatingsInput
+        |> QuizRatings.updateRatings model.quizRatings
+        |> updateQuizRatings model
+        |> flip updateRatingsInput newRatingsInput
 
 
 mkTeamNameInput : Header -> List (Html Msg)
