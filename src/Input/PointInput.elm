@@ -303,7 +303,8 @@ update msg model =
         ChangeMaxPoints roundNumber direction ->
             let
                 currentPoints =
-                    Util.foldMaybe 0 .reachableInRounds (List.Extra.find (\( rn, _ ) -> rn == roundNumber) model.quizRatings.ratings)
+                    List.Extra.find (\( rn, _ ) -> rn == roundNumber) model.quizRatings.ratings
+                        |> Util.foldMaybe 0 (Tuple.second >> .reachableInRound)
 
                 newPoints =
                     updateByDirection direction currentPoints
@@ -317,8 +318,8 @@ update msg model =
             let
                 currentPoints =
                     List.Extra.find (\( rn, _ ) -> rn == roundNumber) model.quizRatings.ratings
-                        |> Maybe.andThen (\( _, rr ) -> List.Extra.find (\( tn, _ ) -> tn == teamNumber) rr)
-                        |> Maybe.withDefault 0
+                        |> Maybe.andThen (\( _, rr ) -> List.Extra.find (\tr -> tr.teamNumber == teamNumber) rr.points)
+                        |> Util.foldMaybe 0 .rating
 
                 newPoints =
                     updateByDirection direction currentPoints
@@ -396,6 +397,8 @@ mkRoundForm roundNumber sortedNamedRoundRating =
                         :: pointInputAttributes
                     )
                     []
+                , button [ onClick (ChangeMaxPoints roundNumber More) ] [ text "+" ]
+                , button [ onClick (ChangeMaxPoints roundNumber Less) ] [ text "-" ]
                 ]
             :: List.map
                 (\namedRoundRating ->
