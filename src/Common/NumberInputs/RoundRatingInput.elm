@@ -10,7 +10,7 @@ module Common.NumberInputs.RoundRatingInput exposing
 import Basics.Extra exposing (flip)
 import Common.FromInput as FromInput exposing (FromInput)
 import Common.NumberInputs.TeamRatingInput as TeamRatingInput exposing (TeamRatingInput, fromTeamRating, toTeamRating)
-import Common.NumberInputs.Util exposing (pointsFromInput, pointsFromInputWith)
+import Common.NumberInputs.Util as Util exposing (pointsFromInput, pointsFromInputWith)
 import Common.Types exposing (Header, RoundRating, TeamNumber)
 import List.Extra exposing (updateIf)
 
@@ -50,6 +50,19 @@ updateReachableInRoundOnly rri reachableInRound =
 
 updatePoints : RoundRatingInput -> TeamNumber -> String -> RoundRatingInput
 updatePoints rri teamNumber rating =
+    rri
+        |> (\input -> updatePointsOnly input teamNumber rating)
+        |> (\input ->
+                let
+                    minValue =
+                        input.points |> List.map (.rating >> .value) |> List.maximum |> Maybe.withDefault 0
+                in
+                { input | reachableInRound = FromInput.updateCheck input.reachableInRound (Util.atLeast minValue) }
+           )
+
+
+updatePointsOnly : RoundRatingInput -> TeamNumber -> String -> RoundRatingInput
+updatePointsOnly rri teamNumber rating =
     { rri | points = updateIf (\tri -> tri.teamNumber == teamNumber) (flip TeamRatingInput.updateRating rating) rri.points }
 
 
