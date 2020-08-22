@@ -13,7 +13,7 @@ import Common.Ranking exposing (NamedTeamRating, ratingsToRankings)
 import Common.Types exposing (Activity, DbQuizId, Header, Labels, QuizInfo, QuizRatings, QuizSettings, RoundNumber, RoundRating, TeamInfo, TeamNumber, UserName, jsonDecLabels, jsonDecQuizRatings, jsonEncDbQuizId, jsonEncQuizRatings)
 import Common.Util as Util exposing (ErrorOr, getMsg, special)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString, loadingSymbol, mkPlacementTables)
-import Html exposing (Html, a, button, div, form, input, label, text)
+import Html exposing (Html, a, button, div, input, label, text)
 import Html.Attributes exposing (checked, class, disabled, for, href, id, max, target, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
@@ -409,7 +409,7 @@ mkRoundForm roundNumber sortedNamedRoundRating =
     div [ id "roundPoints" ]
         (label [ class "roundNumber" ]
             [ text (String.join " " [ "Round", String.fromInt roundNumber ]) ]
-            :: form [ id "maxPointsArea" ]
+            :: div [ id "maxPointsArea" ]
                 [ label [ class "maxPoints" ] [ text "Obtainable" ]
                 , input
                     (value sortedNamedRoundRating.reachableInRound.text
