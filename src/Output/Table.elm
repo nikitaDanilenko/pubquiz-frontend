@@ -118,7 +118,7 @@ roundRatingToTeamLine teamNumber roundNumber roundRating =
 init : Maybe Labels -> Maybe QuizInfo -> TeamQuery -> ( Model, Cmd Msg )
 init mLabels mQuizInfo teamQuery =
     ( { labels = Maybe.withDefault QuizValues.defaultLabels mLabels
-      , teamQuery = Debug.log "teamQuery in Table" teamQuery
+      , teamQuery = teamQuery
       , quizRatings = QuizRatings.default
       , quizInfo = Maybe.withDefault QuizValues.defaultQuizInfo mQuizInfo
       , status =
