@@ -12,6 +12,7 @@ import Common.FromInput as FromInput exposing (FromInput)
 import Common.NumberInputs.TeamRatingInput as TeamRatingInput exposing (TeamRatingInput, fromTeamRating, toTeamRating)
 import Common.NumberInputs.Util as Util exposing (pointsFromInputWith)
 import Common.Types exposing (Header, RoundRating, TeamNumber)
+import Common.Util
 import List.Extra exposing (updateIf)
 
 
@@ -30,7 +31,11 @@ toRoundRating rri =
 
 fromRoundRating : RoundRating -> RoundRatingInput
 fromRoundRating rr =
-    { reachableInRound = pointsFromInputWith (always True) rr.reachableInRound
+    let
+        minValue =
+            maximumWith .rating rr.points
+    in
+    { reachableInRound = pointsFromInputWith (Util.atLeast minValue) rr.reachableInRound
     , points = rr.points |> List.map (fromTeamRating rr.reachableInRound)
     }
 
@@ -55,7 +60,7 @@ updatePoints rri teamNumber rating =
         |> (\input ->
                 let
                     minValue =
-                        input.points |> List.map (.rating >> .value) |> List.maximum |> Maybe.withDefault 0
+                        maximumWith (.rating >> .value) input.points
                 in
                 { input | reachableInRound = FromInput.updateCheck input.reachableInRound (Util.atLeast minValue) }
            )
@@ -71,3 +76,8 @@ emptyForHeader header =
     { reachableInRound = pointsFromInputWith (always True) 0
     , points = List.map (.teamInfoNumber >> TeamRatingInput.zeroTeamRating) header
     }
+
+
+maximumWith : (a -> Float) -> List a -> Float
+maximumWith floatValue xs =
+    xs |> List.Extra.maximumBy floatValue |> Common.Util.foldMaybe 0 floatValue
