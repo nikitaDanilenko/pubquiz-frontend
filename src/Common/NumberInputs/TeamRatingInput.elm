@@ -2,12 +2,13 @@ module Common.NumberInputs.TeamRatingInput exposing
     ( TeamRatingInput
     , fromTeamRating
     , toTeamRating
+    , updateMaxPoints
     , updateRating
     , zeroTeamRating
     )
 
 import Common.FromInput as FromInput exposing (FromInput)
-import Common.NumberInputs.Util exposing (pointsFromInput)
+import Common.NumberInputs.Util as Util exposing (pointsFromInput)
 import Common.Types exposing (TeamNumber, TeamRating)
 
 
@@ -22,10 +23,10 @@ toTeamRating tri =
     { teamNumber = tri.teamNumber, rating = tri.rating.value }
 
 
-fromTeamRating : TeamRating -> TeamRatingInput
-fromTeamRating tr =
+fromTeamRating : Float -> TeamRating -> TeamRatingInput
+fromTeamRating maxValue tr =
     { teamNumber = tr.teamNumber
-    , rating = pointsFromInput tr.rating
+    , rating = pointsFromInput maxValue tr.rating
     }
 
 
@@ -39,6 +40,11 @@ updateRating tri rating =
     FromInput.lift updateOnlyRating tri.rating rating tri
 
 
+updateMaxPoints : TeamRatingInput -> Float -> TeamRatingInput
+updateMaxPoints tri maxValue =
+    { tri | rating = FromInput.updateCheck tri.rating (Util.nonNegativeMax maxValue) }
+
+
 zeroTeamRating : TeamNumber -> TeamRatingInput
 zeroTeamRating tn =
-    { teamNumber = tn, rating = pointsFromInput 0 }
+    { teamNumber = tn, rating = pointsFromInput 0 0 }

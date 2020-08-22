@@ -11,9 +11,9 @@ import Common.NumberInputs.TeamRatingInput exposing (TeamRatingInput)
 import Common.QuizRatings as QuizRatings
 import Common.Ranking exposing (NamedTeamRating, ratingsToRankings)
 import Common.Types exposing (Activity, DbQuizId, Header, Labels, QuizInfo, QuizRatings, QuizSettings, RoundNumber, RoundRating, TeamInfo, TeamNumber, UserName, jsonDecLabels, jsonDecQuizRatings, jsonEncDbQuizId, jsonEncQuizRatings)
-import Common.Util as Util exposing (ErrorOr, getMsg)
+import Common.Util as Util exposing (ErrorOr, getMsg, special)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString, loadingSymbol, mkPlacementTables)
-import Html exposing (Html, a, button, div, input, label, text)
+import Html exposing (Html, a, button, div, form, input, label, text)
 import Html.Attributes exposing (checked, class, disabled, for, href, id, max, target, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
@@ -179,7 +179,7 @@ view model =
                     :: mkTeamNameInput rankings.sortedHeader
                 )
              ]
-                ++ List.map (uncurry mkRoundForm) (Debug.log "nr" namedRatings)
+                ++ List.map (uncurry mkRoundForm) namedRatings
                 ++ [ button [ class "button", onClick AddRound ] [ text "Add round" ]
                    , button [ class "button", onClick EditSettings ] [ text "Edit settings" ]
                    , button [ class "backButton", onClick Back ] [ text "Back" ]
@@ -384,21 +384,40 @@ type alias NamedRoundRating =
     }
 
 
+mkDirectionalButton : Direction -> (Direction -> Msg) -> Html Msg
+mkDirectionalButton direction toMsg =
+    let
+        symbol =
+            case direction of
+                More ->
+                    special 9650
+
+                Less ->
+                    special 9660
+    in
+    button [ class "directionalButton", onClick (toMsg direction) ] [ text symbol ]
+
+
+mkDirectionalButtons : (Direction -> Msg) -> Html Msg
+mkDirectionalButtons toMsg =
+    div [ class "directionalButtonGroup" ]
+        [ mkDirectionalButton More toMsg, mkDirectionalButton Less toMsg ]
+
+
 mkRoundForm : RoundNumber -> { reachableInRound : FromInput Float, points : List { teamRating : TeamRatingInput, teamName : String } } -> Html Msg
 mkRoundForm roundNumber sortedNamedRoundRating =
     div [ id "roundPoints" ]
         (label [ class "roundNumber" ]
             [ text (String.join " " [ "Round", String.fromInt roundNumber ]) ]
-            :: div [ id "maxPointsArea" ]
+            :: form [ id "maxPointsArea" ]
                 [ label [ class "maxPoints" ] [ text "Obtainable" ]
                 , input
-                    (value (Debug.log "max" sortedNamedRoundRating.reachableInRound.text)
+                    (value sortedNamedRoundRating.reachableInRound.text
                         :: onInput (SetMaxPoints roundNumber)
                         :: pointInputAttributes
                     )
                     []
-                , button [ onClick (ChangeMaxPoints roundNumber More) ] [ text "+" ]
-                , button [ onClick (ChangeMaxPoints roundNumber Less) ] [ text "-" ]
+                , mkDirectionalButtons (ChangeMaxPoints roundNumber)
                 ]
             :: List.map
                 (\namedRoundRating ->
@@ -415,6 +434,7 @@ mkRoundForm roundNumber sortedNamedRoundRating =
                                     :: pointInputAttributes
                                 )
                                 []
+                            , mkDirectionalButtons (ChangePoints roundNumber namedRoundRating.teamRating.teamNumber)
                             ]
                         ]
                 )

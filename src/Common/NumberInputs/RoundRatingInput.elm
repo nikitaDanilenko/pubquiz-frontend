@@ -10,7 +10,7 @@ module Common.NumberInputs.RoundRatingInput exposing
 import Basics.Extra exposing (flip)
 import Common.FromInput as FromInput exposing (FromInput)
 import Common.NumberInputs.TeamRatingInput as TeamRatingInput exposing (TeamRatingInput, fromTeamRating, toTeamRating)
-import Common.NumberInputs.Util exposing (pointsFromInput)
+import Common.NumberInputs.Util exposing (pointsFromInput, pointsFromInputWith)
 import Common.Types exposing (Header, RoundRating, TeamNumber)
 import List.Extra exposing (updateIf)
 
@@ -30,8 +30,8 @@ toRoundRating rri =
 
 fromRoundRating : RoundRating -> RoundRatingInput
 fromRoundRating rr =
-    { reachableInRound = pointsFromInput rr.reachableInRound
-    , points = rr.points |> List.map fromTeamRating
+    { reachableInRound = pointsFromInputWith (always True) rr.reachableInRound
+    , points = rr.points |> List.map (fromTeamRating rr.reachableInRound)
     }
 
 
@@ -42,7 +42,10 @@ updateReachableInRound roundRating reachableInRound =
 
 updateReachableInRoundOnly : RoundRatingInput -> FromInput Float -> RoundRatingInput
 updateReachableInRoundOnly rri reachableInRound =
-    { rri | reachableInRound = reachableInRound }
+    { rri
+        | reachableInRound = reachableInRound
+        , points = List.map (flip TeamRatingInput.updateMaxPoints reachableInRound.value) rri.points
+    }
 
 
 updatePoints : RoundRatingInput -> TeamNumber -> String -> RoundRatingInput
@@ -52,6 +55,6 @@ updatePoints rri teamNumber rating =
 
 emptyForHeader : Header -> RoundRatingInput
 emptyForHeader header =
-    { reachableInRound = pointsFromInput 0
+    { reachableInRound = pointsFromInput 0 0
     , points = List.map (.teamInfoNumber >> TeamRatingInput.zeroTeamRating) header
     }
