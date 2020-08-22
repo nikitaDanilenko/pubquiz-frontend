@@ -42,3 +42,6 @@ pointsFromInputWith check value =
 nonNegativeMax : Float -> Float -> Bool
 nonNegativeMax maxValue x =
     x >= 0 && x <= maxValue
+
+atLeast : Float -> Float -> Bool
+atLeast minValue x = x >= minValue
