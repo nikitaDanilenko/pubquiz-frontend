@@ -10,7 +10,7 @@ module Common.NumberInputs.RoundRatingInput exposing
 import Basics.Extra exposing (flip)
 import Common.FromInput as FromInput exposing (FromInput)
 import Common.NumberInputs.TeamRatingInput as TeamRatingInput exposing (TeamRatingInput, fromTeamRating, toTeamRating)
-import Common.NumberInputs.Util as Util exposing (pointsFromInput, pointsFromInputWith)
+import Common.NumberInputs.Util as Util exposing (pointsFromInputWith)
 import Common.Types exposing (Header, RoundRating, TeamNumber)
 import List.Extra exposing (updateIf)
 
@@ -68,6 +68,6 @@ updatePointsOnly rri teamNumber rating =
 
 emptyForHeader : Header -> RoundRatingInput
 emptyForHeader header =
-    { reachableInRound = pointsFromInput 0 0
+    { reachableInRound = pointsFromInputWith (always True) 0
     , points = List.map (.teamInfoNumber >> TeamRatingInput.zeroTeamRating) header
     }
