@@ -141,3 +141,7 @@ isDefined m =
 
 type alias ErrorOr a =
     Result Error a
+
+special : Int -> String
+special =
+    Char.fromCode >> String.fromChar

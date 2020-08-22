@@ -3,7 +3,7 @@ module Output.All exposing (..)
 import Common.Constants exposing (allApi, quizIdParam)
 import Common.Sorting as Sorting exposing (SortBy(..), SortType(..), Sorting, selectAndSort)
 import Common.Types exposing (Labels, QuizInfo, TeamQuery)
-import Common.Util as Util exposing (ErrorOr, getAllWith)
+import Common.Util as Util exposing (ErrorOr, getAllWith, special)
 import Common.WireUtil exposing (linkButton)
 import Html exposing (Html, button, div, input, label, text)
 import Html.Attributes exposing (class, disabled, id)
@@ -77,11 +77,6 @@ view model =
         , div [ id "allQuizzes" ]
             (List.map mkQuizInfoButton (selectAndSort model.sorting model.quizInfos))
         ]
-
-
-special : Int -> String
-special =
-    Char.fromCode >> String.fromChar
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
