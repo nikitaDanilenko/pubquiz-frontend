@@ -9,17 +9,23 @@ type alias FromInput a =
     , text : String
     , parse : String -> Result String a
     , partial : String -> Bool
+    , check : a -> Bool
     }
 
 
 updateText : FromInput a -> String -> FromInput a
-updateText intFromInput text =
-    { intFromInput | text = text }
+updateText fromInput text =
+    { fromInput | text = text }
 
 
 updateValue : FromInput a -> a -> FromInput a
-updateValue intFromInput value =
-    { intFromInput | value = value }
+updateValue fromInput value =
+    { fromInput | value = value }
+
+
+updateCheck : FromInput a -> (a -> Bool) -> FromInput a
+updateCheck fromInput check =
+    { fromInput | check = check }
 
 
 emptyText :
@@ -27,6 +33,7 @@ emptyText :
     , value : a
     , parse : String -> Result String a
     , isPartial : String -> Bool
+    , check : a -> Bool
     }
     -> FromInput a
 emptyText params =
@@ -35,6 +42,7 @@ emptyText params =
     , text = ""
     , parse = params.parse
     , partial = params.isPartial
+    , check = params.check
     }
 
 
@@ -59,12 +67,17 @@ lift ui fromInput text model =
 
             else
                 fromInput
+        invalidCase = ui model possiblyValid
     in
     case fromInput.parse text of
         Ok value ->
-            possiblyValid
-                |> flip updateValue value
-                |> ui model
+            if fromInput.check value then
+                possiblyValid
+                    |> flip updateValue value
+                    |> ui model
+
+            else
+                model
 
         Err _ ->
-            ui model possiblyValid
+            invalidCase
