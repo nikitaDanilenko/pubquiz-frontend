@@ -15,9 +15,11 @@ import Common.Util as Util exposing (ErrorOr, getMsg, special)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString, loadingSymbol, mkPlacementTables)
 import Html exposing (Html, a, button, div, input, label, text)
 import Html.Attributes exposing (checked, class, disabled, for, href, id, max, target, type_, value)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (on, onClick, onInput)
 import Http
 import Input.QuizValues as QuizValues exposing (defaultLabels)
+import Keyboard.Event exposing (KeyboardEvent)
+import Keyboard.Key exposing (Key(..))
 import List.Extra
 import Output.OutputUtil exposing (fromServerUrl)
 
@@ -121,6 +123,24 @@ type Msg
     | GotQuizRatings (ErrorOr QuizRatings)
     | ChangeMaxPoints RoundNumber Direction
     | ChangePoints RoundNumber TeamNumber Direction
+
+
+mkKeyEventMsg : (Direction -> Msg) -> KeyboardEvent -> Maybe Msg
+mkKeyEventMsg toMsg keyboardEvent =
+    case keyboardEvent.keyCode of
+        Up ->
+            More |> toMsg |> Just
+
+        Down ->
+            Less |> toMsg |> Just
+
+        _ ->
+            Nothing
+
+
+onKeyPress : (Direction -> Msg) -> Html.Attribute Msg
+onKeyPress toMsg =
+    toMsg |> mkKeyEventMsg |> Keyboard.Event.considerKeyboardEvent |> on "keydown"
 
 
 init : Authentication -> QuizInfo -> ( Model, Cmd Msg )
@@ -414,6 +434,7 @@ mkRoundForm roundNumber sortedNamedRoundRating =
                 , input
                     (value sortedNamedRoundRating.reachableInRound.text
                         :: onInput (SetMaxPoints roundNumber)
+                        :: onKeyPress (ChangeMaxPoints roundNumber)
                         :: pointInputAttributes
                     )
                     []
@@ -430,6 +451,7 @@ mkRoundForm roundNumber sortedNamedRoundRating =
                             [ input
                                 (value namedRoundRating.teamRating.rating.text
                                     :: onInput (UpdatePoints roundNumber namedRoundRating.teamRating.teamNumber)
+                                    :: onKeyPress (ChangePoints roundNumber namedRoundRating.teamRating.teamNumber)
                                     :: max sortedNamedRoundRating.reachableInRound.text
                                     :: pointInputAttributes
                                 )
