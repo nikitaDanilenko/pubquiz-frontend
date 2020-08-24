@@ -14,7 +14,7 @@ import Common.Types exposing (Activity, DbQuizId, Header, Labels, QuizInfo, Quiz
 import Common.Util as Util exposing (ErrorOr, getMsg, special)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString, loadingSymbol, mkPlacementTables)
 import Html exposing (Html, a, button, div, input, label, text)
-import Html.Attributes exposing (checked, class, disabled, for, href, id, max, target, type_, value)
+import Html.Attributes exposing (checked, class, disabled, for, href, id, max, tabindex, target, type_, value)
 import Html.Events exposing (on, onClick, onInput)
 import Http
 import Input.QuizValues as QuizValues exposing (defaultLabels)
@@ -415,7 +415,12 @@ mkDirectionalButton direction toMsg =
                 Less ->
                     special 9660
     in
-    button [ class "directionalButton", onClick (toMsg direction) ] [ text symbol ]
+    button
+        [ class "directionalButton"
+        , tabindex -1
+        , onClick (toMsg direction)
+        ]
+        [ text symbol ]
 
 
 mkDirectionalButtons : (Direction -> Msg) -> Html Msg
