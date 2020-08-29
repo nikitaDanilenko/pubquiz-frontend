@@ -123,7 +123,7 @@ errorToString err =
             String.concat [ "Bad status: ", String.fromInt s ]
 
         BadBody str ->
-            String.concat [ "Bad body: ", str ]
+            str
 
 
 mkPlacementTables : RankingsWithSorted -> Labels -> List (Html msg)
