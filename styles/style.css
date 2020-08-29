@@ -132,6 +132,23 @@ label, input {
   max-width: 65pt;
 }
 
+.directionalButton {
+  background-color: rgb(150, 150, 150);
+  border-radius: 2px;
+  border: none;
+  padding: 0;
+}
+
+.directionalButton {
+    display: inline-block;
+    font-size: 15pt;
+    vertical-align: middle;
+}
+
+.directionalButtonGroup {
+  display: inline-block;
+}
+
 #questionArea .questionSpinner {
   max-width: 32pt;
 }
