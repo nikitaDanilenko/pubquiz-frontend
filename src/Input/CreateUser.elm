@@ -3,6 +3,7 @@ module Input.CreateUser exposing (..)
 import Basics.Extra exposing (flip)
 import Common.Authentication exposing (Authentication, encodeWithSignature)
 import Common.Constants exposing (newUserApi, userCreationParam)
+import Common.HttpUtil as HttpUtil
 import Common.Types exposing (jsonEncUserCreation)
 import Common.Util exposing (ErrorOr)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
@@ -151,5 +152,5 @@ createNewUser authentication newUser =
     Http.post
         { url = newUserApi
         , body = encodeBody params
-        , expect = Http.expectWhatever CreatedUser
+        , expect = HttpUtil.expectWhatever CreatedUser
         }

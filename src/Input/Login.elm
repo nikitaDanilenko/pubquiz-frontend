@@ -1,6 +1,7 @@
 module Input.Login exposing (..)
 
 import Common.Constants exposing (loginApi, passwordParam, userParam)
+import Common.HttpUtil as HttpUtil
 import Common.Types exposing (Password, UserName, jsonDecUserHash, jsonEncPassword, jsonEncUserName)
 import Common.Util exposing (ErrorOr)
 import Common.WireUtil exposing (SessionKey, addFeedbackLabel, encodeBody, mkJSONParams)
@@ -85,6 +86,6 @@ login : UserName -> Password -> Cmd Msg
 login user password =
     Http.post
         { url = loginApi
-        , expect = Http.expectJson LoggedIn jsonDecUserHash
+        , expect = HttpUtil.expectJson LoggedIn jsonDecUserHash
         , body = encodeBody (mkJSONParams [ ( userParam, jsonEncUserName user ), ( passwordParam, jsonEncPassword password ) ])
         }

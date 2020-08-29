@@ -5,6 +5,7 @@ import Common.Authentication exposing (Authentication, encodeWithSignature)
 import Common.Constants exposing (getLabelsApi, getQuizRatingsApi, mkPath, quizIdParam, quizRatingsParam, serverLocation, serverQuizzesFolder, updateQuizRatingsApi)
 import Common.Copy exposing (updateHeaderTeamInfo, updateTeamInfoActivity)
 import Common.FromInput exposing (FromInput)
+import Common.HttpUtil as HttpUtil
 import Common.NumberInputs.RatingsInput as RatingsInput exposing (RatingsInput)
 import Common.NumberInputs.RoundRatingInput as RoundRatingInput
 import Common.NumberInputs.TeamRatingInput exposing (TeamRatingInput)
@@ -503,7 +504,7 @@ postUpdate authentication qid quizRatings =
     Http.post
         { url = updateQuizRatingsApi
         , body = encodeBody params
-        , expect = Http.expectWhatever UpdatedQuizRatings
+        , expect = HttpUtil.expectWhatever UpdatedQuizRatings
         }
 
 

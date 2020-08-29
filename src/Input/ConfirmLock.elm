@@ -2,6 +2,7 @@ module Input.ConfirmLock exposing (..)
 
 import Common.Authentication exposing (Authentication, encodeWithSignature)
 import Common.Constants exposing (actionParam, lockApi, quizIdParam)
+import Common.HttpUtil as HttpUtil
 import Common.Types exposing (Action(..), DbQuizId, QuizInfo, jsonEncAction, jsonEncDbQuizId)
 import Common.Util as Util exposing (ErrorOr)
 import Common.WireUtil exposing (encodeBody, errorToString)
@@ -76,5 +77,5 @@ postLock authentication qid =
     Http.post
         { url = lockApi
         , body = encodeBody params
-        , expect = Http.expectWhatever Locked
+        , expect = HttpUtil.expectWhatever Locked
         }

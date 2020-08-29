@@ -1,6 +1,7 @@
 module Common.Util exposing (..)
 
 import Common.Constants exposing (quizIdParam)
+import Common.HttpUtil as HttpUtil
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamRating, jsonDecQuizInfo, jsonEncDbQuizId)
 import Http exposing (Error)
 import Json.Decode as Decode
@@ -75,7 +76,7 @@ getMsgWith : (v -> Value) -> String -> String -> (Result Error a -> msg) -> Deco
 getMsgWith encoder param path action decoder v =
     Http.get
         { url = Url.Builder.relative [ path ] [ string param (Encode.encode 0 (encoder v)) ]
-        , expect = Http.expectJson action decoder
+        , expect = HttpUtil.expectJson action decoder
         }
 
 
@@ -83,7 +84,7 @@ getAllWith : String -> (Result Error (List QuizInfo) -> msg) -> Cmd msg
 getAllWith pathToAllApi mkMsg =
     Http.get
         { url = pathToAllApi
-        , expect = Http.expectJson mkMsg (Decode.list jsonDecQuizInfo)
+        , expect = HttpUtil.expectJson mkMsg (Decode.list jsonDecQuizInfo)
         }
 
 

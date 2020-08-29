@@ -19,6 +19,7 @@ import Basics.Extra exposing (flip)
 import Common.Authentication exposing (Authentication, encodeWithSignature)
 import Common.Constants exposing (actionParam, getQuizSettingsApi, newApi, quizIdParam, quizIdentifierParam, quizSettingsParam, updateQuizApi)
 import Common.Copy as Copy
+import Common.HttpUtil as HttpUtil
 import Common.Types exposing (Action(..), DbQuizId, Labels, QuizIdentifier, QuizInfo, QuizSettings, jsonDecQuizInfo, jsonDecQuizSettings, jsonEncAction, jsonEncDbQuizId, jsonEncQuizIdentifier, jsonEncQuizSettings)
 import Common.Util exposing (ErrorOr, getMsg)
 import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString, loadingSymbol)
@@ -329,7 +330,7 @@ createQuiz authentication idf s =
                     , ( actionParam, jsonEncAction CreateQuizA )
                     ]
                 )
-        , expect = Http.expectJson Created jsonDecQuizInfo
+        , expect = HttpUtil.expectJson Created jsonDecQuizInfo
         }
 
 
@@ -347,7 +348,7 @@ updateQuiz authentication qid quizIdentifier quizSettings =
     Http.post
         { url = updateQuizApi
         , body = encodeBody params
-        , expect = Http.expectWhatever Updated
+        , expect = HttpUtil.expectWhatever Updated
         }
 
 
