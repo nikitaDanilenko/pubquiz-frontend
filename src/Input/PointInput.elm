@@ -420,7 +420,7 @@ mkDirectionalButton direction toMsg =
         , tabindex -1
         , onClick (toMsg direction)
         ]
-        [ text symbol ]
+        [ label [ class "directionalLabel" ] [ text symbol ] ]
 
 
 mkDirectionalButtons : (Direction -> Msg) -> Html Msg
