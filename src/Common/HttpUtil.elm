@@ -1,7 +1,10 @@
 module Common.HttpUtil exposing (..)
 
+import Common.Authentication as Authentication exposing (Authentication)
+import Common.Constants exposing (signatureHeader, userHeader)
 import Http exposing (Error(..), Expect, expectStringResponse)
 import Json.Decode as D
+import Json.Encode as Encode
 
 
 expectJson : (Result Http.Error a -> msg) -> D.Decoder a -> Expect msg
@@ -49,3 +52,27 @@ expectWhatever toMsg =
 
                 Http.GoodStatus_ _ _ ->
                     Ok ()
+
+
+postJsonWithCredentials :
+    Authentication
+    ->
+        { url : String
+        , body: Encode.Value
+        , expect : Expect msg
+        }
+    -> Cmd msg
+postJsonWithCredentials authentication request =
+    let
+        credentials =
+            Authentication.mkCredentials authentication request.body
+    in
+    Http.request
+        { method = "POST"
+        , headers = [ Http.header userHeader credentials.user, Http.header signatureHeader credentials.signature ]
+        , url = request.url
+        , body = Http.jsonBody request.body
+        , expect = request.expect
+        , timeout = Nothing
+        , tracker = Nothing
+        }
