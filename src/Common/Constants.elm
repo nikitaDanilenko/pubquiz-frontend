@@ -103,3 +103,9 @@ loginApi = mkPath [apiLocation, "secrets"]
 
 serverQuizzesFolder : String
 serverQuizzesFolder = "quizzes"
+
+userHeader : String
+userHeader = "User"
+
+signatureHeader : String
+signatureHeader = "Signature"
