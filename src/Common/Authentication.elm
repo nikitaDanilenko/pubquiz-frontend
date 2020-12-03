@@ -1,8 +1,8 @@
 module Common.Authentication exposing (..)
 
-import Common.WireUtil exposing (RestParam, SessionKey, mkJSONParams)
-import Common.Constants exposing (credentialsParam)
-import Common.Types exposing (UserName, jsonEncCredentials)
+import Base64
+import Common.Types exposing (Credentials, UserName)
+import Common.WireUtil exposing (RestParam, SessionKey)
 import Crypto.Hash exposing (sha512)
 import Json.Encode as Encode
 
@@ -29,17 +29,11 @@ updateSessionKey : Authentication -> SessionKey -> Authentication
 updateSessionKey authentication sessionKey =
     { authentication | sessionKey = sessionKey }
 
+
 {-| Takes the list of all parameters and adds a credentials parameter,
 where the user is the supplied user and the signature is computed from
 the given session key and the encoded values (in this order).
 -}
-encodeWithSignature : Authentication -> List ( String, Encode.Value ) -> RestParam
-encodeWithSignature authentication params =
-    let
-        signature =
-            sha512 (String.concat [ authentication.sessionKey, mkJSONParams params ])
-
-        credentials =
-            { user = authentication.userName, signature = signature }
-    in
-    mkJSONParams (( credentialsParam, jsonEncCredentials credentials ) :: params)
+mkCredentials : Authentication -> Encode.Value -> Credentials
+mkCredentials authentication value =
+    { user = authentication.userName, signature = sha512 (Base64.encode (Encode.encode 0 value)) }
