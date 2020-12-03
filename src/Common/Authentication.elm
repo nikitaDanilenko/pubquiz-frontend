@@ -36,4 +36,4 @@ the given session key and the encoded values (in this order).
 -}
 mkCredentials : Authentication -> Encode.Value -> Credentials
 mkCredentials authentication value =
-    { user = authentication.userName, signature = sha512 (Base64.encode (Encode.encode 0 value)) }
+    { user = authentication.userName, signature = sha512 (String.concat [authentication.sessionKey, Base64.encode (Encode.encode 0 value)]) }
