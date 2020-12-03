@@ -1,17 +1,16 @@
 module Input.CreateUser exposing (..)
 
 import Basics.Extra exposing (flip)
-import Common.Authentication exposing (Authentication, encodeWithSignature)
-import Common.Constants exposing (newUserApi, userCreationParam)
+import Common.Authentication exposing (Authentication)
+import Common.Constants exposing (newUserApi)
 import Common.HttpUtil as HttpUtil
 import Common.Types exposing (jsonEncUserCreation)
 import Common.Util exposing (ErrorOr)
-import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString)
+import Common.WireUtil exposing (addFeedbackLabel, errorToString)
 import Html exposing (Html, button, div, input, label, text)
 import Html.Attributes exposing (class, disabled, for, id, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Html.Events.Extra exposing (onEnter)
-import Http
 import Input.NewUser as NewUser exposing (NewUser, NewUserField(..))
 
 
@@ -144,13 +143,9 @@ update msg model =
 
 createNewUser : Authentication -> NewUser -> Cmd Msg
 createNewUser authentication newUser =
-    let
-        params =
-            encodeWithSignature authentication
-                [ ( userCreationParam, jsonEncUserCreation { userCreationUser = newUser.user, userCreationPassword = newUser.password1 } ) ]
-    in
-    Http.post
+    HttpUtil.postJsonWithCredentials
+        authentication
         { url = newUserApi
-        , body = encodeBody params
+        , body = jsonEncUserCreation { userCreationUser = newUser.user, userCreationPassword = newUser.password1 }
         , expect = HttpUtil.expectWhatever CreatedUser
         }
