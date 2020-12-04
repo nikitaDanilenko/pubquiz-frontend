@@ -16,19 +16,18 @@ module Input.SetQuizSettings exposing
     )
 
 import Basics.Extra exposing (flip)
-import Common.Authentication exposing (Authentication, encodeWithSignature)
-import Common.Constants exposing (actionParam, getQuizSettingsApi, newApi, quizIdParam, quizIdentifierParam, quizSettingsParam, updateQuizApi)
+import Common.Authentication exposing (Authentication)
+import Common.Constants exposing (getQuizSettingsApi, newApi, updateQuizApi)
 import Common.Copy as Copy
 import Common.HttpUtil as HttpUtil
-import Common.Types exposing (Action(..), DbQuizId, Labels, QuizIdentifier, QuizInfo, QuizSettings, jsonDecQuizInfo, jsonDecQuizSettings, jsonEncAction, jsonEncDbQuizId, jsonEncQuizIdentifier, jsonEncQuizSettings)
+import Common.Types exposing (CreateQuizRequest, DbQuizId, Labels, QuizIdentifier, QuizInfo, QuizSettings, QuizUpdateRequest, jsonDecQuizInfo, jsonDecQuizSettings, jsonEncCreateQuizRequest, jsonEncQuizUpdateRequest)
 import Common.Util exposing (ErrorOr, getMsg)
-import Common.WireUtil exposing (addFeedbackLabel, encodeBody, errorToString, loadingSymbol)
+import Common.WireUtil exposing (addFeedbackLabel, errorToString, loadingSymbol)
 import Date
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (class, disabled, id)
 import Html.Events exposing (onClick)
 import Html.Events.Extra exposing (onEnter)
-import Http
 import Input.QuizValues as QuizValues exposing (Mode(..))
 
 
@@ -173,7 +172,7 @@ viewWith baseOf mode commitButtonText md =
             onEnter Commit
     in
     if not (hasFinishedLoading (baseOf md).status) then
-        div [] [loadingSymbol]
+        div [] [ loadingSymbol ]
 
     else
         div [ id "quizSettingsView" ]
@@ -304,7 +303,15 @@ updateCreate : Msg -> CreateModel -> ( CreateModel, Cmd Msg )
 updateCreate msg createModel =
     let
         ( updatedBase, cmd ) =
-            updateWith (\base -> createQuiz base.authentication base.quizIdentifier base.quizSettings) msg createModel.base
+            updateWith
+                (\base ->
+                    createQuiz base.authentication
+                        { createQuizRequestQuizIdentifier = base.quizIdentifier
+                        , createQuizRequestQuizSettings = base.quizSettings
+                        }
+                )
+                msg
+                createModel.base
     in
     ( updatedBase |> updateCreateBase createModel, cmd )
 
@@ -313,41 +320,37 @@ updateUpdate : Msg -> UpdateModel -> ( UpdateModel, Cmd Msg )
 updateUpdate msg updateModel =
     let
         ( updatedBase, cmd ) =
-            updateWith (\base -> updateQuiz base.authentication updateModel.quizInfo.quizId base.quizIdentifier base.quizSettings) msg (baseOfUpdate updateModel)
+            updateWith
+                (\base ->
+                    updateQuiz base.authentication
+                        { quizUpdateRequestQuizId = updateModel.quizInfo.quizId
+                        , quizUpdateRequestQuizIdentifier = base.quizIdentifier
+                        , quizUpdateRequestQuizSettings = base.quizSettings
+                        }
+                )
+                msg
+                (baseOfUpdate updateModel)
     in
     ( updatedBase |> updateUpdateBase updateModel, cmd )
 
 
-createQuiz : Authentication -> QuizIdentifier -> QuizSettings -> Cmd Msg
-createQuiz authentication idf s =
-    Http.post
+createQuiz : Authentication -> CreateQuizRequest -> Cmd Msg
+createQuiz authentication createQuizRequest =
+    HttpUtil.postJsonWithCredentials
+        authentication
         { url = newApi
         , body =
-            encodeBody
-                (encodeWithSignature authentication
-                    [ ( quizIdentifierParam, jsonEncQuizIdentifier idf )
-                    , ( quizSettingsParam, jsonEncQuizSettings s )
-                    , ( actionParam, jsonEncAction CreateQuizA )
-                    ]
-                )
+            jsonEncCreateQuizRequest createQuizRequest
         , expect = HttpUtil.expectJson Created jsonDecQuizInfo
         }
 
 
-updateQuiz : Authentication -> DbQuizId -> QuizIdentifier -> QuizSettings -> Cmd Msg
-updateQuiz authentication qid quizIdentifier quizSettings =
-    let
-        params =
-            encodeWithSignature authentication
-                [ ( quizIdParam, jsonEncDbQuizId qid )
-                , ( quizIdentifierParam, jsonEncQuizIdentifier quizIdentifier )
-                , ( quizSettingsParam, jsonEncQuizSettings quizSettings )
-                , ( actionParam, jsonEncAction UpdateSettingsA )
-                ]
-    in
-    Http.post
+updateQuiz : Authentication -> QuizUpdateRequest -> Cmd Msg
+updateQuiz authentication quizUpdateRequest =
+    HttpUtil.postJsonWithCredentials
+        authentication
         { url = updateQuizApi
-        , body = encodeBody params
+        , body = jsonEncQuizUpdateRequest quizUpdateRequest
         , expect = HttpUtil.expectWhatever Updated
         }
 

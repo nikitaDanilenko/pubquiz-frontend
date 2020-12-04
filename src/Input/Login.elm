@@ -1,10 +1,10 @@
 module Input.Login exposing (..)
 
-import Common.Constants exposing (loginApi, passwordParam, userParam)
+import Common.Constants exposing (loginApi)
 import Common.HttpUtil as HttpUtil
-import Common.Types exposing (Password, UserName, jsonDecUserHash, jsonEncPassword, jsonEncUserName)
+import Common.Types exposing (Password, SecretRequest, UserHash, UserName, jsonDecUserHash, jsonEncSecretRequest)
 import Common.Util exposing (ErrorOr)
-import Common.WireUtil exposing (SessionKey, addFeedbackLabel, encodeBody, mkJSONParams)
+import Common.WireUtil exposing (addFeedbackLabel)
 import Html exposing (Html, button, div, input, label, text)
 import Html.Attributes exposing (autocomplete, class, for, id, type_)
 import Html.Events exposing (onClick, onInput)
@@ -38,7 +38,7 @@ type Msg
     = SetUser UserName
     | SetPassword Password
     | Login
-    | LoggedIn (ErrorOr SessionKey)
+    | LoggedIn (ErrorOr UserHash)
 
 
 init : Model
@@ -76,16 +76,16 @@ update msg model =
             ( updatePassword model password, Cmd.none )
 
         Login ->
-            ( model, login model.user model.password )
+            ( model, login { secretRequestUserName = model.user, secretRequestPassword = model.password } )
 
         LoggedIn _ ->
             ( model, Cmd.none )
 
 
-login : UserName -> Password -> Cmd Msg
-login user password =
+login : SecretRequest -> Cmd Msg
+login secretRequest =
     Http.post
         { url = loginApi
         , expect = HttpUtil.expectJson LoggedIn jsonDecUserHash
-        , body = encodeBody (mkJSONParams [ ( userParam, jsonEncUserName user ), ( passwordParam, jsonEncPassword password ) ])
+        , body = Http.jsonBody (jsonEncSecretRequest secretRequest)
         }
