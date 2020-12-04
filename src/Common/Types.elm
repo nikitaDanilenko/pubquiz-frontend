@@ -283,17 +283,6 @@ jsonEncUserName  val = Json.Encode.string val
 
 
 
-type alias UserSalt  = String
-
-jsonDecUserSalt : Json.Decode.Decoder ( UserSalt )
-jsonDecUserSalt =
-    Json.Decode.string
-
-jsonEncUserSalt : UserSalt -> Value
-jsonEncUserSalt  val = Json.Encode.string val
-
-
-
 type alias UserHash  = String
 
 jsonDecUserHash : Json.Decode.Decoder ( UserHash )
@@ -364,26 +353,6 @@ jsonDecRatings =
 
 jsonEncRatings : Ratings -> Value
 jsonEncRatings  val = (Json.Encode.list (\(t1,t2) -> Json.Encode.list identity [(jsonEncRoundNumber) t1,(jsonEncRoundRating) t2])) val
-
-
-
-type alias Credentials  =
-   { user: UserName
-   , signature: UserHash
-   }
-
-jsonDecCredentials : Json.Decode.Decoder ( Credentials )
-jsonDecCredentials =
-   Json.Decode.succeed (\puser psignature -> {user = puser, signature = psignature})
-   |> required "user" (jsonDecUserName)
-   |> required "signature" (jsonDecUserHash)
-
-jsonEncCredentials : Credentials -> Value
-jsonEncCredentials  val =
-   Json.Encode.object
-   [ ("user", jsonEncUserName val.user)
-   , ("signature", jsonEncUserHash val.signature)
-   ]
 
 
 
@@ -603,25 +572,6 @@ jsonEncActivity  val =
 
 
 
-type Action  =
-    CreateQuizA 
-    | LockA 
-    | UpdateSettingsA 
-
-jsonDecAction : Json.Decode.Decoder ( Action )
-jsonDecAction = 
-    let jsonDecDictAction = Dict.fromList [("CreateQuizA", CreateQuizA), ("LockA", LockA), ("UpdateSettingsA", UpdateSettingsA)]
-    in  decodeSumUnaries "Action" jsonDecDictAction
-
-jsonEncAction : Action -> Value
-jsonEncAction  val =
-    case val of
-        CreateQuizA -> Json.Encode.string "CreateQuizA"
-        LockA -> Json.Encode.string "LockA"
-        UpdateSettingsA -> Json.Encode.string "UpdateSettingsA"
-
-
-
 type alias QuizRatings  =
    { header: Header
    , ratings: Ratings
@@ -638,92 +588,6 @@ jsonEncQuizRatings  val =
    Json.Encode.object
    [ ("header", jsonEncHeader val.header)
    , ("ratings", jsonEncRatings val.ratings)
-   ]
-
-
-
-type alias TeamLine  =
-   { roundNumber: RoundNumber
-   , reachedPoints: Float
-   , maximumPoints: Float
-   , reachablePoints: Float
-   }
-
-jsonDecTeamLine : Json.Decode.Decoder ( TeamLine )
-jsonDecTeamLine =
-   Json.Decode.succeed (\proundNumber preachedPoints pmaximumPoints preachablePoints -> {roundNumber = proundNumber, reachedPoints = preachedPoints, maximumPoints = pmaximumPoints, reachablePoints = preachablePoints})
-   |> required "roundNumber" (jsonDecRoundNumber)
-   |> required "reachedPoints" (Json.Decode.float)
-   |> required "maximumPoints" (Json.Decode.float)
-   |> required "reachablePoints" (Json.Decode.float)
-
-jsonEncTeamLine : TeamLine -> Value
-jsonEncTeamLine  val =
-   Json.Encode.object
-   [ ("roundNumber", jsonEncRoundNumber val.roundNumber)
-   , ("reachedPoints", Json.Encode.float val.reachedPoints)
-   , ("maximumPoints", Json.Encode.float val.maximumPoints)
-   , ("reachablePoints", Json.Encode.float val.reachablePoints)
-   ]
-
-
-
-type alias TeamTable  = (List TeamLine)
-
-jsonDecTeamTable : Json.Decode.Decoder ( TeamTable )
-jsonDecTeamTable =
-    Json.Decode.list (jsonDecTeamLine)
-
-jsonEncTeamTable : TeamTable -> Value
-jsonEncTeamTable  val = (Json.Encode.list jsonEncTeamLine) val
-
-
-
-type alias TeamQuery  =
-   { teamQueryQuizId: DbQuizId
-   , teamQueryTeamNumber: TeamNumber
-   , teamQueryTeamCode: Code
-   }
-
-jsonDecTeamQuery : Json.Decode.Decoder ( TeamQuery )
-jsonDecTeamQuery =
-   Json.Decode.succeed (\pteamQueryQuizId pteamQueryTeamNumber pteamQueryTeamCode -> {teamQueryQuizId = pteamQueryQuizId, teamQueryTeamNumber = pteamQueryTeamNumber, teamQueryTeamCode = pteamQueryTeamCode})
-   |> required "teamQueryQuizId" (jsonDecDbQuizId)
-   |> required "teamQueryTeamNumber" (jsonDecTeamNumber)
-   |> required "teamQueryTeamCode" (jsonDecCode)
-
-jsonEncTeamQuery : TeamQuery -> Value
-jsonEncTeamQuery  val =
-   Json.Encode.object
-   [ ("teamQueryQuizId", jsonEncDbQuizId val.teamQueryQuizId)
-   , ("teamQueryTeamNumber", jsonEncTeamNumber val.teamQueryTeamNumber)
-   , ("teamQueryTeamCode", jsonEncCode val.teamQueryTeamCode)
-   ]
-
-
-
-type alias TeamTableInfo  =
-   { teamTable: TeamTable
-   , teamTableInfoTeamName: TeamName
-   , teamTableInfoNumberOfTeams: Int
-   , teamTableInfoTeamNumber: TeamNumber
-   }
-
-jsonDecTeamTableInfo : Json.Decode.Decoder ( TeamTableInfo )
-jsonDecTeamTableInfo =
-   Json.Decode.succeed (\pteamTable pteamTableInfoTeamName pteamTableInfoNumberOfTeams pteamTableInfoTeamNumber -> {teamTable = pteamTable, teamTableInfoTeamName = pteamTableInfoTeamName, teamTableInfoNumberOfTeams = pteamTableInfoNumberOfTeams, teamTableInfoTeamNumber = pteamTableInfoTeamNumber})
-   |> required "teamTable" (jsonDecTeamTable)
-   |> required "teamTableInfoTeamName" (jsonDecTeamName)
-   |> required "teamTableInfoNumberOfTeams" (Json.Decode.int)
-   |> required "teamTableInfoTeamNumber" (jsonDecTeamNumber)
-
-jsonEncTeamTableInfo : TeamTableInfo -> Value
-jsonEncTeamTableInfo  val =
-   Json.Encode.object
-   [ ("teamTable", jsonEncTeamTable val.teamTable)
-   , ("teamTableInfoTeamName", jsonEncTeamName val.teamTableInfoTeamName)
-   , ("teamTableInfoNumberOfTeams", Json.Encode.int val.teamTableInfoNumberOfTeams)
-   , ("teamTableInfoTeamNumber", jsonEncTeamNumber val.teamTableInfoTeamNumber)
    ]
 
 
@@ -787,4 +651,204 @@ jsonEncQuestionsInRound  val =
    [ ("questionsInRoundRoundNumber", jsonEncRoundNumber val.questionsInRoundRoundNumber)
    , ("questionsInRoundNumberOfQuestions", jsonEncNumberOfQuestions val.questionsInRoundNumberOfQuestions)
    ]
+
+
+
+type alias CreateQuizRequest  =
+   { createQuizRequestQuizIdentifier: QuizIdentifier
+   , createQuizRequestQuizSettings: QuizSettings
+   }
+
+jsonDecCreateQuizRequest : Json.Decode.Decoder ( CreateQuizRequest )
+jsonDecCreateQuizRequest =
+   Json.Decode.succeed (\pcreateQuizRequestQuizIdentifier pcreateQuizRequestQuizSettings -> {createQuizRequestQuizIdentifier = pcreateQuizRequestQuizIdentifier, createQuizRequestQuizSettings = pcreateQuizRequestQuizSettings})
+   |> required "createQuizRequestQuizIdentifier" (jsonDecQuizIdentifier)
+   |> required "createQuizRequestQuizSettings" (jsonDecQuizSettings)
+
+jsonEncCreateQuizRequest : CreateQuizRequest -> Value
+jsonEncCreateQuizRequest  val =
+   Json.Encode.object
+   [ ("createQuizRequestQuizIdentifier", jsonEncQuizIdentifier val.createQuizRequestQuizIdentifier)
+   , ("createQuizRequestQuizSettings", jsonEncQuizSettings val.createQuizRequestQuizSettings)
+   ]
+
+
+
+type alias QuizIdRequest  = DbQuizId
+
+jsonDecQuizIdRequest : Json.Decode.Decoder ( QuizIdRequest )
+jsonDecQuizIdRequest =
+    jsonDecDbQuizId
+
+jsonEncQuizIdRequest : QuizIdRequest -> Value
+jsonEncQuizIdRequest  val = jsonEncDbQuizId val
+
+
+
+type alias QuizUpdateRequest  =
+   { quizUpdateRequestQuizId: DbQuizId
+   , quizUpdateRequestQuizIdentifier: QuizIdentifier
+   , quizUpdateRequestQuizSettings: QuizSettings
+   }
+
+jsonDecQuizUpdateRequest : Json.Decode.Decoder ( QuizUpdateRequest )
+jsonDecQuizUpdateRequest =
+   Json.Decode.succeed (\pquizUpdateRequestQuizId pquizUpdateRequestQuizIdentifier pquizUpdateRequestQuizSettings -> {quizUpdateRequestQuizId = pquizUpdateRequestQuizId, quizUpdateRequestQuizIdentifier = pquizUpdateRequestQuizIdentifier, quizUpdateRequestQuizSettings = pquizUpdateRequestQuizSettings})
+   |> required "quizUpdateRequestQuizId" (jsonDecDbQuizId)
+   |> required "quizUpdateRequestQuizIdentifier" (jsonDecQuizIdentifier)
+   |> required "quizUpdateRequestQuizSettings" (jsonDecQuizSettings)
+
+jsonEncQuizUpdateRequest : QuizUpdateRequest -> Value
+jsonEncQuizUpdateRequest  val =
+   Json.Encode.object
+   [ ("quizUpdateRequestQuizId", jsonEncDbQuizId val.quizUpdateRequestQuizId)
+   , ("quizUpdateRequestQuizIdentifier", jsonEncQuizIdentifier val.quizUpdateRequestQuizIdentifier)
+   , ("quizUpdateRequestQuizSettings", jsonEncQuizSettings val.quizUpdateRequestQuizSettings)
+   ]
+
+
+
+type alias SecretRequest  =
+   { secretRequestUserName: UserName
+   , secretRequestPassword: Password
+   }
+
+jsonDecSecretRequest : Json.Decode.Decoder ( SecretRequest )
+jsonDecSecretRequest =
+   Json.Decode.succeed (\psecretRequestUserName psecretRequestPassword -> {secretRequestUserName = psecretRequestUserName, secretRequestPassword = psecretRequestPassword})
+   |> required "secretRequestUserName" (jsonDecUserName)
+   |> required "secretRequestPassword" (jsonDecPassword)
+
+jsonEncSecretRequest : SecretRequest -> Value
+jsonEncSecretRequest  val =
+   Json.Encode.object
+   [ ("secretRequestUserName", jsonEncUserName val.secretRequestUserName)
+   , ("secretRequestPassword", jsonEncPassword val.secretRequestPassword)
+   ]
+
+
+
+type alias UpdateQuizRatingsRequest  =
+   { updateQuizRatingsRequestQuizId: DbQuizId
+   , updateQuizRatingsRequestQuizRatings: QuizRatings
+   }
+
+jsonDecUpdateQuizRatingsRequest : Json.Decode.Decoder ( UpdateQuizRatingsRequest )
+jsonDecUpdateQuizRatingsRequest =
+   Json.Decode.succeed (\pupdateQuizRatingsRequestQuizId pupdateQuizRatingsRequestQuizRatings -> {updateQuizRatingsRequestQuizId = pupdateQuizRatingsRequestQuizId, updateQuizRatingsRequestQuizRatings = pupdateQuizRatingsRequestQuizRatings})
+   |> required "updateQuizRatingsRequestQuizId" (jsonDecDbQuizId)
+   |> required "updateQuizRatingsRequestQuizRatings" (jsonDecQuizRatings)
+
+jsonEncUpdateQuizRatingsRequest : UpdateQuizRatingsRequest -> Value
+jsonEncUpdateQuizRatingsRequest  val =
+   Json.Encode.object
+   [ ("updateQuizRatingsRequestQuizId", jsonEncDbQuizId val.updateQuizRatingsRequestQuizId)
+   , ("updateQuizRatingsRequestQuizRatings", jsonEncQuizRatings val.updateQuizRatingsRequestQuizRatings)
+   ]
+
+
+
+type alias Credentials  =
+   { user: UserName
+   , signature: UserHash
+   }
+
+jsonDecCredentials : Json.Decode.Decoder ( Credentials )
+jsonDecCredentials =
+   Json.Decode.succeed (\puser psignature -> {user = puser, signature = psignature})
+   |> required "user" (jsonDecUserName)
+   |> required "signature" (jsonDecUserHash)
+
+jsonEncCredentials : Credentials -> Value
+jsonEncCredentials  val =
+   Json.Encode.object
+   [ ("user", jsonEncUserName val.user)
+   , ("signature", jsonEncUserHash val.signature)
+   ]
+
+
+
+type alias TeamQuery  =
+   { teamQueryQuizId: DbQuizId
+   , teamQueryTeamNumber: TeamNumber
+   , teamQueryTeamCode: Code
+   }
+
+jsonDecTeamQuery : Json.Decode.Decoder ( TeamQuery )
+jsonDecTeamQuery =
+   Json.Decode.succeed (\pteamQueryQuizId pteamQueryTeamNumber pteamQueryTeamCode -> {teamQueryQuizId = pteamQueryQuizId, teamQueryTeamNumber = pteamQueryTeamNumber, teamQueryTeamCode = pteamQueryTeamCode})
+   |> required "teamQueryQuizId" (jsonDecDbQuizId)
+   |> required "teamQueryTeamNumber" (jsonDecTeamNumber)
+   |> required "teamQueryTeamCode" (jsonDecCode)
+
+jsonEncTeamQuery : TeamQuery -> Value
+jsonEncTeamQuery  val =
+   Json.Encode.object
+   [ ("teamQueryQuizId", jsonEncDbQuizId val.teamQueryQuizId)
+   , ("teamQueryTeamNumber", jsonEncTeamNumber val.teamQueryTeamNumber)
+   , ("teamQueryTeamCode", jsonEncCode val.teamQueryTeamCode)
+   ]
+
+
+
+type alias TeamLine  =
+   { roundNumber: RoundNumber
+   , reachedPoints: Float
+   , maximumPoints: Float
+   , reachablePoints: Float
+   }
+
+jsonDecTeamLine : Json.Decode.Decoder ( TeamLine )
+jsonDecTeamLine =
+   Json.Decode.succeed (\proundNumber preachedPoints pmaximumPoints preachablePoints -> {roundNumber = proundNumber, reachedPoints = preachedPoints, maximumPoints = pmaximumPoints, reachablePoints = preachablePoints})
+   |> required "roundNumber" (jsonDecRoundNumber)
+   |> required "reachedPoints" (Json.Decode.float)
+   |> required "maximumPoints" (Json.Decode.float)
+   |> required "reachablePoints" (Json.Decode.float)
+
+jsonEncTeamLine : TeamLine -> Value
+jsonEncTeamLine  val =
+   Json.Encode.object
+   [ ("roundNumber", jsonEncRoundNumber val.roundNumber)
+   , ("reachedPoints", Json.Encode.float val.reachedPoints)
+   , ("maximumPoints", Json.Encode.float val.maximumPoints)
+   , ("reachablePoints", Json.Encode.float val.reachablePoints)
+   ]
+
+
+
+type alias TeamTableInfo  =
+   { teamTable: TeamTable
+   , teamTableInfoTeamName: TeamName
+   , teamTableInfoNumberOfTeams: Int
+   , teamTableInfoTeamNumber: TeamNumber
+   }
+
+jsonDecTeamTableInfo : Json.Decode.Decoder ( TeamTableInfo )
+jsonDecTeamTableInfo =
+   Json.Decode.succeed (\pteamTable pteamTableInfoTeamName pteamTableInfoNumberOfTeams pteamTableInfoTeamNumber -> {teamTable = pteamTable, teamTableInfoTeamName = pteamTableInfoTeamName, teamTableInfoNumberOfTeams = pteamTableInfoNumberOfTeams, teamTableInfoTeamNumber = pteamTableInfoTeamNumber})
+   |> required "teamTable" (jsonDecTeamTable)
+   |> required "teamTableInfoTeamName" (jsonDecTeamName)
+   |> required "teamTableInfoNumberOfTeams" (Json.Decode.int)
+   |> required "teamTableInfoTeamNumber" (jsonDecTeamNumber)
+
+jsonEncTeamTableInfo : TeamTableInfo -> Value
+jsonEncTeamTableInfo  val =
+   Json.Encode.object
+   [ ("teamTable", jsonEncTeamTable val.teamTable)
+   , ("teamTableInfoTeamName", jsonEncTeamName val.teamTableInfoTeamName)
+   , ("teamTableInfoNumberOfTeams", Json.Encode.int val.teamTableInfoNumberOfTeams)
+   , ("teamTableInfoTeamNumber", jsonEncTeamNumber val.teamTableInfoTeamNumber)
+   ]
+
+
+
+type alias TeamTable  = (List TeamLine)
+
+jsonDecTeamTable : Json.Decode.Decoder ( TeamTable )
+jsonDecTeamTable =
+    Json.Decode.list (jsonDecTeamLine)
+
+jsonEncTeamTable : TeamTable -> Value
+jsonEncTeamTable  val = (Json.Encode.list jsonEncTeamLine) val
 
