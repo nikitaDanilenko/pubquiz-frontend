@@ -22,9 +22,6 @@ serverLocationWithFrontendPort =
 apiLocation : String
 apiLocation = mkPath [ serverLocationWithBackendPort, "api" ]
 
-actionParam : String
-actionParam = "action"
-
 
 quizIdParam : String
 quizIdParam = "quizId"
@@ -34,27 +31,6 @@ teamNumberParam = "teamNumber"
 
 teamCodeParam : String
 teamCodeParam = "teamCode"
-
-userParam : String
-userParam = "user"
-
-passwordParam : String
-passwordParam = "pass"
-
-quizIdentifierParam : String
-quizIdentifierParam = "quizIdentifier"
-
-quizSettingsParam : String
-quizSettingsParam = "quizSettings"
-
-quizRatingsParam : String
-quizRatingsParam = "quizRatings"
-
-credentialsParam : String
-credentialsParam = "credentials"
-
-userCreationParam : String
-userCreationParam = "userCreation"
 
 mkPath : List String -> String
 mkPath = String.join "/"
