@@ -1,15 +1,14 @@
 module Common.Authentication exposing (..)
 
 import Base64
-import Common.Types exposing (Credentials, UserName)
-import Common.WireUtil exposing (RestParam, SessionKey)
+import Common.Types exposing (Credentials, UserHash, UserName)
 import Crypto.Hash exposing (sha512)
 import Json.Encode as Encode
 
 
 type alias Authentication =
     { userName : UserName
-    , sessionKey : SessionKey
+    , sessionKey : UserHash
     }
 
 
@@ -25,7 +24,7 @@ updateUserName authentication userName =
     { authentication | userName = userName }
 
 
-updateSessionKey : Authentication -> SessionKey -> Authentication
+updateSessionKey : Authentication -> UserHash -> Authentication
 updateSessionKey authentication sessionKey =
     { authentication | sessionKey = sessionKey }
 
@@ -36,4 +35,4 @@ the given session key and the encoded values (in this order).
 -}
 mkCredentials : Authentication -> Encode.Value -> Credentials
 mkCredentials authentication value =
-    { user = authentication.userName, signature = sha512 (String.concat [authentication.sessionKey, Base64.encode (Encode.encode 0 value)]) }
+    { user = authentication.userName, signature = sha512 (String.concat [ authentication.sessionKey, Base64.encode (Encode.encode 0 value) ]) }
