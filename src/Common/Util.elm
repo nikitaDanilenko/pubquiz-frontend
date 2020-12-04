@@ -1,13 +1,11 @@
 module Common.Util exposing (..)
 
-import Common.Constants exposing (quizIdParam)
 import Common.HttpUtil as HttpUtil
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamRating, jsonDecQuizInfo, jsonEncDbQuizId)
 import Http exposing (Error)
 import Json.Decode as Decode
-import Json.Encode as Encode exposing (Value)
+import Json.Encode exposing (Value)
 import List.Extra
-import Url.Builder exposing (string)
 
 
 escapeHTML : String -> String
@@ -69,13 +67,14 @@ foldResultWith errorFunction okFunction result =
 
 getMsg : String -> (Result Error a -> msg) -> Decode.Decoder a -> DbQuizId -> Cmd msg
 getMsg =
-    getMsgWith jsonEncDbQuizId quizIdParam
+    getMsgWith jsonEncDbQuizId
 
 
-getMsgWith : (v -> Value) -> String -> String -> (Result Error a -> msg) -> Decode.Decoder a -> v -> Cmd msg
-getMsgWith encoder param path action decoder v =
-    Http.get
-        { url = Url.Builder.relative [ path ] [ string param (Encode.encode 0 (encoder v)) ]
+getMsgWith : (v -> Value) -> String -> (Result Error a -> msg) -> Decode.Decoder a -> v -> Cmd msg
+getMsgWith encoder path action decoder v =
+    HttpUtil.get
+        { url = path
+        , body = encoder v
         , expect = HttpUtil.expectJson action decoder
         }
 
@@ -142,6 +141,7 @@ isDefined m =
 
 type alias ErrorOr a =
     Result Error a
+
 
 special : Int -> String
 special =

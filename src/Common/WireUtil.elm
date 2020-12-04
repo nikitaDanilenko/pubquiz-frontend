@@ -1,19 +1,11 @@
 module Common.WireUtil exposing
-    ( RestKey
-    , RestParam
-    , RestValue
-    , SessionKey
-    , User
-    , addFeedbackLabel
-    , encodeBody
+    ( addFeedbackLabel
     , errorToString
     , getLabelsWith
     , getQuizInfoWith
     , getQuizRatingsWith
     , linkButton
     , loadingSymbol
-    , mkJSONParams
-    , mkParams
     , mkPlacement
     , mkPlacementTables
     , useOrFetchWith
@@ -27,44 +19,8 @@ import Common.Util as Util exposing (ErrorOr, getMsg)
 import Html exposing (Attribute, Html, div, label, table, td, text, tr)
 import Html.Attributes exposing (for, href, id)
 import Http exposing (Error(..))
-import Json.Encode as Encode exposing (encode)
 import List.Extra exposing (maximumBy)
 import Loading
-import Url.Builder
-
-
-type alias User =
-    String
-
-
-type alias SessionKey =
-    String
-
-
-type alias RestParam =
-    String
-
-
-type alias RestValue =
-    String
-
-
-type alias RestKey =
-    String
-
-
-mkJSONParams : List ( String, Encode.Value ) -> RestParam
-mkJSONParams ps =
-    ps |> List.map (\( k, v ) -> ( k, encode 0 v )) |> mkParams
-
-
-mkParams : List ( RestKey, RestValue ) -> RestParam
-mkParams kvs =
-    let
-        done =
-            Url.Builder.relative [] (List.map (\( k, v ) -> Url.Builder.string k v) kvs)
-    in
-    String.dropLeft 1 done
 
 
 getLabelsWith : (ErrorOr Labels -> msg) -> DbQuizId -> Cmd msg
@@ -85,11 +41,6 @@ getQuizRatingsWith f =
 useOrFetchWith : (DbQuizId -> Cmd msg) -> Maybe a -> DbQuizId -> Cmd msg
 useOrFetchWith dft mA qid =
     Util.foldMaybe (dft qid) (always Cmd.none) mA
-
-
-encodeBody : String -> Http.Body
-encodeBody =
-    Http.stringBody "application/x-www-form-urlencoded"
 
 
 linkButton : String -> List (Attribute msg) -> List (Html msg) -> Html msg

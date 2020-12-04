@@ -58,7 +58,7 @@ postJsonWithCredentials :
     Authentication
     ->
         { url : String
-        , body: Encode.Value
+        , body : Encode.Value
         , expect : Expect msg
         }
     -> Cmd msg
@@ -70,6 +70,24 @@ postJsonWithCredentials authentication request =
     Http.request
         { method = "POST"
         , headers = [ Http.header userHeader credentials.user, Http.header signatureHeader credentials.signature ]
+        , url = request.url
+        , body = Http.jsonBody request.body
+        , expect = request.expect
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+get :
+    { url : String
+    , body : Encode.Value
+    , expect : Expect msg
+    }
+    -> Cmd msg
+get request =
+    Http.request
+        { method = "PUT"
+        , headers = []
         , url = request.url
         , body = Http.jsonBody request.body
         , expect = request.expect
