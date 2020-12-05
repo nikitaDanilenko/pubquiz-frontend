@@ -9,6 +9,7 @@ module Common.WireUtil exposing
     , mkPlacement
     , mkPlacementTables
     , mkTeamQueryLink
+    , mkTeamQueryLinkRelative
     , useOrFetchWith
     )
 
@@ -179,12 +180,16 @@ loadingSymbol =
 
 
 mkTeamQueryLink : TeamQuery -> String
-mkTeamQueryLink teamQuery =
-    fragmentUrl
-        [ quizIdParam
-        , String.fromInt teamQuery.teamQueryQuizId
-        , teamNumberParam
-        , String.fromInt teamQuery.teamQueryTeamNumber
-        , teamCodeParam
-        , teamQuery.teamQueryTeamCode
-        ]
+mkTeamQueryLink =
+    mkTeamQueryLinkRelative >> fragmentUrl
+
+
+mkTeamQueryLinkRelative : TeamQuery -> List String
+mkTeamQueryLinkRelative teamQuery =
+    [ quizIdParam
+    , String.fromInt teamQuery.teamQueryQuizId
+    , teamNumberParam
+    , String.fromInt teamQuery.teamQueryTeamNumber
+    , teamCodeParam
+    , teamQuery.teamQueryTeamCode
+    ]
