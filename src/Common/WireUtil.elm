@@ -8,19 +8,21 @@ module Common.WireUtil exposing
     , loadingSymbol
     , mkPlacement
     , mkPlacementTables
+    , mkTeamQueryLink
     , useOrFetchWith
     )
 
 import Bootstrap.Button
-import Common.Constants exposing (getLabelsApi, getQuizInfoApi, getQuizRatingsApi)
+import Common.Constants exposing (getLabelsApi, getQuizInfoApi, getQuizRatingsApi, quizIdParam, teamCodeParam, teamNumberParam)
 import Common.Ranking exposing (RankingsWithSorted, RoundRankings, RoundWinner, TeamsRanking, rankingToPlacement, roundRankingsToRoundWinners)
-import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, Ratings, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings)
+import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, Ratings, TeamQuery, jsonDecLabels, jsonDecQuizInfo, jsonDecQuizRatings)
 import Common.Util as Util exposing (ErrorOr, getMsg)
 import Html exposing (Attribute, Html, div, label, table, td, text, tr)
 import Html.Attributes exposing (for, href, id)
 import Http exposing (Error(..))
 import List.Extra exposing (maximumBy)
 import Loading
+import Output.OutputUtil exposing (fragmentUrl)
 
 
 getLabelsWith : (ErrorOr Labels -> msg) -> DbQuizId -> Cmd msg
@@ -174,3 +176,15 @@ mkRoundWinnersTableLine wordForRound wordForPoints rw =
 loadingSymbol : Html msg
 loadingSymbol =
     Loading.render Loading.Spinner Loading.defaultConfig Loading.On
+
+
+mkTeamQueryLink : TeamQuery -> String
+mkTeamQueryLink teamQuery =
+    fragmentUrl
+        [ quizIdParam
+        , String.fromInt teamQuery.teamQueryQuizId
+        , teamNumberParam
+        , String.fromInt teamQuery.teamQueryTeamNumber
+        , teamCodeParam
+        , teamQuery.teamQueryTeamCode
+        ]

@@ -1,12 +1,11 @@
 module Output.Quiz exposing (Model, Msg, init, update, view)
 
 import Chartjs.Chart exposing (chart)
-import Common.Constants exposing (quizIdParam, teamCodeParam, teamNumberParam)
 import Common.QuizRatings as QuizRatings
 import Common.Ranking exposing (RoundRankingPerTeam, RoundRankings, RoundWinner, TeamsRanking, ratingsToRankings)
 import Common.Types exposing (DbQuizId, Labels, QuizInfo, QuizRatings, TeamQuery)
 import Common.Util as Util exposing (ErrorOr)
-import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, linkButton, loadingSymbol, mkPlacementTables, useOrFetchWith)
+import Common.WireUtil exposing (getLabelsWith, getQuizInfoWith, getQuizRatingsWith, linkButton, loadingSymbol, mkPlacementTables, mkTeamQueryLink, useOrFetchWith)
 import Html exposing (Html, div, label, text)
 import Html.Attributes exposing (class, for, id)
 import Input.QuizValues as QuizValues
@@ -182,13 +181,3 @@ update msg model =
     ( newModel, Cmd.none )
 
 
-mkTeamQueryLink : TeamQuery -> String
-mkTeamQueryLink teamQuery =
-    fragmentUrl
-        [ quizIdParam
-        , String.fromInt teamQuery.teamQueryQuizId
-        , teamNumberParam
-        , String.fromInt teamQuery.teamQueryTeamNumber
-        , teamCodeParam
-        , teamQuery.teamQueryTeamCode
-        ]
