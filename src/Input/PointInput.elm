@@ -13,7 +13,7 @@ import Common.QuizRatings as QuizRatings
 import Common.Ranking exposing (NamedTeamRating, ratingsToRankings)
 import Common.Types exposing (Activity, DbQuizId, Header, Labels, QuizInfo, QuizRatings, QuizSettings, RoundNumber, RoundRating, TeamInfo, TeamNumber, UserName, jsonDecLabels, jsonDecQuizRatings, jsonEncUpdateQuizRatingsRequest)
 import Common.Util as Util exposing (ErrorOr, getMsg, special)
-import Common.WireUtil exposing (addFeedbackLabel, errorToString, loadingSymbol, mkPlacementTables)
+import Common.WireUtil exposing (addFeedbackLabel, errorToString, loadingSymbol, mkPlacementTables, mkTeamQueryLink)
 import Html exposing (Html, a, button, div, input, label, text)
 import Html.Attributes exposing (checked, class, disabled, for, href, id, max, tabindex, target, type_, value)
 import Html.Events exposing (on, onClick, onInput)
@@ -32,6 +32,7 @@ type alias Model =
     , authentication : Authentication
     , feedback : String
     , status : Status
+    , displayTeamLinks : Bool
     }
 
 
@@ -58,6 +59,11 @@ updateFeedback model feedback =
 updateStatus : Model -> Status -> Model
 updateStatus model status =
     { model | status = status }
+
+
+updateDisplayTeamLinks : Model -> Bool -> Model
+updateDisplayTeamLinks model displayTeamLinks =
+    { model | displayTeamLinks = displayTeamLinks }
 
 
 type alias Status =
@@ -123,6 +129,7 @@ type Msg
     | GotQuizRatings (ErrorOr QuizRatings)
     | ChangeMaxPoints RoundNumber Direction
     | ChangePoints RoundNumber TeamNumber Direction
+    | ToggleDisplayLinks
 
 
 mkKeyEventMsg : (Direction -> Msg) -> KeyboardEvent -> Maybe Msg
@@ -152,6 +159,7 @@ init authentication quizInfo =
       , authentication = authentication
       , feedback = ""
       , status = initialStatus
+      , displayTeamLinks = False
       }
     , Cmd.batch [ getLabels quizInfo.quizId, getQuizRatings quizInfo.quizId ]
     )
@@ -196,7 +204,14 @@ view model =
                 ]
              , div [ id "teamNames" ]
                 (label [ for "teamNamesLabel" ] [ text "Team names" ]
-                    :: mkTeamNameInput rankings.sortedHeader
+                    :: label [ for "teamLinks" ] [ text "Display team links?" ]
+                    :: input
+                        [ type_ "checkbox"
+                        , checked model.displayTeamLinks
+                        , onClick ToggleDisplayLinks
+                        ]
+                        []
+                    :: mkTeamNameInput model.quizInfo.quizId model.displayTeamLinks rankings.sortedHeader
                 )
              ]
                 ++ List.map (uncurry mkRoundForm) namedRatings
@@ -210,11 +225,22 @@ view model =
                         , disabled (List.any (.teamInfoName >> String.isEmpty) model.quizRatings.header)
                         ]
                         [ text "Update" ]
-                   , mkLinkToSheet "answerSheet" "Get quiz sheet" model.quizInfo.fullSheetPath
-                   , mkLinkToSheet "qrSheet" "Get QR codes only" model.quizInfo.qrOnlyPath
-                   , mkLinkWith "mainGraphPage"
-                        "View main graph page"
-                        (fromServerUrl [ serverQuizzesFolder ] [ quizIdParam, String.fromInt model.quizInfo.quizId ])
+                   , mkLinkToSheet
+                        { divId = "answerSheet"
+                        , linkText = "Get quiz sheet"
+                        , file = model.quizInfo.fullSheetPath
+                        }
+                   , mkLinkToSheet
+                        { divId = "qrSheet"
+                        , linkText = "Get QR codes only"
+                        , file = model.quizInfo.qrOnlyPath
+                        }
+                   , mkLinkWith
+                        { divId = "mainGraphPage"
+                        , linkText = "View main graph page"
+                        , path = fromServerUrl [ serverQuizzesFolder ] [ quizIdParam, String.fromInt model.quizInfo.quizId ]
+                        , cls = "link"
+                        }
                    , addFeedbackLabel model.feedback
                    , div [ id "pointInputRankings" ] (mkPlacementTables rankings model.labels)
                    ]
@@ -349,6 +375,13 @@ update msg model =
             in
             ( newModel, Cmd.none )
 
+        ToggleDisplayLinks ->
+            let
+                newModel =
+                    updateDisplayTeamLinks model (not model.displayTeamLinks)
+            in
+            ( newModel, Cmd.none )
+
 
 updateMaxPointsInRound : RoundNumber -> String -> Model -> Model
 updateMaxPointsInRound roundNumber newPoints model =
@@ -369,15 +402,38 @@ updateTeamPointsInRound rn tn ps model =
         |> updateRatingsInput model
 
 
-mkTeamNameInput : Header -> List (Html Msg)
-mkTeamNameInput =
-    List.sortBy .teamInfoNumber >> List.map mkSingleTeamNameInput
+mkTeamNameInput : DbQuizId -> Bool -> Header -> List (Html Msg)
+mkTeamNameInput qid displayTeamLinks =
+    let
+        plain teamInfo =
+            text (mkTeamNumber teamInfo.teamInfoNumber "Team")
+
+        asLink teamInfo =
+            mkLink
+                { path =
+                    mkTeamQueryLink
+                        { teamQueryQuizId = qid
+                        , teamQueryTeamNumber = teamInfo.teamInfoNumber
+                        , teamQueryTeamCode = teamInfo.teamInfoCode
+                        }
+                , text = mkTeamNumber teamInfo.teamInfoNumber "Team"
+                , cls = "teamLink"
+                }
+
+        teamNameElement =
+            if displayTeamLinks then
+                asLink
+
+            else
+                plain
+    in
+    List.sortBy .teamInfoNumber >> List.map (mkSingleTeamNameInput teamNameElement)
 
 
-mkSingleTeamNameInput : TeamInfo -> Html Msg
-mkSingleTeamNameInput teamInfo =
+mkSingleTeamNameInput : (TeamInfo -> Html Msg) -> TeamInfo -> Html Msg
+mkSingleTeamNameInput teamNameElement teamInfo =
     div [ class "teamNameInputArea" ]
-        [ label [ for "teamName" ] [ text (mkTeamNumber teamInfo.teamInfoNumber "Team") ]
+        [ label [ for "teamName" ] [ teamNameElement teamInfo ]
         , input
             [ value teamInfo.teamInfoName
             , onInput (SetTeamName teamInfo.teamInfoNumber)
@@ -469,21 +525,42 @@ mkRoundForm roundNumber sortedNamedRoundRating =
         )
 
 
-mkLinkToSheet : String -> String -> String -> Html Msg
-mkLinkToSheet divId linkText file =
-    mkLinkWith divId linkText (mkPath [ serverLocation, file ])
+mkLinkToSheet :
+    { divId : String
+    , linkText : String
+    , file : String
+    }
+    -> Html Msg
+mkLinkToSheet linkParams =
+    mkLinkWith
+        { divId = linkParams.divId
+        , linkText = linkParams.linkText
+        , path = mkPath [ serverLocation, linkParams.file ]
+        , cls = "link"
+        }
 
 
-mkLinkWith : String -> String -> String -> Html Msg
-mkLinkWith divId linkText path =
-    div [ id divId ]
-        [ a
-            [ class "link"
-            , href path
-            , target "_blank"
-            ]
-            [ text linkText ]
+mkLinkWith :
+    { divId : String
+    , cls : String
+    , linkText : String
+    , path : String
+    }
+    -> Html Msg
+mkLinkWith linkParams =
+    div [ id linkParams.divId ]
+        [ mkLink { path = linkParams.path, text = linkParams.linkText, cls = linkParams.cls }
         ]
+
+
+mkLink : { path : String, text : String, cls : String } -> Html Msg
+mkLink linkParams =
+    a
+        [ class linkParams.cls
+        , href linkParams.path
+        , target "_blank"
+        ]
+        [ text linkParams.text ]
 
 
 pointInputAttributes : List (Html.Attribute Msg)
