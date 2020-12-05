@@ -13,7 +13,7 @@ import Common.QuizRatings as QuizRatings
 import Common.Ranking exposing (NamedTeamRating, ratingsToRankings)
 import Common.Types exposing (Activity, DbQuizId, Header, Labels, QuizInfo, QuizRatings, QuizSettings, RoundNumber, RoundRating, TeamInfo, TeamNumber, UserName, jsonDecLabels, jsonDecQuizRatings, jsonEncUpdateQuizRatingsRequest)
 import Common.Util as Util exposing (ErrorOr, getMsg, special)
-import Common.WireUtil exposing (addFeedbackLabel, errorToString, loadingSymbol, mkPlacementTables, mkTeamQueryLink)
+import Common.WireUtil exposing (addFeedbackLabel, errorToString, loadingSymbol, mkPlacementTables, mkTeamQueryLinkRelative)
 import Html exposing (Html, a, button, div, input, label, text)
 import Html.Attributes exposing (checked, class, disabled, for, href, id, max, tabindex, target, type_, value)
 import Html.Events exposing (on, onClick, onInput)
@@ -411,11 +411,14 @@ mkTeamNameInput qid displayTeamLinks =
         asLink teamInfo =
             mkLink
                 { path =
-                    mkTeamQueryLink
-                        { teamQueryQuizId = qid
-                        , teamQueryTeamNumber = teamInfo.teamInfoNumber
-                        , teamQueryTeamCode = teamInfo.teamInfoCode
-                        }
+                    fromServerUrl
+                        [ serverQuizzesFolder ]
+                        (mkTeamQueryLinkRelative
+                            { teamQueryQuizId = qid
+                            , teamQueryTeamNumber = teamInfo.teamInfoNumber
+                            , teamQueryTeamCode = teamInfo.teamInfoCode
+                            }
+                        )
                 , text = mkTeamNumber teamInfo.teamInfoNumber "Team"
                 , cls = "teamLink"
                 }
