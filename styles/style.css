@@ -102,9 +102,13 @@ label, input {
   text-decoration: none;
 }
 
-.link:hover {
+.link:hover, .teamLink:hover {
  text-decoration: underline;
  color: rgb(0, 0, 0);
+}
+
+.teamLink {
+  text-decoration: none;
 }
 
 .teamPointsArea, #maxPointsArea > .maxPoints {
@@ -153,7 +157,7 @@ label, input {
   max-width: 32pt;
 }
 
-#editingLabel, .link, #fullQuizTitleLabel, #fullQuizTitle {
+#editingLabel, .link, .teamLink, #fullQuizTitleLabel, #fullQuizTitle {
   color: rgb(100, 149, 237);
 }
 
