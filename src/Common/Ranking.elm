@@ -27,14 +27,11 @@ type alias RankingsWithSorted =
     { sortedHeader : Header, sortedRatings : Ratings, perRound : RoundRankings, cumulative : RoundRankings }
 
 
-ratingsToRankings : QuizRatings -> RankingsWithSorted
-ratingsToRankings quizRatings =
+sortedHeaderAndActive : QuizRatings -> QuizRatings
+sortedHeaderAndActive quizRatings =
     let
         sortedHeader =
             List.sortBy .teamInfoNumber quizRatings.header
-
-        activeHeader =
-            sortedHeader |> List.filter (.teamInfoActivity >> QuizValues.isActive)
 
         sortedRatings =
             quizRatings.ratings
@@ -49,6 +46,26 @@ ratingsToRankings quizRatings =
                                 |> RoundRating.updatePoints rr
                         )
                     )
+    in
+    { header = sortedHeader
+    , ratings = sortedRatings
+    }
+
+
+ratingsToRankings : QuizRatings -> RankingsWithSorted
+ratingsToRankings quizRatings =
+    let
+        sortedQuizRatings =
+            sortedHeaderAndActive quizRatings
+
+        sortedRatings =
+            sortedQuizRatings.ratings
+
+        sortedHeader =
+            sortedQuizRatings.header
+
+        activeHeader =
+            sortedHeader |> List.filter (.teamInfoActivity >> QuizValues.isActive)
 
         rearranged =
             transpose (List.map (\( rn, rat ) -> rat.points |> List.sortBy .teamNumber |> List.map (\x -> ( rn, x ))) sortedRatings)
