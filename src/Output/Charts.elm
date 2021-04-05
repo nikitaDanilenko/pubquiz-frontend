@@ -13,6 +13,7 @@ import Chartjs.Options.Title exposing (defaultTitle)
 import Color exposing (Color)
 import Common.Ranking exposing (RoundRankingPerTeam, RoundRankings, roundRankingPerTeamToPointsPerTeam)
 import Common.Types exposing (QuizRatings, RoundRating)
+import Output.EvaluationLabels as EvaluationLabels exposing (EvaluationLabels)
 import Stat
 
 
@@ -34,9 +35,10 @@ progressionChart =
 roundEvaluationChart : List Color -> QuizRatings -> List String -> String -> Chart
 roundEvaluationChart cs qrs roundLabels t =
     { chartType = Bar
-    , data = { labels = roundLabels, datasets = mkEvaluationDataSets cs qrs }
+    , data = { labels = roundLabels, datasets = mkEvaluationDataSets EvaluationLabels.default cs qrs }
     , options = chartOptionsWithTitle t
     }
+
 
 mkChartWith : (List Color -> RoundRankings -> List DataSet) -> Type -> List Color -> RoundRankings -> List String -> String -> Chart
 mkChartWith mkDataSets chartType colors rankings roundLabels chartTitle =
@@ -172,12 +174,12 @@ mkEvaluationDataSet color desc selector evs =
     }
 
 
-mkEvaluationDataSets : List Color -> QuizRatings -> List DataSet
-mkEvaluationDataSets cs qrs =
+mkEvaluationDataSets : EvaluationLabels -> List Color -> QuizRatings -> List DataSet
+mkEvaluationDataSets evLbls cs qrs =
     let
         roundEvaluations =
             List.map (Tuple.second >> mkRoundEvaluation) qrs.ratings
     in
-      List.map2 (\c (n, f) -> mkEvaluationDataSet c n f roundEvaluations |> BarDataSet)
-                cs
-                [("Min", .min), ("Max", .max), ("Ø", .mean), ("Med", .median)]
+    List.map2 (\c ( nf, f ) -> mkEvaluationDataSet c (nf evLbls) f roundEvaluations |> BarDataSet)
+        cs
+        [ ( .min, .min ), ( .max, .max ), ( .mean, .mean ), ( .median, .median ) ]
