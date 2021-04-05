@@ -11,7 +11,7 @@ import Chartjs.Options.Elements exposing (LineFill(..), defaultElements)
 import Chartjs.Options.Scales exposing (Axis, defaultAxis, defaultScales, defaultTicks)
 import Chartjs.Options.Title exposing (defaultTitle)
 import Color exposing (Color)
-import Common.Ranking exposing (RoundRankingPerTeam, RoundRankings, roundRankingPerTeamToPointsPerTeam)
+import Common.Ranking as Ranking exposing (RoundRankingPerTeam, RoundRankings, roundRankingPerTeamToPointsPerTeam)
 import Common.Types exposing (QuizRatings, RoundRating)
 import Output.EvaluationLabels as EvaluationLabels exposing (EvaluationLabels)
 import Stat
@@ -178,7 +178,8 @@ mkEvaluationDataSets : EvaluationLabels -> List Color -> QuizRatings -> List Dat
 mkEvaluationDataSets evLbls cs qrs =
     let
         roundEvaluations =
-            List.map (Tuple.second >> mkRoundEvaluation) qrs.ratings
+            List.map (Tuple.second >> mkRoundEvaluation)
+                (Ranking.sortedHeaderAndActive qrs).ratings
     in
     List.map2 (\c ( nf, f ) -> mkEvaluationDataSet c (nf evLbls) f roundEvaluations |> BarDataSet)
         cs
