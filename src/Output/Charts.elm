@@ -1,4 +1,4 @@
-module Output.Charts exposing (cumulativeChart, perRoundChart, progressionChart)
+module Output.Charts exposing (cumulativeChart, perRoundChart, progressionChart, roundEvaluationChart)
 
 import Basics.Extra exposing (uncurry)
 import Chartjs.Chart exposing (Chart, Type(..))
@@ -12,6 +12,8 @@ import Chartjs.Options.Scales exposing (Axis, defaultAxis, defaultScales, defaul
 import Chartjs.Options.Title exposing (defaultTitle)
 import Color exposing (Color)
 import Common.Ranking exposing (RoundRankingPerTeam, RoundRankings, roundRankingPerTeamToPointsPerTeam)
+import Common.Types exposing (QuizRatings, RoundRating)
+import Stat
 
 
 perRoundChart : List Color -> RoundRankings -> List String -> String -> Chart
@@ -28,6 +30,13 @@ progressionChart : List Color -> RoundRankings -> List String -> String -> Chart
 progressionChart =
     mkChartWith mkProgressionDataSets Line
 
+
+roundEvaluationChart : List Color -> QuizRatings -> List String -> String -> Chart
+roundEvaluationChart cs qrs roundLabels t =
+    { chartType = Bar
+    , data = { labels = roundLabels, datasets = mkEvaluationDataSets cs qrs }
+    , options = chartOptionsWithTitle t
+    }
 
 mkChartWith : (List Color -> RoundRankings -> List DataSet) -> Type -> List Color -> RoundRankings -> List String -> String -> Chart
 mkChartWith mkDataSets chartType colors rankings roundLabels chartTitle =
@@ -108,7 +117,7 @@ defaultLine =
 
 mkPerRoundDataSets : List Color -> RoundRankings -> List DataSet
 mkPerRoundDataSets =
-    List.map2 (\c x -> (c, x) |> uncurry mkPerRoundBarDataSet |> BarDataSet)
+    List.map2 (\c x -> ( c, x ) |> uncurry mkPerRoundBarDataSet |> BarDataSet)
 
 
 mkCumulativeDataSets : List Color -> RoundRankings -> List DataSet
@@ -123,4 +132,52 @@ mkProgressionDataSets =
 
 processCumulativeWith : (Color -> RoundRankingPerTeam -> ds) -> (ds -> DataSet) -> List Color -> RoundRankings -> List DataSet
 processCumulativeWith mkSpecialDataSet mkDataSet =
-    List.map2 (\c x -> (c, x ) |> uncurry mkSpecialDataSet |> mkDataSet)
+    List.map2 (\c x -> ( c, x ) |> uncurry mkSpecialDataSet |> mkDataSet)
+
+
+type alias RoundEvaluation =
+    { min : Float
+    , max : Float
+    , mean : Float
+    , median : Float
+    }
+
+
+mkRoundEvaluation : RoundRating -> RoundEvaluation
+mkRoundEvaluation r =
+    let
+        ps =
+            List.map .rating r.points
+
+        orZero =
+            Maybe.withDefault 0
+    in
+    { min = orZero (List.minimum ps)
+    , max = orZero (List.maximum ps)
+    , mean = orZero (Stat.mean ps)
+    , median = orZero (Stat.median ps)
+    }
+
+
+mkEvaluationDataSet : Color -> String -> (RoundEvaluation -> Float) -> List RoundEvaluation -> Bar.DataSet
+mkEvaluationDataSet color desc selector evs =
+    let
+        base =
+            Bar.defaultFromLabel desc
+    in
+    { base
+        | data = List.map selector evs
+        , backgroundColor = mkColorProperty color
+        , borderColor = mkColorProperty color
+    }
+
+
+mkEvaluationDataSets : List Color -> QuizRatings -> List DataSet
+mkEvaluationDataSets cs qrs =
+    let
+        roundEvaluations =
+            List.map (Tuple.second >> mkRoundEvaluation) qrs.ratings
+    in
+      List.map2 (\c (n, f) -> mkEvaluationDataSet c n f roundEvaluations |> BarDataSet)
+                cs
+                [("Min", .min), ("Max", .max), ("Ø", .mean), ("Med", .median)]

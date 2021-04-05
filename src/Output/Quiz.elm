@@ -10,7 +10,7 @@ import Html exposing (Html, div, label, text)
 import Html.Attributes exposing (class, for, id)
 import Input.QuizValues as QuizValues
 import Output.Charts as Charts
-import Output.Colors exposing (mkColors)
+import Output.Colors as Colors exposing (mkColors)
 import Output.OutputUtil exposing (fragmentUrl, mkFullQuizName)
 
 
@@ -119,6 +119,9 @@ view model =
             progressionChart =
                 Charts.progressionChart colors rankings.cumulative roundLabels model.labels.progressionLabel
 
+            roundEvaluationChart =
+                Charts.roundEvaluationChart Colors.evaluationColors model.quizRatings roundLabels ""
+
             backToTable =
                 case model.teamQueryCandidate of
                     Just teamQuery ->
@@ -153,6 +156,8 @@ view model =
                         [ chart 800 600 perRoundChart ]
                     , div [ id "progressionChart" ]
                         [ chart 800 600 progressionChart ]
+                    , div [ id "roundEvaluationChart" ]
+                        [ chart 800 600 roundEvaluationChart ]
                     ]
                 :: div [ id "allQuizzes" ]
                     [ linkButton
@@ -179,5 +184,3 @@ update msg model =
                     Util.foldResult model (updateQuizInfo model) quizInfoCandidate
     in
     ( newModel, Cmd.none )
-
-
