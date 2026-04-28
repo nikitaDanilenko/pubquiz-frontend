@@ -1,7 +1,7 @@
-module Generated.Api.Types exposing
+module Api.Types exposing
     ( AddTeamsCommand, ChangeSettingsCommand, CorrectScoreCommand, Day, LoginRequest, LoginResponse, QuizActive
     , QuizIdentifier, QuizMetaData, QuizSettings, QuizSummary, RecordRoundScoresCommand, RenameTeamCommand
-    , Round, ScoreBoard, ScoreEntry, SetTeamActiveCommand, Team
+    , Round, ScoreBoard, ScoreEntry, SetTeamActiveCommand, Team, TeamScore
     , BackofficeQuizIdAddTeams_Error(..), BackofficeQuizIdChangeSettings_Error(..), BackofficeQuizIdCorrectScore_Error(..)
     , BackofficeQuizIdRecordRoundScores_Error(..), BackofficeQuizIdRenameTeam_Error(..)
     , BackofficeQuizIdSetTeamActive_Error(..)
@@ -14,7 +14,7 @@ module Generated.Api.Types exposing
 
 @docs AddTeamsCommand, ChangeSettingsCommand, CorrectScoreCommand, Day, LoginRequest, LoginResponse, QuizActive
 @docs QuizIdentifier, QuizMetaData, QuizSettings, QuizSummary, RecordRoundScoresCommand, RenameTeamCommand
-@docs Round, ScoreBoard, ScoreEntry, SetTeamActiveCommand, Team
+@docs Round, ScoreBoard, ScoreEntry, SetTeamActiveCommand, Team, TeamScore
 
 
 ## Errors
@@ -26,11 +26,6 @@ module Generated.Api.Types exposing
 -}
 
 import Date
-import Json.Encode
-
-
-type alias ScoreEntry =
-    { teamNumber : Int, roundNumber : Int, points : Float }
 
 
 type BackofficeQuizIdAddTeams_Error
@@ -63,12 +58,20 @@ type BackofficeQuizIdSetTeamActive_Error
     | BackofficeQuizIdSetTeamActive_404 ()
 
 
+type alias TeamScore =
+    { points : Float, teamNumber : Int }
+
+
 type alias Team =
     { active : Bool, name : String, number : Int }
 
 
 type alias SetTeamActiveCommand =
     { active : Bool, teamNumber : Int }
+
+
+type alias ScoreEntry =
+    { points : Float, roundNumber : Int, teamNumber : Int }
 
 
 type alias ScoreBoard =
@@ -84,7 +87,7 @@ type alias RenameTeamCommand =
 
 
 type alias RecordRoundScoresCommand =
-    { roundNumber : Int, scores : List ScoreEntry }
+    { roundNumber : Int, scores : List TeamScore }
 
 
 type alias QuizActive =

@@ -1,4 +1,4 @@
-module Generated.OpenApi.Common exposing
+module OpenApi.Common exposing
     ( Nullable(..)
     , decodeOptionalField, jsonDecodeAndMap
     , Error(..), bytesResolverCustom, expectBytesCustom, expectJsonCustom, expectStringCustom, jsonResolverCustom

@@ -1,4 +1,4 @@
-module Generated.Api.Api exposing
+module Api.Api exposing
     ( backoffice, backofficeLogin, backofficeLoginTask, backofficeQuizIdAddTeams, backofficeQuizIdAddTeamsTask
     , backofficeQuizIdChangeSettings, backofficeQuizIdChangeSettingsTask, backofficeQuizIdCorrectScore
     , backofficeQuizIdCorrectScoreTask, backofficeQuizIdLock, backofficeQuizIdLockTask
@@ -23,12 +23,12 @@ module Generated.Api.Api exposing
 
 -}
 
-import Generated.Api.Types
+import Api.Types
 import Bytes
 import Dict
 import Http
 import Json.Decode
-import Generated.OpenApi.Common
+import OpenApi.Common
 import Task
 import Url.Builder
 
@@ -39,7 +39,7 @@ backoffice config =
         , method = "POST"
         , headers = []
         , expect =
-            Generated.OpenApi.Common.expectBytesCustom
+            OpenApi.Common.expectBytesCustom
                 config.toMsg
                 (Dict.fromList [ ( "400", Json.Decode.succeed () ) ])
         , body = Http.bytesBody "application/json;charset=utf-8" config.body
@@ -50,14 +50,14 @@ backoffice config =
 
 backofficeTask :
     { body : Bytes.Bytes }
-    -> Task.Task (Generated.OpenApi.Common.Error () Bytes.Bytes) Bytes.Bytes
+    -> Task.Task (OpenApi.Common.Error () Bytes.Bytes) Bytes.Bytes
 backofficeTask config =
     Http.task
         { url = Url.Builder.absolute [ "backoffice" ] []
         , method = "POST"
         , headers = []
         , resolver =
-            Generated.OpenApi.Common.bytesResolverCustom
+            OpenApi.Common.bytesResolverCustom
                 (Dict.fromList [ ( "400", Json.Decode.succeed () ) ])
         , body = Http.bytesBody "application/json;charset=utf-8" config.body
         , timeout = Nothing
@@ -70,7 +70,7 @@ backofficeLogin config =
         , method = "POST"
         , headers = []
         , expect =
-            Generated.OpenApi.Common.expectBytesCustom
+            OpenApi.Common.expectBytesCustom
                 config.toMsg
                 (Dict.fromList [ ( "400", Json.Decode.succeed () ) ])
         , body = Http.bytesBody "application/json;charset=utf-8" config.body
@@ -81,14 +81,14 @@ backofficeLogin config =
 
 backofficeLoginTask :
     { body : Bytes.Bytes }
-    -> Task.Task (Generated.OpenApi.Common.Error () Bytes.Bytes) Bytes.Bytes
+    -> Task.Task (OpenApi.Common.Error () Bytes.Bytes) Bytes.Bytes
 backofficeLoginTask config =
     Http.task
         { url = Url.Builder.absolute [ "backoffice", "login" ] []
         , method = "POST"
         , headers = []
         , resolver =
-            Generated.OpenApi.Common.bytesResolverCustom
+            OpenApi.Common.bytesResolverCustom
                 (Dict.fromList [ ( "400", Json.Decode.succeed () ) ])
         , body = Http.bytesBody "application/json;charset=utf-8" config.body
         , timeout = Nothing
@@ -97,7 +97,7 @@ backofficeLoginTask config =
 
 backofficeQuizIdAddTeams :
     { toMsg :
-        Result (Generated.OpenApi.Common.Error Generated.Api.Types.BackofficeQuizIdAddTeams_Error Bytes.Bytes) Bytes.Bytes
+        Result (OpenApi.Common.Error Api.Types.BackofficeQuizIdAddTeams_Error Bytes.Bytes) Bytes.Bytes
         -> msg
     , body : Bytes.Bytes
     , params : { quizId : Int }
@@ -115,17 +115,17 @@ backofficeQuizIdAddTeams config =
         , method = "POST"
         , headers = []
         , expect =
-            Generated.OpenApi.Common.expectBytesCustom
+            OpenApi.Common.expectBytesCustom
                 config.toMsg
                 (Dict.fromList
                     [ ( "400"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdAddTeams_400
+                            Api.Types.BackofficeQuizIdAddTeams_400
                             (Json.Decode.succeed ())
                       )
                     , ( "404"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdAddTeams_404
+                            Api.Types.BackofficeQuizIdAddTeams_404
                             (Json.Decode.succeed ())
                       )
                     ]
@@ -138,7 +138,7 @@ backofficeQuizIdAddTeams config =
 
 backofficeQuizIdAddTeamsTask :
     { body : Bytes.Bytes, params : { quizId : Int } }
-    -> Task.Task (Generated.OpenApi.Common.Error Generated.Api.Types.BackofficeQuizIdAddTeams_Error Bytes.Bytes) Bytes.Bytes
+    -> Task.Task (OpenApi.Common.Error Api.Types.BackofficeQuizIdAddTeams_Error Bytes.Bytes) Bytes.Bytes
 backofficeQuizIdAddTeamsTask config =
     Http.task
         { url =
@@ -151,16 +151,16 @@ backofficeQuizIdAddTeamsTask config =
         , method = "POST"
         , headers = []
         , resolver =
-            Generated.OpenApi.Common.bytesResolverCustom
+            OpenApi.Common.bytesResolverCustom
                 (Dict.fromList
                     [ ( "400"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdAddTeams_400
+                            Api.Types.BackofficeQuizIdAddTeams_400
                             (Json.Decode.succeed ())
                       )
                     , ( "404"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdAddTeams_404
+                            Api.Types.BackofficeQuizIdAddTeams_404
                             (Json.Decode.succeed ())
                       )
                     ]
@@ -172,7 +172,7 @@ backofficeQuizIdAddTeamsTask config =
 
 backofficeQuizIdChangeSettings :
     { toMsg :
-        Result (Generated.OpenApi.Common.Error Generated.Api.Types.BackofficeQuizIdChangeSettings_Error Bytes.Bytes) Bytes.Bytes
+        Result (OpenApi.Common.Error Api.Types.BackofficeQuizIdChangeSettings_Error Bytes.Bytes) Bytes.Bytes
         -> msg
     , body : Bytes.Bytes
     , params : { quizId : Int }
@@ -190,17 +190,17 @@ backofficeQuizIdChangeSettings config =
         , method = "POST"
         , headers = []
         , expect =
-            Generated.OpenApi.Common.expectBytesCustom
+            OpenApi.Common.expectBytesCustom
                 config.toMsg
                 (Dict.fromList
                     [ ( "400"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdChangeSettings_400
+                            Api.Types.BackofficeQuizIdChangeSettings_400
                             (Json.Decode.succeed ())
                       )
                     , ( "404"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdChangeSettings_404
+                            Api.Types.BackofficeQuizIdChangeSettings_404
                             (Json.Decode.succeed ())
                       )
                     ]
@@ -213,7 +213,7 @@ backofficeQuizIdChangeSettings config =
 
 backofficeQuizIdChangeSettingsTask :
     { body : Bytes.Bytes, params : { quizId : Int } }
-    -> Task.Task (Generated.OpenApi.Common.Error Generated.Api.Types.BackofficeQuizIdChangeSettings_Error Bytes.Bytes) Bytes.Bytes
+    -> Task.Task (OpenApi.Common.Error Api.Types.BackofficeQuizIdChangeSettings_Error Bytes.Bytes) Bytes.Bytes
 backofficeQuizIdChangeSettingsTask config =
     Http.task
         { url =
@@ -226,16 +226,16 @@ backofficeQuizIdChangeSettingsTask config =
         , method = "POST"
         , headers = []
         , resolver =
-            Generated.OpenApi.Common.bytesResolverCustom
+            OpenApi.Common.bytesResolverCustom
                 (Dict.fromList
                     [ ( "400"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdChangeSettings_400
+                            Api.Types.BackofficeQuizIdChangeSettings_400
                             (Json.Decode.succeed ())
                       )
                     , ( "404"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdChangeSettings_404
+                            Api.Types.BackofficeQuizIdChangeSettings_404
                             (Json.Decode.succeed ())
                       )
                     ]
@@ -247,7 +247,7 @@ backofficeQuizIdChangeSettingsTask config =
 
 backofficeQuizIdCorrectScore :
     { toMsg :
-        Result (Generated.OpenApi.Common.Error Generated.Api.Types.BackofficeQuizIdCorrectScore_Error Bytes.Bytes) Bytes.Bytes
+        Result (OpenApi.Common.Error Api.Types.BackofficeQuizIdCorrectScore_Error Bytes.Bytes) Bytes.Bytes
         -> msg
     , body : Bytes.Bytes
     , params : { quizId : Int }
@@ -265,17 +265,17 @@ backofficeQuizIdCorrectScore config =
         , method = "POST"
         , headers = []
         , expect =
-            Generated.OpenApi.Common.expectBytesCustom
+            OpenApi.Common.expectBytesCustom
                 config.toMsg
                 (Dict.fromList
                     [ ( "400"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdCorrectScore_400
+                            Api.Types.BackofficeQuizIdCorrectScore_400
                             (Json.Decode.succeed ())
                       )
                     , ( "404"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdCorrectScore_404
+                            Api.Types.BackofficeQuizIdCorrectScore_404
                             (Json.Decode.succeed ())
                       )
                     ]
@@ -288,7 +288,7 @@ backofficeQuizIdCorrectScore config =
 
 backofficeQuizIdCorrectScoreTask :
     { body : Bytes.Bytes, params : { quizId : Int } }
-    -> Task.Task (Generated.OpenApi.Common.Error Generated.Api.Types.BackofficeQuizIdCorrectScore_Error Bytes.Bytes) Bytes.Bytes
+    -> Task.Task (OpenApi.Common.Error Api.Types.BackofficeQuizIdCorrectScore_Error Bytes.Bytes) Bytes.Bytes
 backofficeQuizIdCorrectScoreTask config =
     Http.task
         { url =
@@ -301,16 +301,16 @@ backofficeQuizIdCorrectScoreTask config =
         , method = "POST"
         , headers = []
         , resolver =
-            Generated.OpenApi.Common.bytesResolverCustom
+            OpenApi.Common.bytesResolverCustom
                 (Dict.fromList
                     [ ( "400"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdCorrectScore_400
+                            Api.Types.BackofficeQuizIdCorrectScore_400
                             (Json.Decode.succeed ())
                       )
                     , ( "404"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdCorrectScore_404
+                            Api.Types.BackofficeQuizIdCorrectScore_404
                             (Json.Decode.succeed ())
                       )
                     ]
@@ -321,7 +321,7 @@ backofficeQuizIdCorrectScoreTask config =
 
 
 backofficeQuizIdLock :
-    { toMsg : Result (Generated.OpenApi.Common.Error () Bytes.Bytes) Bytes.Bytes -> msg
+    { toMsg : Result (OpenApi.Common.Error () Bytes.Bytes) Bytes.Bytes -> msg
     , params : { quizId : Int }
     }
     -> Cmd msg
@@ -334,7 +334,7 @@ backofficeQuizIdLock config =
         , method = "POST"
         , headers = []
         , expect =
-            Generated.OpenApi.Common.expectBytesCustom
+            OpenApi.Common.expectBytesCustom
                 config.toMsg
                 (Dict.fromList [ ( "404", Json.Decode.succeed () ) ])
         , body = Http.emptyBody
@@ -345,7 +345,7 @@ backofficeQuizIdLock config =
 
 backofficeQuizIdLockTask :
     { params : { quizId : Int } }
-    -> Task.Task (Generated.OpenApi.Common.Error () Bytes.Bytes) Bytes.Bytes
+    -> Task.Task (OpenApi.Common.Error () Bytes.Bytes) Bytes.Bytes
 backofficeQuizIdLockTask config =
     Http.task
         { url =
@@ -355,7 +355,7 @@ backofficeQuizIdLockTask config =
         , method = "POST"
         , headers = []
         , resolver =
-            Generated.OpenApi.Common.bytesResolverCustom
+            OpenApi.Common.bytesResolverCustom
                 (Dict.fromList [ ( "404", Json.Decode.succeed () ) ])
         , body = Http.emptyBody
         , timeout = Nothing
@@ -364,7 +364,7 @@ backofficeQuizIdLockTask config =
 
 backofficeQuizIdRecordRoundScores :
     { toMsg :
-        Result (Generated.OpenApi.Common.Error Generated.Api.Types.BackofficeQuizIdRecordRoundScores_Error Bytes.Bytes) Bytes.Bytes
+        Result (OpenApi.Common.Error Api.Types.BackofficeQuizIdRecordRoundScores_Error Bytes.Bytes) Bytes.Bytes
         -> msg
     , body : Bytes.Bytes
     , params : { quizId : Int }
@@ -382,17 +382,17 @@ backofficeQuizIdRecordRoundScores config =
         , method = "POST"
         , headers = []
         , expect =
-            Generated.OpenApi.Common.expectBytesCustom
+            OpenApi.Common.expectBytesCustom
                 config.toMsg
                 (Dict.fromList
                     [ ( "400"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdRecordRoundScores_400
+                            Api.Types.BackofficeQuizIdRecordRoundScores_400
                             (Json.Decode.succeed ())
                       )
                     , ( "404"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdRecordRoundScores_404
+                            Api.Types.BackofficeQuizIdRecordRoundScores_404
                             (Json.Decode.succeed ())
                       )
                     ]
@@ -405,7 +405,7 @@ backofficeQuizIdRecordRoundScores config =
 
 backofficeQuizIdRecordRoundScoresTask :
     { body : Bytes.Bytes, params : { quizId : Int } }
-    -> Task.Task (Generated.OpenApi.Common.Error Generated.Api.Types.BackofficeQuizIdRecordRoundScores_Error Bytes.Bytes) Bytes.Bytes
+    -> Task.Task (OpenApi.Common.Error Api.Types.BackofficeQuizIdRecordRoundScores_Error Bytes.Bytes) Bytes.Bytes
 backofficeQuizIdRecordRoundScoresTask config =
     Http.task
         { url =
@@ -418,16 +418,16 @@ backofficeQuizIdRecordRoundScoresTask config =
         , method = "POST"
         , headers = []
         , resolver =
-            Generated.OpenApi.Common.bytesResolverCustom
+            OpenApi.Common.bytesResolverCustom
                 (Dict.fromList
                     [ ( "400"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdRecordRoundScores_400
+                            Api.Types.BackofficeQuizIdRecordRoundScores_400
                             (Json.Decode.succeed ())
                       )
                     , ( "404"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdRecordRoundScores_404
+                            Api.Types.BackofficeQuizIdRecordRoundScores_404
                             (Json.Decode.succeed ())
                       )
                     ]
@@ -439,7 +439,7 @@ backofficeQuizIdRecordRoundScoresTask config =
 
 backofficeQuizIdRenameTeam :
     { toMsg :
-        Result (Generated.OpenApi.Common.Error Generated.Api.Types.BackofficeQuizIdRenameTeam_Error Bytes.Bytes) Bytes.Bytes
+        Result (OpenApi.Common.Error Api.Types.BackofficeQuizIdRenameTeam_Error Bytes.Bytes) Bytes.Bytes
         -> msg
     , body : Bytes.Bytes
     , params : { quizId : Int }
@@ -457,17 +457,17 @@ backofficeQuizIdRenameTeam config =
         , method = "POST"
         , headers = []
         , expect =
-            Generated.OpenApi.Common.expectBytesCustom
+            OpenApi.Common.expectBytesCustom
                 config.toMsg
                 (Dict.fromList
                     [ ( "400"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdRenameTeam_400
+                            Api.Types.BackofficeQuizIdRenameTeam_400
                             (Json.Decode.succeed ())
                       )
                     , ( "404"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdRenameTeam_404
+                            Api.Types.BackofficeQuizIdRenameTeam_404
                             (Json.Decode.succeed ())
                       )
                     ]
@@ -480,7 +480,7 @@ backofficeQuizIdRenameTeam config =
 
 backofficeQuizIdRenameTeamTask :
     { body : Bytes.Bytes, params : { quizId : Int } }
-    -> Task.Task (Generated.OpenApi.Common.Error Generated.Api.Types.BackofficeQuizIdRenameTeam_Error Bytes.Bytes) Bytes.Bytes
+    -> Task.Task (OpenApi.Common.Error Api.Types.BackofficeQuizIdRenameTeam_Error Bytes.Bytes) Bytes.Bytes
 backofficeQuizIdRenameTeamTask config =
     Http.task
         { url =
@@ -493,16 +493,16 @@ backofficeQuizIdRenameTeamTask config =
         , method = "POST"
         , headers = []
         , resolver =
-            Generated.OpenApi.Common.bytesResolverCustom
+            OpenApi.Common.bytesResolverCustom
                 (Dict.fromList
                     [ ( "400"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdRenameTeam_400
+                            Api.Types.BackofficeQuizIdRenameTeam_400
                             (Json.Decode.succeed ())
                       )
                     , ( "404"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdRenameTeam_404
+                            Api.Types.BackofficeQuizIdRenameTeam_404
                             (Json.Decode.succeed ())
                       )
                     ]
@@ -514,7 +514,7 @@ backofficeQuizIdRenameTeamTask config =
 
 backofficeQuizIdSetTeamActive :
     { toMsg :
-        Result (Generated.OpenApi.Common.Error Generated.Api.Types.BackofficeQuizIdSetTeamActive_Error Bytes.Bytes) Bytes.Bytes
+        Result (OpenApi.Common.Error Api.Types.BackofficeQuizIdSetTeamActive_Error Bytes.Bytes) Bytes.Bytes
         -> msg
     , body : Bytes.Bytes
     , params : { quizId : Int }
@@ -532,17 +532,17 @@ backofficeQuizIdSetTeamActive config =
         , method = "POST"
         , headers = []
         , expect =
-            Generated.OpenApi.Common.expectBytesCustom
+            OpenApi.Common.expectBytesCustom
                 config.toMsg
                 (Dict.fromList
                     [ ( "400"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdSetTeamActive_400
+                            Api.Types.BackofficeQuizIdSetTeamActive_400
                             (Json.Decode.succeed ())
                       )
                     , ( "404"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdSetTeamActive_404
+                            Api.Types.BackofficeQuizIdSetTeamActive_404
                             (Json.Decode.succeed ())
                       )
                     ]
@@ -555,7 +555,7 @@ backofficeQuizIdSetTeamActive config =
 
 backofficeQuizIdSetTeamActiveTask :
     { body : Bytes.Bytes, params : { quizId : Int } }
-    -> Task.Task (Generated.OpenApi.Common.Error Generated.Api.Types.BackofficeQuizIdSetTeamActive_Error Bytes.Bytes) Bytes.Bytes
+    -> Task.Task (OpenApi.Common.Error Api.Types.BackofficeQuizIdSetTeamActive_Error Bytes.Bytes) Bytes.Bytes
 backofficeQuizIdSetTeamActiveTask config =
     Http.task
         { url =
@@ -568,16 +568,16 @@ backofficeQuizIdSetTeamActiveTask config =
         , method = "POST"
         , headers = []
         , resolver =
-            Generated.OpenApi.Common.bytesResolverCustom
+            OpenApi.Common.bytesResolverCustom
                 (Dict.fromList
                     [ ( "400"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdSetTeamActive_400
+                            Api.Types.BackofficeQuizIdSetTeamActive_400
                             (Json.Decode.succeed ())
                       )
                     , ( "404"
                       , Json.Decode.map
-                            Generated.Api.Types.BackofficeQuizIdSetTeamActive_404
+                            Api.Types.BackofficeQuizIdSetTeamActive_404
                             (Json.Decode.succeed ())
                       )
                     ]
@@ -588,7 +588,7 @@ backofficeQuizIdSetTeamActiveTask config =
 
 
 backofficeQuizIdUnlock :
-    { toMsg : Result (Generated.OpenApi.Common.Error () Bytes.Bytes) Bytes.Bytes -> msg
+    { toMsg : Result (OpenApi.Common.Error () Bytes.Bytes) Bytes.Bytes -> msg
     , params : { quizId : Int }
     }
     -> Cmd msg
@@ -601,7 +601,7 @@ backofficeQuizIdUnlock config =
         , method = "POST"
         , headers = []
         , expect =
-            Generated.OpenApi.Common.expectBytesCustom
+            OpenApi.Common.expectBytesCustom
                 config.toMsg
                 (Dict.fromList [ ( "404", Json.Decode.succeed () ) ])
         , body = Http.emptyBody
@@ -612,7 +612,7 @@ backofficeQuizIdUnlock config =
 
 backofficeQuizIdUnlockTask :
     { params : { quizId : Int } }
-    -> Task.Task (Generated.OpenApi.Common.Error () Bytes.Bytes) Bytes.Bytes
+    -> Task.Task (OpenApi.Common.Error () Bytes.Bytes) Bytes.Bytes
 backofficeQuizIdUnlockTask config =
     Http.task
         { url =
@@ -622,7 +622,7 @@ backofficeQuizIdUnlockTask config =
         , method = "POST"
         , headers = []
         , resolver =
-            Generated.OpenApi.Common.bytesResolverCustom
+            OpenApi.Common.bytesResolverCustom
                 (Dict.fromList [ ( "404", Json.Decode.succeed () ) ])
         , body = Http.emptyBody
         , timeout = Nothing
@@ -635,27 +635,27 @@ public config =
         , method = "GET"
         , headers = []
         , expect =
-            Generated.OpenApi.Common.expectBytesCustom config.toMsg (Dict.fromList [])
+            OpenApi.Common.expectBytesCustom config.toMsg (Dict.fromList [])
         , body = Http.emptyBody
         , timeout = Nothing
         , tracker = Nothing
         }
 
 
-publicTask : {} -> Task.Task (Generated.OpenApi.Common.Error e Bytes.Bytes) Bytes.Bytes
+publicTask : {} -> Task.Task (OpenApi.Common.Error e Bytes.Bytes) Bytes.Bytes
 publicTask config =
     Http.task
         { url = Url.Builder.absolute [ "public" ] []
         , method = "GET"
         , headers = []
-        , resolver = Generated.OpenApi.Common.bytesResolverCustom (Dict.fromList [])
+        , resolver = OpenApi.Common.bytesResolverCustom (Dict.fromList [])
         , body = Http.emptyBody
         , timeout = Nothing
         }
 
 
 publicQuizId :
-    { toMsg : Result (Generated.OpenApi.Common.Error () Bytes.Bytes) Bytes.Bytes -> msg
+    { toMsg : Result (OpenApi.Common.Error () Bytes.Bytes) Bytes.Bytes -> msg
     , params : { quizId : Int }
     }
     -> Cmd msg
@@ -668,7 +668,7 @@ publicQuizId config =
         , method = "GET"
         , headers = []
         , expect =
-            Generated.OpenApi.Common.expectBytesCustom
+            OpenApi.Common.expectBytesCustom
                 config.toMsg
                 (Dict.fromList [ ( "404", Json.Decode.succeed () ) ])
         , body = Http.emptyBody
@@ -679,7 +679,7 @@ publicQuizId config =
 
 publicQuizIdTask :
     { params : { quizId : Int } }
-    -> Task.Task (Generated.OpenApi.Common.Error () Bytes.Bytes) Bytes.Bytes
+    -> Task.Task (OpenApi.Common.Error () Bytes.Bytes) Bytes.Bytes
 publicQuizIdTask config =
     Http.task
         { url =
@@ -689,7 +689,7 @@ publicQuizIdTask config =
         , method = "GET"
         , headers = []
         , resolver =
-            Generated.OpenApi.Common.bytesResolverCustom
+            OpenApi.Common.bytesResolverCustom
                 (Dict.fromList [ ( "404", Json.Decode.succeed () ) ])
         , body = Http.emptyBody
         , timeout = Nothing
