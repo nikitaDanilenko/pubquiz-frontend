@@ -1,0 +1,13 @@
+{
+  "name": "pubquiz-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "generate-api": "dotenv -- openapi-generator-cli generate --generator-key elm && ./scripts/post-generate-api.sh"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.13.4",
+    "dotenv-cli": "^8.0.0"
+  }
+}
+
