@@ -21,10 +21,35 @@ services:
     ports:
       - "8080:8080"
     environment:
-      DATABASE_URL: postgres://pubquiz:pubquiz@postgres:5436/pubquiz
+      SERVER_PATH: /api
+      PORT: 8080
+      DATABASE_HOST: postgres
+      DATABASE_NAME: pubquiz
+      DATABASE_USER: pubquiz
+      DATABASE_PASSWORD: pubquiz
+      DATABASE_PORT: 5432
+      ORGANIZER_ADMIN_NAME: admin
+      ORGANIZER_ADMIN_HASH: "$$2a$$12$$x.gTHtEsgwTyAxDeWuyHXel4wSj3.tbPhpFj.iKInlCb5zfBRlPGO"
+      ORGANIZER_USER_NAME: user
+      ORGANIZER_USER_HASH: "$$2a$$12$$Imca3zXFekaRMFLOcBlNhePaAtkIzd9iiif8nhN5tZ455h8fuRfrO"
+      JWT_SECRET: dev-jwt-secret
+      JWT_EXPIRATION_SECONDS: 86400
     depends_on:
       postgres:
         condition: service_healthy
+
+  # Run under localhost:8092, with
+  # System: PostgreSQL
+  # Server: postgres (the docker service name)
+  # Username: pubquiz
+  # Password: pubquiz
+  # Database: pubquiz
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8092:8080"
+    depends_on:
+      - postgres
 
 volumes:
   postgres_data:
