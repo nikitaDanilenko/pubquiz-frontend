@@ -2,10 +2,12 @@ port module Main exposing (main)
 
 import Browser
 import Browser.Navigation as Nav
-import Html exposing (Html, a, button, div, h1, li, nav, p, section, text, ul)
+import Html exposing (Html, a, button, div, h1, p, section, text)
 import Html.Attributes exposing (attribute, class, href)
 import Html.Events exposing (onClick)
-import Monocle.Lens exposing (Lens)
+import Pages.Public.Overview.Handler
+import Pages.Public.Overview.Page
+import Pages.Public.Overview.View
 import Pages.Public.Quiz.Handler
 import Pages.Public.Quiz.Page
 import Pages.Public.Quiz.View
@@ -43,26 +45,16 @@ type alias Model =
     }
 
 
-lenses :
-    { page : Lens Model Page
-    , apiBase : Lens Model String
-    , theme : Lens Model Theme
-    }
-lenses =
-    { page = Lens .page (\b a -> { a | page = b })
-    , apiBase = Lens .apiBase (\b a -> { a | apiBase = b })
-    , theme = Lens .theme (\b a -> { a | theme = b })
-    }
-
-
 type Page
     = Landing
+    | Overview Pages.Public.Overview.Page.Model
     | Quiz Pages.Public.Quiz.Page.Model
     | NotFound
 
 
 type Route
     = LandingRoute
+    | OverviewRoute
     | QuizRoute Int
 
 
@@ -70,7 +62,8 @@ routeParser : Parser (Route -> a) a
 routeParser =
     Parser.oneOf
         [ Parser.map LandingRoute Parser.top
-        , Parser.map QuizRoute (Parser.s "quiz" </> Parser.int)
+        , Parser.map OverviewRoute (Parser.s "quizzes")
+        , Parser.map QuizRoute (Parser.s "quizzes" </> Parser.int)
         ]
 
 
@@ -114,6 +107,7 @@ init flags url key =
 type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url
+    | OverviewMsg Pages.Public.Overview.Page.Msg
     | QuizMsg Pages.Public.Quiz.Page.Msg
     | ToggleTheme
 
@@ -131,6 +125,15 @@ update msg model =
 
         ( UrlChanged url, _ ) ->
             navigateTo (parseUrl url) model
+
+        ( OverviewMsg overviewMsg, Overview overviewModel ) ->
+            let
+                ( newOverviewModel, overviewCmd ) =
+                    Pages.Public.Overview.Handler.update overviewMsg overviewModel
+            in
+            ( { model | page = Overview newOverviewModel }
+            , Cmd.map OverviewMsg overviewCmd
+            )
 
         ( QuizMsg quizMsg, Quiz quizModel ) ->
             let
@@ -168,6 +171,17 @@ navigateTo maybeRoute model =
         Just LandingRoute ->
             ( { model | page = Landing }, Cmd.none )
 
+        Just OverviewRoute ->
+            let
+                ( overviewModel, overviewCmd ) =
+                    Pages.Public.Overview.Handler.init
+                        { apiBase = model.apiBase
+                        }
+            in
+            ( { model | page = Overview overviewModel }
+            , Cmd.map OverviewMsg overviewCmd
+            )
+
         Just (QuizRoute quizId) ->
             let
                 ( quizModel, quizCmd ) =
@@ -183,7 +197,7 @@ navigateTo maybeRoute model =
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = pageTitle model.page
+    { title = "Quizzes"
     , body =
         [ div [ attribute "data-theme" (themeToString model.theme), class "app" ]
             [ viewThemeToggle model.theme
@@ -207,24 +221,14 @@ viewThemeToggle theme =
         ]
 
 
-pageTitle : Page -> String
-pageTitle page =
-    case page of
-        Landing ->
-            "Pubquiz"
-
-        Quiz _ ->
-            "Quiz - Pubquiz"
-
-        NotFound ->
-            "Not Found - Pubquiz"
-
-
 viewPage : Theme -> Page -> Html Msg
 viewPage theme page =
     case page of
         Landing ->
             viewLanding
+
+        Overview overviewModel ->
+            Html.map OverviewMsg (Pages.Public.Overview.View.view overviewModel)
 
         Quiz quizModel ->
             Html.map QuizMsg (Pages.Public.Quiz.View.view theme quizModel)
@@ -237,12 +241,8 @@ viewLanding : Html msg
 viewLanding =
     section [ class "landing" ]
         [ h1 [] [ text "Pubquiz" ]
-        , p [] [ text "Select a quiz to view results." ]
-        , nav []
-            [ ul []
-                [ li [] [ a [ href "/quiz/1" ] [ text "Quiz 1" ] ]
-                ]
-            ]
+        , p [] [ text "View quiz results." ]
+        , a [ href "/quizzes", class "browse-link" ] [ text "Browse Quizzes" ]
         ]
 
 
