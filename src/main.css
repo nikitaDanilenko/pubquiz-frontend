@@ -24,3 +24,47 @@ img {
   margin: 20px 0;
   max-width: 200px;
 }
+
+.statistics-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.legend-item::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+}
+
+.legend-item[data-stat="min"]::before {
+  background-color: #dd4124;
+}
+
+.legend-item[data-stat="average"]::before {
+  background-color: #009b77;
+}
+
+.legend-item[data-stat="median"]::before {
+  background-color: #efc050;
+}
+
+.legend-item[data-stat="max"]::before {
+  background-color: #6b5b95;
+}
+
+.chart {
+  margin-bottom: 32px;
+}

@@ -7,8 +7,8 @@ import Api.Types exposing (QuizActive, Round, ScoreEntry, Team)
 import Chart as C
 import Chart.Attributes as CA
 import Date
-import Html exposing (Html, h1, h2, li, ol, p, section, text)
-import Html.Attributes exposing (class)
+import Html exposing (Html, h1, h2, li, ol, p, section, text, ul)
+import Html.Attributes exposing (attribute, class)
 import List.Extra
 import Maybe.Extra
 import Pages.Public.Quiz.Page as Page
@@ -176,6 +176,7 @@ viewProgressionChart teamData =
         , C.chart
             [ CA.height 300
             , CA.width 600
+            , CA.margin { top = 10, bottom = 30, left = 0, right = 0 }
             ]
             ([ C.xLabels [ CA.withGrid ]
              , C.yLabels [ CA.withGrid ]
@@ -204,6 +205,7 @@ viewCumulativeBarChart teamData rounds =
         , C.chart
             [ CA.height 300
             , CA.width 600
+            , CA.margin { top = 10, bottom = 30, left = 0, right = 0 }
             ]
             [ C.xLabels [ CA.withGrid ]
             , C.yLabels [ CA.withGrid ]
@@ -243,6 +245,7 @@ viewPerRoundBarChart teamData rounds =
         , C.chart
             [ CA.height 300
             , CA.width 600
+            , CA.margin { top = 10, bottom = 30, left = 0, right = 0 }
             ]
             [ C.xLabels [ CA.withGrid ]
             , C.yLabels [ CA.withGrid ]
@@ -341,6 +344,7 @@ viewRoundStatisticsChart rounds scores =
         , C.chart
             [ CA.height 300
             , CA.width 600
+            , CA.margin { top = 10, bottom = 30, left = 0, right = 0 }
             ]
             [ C.xLabels [ CA.withGrid ]
             , C.yLabels [ CA.withGrid ]
@@ -356,9 +360,28 @@ viewRoundStatisticsChart rounds scores =
                     |> C.named "Max"
                 ]
                 stats
-            , C.legendsAt .max .max [ CA.alignRight ] []
             ]
+        , viewStatisticsLegend
         ]
+
+
+viewStatisticsLegend : Html msg
+viewStatisticsLegend =
+    ul [ class "statistics-legend" ]
+        [ legendItem "min" "Min"
+        , legendItem "average" "Average"
+        , legendItem "median" "Median"
+        , legendItem "max" "Max"
+        ]
+
+
+legendItem : String -> String -> Html msg
+legendItem colorKey label =
+    li
+        [ class "legend-item"
+        , attribute "data-stat" colorKey
+        ]
+        [ text label ]
 
 
 viewHeader : QuizActive -> Html msg
