@@ -1,9 +1,10 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Browser
 import Browser.Navigation as Nav
-import Html exposing (Html, a, h1, li, nav, p, section, text, ul)
-import Html.Attributes exposing (class, href)
+import Html exposing (Html, a, button, div, h1, li, nav, p, section, text, ul)
+import Html.Attributes exposing (attribute, class, href)
+import Html.Events exposing (onClick)
 import Monocle.Lens exposing (Lens)
 import Pages.Public.Quiz.Handler
 import Pages.Public.Quiz.Page
@@ -12,8 +13,17 @@ import Url exposing (Url)
 import Url.Parser as Parser exposing ((</>), Parser)
 
 
+port saveTheme : String -> Cmd msg
+
+
+type Theme
+    = Light
+    | Dark
+
+
 type alias Flags =
     { apiBase : String
+    , theme : String
     }
 
 
@@ -33,16 +43,19 @@ type alias Model =
     { key : Nav.Key
     , page : Page
     , apiBase : String
+    , theme : Theme
     }
 
 
 lenses :
     { page : Lens Model Page
     , apiBase : Lens Model String
+    , theme : Lens Model Theme
     }
 lenses =
     { page = Lens .page (\b a -> { a | page = b })
     , apiBase = Lens .apiBase (\b a -> { a | apiBase = b })
+    , theme = Lens .theme (\b a -> { a | theme = b })
     }
 
 
@@ -70,6 +83,25 @@ parseUrl url =
     Parser.parse routeParser url
 
 
+parseTheme : String -> Theme
+parseTheme str =
+    if str == "dark" then
+        Dark
+
+    else
+        Light
+
+
+themeToString : Theme -> String
+themeToString theme =
+    case theme of
+        Light ->
+            "light"
+
+        Dark ->
+            "dark"
+
+
 init : Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     let
@@ -77,6 +109,7 @@ init flags url key =
             { key = key
             , page = NotFound
             , apiBase = flags.apiBase
+            , theme = parseTheme flags.theme
             }
     in
     navigateTo (parseUrl url) model
@@ -86,6 +119,7 @@ type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url
     | QuizMsg Pages.Public.Quiz.Page.Msg
+    | ToggleTheme
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -109,6 +143,20 @@ update msg model =
             in
             ( { model | page = Quiz newQuizModel }
             , Cmd.map QuizMsg quizCmd
+            )
+
+        ( ToggleTheme, _ ) ->
+            let
+                newTheme =
+                    case model.theme of
+                        Light ->
+                            Dark
+
+                        Dark ->
+                            Light
+            in
+            ( { model | theme = newTheme }
+            , saveTheme (themeToString newTheme)
             )
 
         _ ->
@@ -140,8 +188,27 @@ navigateTo maybeRoute model =
 view : Model -> Browser.Document Msg
 view model =
     { title = pageTitle model.page
-    , body = [ viewPage model.page ]
+    , body =
+        [ div [ attribute "data-theme" (themeToString model.theme), class "app" ]
+            [ viewThemeToggle model.theme
+            , viewPage model.page
+            ]
+        ]
     }
+
+
+viewThemeToggle : Theme -> Html Msg
+viewThemeToggle theme =
+    button [ class "theme-toggle", onClick ToggleTheme ]
+        [ text
+            (case theme of
+                Light ->
+                    "💡"
+
+                Dark ->
+                    "💡"
+            )
+        ]
 
 
 pageTitle : Page -> String

@@ -9,11 +9,63 @@
   height: inherit;
 }
 
+:root,
+[data-theme="light"] {
+  --color-bg: #ffffff;
+  --color-text: #293c4b;
+  --color-text-muted: #5a6a7a;
+  --color-border: #e0e0e0;
+  --color-surface: #f5f5f5;
+  --color-chart-grid: #e0e0e0;
+}
+
+[data-theme="dark"] {
+  --color-bg: rgb(40, 40, 40);
+  --color-text: rgb(200, 200, 200);
+  --color-text-muted: rgb(150, 150, 150);
+  --color-border: rgb(70, 70, 70);
+  --color-surface: rgb(55, 55, 55);
+  --color-chart-grid: rgb(70, 70, 70);
+}
+
+html {
+  background-color: var(--color-bg);
+}
+
+.app {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
 body {
   font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
   margin: 0;
   text-align: center;
-  color: #293c4b;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.theme-toggle:hover {
+  background-color: var(--color-border);
 }
 
 h1 {
