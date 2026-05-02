@@ -8,6 +8,7 @@ import Date
 import Html exposing (Html, h1, p, section, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class)
 import List.Extra
+import Maybe.Extra
 import Pages.Public.Quiz.Page as Page
 import Util.Tristate as Tristate
 
@@ -149,12 +150,11 @@ viewTeamRow rounds scores _ team =
                         scores
                             |> List.Extra.find
                                 (\s -> s.teamNumber == team.number && s.roundNumber == roundNum)
-                            |> Maybe.map .points
+                            |> Maybe.Extra.unwrap 0 .points
                     )
 
         total =
             roundScores
-                |> List.filterMap identity
                 |> List.sum
 
         cells =
@@ -162,12 +162,12 @@ viewTeamRow rounds scores _ team =
                 |> List.map
                     (\maybePoints ->
                         td [ class "score-cell" ]
-                            [ text (maybePoints |> Maybe.map formatPoints |> Maybe.withDefault "-") ]
+                            [ text (formatPoints maybePoints) ]
                     )
 
         teamName =
             if String.isEmpty team.name then
-                "Team " ++ String.fromInt team.number
+                String.concat [ "Team", " ", String.fromInt team.number ]
 
             else
                 team.name
