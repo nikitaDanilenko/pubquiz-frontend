@@ -25,6 +25,11 @@ img {
   max-width: 200px;
 }
 
+.ranking-list {
+  list-style: none;
+  padding: 0;
+}
+
 .statistics-legend,
 .team-legend {
   display: flex;

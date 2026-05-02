@@ -9,7 +9,7 @@ import Chart.Attributes as CA
 import Chart.Events as CE
 import Chart.Item as CI
 import Date
-import Html exposing (Html, h1, h2, li, ol, p, section, span, text, ul)
+import Html exposing (Html, h1, h2, li, p, section, span, text, ul)
 import Html.Attributes exposing (attribute, class, style)
 import List.Extra
 import Maybe.Extra
@@ -143,7 +143,7 @@ viewRanking teamData =
     in
     section [ class "ranking" ]
         [ h2 [] [ text "Ranking" ]
-        , ol [ class "ranking-list" ]
+        , ul [ class "ranking-list" ]
             (ranked
                 |> List.map
                     (\r ->
