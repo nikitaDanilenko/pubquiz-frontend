@@ -187,7 +187,7 @@ viewProgressionChart theme teamData =
         , C.chart
             [ CA.height 300
             , CA.width 600
-            , CA.margin { top = 10, bottom = 30, left = 0, right = 0 }
+            , CA.margin { top = 10, bottom = 30, left = 40, right = 0 }
             ]
             (List.concat
                 [ [ C.xLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
@@ -228,7 +228,7 @@ viewCumulativeBarChart theme hovering teamData rounds =
         , C.chart
             [ CA.height 300
             , CA.width 600
-            , CA.margin { top = 10, bottom = 30, left = 0, right = 0 }
+            , CA.margin { top = 10, bottom = 30, left = 40, right = 0 }
             , CE.onMouseMove Page.OnHover (CE.getNearest CI.any)
             , CE.onMouseLeave (Page.OnHover [])
             ]
@@ -277,7 +277,7 @@ viewPerRoundBarChart theme hovering teamData rounds =
         , C.chart
             [ CA.height 300
             , CA.width 600
-            , CA.margin { top = 10, bottom = 30, left = 0, right = 0 }
+            , CA.margin { top = 10, bottom = 30, left = 40, right = 0 }
             , CE.onMouseMove Page.OnHover (CE.getNearest CI.any)
             , CE.onMouseLeave (Page.OnHover [])
             ]
@@ -364,7 +364,7 @@ viewRoundStatisticsChart theme hovering rounds scores =
         , C.chart
             [ CA.height 300
             , CA.width 600
-            , CA.margin { top = 10, bottom = 30, left = 0, right = 0 }
+            , CA.margin { top = 10, bottom = 30, left = 40, right = 0 }
             , CE.onMouseMove Page.OnStatsHover (CE.getNearest CI.any)
             , CE.onMouseLeave (Page.OnStatsHover [])
             ]
