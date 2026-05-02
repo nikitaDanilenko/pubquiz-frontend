@@ -29,6 +29,8 @@
     - repeat one line implementations in words
     - commenting a section `Foo configuration` in a configuration file starting with `foo:`
 - Use semantic HTML, and avoid `div` and `span` elements when possible
+- Prefer `concat` over `++`, even for just two values
+- Prefer existing combinators to pattern matching
 
 ## Tooling
 
