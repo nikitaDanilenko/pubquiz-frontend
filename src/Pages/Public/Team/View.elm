@@ -328,7 +328,7 @@ viewRoundRow rd =
 
 viewBackLink : Int -> Html msg
 viewBackLink quizId =
-    section [ class "back-link" ]
+    section [ class "quiz-link" ]
         [ a [ href (String.concat [ "/quizzes/", String.fromInt quizId ]) ]
-            [ text "← Back to quiz" ]
+            [ text "To quiz" ]
         ]

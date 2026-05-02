@@ -341,6 +341,7 @@ img {
 .team-table th {
   color: var(--color-text-muted);
   font-weight: normal;
+  font-size: 14px;
 }
 
 .team-table td:first-child,
@@ -348,15 +349,27 @@ img {
   text-align: left;
 }
 
-.back-link {
+@media (max-width: 500px) {
+  .team-table th,
+  .team-table td {
+    padding: 8px 6px;
+    font-size: 14px;
+  }
+
+  .team-table th {
+    font-size: 12px;
+  }
+}
+
+.quiz-link {
   margin-top: 32px;
 }
 
-.back-link a {
+.quiz-link a {
   color: var(--color-text-muted);
   text-decoration: none;
 }
 
-.back-link a:hover {
+.quiz-link a:hover {
   text-decoration: underline;
 }
