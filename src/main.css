@@ -339,14 +339,14 @@ img {
 }
 
 .round-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   margin: 0 0 8px 0;
 }
 
 .round-line {
   margin: 4px 0;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .round-card em {
@@ -356,7 +356,7 @@ img {
 
 .round-card small {
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .quiz-link {

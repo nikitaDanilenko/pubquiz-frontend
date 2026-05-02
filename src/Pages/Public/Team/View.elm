@@ -8,6 +8,7 @@ import Date
 import Html exposing (Html, a, article, em, h1, h2, h3, p, section, small, text)
 import Html.Attributes exposing (class, href, style)
 import List.Extra
+import Maybe.Extra
 import Pages.Public.Team.Page as Page
 import Util.Colors as Colors
 import Util.Tristate as Tristate
@@ -259,8 +260,7 @@ computeCumulativeScores rounds scores activeTeamNumbers =
         getScoreForRound roundNum teamNum =
             scores
                 |> List.Extra.find (\s -> s.roundNumber == roundNum && s.teamNumber == teamNum)
-                |> Maybe.map .points
-                |> Maybe.withDefault 0
+                |> Maybe.Extra.unwrap 0 .points
 
         accumulate roundNum previousCumulative =
             activeTeamNumbers
@@ -270,8 +270,7 @@ computeCumulativeScores rounds scores activeTeamNumbers =
                             prev =
                                 previousCumulative
                                     |> List.Extra.find (\( tn, _ ) -> tn == teamNum)
-                                    |> Maybe.map Tuple.second
-                                    |> Maybe.withDefault 0
+                                    |> Maybe.Extra.unwrap 0 Tuple.second
 
                             current =
                                 getScoreForRound roundNum teamNum
@@ -338,19 +337,20 @@ viewRoundCard ( rd, maybePrevious ) =
 
 trendIndicator : Maybe Int -> String
 trendIndicator maybeChange =
-    case maybeChange of
-        Nothing ->
-            ""
+    maybeChange
+        |> Maybe.Extra.unwrap "" changeSymbol
 
-        Just change ->
-            if change > 0 then
-                "↑"
 
-            else if change < 0 then
-                "↓"
+changeSymbol : Int -> String
+changeSymbol change =
+    if change > 0 then
+        "↑"
 
-            else
-                "·"
+    else if change < 0 then
+        "↓"
+
+    else
+        "·"
 
 
 ordinal : Int -> String
