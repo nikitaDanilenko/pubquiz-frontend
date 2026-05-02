@@ -53,36 +53,41 @@ numberOfFixedColors =
 
 mkColors : Int -> List Color
 mkColors total =
+    List.range 0 (total - 1)
+        |> List.map (colorForIndex total)
+
+
+colorForIndex : Int -> Int -> Color
+colorForIndex total index =
     if total <= numberOfFixedColors then
-        List.take total fixedPalette
+        colorAt index
 
     else
-        List.range 0 (total - 1)
-            |> List.map (interpolateColor total)
+        let
+            position =
+                toFloat index * toFloat (numberOfFixedColors - 1) / toFloat (total - 1)
+
+            lowerIndex =
+                floor position
+
+            upperIndex =
+                min (lowerIndex + 1) (numberOfFixedColors - 1)
+
+            fraction =
+                position - toFloat lowerIndex
+
+            lowerColor =
+                colorAt lowerIndex
+
+            upperColor =
+                colorAt upperIndex
+        in
+        Interpolate.interpolate Interpolate.RGB lowerColor upperColor fraction
 
 
 interpolateColor : Int -> Int -> Color
-interpolateColor total index =
-    let
-        position =
-            toFloat index * toFloat (numberOfFixedColors - 1) / toFloat (total - 1)
-
-        lowerIndex =
-            floor position
-
-        upperIndex =
-            min (lowerIndex + 1) (numberOfFixedColors - 1)
-
-        fraction =
-            position - toFloat lowerIndex
-
-        lowerColor =
-            colorAt lowerIndex
-
-        upperColor =
-            colorAt upperIndex
-    in
-    Interpolate.interpolate Interpolate.RGB lowerColor upperColor fraction
+interpolateColor =
+    colorForIndex
 
 
 colorAt : Int -> Color
