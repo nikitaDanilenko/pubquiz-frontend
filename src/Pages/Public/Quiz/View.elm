@@ -6,9 +6,11 @@ module Pages.Public.Quiz.View exposing (view)
 import Api.Types exposing (QuizActive, Round, ScoreEntry, Team)
 import Chart as C
 import Chart.Attributes as CA
+import Chart.Events as CE
+import Chart.Item as CI
 import Date
 import Html exposing (Html, h1, h2, li, ol, p, section, text, ul)
-import Html.Attributes exposing (attribute, class)
+import Html.Attributes exposing (attribute, class, style)
 import List.Extra
 import Maybe.Extra
 import Pages.Public.Quiz.Page as Page
@@ -20,7 +22,7 @@ view : Page.Model -> Html Page.Msg
 view model =
     Tristate.fold
         { onInitial = viewLoading
-        , onReady = viewQuiz
+        , onReady = viewQuiz model.hovering
         , onFailed = viewError
         }
         model.quiz
@@ -41,8 +43,8 @@ viewError _ =
         ]
 
 
-viewQuiz : QuizActive -> Html msg
-viewQuiz quiz =
+viewQuiz : Page.Hovering -> QuizActive -> Html Page.Msg
+viewQuiz hovering quiz =
     let
         activeTeams =
             quiz.scoreBoard.teams
@@ -62,8 +64,8 @@ viewQuiz quiz =
         [ viewHeader quiz
         , viewRanking teamData
         , viewProgressionChart teamData
-        , viewCumulativeBarChart teamData rounds
-        , viewPerRoundBarChart teamData rounds
+        , viewCumulativeBarChart hovering teamData rounds
+        , viewPerRoundBarChart hovering teamData rounds
         , viewRoundStatisticsChart rounds scores
         ]
 
@@ -186,19 +188,30 @@ viewProgressionChart teamData =
                             (\i td ->
                                 C.series .x
                                     [ C.interpolated .y [ CA.color (teamColor totalTeams i) ] [ CA.circle ]
+                                        |> C.named (teamName td.team)
                                     ]
                                     (td.cumulativeScores |> List.indexedMap (\ri score -> { x = toFloat (ri + 1), y = score }))
                             )
                    )
             )
+        , viewTeamLegend teamData
         ]
 
 
-viewCumulativeBarChart : List TeamData -> List Round -> Html msg
-viewCumulativeBarChart teamData rounds =
+viewCumulativeBarChart : Page.Hovering -> List TeamData -> List Round -> Html Page.Msg
+viewCumulativeBarChart hovering teamData rounds =
     let
         totalTeams =
             List.length teamData
+
+        roundData =
+            rounds |> List.map (\r -> { round = r.number })
+
+        getScore ri i =
+            teamData
+                |> List.Extra.getAt i
+                |> Maybe.andThen (\td -> List.Extra.getAt ri td.cumulativeScores)
+                |> Maybe.withDefault 0
     in
     section [ class "chart cumulative-chart" ]
         [ h2 [] [ text "Cumulative Points by Round" ]
@@ -206,6 +219,8 @@ viewCumulativeBarChart teamData rounds =
             [ CA.height 300
             , CA.width 600
             , CA.margin { top = 10, bottom = 30, left = 0, right = 0 }
+            , CE.onMouseMove Page.OnHover (CE.getNearest CI.any)
+            , CE.onMouseLeave (Page.OnHover [])
             ]
             [ C.xLabels [ CA.withGrid ]
             , C.yLabels [ CA.withGrid ]
@@ -213,20 +228,18 @@ viewCumulativeBarChart teamData rounds =
                 [ CA.roundTop 0.2 ]
                 (teamData
                     |> List.indexedMap
-                        (\i _ ->
-                            C.bar (.cumulativeScores >> List.Extra.getAt i >> Maybe.withDefault 0)
+                        (\i td ->
+                            C.bar (\datum -> getScore (datum.round - 1) i)
                                 [ CA.color (teamColor totalTeams i) ]
+                                |> C.named (teamName td.team)
                         )
                 )
-                (rounds
-                    |> List.indexedMap
-                        (\ri r ->
-                            { round = r.number
-                            , cumulativeScores = teamData |> List.map (\td -> List.Extra.getAt ri td.cumulativeScores |> Maybe.withDefault 0)
-                            }
-                        )
-                )
+                roundData
+            , C.each hovering <|
+                \_ item ->
+                    [ C.tooltip item [] [] [] ]
             ]
+        , viewTeamLegend teamData
         ]
 
 
@@ -234,11 +247,20 @@ viewCumulativeBarChart teamData rounds =
 -- CHART 3: PER-ROUND BAR CHART
 
 
-viewPerRoundBarChart : List TeamData -> List Round -> Html msg
-viewPerRoundBarChart teamData rounds =
+viewPerRoundBarChart : Page.Hovering -> List TeamData -> List Round -> Html Page.Msg
+viewPerRoundBarChart hovering teamData rounds =
     let
         totalTeams =
             List.length teamData
+
+        roundData =
+            rounds |> List.map (\r -> { round = r.number })
+
+        getScore ri i =
+            teamData
+                |> List.Extra.getAt i
+                |> Maybe.andThen (\td -> List.Extra.getAt ri td.roundScores)
+                |> Maybe.withDefault 0
     in
     section [ class "chart per-round-chart" ]
         [ h2 [] [ text "Points per Round" ]
@@ -246,6 +268,8 @@ viewPerRoundBarChart teamData rounds =
             [ CA.height 300
             , CA.width 600
             , CA.margin { top = 10, bottom = 30, left = 0, right = 0 }
+            , CE.onMouseMove Page.OnHover (CE.getNearest CI.any)
+            , CE.onMouseLeave (Page.OnHover [])
             ]
             [ C.xLabels [ CA.withGrid ]
             , C.yLabels [ CA.withGrid ]
@@ -253,20 +277,18 @@ viewPerRoundBarChart teamData rounds =
                 [ CA.roundTop 0.2 ]
                 (teamData
                     |> List.indexedMap
-                        (\i _ ->
-                            C.bar (.roundScores >> List.Extra.getAt i >> Maybe.withDefault 0)
+                        (\i td ->
+                            C.bar (\datum -> getScore (datum.round - 1) i)
                                 [ CA.color (teamColor totalTeams i) ]
+                                |> C.named (teamName td.team)
                         )
                 )
-                (rounds
-                    |> List.indexedMap
-                        (\ri r ->
-                            { round = r.number
-                            , roundScores = teamData |> List.map (\td -> List.Extra.getAt ri td.roundScores |> Maybe.withDefault 0)
-                            }
-                        )
-                )
+                roundData
+            , C.each hovering <|
+                \_ item ->
+                    [ C.tooltip item [] [] [] ]
             ]
+        , viewTeamLegend teamData
         ]
 
 
@@ -424,3 +446,22 @@ formatPoints points =
 teamColor : Int -> Int -> String
 teamColor total =
     Colors.interpolateColor total >> Colors.toHex
+
+
+viewTeamLegend : List TeamData -> Html msg
+viewTeamLegend teamData =
+    let
+        totalTeams =
+            List.length teamData
+    in
+    ul [ class "team-legend" ]
+        (teamData
+            |> List.indexedMap
+                (\i td ->
+                    li
+                        [ class "legend-item"
+                        , style "color" (teamColor totalTeams i)
+                        ]
+                        [ text (teamName td.team) ]
+                )
+        )

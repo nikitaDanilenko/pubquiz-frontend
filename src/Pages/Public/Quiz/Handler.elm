@@ -14,6 +14,7 @@ init : Page.Flags -> ( Page.Model, Cmd Page.Msg )
 init flags =
     ( { quizId = flags.quizId
       , quiz = Tristate.initial
+      , hovering = []
       }
     , fetchQuiz flags.apiBase flags.quizId
     )
@@ -24,6 +25,11 @@ update msg model =
     case msg of
         Page.GotQuiz result ->
             ( Page.lenses.quiz.set (Result.Extra.unpack Tristate.failed Tristate.ready result) model
+            , Cmd.none
+            )
+
+        Page.OnHover hovering ->
+            ( Page.lenses.hovering.set hovering model
             , Cmd.none
             )
 

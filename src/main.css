@@ -25,7 +25,8 @@ img {
   max-width: 200px;
 }
 
-.statistics-legend {
+.statistics-legend,
+.team-legend {
   display: flex;
   justify-content: center;
   gap: 24px;
@@ -47,6 +48,10 @@ img {
   width: 16px;
   height: 16px;
   border-radius: 2px;
+}
+
+.team-legend .legend-item::before {
+  background-color: currentColor;
 }
 
 .legend-item[data-stat="min"]::before {
