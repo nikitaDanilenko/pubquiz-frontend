@@ -9,11 +9,12 @@ import Chart.Attributes as CA
 import Chart.Events as CE
 import Chart.Item as CI
 import Date
-import Html exposing (Html, h1, h2, li, p, section, span, text, ul)
+import Html exposing (Html, h1, h2, li, p, s, section, span, text, ul)
 import Html.Attributes exposing (attribute, class, style)
 import List.Extra
 import Maybe.Extra
 import Pages.Public.Quiz.Page as Page
+import Stat
 import Util.Colors as Colors
 import Util.Theme as Theme exposing (Theme)
 import Util.Tristate as Tristate
@@ -81,32 +82,32 @@ type alias TeamData =
 
 prepareTeamData : List Team -> List Round -> List ScoreEntry -> List TeamData
 prepareTeamData teams rounds scores =
-    teams
-        |> List.map
-            (\team ->
-                let
-                    roundScores =
-                        rounds
-                            |> List.map
-                                (\r ->
-                                    scores
-                                        |> List.Extra.find (\s -> s.teamNumber == team.number && s.roundNumber == r.number)
-                                        |> Maybe.Extra.unwrap 0 .points
-                                )
+    let
+        toTeamData team =
+            let
+                roundScores =
+                    rounds
+                        |> List.map
+                            (\r ->
+                                scores
+                                    |> List.Extra.find (\s -> s.teamNumber == team.number && s.roundNumber == r.number)
+                                    |> Maybe.Extra.unwrap 0 .points
+                            )
 
-                    cumulativeScores =
-                        roundScores
-                            |> List.foldl (\score acc -> acc ++ [ Maybe.Extra.unwrap score ((+) score) (List.Extra.last acc) ]) []
+                cumulativeScores =
+                    roundScores
+                        |> List.foldl (\score acc -> List.concat [ acc, [ Maybe.Extra.unwrap score ((+) score) (List.Extra.last acc) ] ]) []
 
-                    total =
-                        List.sum roundScores
-                in
-                { team = team
-                , roundScores = roundScores
-                , cumulativeScores = cumulativeScores
-                , total = total
-                }
-            )
+                total =
+                    List.sum roundScores
+            in
+            { team = team
+            , roundScores = roundScores
+            , cumulativeScores = cumulativeScores
+            , total = total
+            }
+    in
+    teams |> List.map toTeamData
 
 
 type alias RankedTeam =
@@ -118,21 +119,21 @@ type alias RankedTeam =
 
 computeRanking : List TeamData -> List RankedTeam
 computeRanking teamData =
+    let
+        assignRank ( first, rest ) ( rank, acc ) =
+            let
+                group =
+                    first :: rest
+
+                ranked =
+                    group |> List.map (\td -> { rank = rank, team = td.team, total = td.total })
+            in
+            ( rank + List.length group, List.concat [ acc, ranked ] )
+    in
     teamData
         |> List.sortBy (.total >> negate)
         |> List.Extra.groupWhile (\a b -> a.total == b.total)
-        |> List.foldl
-            (\( first, rest ) ( rank, acc ) ->
-                let
-                    group =
-                        first :: rest
-
-                    ranked =
-                        group |> List.map (\td -> { rank = rank, team = td.team, total = td.total })
-                in
-                ( rank + List.length group, acc ++ ranked )
-            )
-            ( 1, [] )
+        |> List.foldl assignRank ( 1, [] )
         |> Tuple.second
 
 
@@ -149,9 +150,9 @@ viewRanking teamData =
                 |> List.map
                     (\r ->
                         li [ class "ranking-item" ]
-                            [ text <| String.fromInt r.rank ++ ". "
+                            [ text <| String.concat [ String.fromInt r.rank, ". " ]
                             , text <| teamName r.team
-                            , text <| " (" ++ formatPoints r.total ++ ")"
+                            , text <| String.concat [ " (", formatPoints r.total, ")" ]
                             ]
                     )
             )
@@ -171,19 +172,20 @@ viewProgressionChart theme teamData =
             , CA.width 600
             , CA.margin { top = 10, bottom = 30, left = 0, right = 0 }
             ]
-            ([ C.xLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
-             , C.yLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
-             ]
-                ++ (teamData
-                        |> List.indexedMap
-                            (\i td ->
-                                C.series .x
-                                    [ C.interpolated .y [ CA.color (teamColor totalTeams i) ] [ CA.circle, CA.size 8 ]
-                                        |> C.named (teamName td.team)
-                                    ]
-                                    (td.cumulativeScores |> List.indexedMap (\ri score -> { x = toFloat (ri + 1), y = score }))
-                            )
-                   )
+            (List.concat
+                [ [ C.xLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
+                  , C.yLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
+                  ]
+                , teamData
+                    |> List.indexedMap
+                        (\i td ->
+                            C.series .x
+                                [ C.interpolated .y [ CA.color (teamColor totalTeams i) ] [ CA.circle, CA.size 8 ]
+                                    |> C.named (teamName td.team)
+                                ]
+                                (td.cumulativeScores |> List.indexedMap (\ri score -> { x = toFloat (ri + 1), y = score }))
+                        )
+                ]
             )
         , viewTeamLegend teamData
         ]
@@ -213,7 +215,7 @@ viewCumulativeBarChart theme hovering teamData rounds =
             , CE.onMouseMove Page.OnHover (CE.getNearest CI.any)
             , CE.onMouseLeave (Page.OnHover [])
             ]
-            [ C.xLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
+            [ C.xLabels [ CA.noGrid, CA.color (Theme.labelColor theme) ]
             , C.yLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
             , C.bars
                 [ CA.roundTop 0.2 ]
@@ -228,7 +230,7 @@ viewCumulativeBarChart theme hovering teamData rounds =
                 roundData
             , C.each hovering <|
                 \_ item ->
-                    [ C.tooltip item [ CA.onTop ] [] [ Html.text (CI.getName item ++ ": " ++ formatPoints (CI.getY item)) ] ]
+                    [ C.tooltip item [ CA.onTop ] [] [ Html.text (String.concat [ CI.getName item, ": ", formatPoints (CI.getY item) ]) ] ]
             ]
         , viewTeamLegend teamData
         ]
@@ -262,7 +264,7 @@ viewPerRoundBarChart theme hovering teamData rounds =
             , CE.onMouseMove Page.OnHover (CE.getNearest CI.any)
             , CE.onMouseLeave (Page.OnHover [])
             ]
-            [ C.xLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
+            [ C.xLabels [ CA.noGrid, CA.color (Theme.labelColor theme) ]
             , C.yLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
             , C.bars
                 [ CA.roundTop 0.2 ]
@@ -277,7 +279,7 @@ viewPerRoundBarChart theme hovering teamData rounds =
                 roundData
             , C.each hovering <|
                 \_ item ->
-                    [ C.tooltip item [ CA.onTop ] [] [ Html.text (CI.getName item ++ ": " ++ formatPoints (CI.getY item)) ] ]
+                    [ C.tooltip item [ CA.onTop ] [] [ Html.text (String.concat [ CI.getName item, ": ", formatPoints (CI.getY item) ]) ] ]
             ]
         , viewTeamLegend teamData
         ]
@@ -292,58 +294,46 @@ type alias RoundStats =
     }
 
 
+toRoundStats : List ScoreEntry -> Round -> RoundStats
+toRoundStats scores r =
+    let
+        roundScores =
+            scores
+                |> List.filterMap
+                    (\s ->
+                        if s.roundNumber == r.number then
+                            Just s.points
+
+                                else
+                                    Nothing
+                            )
+                        |> List.sort
+
+        minVal =
+            List.minimum roundScores |> Maybe.withDefault 0
+
+        maxVal =
+            List.maximum roundScores |> Maybe.withDefault 0
+
+        avg =
+            Stat.average roundScores
+                |> Maybe.withDefault 0
+
+        med =
+            Stat.median roundScores
+                |> Maybe.withDefault 0
+    in
+    { round = r.number
+    , min = minVal
+    , max = maxVal
+    , average = avg
+    , median = med
+    }
+
+
 computeRoundStats : List Round -> List ScoreEntry -> List RoundStats
 computeRoundStats rounds scores =
-    rounds
-        |> List.map
-            (\r ->
-                let
-                    roundScores =
-                        scores
-                            |> List.filter (\s -> s.roundNumber == r.number)
-                            |> List.map .points
-                            |> List.sort
-
-                    count =
-                        List.length roundScores
-
-                    minVal =
-                        List.minimum roundScores |> Maybe.withDefault 0
-
-                    maxVal =
-                        List.maximum roundScores |> Maybe.withDefault 0
-
-                    avg =
-                        if count > 0 then
-                            List.sum roundScores / toFloat count
-
-                        else
-                            0
-
-                    med =
-                        if count == 0 then
-                            0
-
-                        else if modBy 2 count == 1 then
-                            List.Extra.getAt (count // 2) roundScores |> Maybe.withDefault 0
-
-                        else
-                            let
-                                lower =
-                                    List.Extra.getAt (count // 2 - 1) roundScores |> Maybe.withDefault 0
-
-                                upper =
-                                    List.Extra.getAt (count // 2) roundScores |> Maybe.withDefault 0
-                            in
-                            (lower + upper) / 2
-                in
-                { round = r.number
-                , min = minVal
-                , max = maxVal
-                , average = avg
-                , median = med
-                }
-            )
+    rounds |> List.map (toRoundStats scores)
 
 
 viewRoundStatisticsChart : Theme -> List Round -> List ScoreEntry -> Html msg
@@ -359,7 +349,7 @@ viewRoundStatisticsChart theme rounds scores =
             , CA.width 600
             , CA.margin { top = 10, bottom = 30, left = 0, right = 0 }
             ]
-            [ C.xLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
+            [ C.xLabels [ CA.noGrid, CA.color (Theme.labelColor theme) ]
             , C.yLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
             , C.bars
                 [ CA.roundTop 0.2 ]
@@ -419,7 +409,7 @@ viewHeader quiz =
 teamName : Team -> String
 teamName team =
     if String.isEmpty team.name then
-        "Team " ++ String.fromInt team.number
+        String.concat [ "Team ", String.fromInt team.number ]
 
     else
         team.name
