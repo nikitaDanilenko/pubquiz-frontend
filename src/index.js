@@ -7,14 +7,18 @@ const getInitialTheme = () => {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 };
 
+const initialTheme = getInitialTheme();
+document.documentElement.setAttribute('data-theme', initialTheme);
+
 const app = Elm.Main.init({
   node: document.getElementById('root'),
   flags: {
     apiBase: window.CONFIG?.apiBase || '',
-    theme: getInitialTheme()
+    theme: initialTheme
   }
 });
 
 app.ports.saveTheme.subscribe((theme) => {
   localStorage.setItem('theme', theme);
+  document.documentElement.setAttribute('data-theme', theme);
 });

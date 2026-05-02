@@ -15,14 +15,15 @@ import List.Extra
 import Maybe.Extra
 import Pages.Public.Quiz.Page as Page
 import Util.Colors as Colors
+import Util.Theme as Theme exposing (Theme)
 import Util.Tristate as Tristate
 
 
-view : Page.Model -> Html Page.Msg
-view model =
+view : Theme -> Page.Model -> Html Page.Msg
+view theme model =
     Tristate.fold
         { onInitial = viewLoading
-        , onReady = viewQuiz model.hovering
+        , onReady = viewQuiz theme model.hovering
         , onFailed = viewError
         }
         model.quiz
@@ -43,8 +44,8 @@ viewError _ =
         ]
 
 
-viewQuiz : Page.Hovering -> QuizActive -> Html Page.Msg
-viewQuiz hovering quiz =
+viewQuiz : Theme -> Page.Hovering -> QuizActive -> Html Page.Msg
+viewQuiz theme hovering quiz =
     let
         activeTeams =
             quiz.scoreBoard.teams
@@ -63,10 +64,10 @@ viewQuiz hovering quiz =
     section [ class "quiz" ]
         [ viewHeader quiz
         , viewRanking teamData
-        , viewProgressionChart teamData
-        , viewCumulativeBarChart hovering teamData rounds
-        , viewPerRoundBarChart hovering teamData rounds
-        , viewRoundStatisticsChart rounds scores
+        , viewProgressionChart theme teamData
+        , viewCumulativeBarChart theme hovering teamData rounds
+        , viewPerRoundBarChart theme hovering teamData rounds
+        , viewRoundStatisticsChart theme rounds scores
         ]
 
 
@@ -157,8 +158,8 @@ viewRanking teamData =
         ]
 
 
-viewProgressionChart : List TeamData -> Html Page.Msg
-viewProgressionChart teamData =
+viewProgressionChart : Theme -> List TeamData -> Html Page.Msg
+viewProgressionChart theme teamData =
     let
         totalTeams =
             List.length teamData
@@ -170,8 +171,8 @@ viewProgressionChart teamData =
             , CA.width 600
             , CA.margin { top = 10, bottom = 30, left = 0, right = 0 }
             ]
-            ([ C.xLabels [ CA.withGrid ]
-             , C.yLabels [ CA.withGrid ]
+            ([ C.xLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
+             , C.yLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
              ]
                 ++ (teamData
                         |> List.indexedMap
@@ -188,8 +189,8 @@ viewProgressionChart teamData =
         ]
 
 
-viewCumulativeBarChart : Page.Hovering -> List TeamData -> List Round -> Html Page.Msg
-viewCumulativeBarChart hovering teamData rounds =
+viewCumulativeBarChart : Theme -> Page.Hovering -> List TeamData -> List Round -> Html Page.Msg
+viewCumulativeBarChart theme hovering teamData rounds =
     let
         totalTeams =
             List.length teamData
@@ -212,8 +213,8 @@ viewCumulativeBarChart hovering teamData rounds =
             , CE.onMouseMove Page.OnHover (CE.getNearest CI.any)
             , CE.onMouseLeave (Page.OnHover [])
             ]
-            [ C.xLabels [ CA.withGrid ]
-            , C.yLabels [ CA.withGrid ]
+            [ C.xLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
+            , C.yLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
             , C.bars
                 [ CA.roundTop 0.2 ]
                 (teamData
@@ -237,8 +238,8 @@ viewCumulativeBarChart hovering teamData rounds =
 -- CHART 3: PER-ROUND BAR CHART
 
 
-viewPerRoundBarChart : Page.Hovering -> List TeamData -> List Round -> Html Page.Msg
-viewPerRoundBarChart hovering teamData rounds =
+viewPerRoundBarChart : Theme -> Page.Hovering -> List TeamData -> List Round -> Html Page.Msg
+viewPerRoundBarChart theme hovering teamData rounds =
     let
         totalTeams =
             List.length teamData
@@ -261,8 +262,8 @@ viewPerRoundBarChart hovering teamData rounds =
             , CE.onMouseMove Page.OnHover (CE.getNearest CI.any)
             , CE.onMouseLeave (Page.OnHover [])
             ]
-            [ C.xLabels [ CA.withGrid ]
-            , C.yLabels [ CA.withGrid ]
+            [ C.xLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
+            , C.yLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
             , C.bars
                 [ CA.roundTop 0.2 ]
                 (teamData
@@ -345,8 +346,8 @@ computeRoundStats rounds scores =
             )
 
 
-viewRoundStatisticsChart : List Round -> List ScoreEntry -> Html msg
-viewRoundStatisticsChart rounds scores =
+viewRoundStatisticsChart : Theme -> List Round -> List ScoreEntry -> Html msg
+viewRoundStatisticsChart theme rounds scores =
     let
         stats =
             computeRoundStats rounds scores
@@ -358,8 +359,8 @@ viewRoundStatisticsChart rounds scores =
             , CA.width 600
             , CA.margin { top = 10, bottom = 30, left = 0, right = 0 }
             ]
-            [ C.xLabels [ CA.withGrid ]
-            , C.yLabels [ CA.withGrid ]
+            [ C.xLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
+            , C.yLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
             , C.bars
                 [ CA.roundTop 0.2 ]
                 [ C.bar .min [ CA.color Colors.statisticsColors.min ]

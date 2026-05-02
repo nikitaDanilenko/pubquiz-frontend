@@ -25,10 +25,16 @@
   --color-text-muted: rgb(150, 150, 150);
   --color-border: rgb(70, 70, 70);
   --color-surface: rgb(55, 55, 55);
-  --color-chart-grid: rgb(70, 70, 70);
+  --color-chart-grid: rgb(40, 40, 40);
 }
 
-html {
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg);
+}
+
+#root {
   background-color: var(--color-bg);
 }
 
@@ -40,10 +46,13 @@ html {
 
 body {
   font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
-  margin: 0;
   text-align: center;
-  background-color: var(--color-bg);
   color: var(--color-text);
+}
+
+/* Dark mode grid line colors */
+html[data-theme="dark"] .chart svg line {
+  stroke: rgb(70, 70, 70);
 }
 
 .theme-toggle {

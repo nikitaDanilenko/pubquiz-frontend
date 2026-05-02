@@ -11,14 +11,10 @@ import Pages.Public.Quiz.Page
 import Pages.Public.Quiz.View
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((</>), Parser)
+import Util.Theme as Theme exposing (Theme)
 
 
 port saveTheme : String -> Cmd msg
-
-
-type Theme
-    = Light
-    | Dark
 
 
 type alias Flags =
@@ -86,19 +82,19 @@ parseUrl url =
 parseTheme : String -> Theme
 parseTheme str =
     if str == "dark" then
-        Dark
+        Theme.Dark
 
     else
-        Light
+        Theme.Light
 
 
 themeToString : Theme -> String
 themeToString theme =
     case theme of
-        Light ->
+        Theme.Light ->
             "light"
 
-        Dark ->
+        Theme.Dark ->
             "dark"
 
 
@@ -149,11 +145,11 @@ update msg model =
             let
                 newTheme =
                     case model.theme of
-                        Light ->
-                            Dark
+                        Theme.Light ->
+                            Theme.Dark
 
-                        Dark ->
-                            Light
+                        Theme.Dark ->
+                            Theme.Light
             in
             ( { model | theme = newTheme }
             , saveTheme (themeToString newTheme)
@@ -191,7 +187,7 @@ view model =
     , body =
         [ div [ attribute "data-theme" (themeToString model.theme), class "app" ]
             [ viewThemeToggle model.theme
-            , viewPage model.page
+            , viewPage model.theme model.page
             ]
         ]
     }
@@ -202,10 +198,10 @@ viewThemeToggle theme =
     button [ class "theme-toggle", onClick ToggleTheme ]
         [ text
             (case theme of
-                Light ->
+                Theme.Light ->
                     "💡"
 
-                Dark ->
+                Theme.Dark ->
                     "💡"
             )
         ]
@@ -224,14 +220,14 @@ pageTitle page =
             "Not Found - Pubquiz"
 
 
-viewPage : Page -> Html Msg
-viewPage page =
+viewPage : Theme -> Page -> Html Msg
+viewPage theme page =
     case page of
         Landing ->
             viewLanding
 
         Quiz quizModel ->
-            Html.map QuizMsg (Pages.Public.Quiz.View.view quizModel)
+            Html.map QuizMsg (Pages.Public.Quiz.View.view theme quizModel)
 
         NotFound ->
             viewNotFound
