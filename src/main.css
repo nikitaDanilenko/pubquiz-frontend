@@ -94,9 +94,25 @@ img {
   max-width: 200px;
 }
 
-.ranking-list {
-  list-style: none;
-  padding: 0;
+.ranking-table {
+  margin: 0 auto;
+  border-collapse: collapse;
+}
+
+.ranking-table th,
+.ranking-table td {
+  padding: 8px 16px;
+  text-align: left;
+}
+
+.ranking-table th {
+  color: var(--color-text-muted);
+  font-weight: normal;
+}
+
+.ranking-table td:first-child,
+.ranking-table td:last-child {
+  text-align: right;
 }
 
 .statistics-legend,

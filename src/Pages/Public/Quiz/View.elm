@@ -9,7 +9,7 @@ import Chart.Attributes as CA
 import Chart.Events as CE
 import Chart.Item as CI
 import Date
-import Html exposing (Html, h1, h2, li, p, s, section, span, text, ul)
+import Html exposing (Html, h1, h2, li, p, s, section, span, table, tbody, td, text, th, thead, tr, ul)
 import Html.Attributes exposing (attribute, class, style)
 import List.Extra
 import Maybe.Extra
@@ -145,17 +145,26 @@ viewRanking teamData =
     in
     section [ class "ranking" ]
         [ h2 [] [ text "Ranking" ]
-        , ul [ class "ranking-list" ]
-            (ranked
-                |> List.map
-                    (\r ->
-                        li [ class "ranking-item" ]
-                            [ text <| String.concat [ String.fromInt r.rank, ". " ]
-                            , text <| teamName r.team
-                            , text <| String.concat [ " (", formatPoints r.total, ")" ]
-                            ]
-                    )
-            )
+        , table [ class "ranking-table" ]
+            [ thead []
+                [ tr []
+                    [ th [] [ text "#" ]
+                    , th [] [ text "Team" ]
+                    , th [] [ text "Points" ]
+                    ]
+                ]
+            , tbody []
+                (ranked
+                    |> List.map
+                        (\r ->
+                            tr []
+                                [ td [] [ text (String.fromInt r.rank) ]
+                                , td [] [ text (teamName r.team) ]
+                                , td [] [ text (formatPoints r.total) ]
+                                ]
+                        )
+                )
+            ]
         ]
 
 
