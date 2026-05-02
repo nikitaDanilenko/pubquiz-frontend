@@ -2,9 +2,6 @@ module Api.Types exposing
     ( AddTeamsCommand, ChangeSettingsCommand, CorrectScoreCommand, Day, LoginRequest, LoginResponse, QuizActive
     , QuizIdentifier, QuizMetaData, QuizSettings, QuizSummary, RecordRoundScoresCommand, RenameTeamCommand
     , Round, ScoreBoard, ScoreEntry, SetTeamActiveCommand, Team, TeamScore
-    , BackofficeQuizIdAddTeams_Error(..), BackofficeQuizIdChangeSettings_Error(..), BackofficeQuizIdCorrectScore_Error(..)
-    , BackofficeQuizIdRecordRoundScores_Error(..), BackofficeQuizIdRenameTeam_Error(..)
-    , BackofficeQuizIdSetTeamActive_Error(..)
     )
 
 {-|
@@ -16,46 +13,9 @@ module Api.Types exposing
 @docs QuizIdentifier, QuizMetaData, QuizSettings, QuizSummary, RecordRoundScoresCommand, RenameTeamCommand
 @docs Round, ScoreBoard, ScoreEntry, SetTeamActiveCommand, Team, TeamScore
 
-
-## Errors
-
-@docs BackofficeQuizIdAddTeams_Error, BackofficeQuizIdChangeSettings_Error, BackofficeQuizIdCorrectScore_Error
-@docs BackofficeQuizIdRecordRoundScores_Error, BackofficeQuizIdRenameTeam_Error
-@docs BackofficeQuizIdSetTeamActive_Error
-
 -}
 
 import Date
-
-
-type BackofficeQuizIdAddTeams_Error
-    = BackofficeQuizIdAddTeams_400 ()
-    | BackofficeQuizIdAddTeams_404 ()
-
-
-type BackofficeQuizIdChangeSettings_Error
-    = BackofficeQuizIdChangeSettings_400 ()
-    | BackofficeQuizIdChangeSettings_404 ()
-
-
-type BackofficeQuizIdCorrectScore_Error
-    = BackofficeQuizIdCorrectScore_400 ()
-    | BackofficeQuizIdCorrectScore_404 ()
-
-
-type BackofficeQuizIdRecordRoundScores_Error
-    = BackofficeQuizIdRecordRoundScores_400 ()
-    | BackofficeQuizIdRecordRoundScores_404 ()
-
-
-type BackofficeQuizIdRenameTeam_Error
-    = BackofficeQuizIdRenameTeam_400 ()
-    | BackofficeQuizIdRenameTeam_404 ()
-
-
-type BackofficeQuizIdSetTeamActive_Error
-    = BackofficeQuizIdSetTeamActive_400 ()
-    | BackofficeQuizIdSetTeamActive_404 ()
 
 
 type alias TeamScore =
