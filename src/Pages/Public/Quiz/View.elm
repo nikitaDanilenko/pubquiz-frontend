@@ -191,7 +191,7 @@ viewProgressionChart theme teamData =
             ]
             (List.concat
                 [ [ C.xLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
-                  , C.yLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
+                  , C.yLabels [ CA.withGrid, CA.ints, CA.color (Theme.labelColor theme) ]
                   ]
                 , teamData
                     |> List.indexedMap
@@ -233,7 +233,7 @@ viewCumulativeBarChart theme hovering teamData rounds =
             , CE.onMouseLeave (Page.OnHover [])
             ]
             [ C.xLabels [ CA.noGrid, CA.color (Theme.labelColor theme) ]
-            , C.yLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
+            , C.yLabels [ CA.withGrid, CA.ints, CA.color (Theme.labelColor theme) ]
             , C.bars
                 [ CA.roundTop 0.2 ]
                 (teamData
@@ -282,7 +282,7 @@ viewPerRoundBarChart theme hovering teamData rounds =
             , CE.onMouseLeave (Page.OnHover [])
             ]
             [ C.xLabels [ CA.noGrid, CA.color (Theme.labelColor theme) ]
-            , C.yLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
+            , C.yLabels [ CA.withGrid, CA.ints, CA.color (Theme.labelColor theme) ]
             , C.bars
                 [ CA.roundTop 0.2 ]
                 (teamData
@@ -369,7 +369,7 @@ viewRoundStatisticsChart theme hovering rounds scores =
             , CE.onMouseLeave (Page.OnStatsHover [])
             ]
             [ C.xLabels [ CA.noGrid, CA.color (Theme.labelColor theme) ]
-            , C.yLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
+            , C.yLabels [ CA.withGrid, CA.ints, CA.color (Theme.labelColor theme) ]
             , C.bars
                 [ CA.roundTop 0.2 ]
                 [ C.bar .min [ CA.color Colors.statisticsColors.min ]
