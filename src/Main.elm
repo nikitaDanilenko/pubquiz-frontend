@@ -61,17 +61,30 @@ type Route
     | OverviewRoute
     | QuizRoute Int
     | TeamRoute Int Int
-    | TeamRouteLegacy Int Int String
 
 
 routeParser : Parser (Route -> a) a
 routeParser =
+    let
+        quizParser =
+            -- The 'quizId' route is a legacy route that is supported so that old links are easy to redirect.
+            Parser.oneOf
+                [ Parser.map QuizRoute (Parser.s "quizId" </> Parser.int) -- legacy route
+                , Parser.map QuizRoute (Parser.s "quizzes" </> Parser.int)
+                ]
+
+        teamParser =
+            -- The 'quizId/teamNumber' route is a legacy route that is supported so that old links are easy to redirect.
+            Parser.oneOf
+                [ Parser.map (\quizId teamNumber _ -> TeamRoute quizId teamNumber) (Parser.s "quizId" </> Parser.int </> Parser.s "teamNumber" </> Parser.int </> Parser.s "teamCode" </> Parser.string)
+                , Parser.map TeamRoute (Parser.s "quizzes" </> Parser.int </> Parser.s "teams" </> Parser.int)
+                ]
+    in
     Parser.oneOf
         [ Parser.map LandingRoute Parser.top
         , Parser.map OverviewRoute (Parser.s "quizzes")
-        , Parser.map TeamRouteLegacy (Parser.s "quizzes" </> Parser.int </> Parser.s "teams" </> Parser.int </> Parser.string)
-        , Parser.map TeamRoute (Parser.s "quizzes" </> Parser.int </> Parser.s "teams" </> Parser.int)
-        , Parser.map QuizRoute (Parser.s "quizzes" </> Parser.int)
+        , teamParser
+        , quizParser
         ]
 
 
@@ -215,9 +228,6 @@ navigateTo maybeRoute model =
         Just (TeamRoute quizId teamNumber) ->
             initTeamPage model quizId teamNumber
 
-        Just (TeamRouteLegacy quizId teamNumber _) ->
-            initTeamPage model quizId teamNumber
-
 
 initTeamPage : Model -> Int -> Int -> ( Model, Cmd Msg )
 initTeamPage model quizId teamNumber =
@@ -248,15 +258,17 @@ view model =
 
 viewThemeToggle : Theme -> Html Msg
 viewThemeToggle theme =
-    button [ class "theme-toggle", onClick ToggleTheme ]
-        [ text
-            (case theme of
+    let
+        icon =
+            case theme of
                 Theme.Light ->
                     "💡"
 
                 Theme.Dark ->
                     "💡"
-            )
+    in
+    button [ class "theme-toggle", onClick ToggleTheme ]
+        [ text icon
         ]
 
 
