@@ -157,17 +157,7 @@ viewRanking teamData =
         ]
 
 
-
--- CHART 1: PROGRESSION LINE CHART
-
-
-type alias DataPoint =
-    { x : Float
-    , y : Float
-    }
-
-
-viewProgressionChart : List TeamData -> Html msg
+viewProgressionChart : List TeamData -> Html Page.Msg
 viewProgressionChart teamData =
     let
         totalTeams =
@@ -187,7 +177,7 @@ viewProgressionChart teamData =
                         |> List.indexedMap
                             (\i td ->
                                 C.series .x
-                                    [ C.interpolated .y [ CA.color (teamColor totalTeams i) ] [ CA.circle ]
+                                    [ C.interpolated .y [ CA.color (teamColor totalTeams i) ] [ CA.circle, CA.size 8 ]
                                         |> C.named (teamName td.team)
                                     ]
                                     (td.cumulativeScores |> List.indexedMap (\ri score -> { x = toFloat (ri + 1), y = score }))
@@ -237,7 +227,7 @@ viewCumulativeBarChart hovering teamData rounds =
                 roundData
             , C.each hovering <|
                 \_ item ->
-                    [ C.tooltip item [] [] [] ]
+                    [ C.tooltip item [ CA.onTop ] [] [ Html.text (CI.getName item ++ ": " ++ formatPoints (CI.getY item)) ] ]
             ]
         , viewTeamLegend teamData
         ]
@@ -286,7 +276,7 @@ viewPerRoundBarChart hovering teamData rounds =
                 roundData
             , C.each hovering <|
                 \_ item ->
-                    [ C.tooltip item [] [] [] ]
+                    [ C.tooltip item [ CA.onTop ] [] [ Html.text (CI.getName item ++ ": " ++ formatPoints (CI.getY item)) ] ]
             ]
         , viewTeamLegend teamData
         ]
