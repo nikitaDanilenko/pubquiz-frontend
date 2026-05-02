@@ -9,7 +9,7 @@ import Chart.Attributes as CA
 import Chart.Events as CE
 import Chart.Item as CI
 import Date
-import Html exposing (Html, h1, h2, li, ol, p, section, text, ul)
+import Html exposing (Html, h1, h2, li, ol, p, section, span, text, ul)
 import Html.Attributes exposing (attribute, class, style)
 import List.Extra
 import Maybe.Extra
@@ -458,10 +458,13 @@ viewTeamLegend teamData =
         (teamData
             |> List.indexedMap
                 (\i td ->
-                    li
-                        [ class "legend-item"
-                        , style "color" (teamColor totalTeams i)
+                    li [ class "legend-item" ]
+                        [ span
+                            [ class "legend-color"
+                            , style "background-color" (teamColor totalTeams i)
+                            ]
+                            []
+                        , text (teamName td.team)
                         ]
-                        [ text (teamName td.team) ]
                 )
         )

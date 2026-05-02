@@ -51,7 +51,14 @@ img {
 }
 
 .team-legend .legend-item::before {
-  background-color: currentColor;
+  display: none;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  flex-shrink: 0;
 }
 
 .legend-item[data-stat="min"]::before {
