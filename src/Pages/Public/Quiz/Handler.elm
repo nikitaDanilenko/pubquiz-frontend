@@ -15,6 +15,7 @@ init flags =
     ( { quizId = flags.quizId
       , quiz = Tristate.initial
       , hovering = []
+      , statsHovering = []
       }
     , fetchQuiz flags.apiBase flags.quizId
     )
@@ -30,6 +31,11 @@ update msg model =
 
         Page.OnHover hovering ->
             ( Page.lenses.hovering.set hovering model
+            , Cmd.none
+            )
+
+        Page.OnStatsHover hovering ->
+            ( Page.lenses.statsHovering.set hovering model
             , Cmd.none
             )
 

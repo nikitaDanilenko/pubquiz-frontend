@@ -24,7 +24,7 @@ view : Theme -> Page.Model -> Html Page.Msg
 view theme model =
     Tristate.fold
         { onInitial = viewLoading
-        , onReady = viewQuiz theme model.hovering
+        , onReady = viewQuiz theme model.hovering model.statsHovering
         , onFailed = viewError
         }
         model.quiz
@@ -45,8 +45,8 @@ viewError _ =
         ]
 
 
-viewQuiz : Theme -> Page.Hovering -> QuizActive -> Html Page.Msg
-viewQuiz theme hovering quiz =
+viewQuiz : Theme -> Page.Hovering -> Page.StatsHovering -> QuizActive -> Html Page.Msg
+viewQuiz theme hovering statsHovering quiz =
     let
         activeTeams =
             quiz.scoreBoard.teams
@@ -68,7 +68,7 @@ viewQuiz theme hovering quiz =
         , viewProgressionChart theme teamData
         , viewCumulativeBarChart theme hovering teamData rounds
         , viewPerRoundBarChart theme hovering teamData rounds
-        , viewRoundStatisticsChart theme rounds scores
+        , viewRoundStatisticsChart theme statsHovering rounds scores
         ]
 
 
@@ -321,10 +321,10 @@ toRoundStats scores r =
                         if s.roundNumber == r.number then
                             Just s.points
 
-                                else
-                                    Nothing
-                            )
-                        |> List.sort
+                        else
+                            Nothing
+                    )
+                |> List.sort
 
         minVal =
             List.minimum roundScores |> Maybe.withDefault 0
@@ -353,8 +353,8 @@ computeRoundStats rounds scores =
     rounds |> List.map (toRoundStats scores)
 
 
-viewRoundStatisticsChart : Theme -> List Round -> List ScoreEntry -> Html msg
-viewRoundStatisticsChart theme rounds scores =
+viewRoundStatisticsChart : Theme -> Page.StatsHovering -> List Round -> List ScoreEntry -> Html Page.Msg
+viewRoundStatisticsChart theme hovering rounds scores =
     let
         stats =
             computeRoundStats rounds scores
@@ -365,6 +365,8 @@ viewRoundStatisticsChart theme rounds scores =
             [ CA.height 300
             , CA.width 600
             , CA.margin { top = 10, bottom = 30, left = 0, right = 0 }
+            , CE.onMouseMove Page.OnStatsHover (CE.getNearest CI.any)
+            , CE.onMouseLeave (Page.OnStatsHover [])
             ]
             [ C.xLabels [ CA.noGrid, CA.color (Theme.labelColor theme) ]
             , C.yLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
@@ -380,6 +382,9 @@ viewRoundStatisticsChart theme rounds scores =
                     |> C.named "Max"
                 ]
                 stats
+            , C.each hovering <|
+                \_ item ->
+                    [ C.tooltip item [ CA.onTop ] [] [ Html.text (String.concat [ CI.getName item, ": ", formatPoints (CI.getY item) ]) ] ]
             ]
         , viewStatisticsLegend
         ]
