@@ -5,7 +5,7 @@ module Pages.Public.Team.View exposing (view)
 
 import Api.Types exposing (QuizActive, QuizIdentifier, Round, ScoreEntry, Team)
 import Date
-import Html exposing (Html, a, h1, h2, p, section, table, tbody, td, text, th, thead, tr)
+import Html exposing (Html, a, article, em, h1, h2, h3, p, section, small, text)
 import Html.Attributes exposing (class, href, style)
 import List.Extra
 import Pages.Public.Team.Page as Page
@@ -296,34 +296,85 @@ computeCumulativeScores rounds scores activeTeamNumbers =
 
 viewRoundTable : List RoundData -> Html msg
 viewRoundTable roundData =
-    section [ class "round-table" ]
-        [ table [ class "team-table" ]
-            [ thead []
-                [ tr []
-                    [ th [] [ text "Round" ]
-                    , th [] [ text "Points" ]
-                    , th [] [ text "Max" ]
-                    , th [] [ text "Possible" ]
-                    , th [] [ text "Place" ]
-                    , th [] [ text "Overall" ]
-                    ]
-                ]
-            , tbody []
-                (roundData |> List.map viewRoundRow)
+    let
+        withPrevious =
+            List.indexedMap
+                (\i rd ->
+                    ( rd, List.Extra.getAt (i - 1) roundData )
+                )
+                roundData
+    in
+    section [ class "round-cards" ]
+        (withPrevious |> List.map viewRoundCard)
+
+
+viewRoundCard : ( RoundData, Maybe RoundData ) -> Html msg
+viewRoundCard ( rd, maybePrevious ) =
+    let
+        overallChange =
+            maybePrevious
+                |> Maybe.map (\prev -> prev.placeAfterRound - rd.placeAfterRound)
+    in
+    article [ class "round-card" ]
+        [ h3 [ class "round-title" ]
+            [ text (String.concat [ "Round ", String.fromInt rd.roundNumber ]) ]
+        , p [ class "round-line" ]
+            [ em [] [ text "Points: " ]
+            , text (String.concat [ formatPoints rd.ownPoints, " / ", formatPoints rd.maxReachable ])
+            , small [] [ text (String.concat [ " (max: ", formatPoints rd.maxReached, ")" ]) ]
+            ]
+        , p [ class "round-line" ]
+            [ em [] [ text "Place: " ]
+            , text (ordinal rd.placeInRound)
+            ]
+        , p [ class "round-line" ]
+            [ em [] [ text "Overall: " ]
+            , text (ordinal rd.placeAfterRound)
+            , text " "
+            , text (trendIndicator overallChange)
             ]
         ]
 
 
-viewRoundRow : RoundData -> Html msg
-viewRoundRow rd =
-    tr []
-        [ td [] [ text (String.fromInt rd.roundNumber) ]
-        , td [] [ text (formatPoints rd.ownPoints) ]
-        , td [] [ text (formatPoints rd.maxReached) ]
-        , td [] [ text (formatPoints rd.maxReachable) ]
-        , td [] [ text (String.fromInt rd.placeInRound) ]
-        , td [] [ text (String.fromInt rd.placeAfterRound) ]
-        ]
+trendIndicator : Maybe Int -> String
+trendIndicator maybeChange =
+    case maybeChange of
+        Nothing ->
+            ""
+
+        Just change ->
+            if change > 0 then
+                "↑"
+
+            else if change < 0 then
+                "↓"
+
+            else
+                "·"
+
+
+ordinal : Int -> String
+ordinal n =
+    let
+        suffix =
+            if n >= 11 && n <= 13 then
+                "th"
+
+            else
+                case modBy 10 n of
+                    1 ->
+                        "st"
+
+                    2 ->
+                        "nd"
+
+                    3 ->
+                        "rd"
+
+                    _ ->
+                        "th"
+    in
+    String.concat [ String.fromInt n, suffix ]
 
 
 viewBackLink : Int -> Html msg

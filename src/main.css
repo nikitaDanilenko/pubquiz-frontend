@@ -324,41 +324,39 @@ img {
   margin: 0;
 }
 
-.team-table {
+.round-cards {
+  max-width: 400px;
   margin: 0 auto;
-  border-collapse: collapse;
-  width: 100%;
-  max-width: 500px;
 }
 
-.team-table th,
-.team-table td {
-  padding: 10px 12px;
-  text-align: right;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.team-table th {
-  color: var(--color-text-muted);
-  font-weight: normal;
-  font-size: 14px;
-}
-
-.team-table td:first-child,
-.team-table th:first-child {
+.round-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
   text-align: left;
 }
 
-@media (max-width: 500px) {
-  .team-table th,
-  .team-table td {
-    padding: 8px 6px;
-    font-size: 14px;
-  }
+.round-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
 
-  .team-table th {
-    font-size: 12px;
-  }
+.round-line {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.round-card em {
+  color: var(--color-text-muted);
+  font-style: normal;
+}
+
+.round-card small {
+  color: var(--color-text-muted);
+  font-size: 13px;
 }
 
 .quiz-link {
