@@ -7,7 +7,7 @@ import Api.Types exposing (QuizActive, Round, ScoreEntry, Team)
 import Chart as C
 import Chart.Attributes as CA
 import Date
-import Html exposing (Html, h1, h2, li, ol, p, section, table, tbody, td, text, th, thead, tr)
+import Html exposing (Html, h1, h2, li, ol, p, section, text)
 import Html.Attributes exposing (class)
 import List.Extra
 import Maybe.Extra
@@ -64,7 +64,6 @@ viewQuiz quiz =
         , viewCumulativeBarChart teamData rounds
         , viewPerRoundBarChart teamData rounds
         , viewRoundStatisticsChart rounds scores
-        , viewScoreTable quiz
         ]
 
 
@@ -382,119 +381,6 @@ viewHeader quiz =
             , text dateStr
             ]
         ]
-
-
-viewScoreTable : QuizActive -> Html msg
-viewScoreTable quiz =
-    let
-        activeTeams =
-            quiz.scoreBoard.teams
-                |> List.filter .active
-                |> List.sortBy .number
-
-        rounds =
-            quiz.scoreBoard.scores
-                |> List.map .roundNumber
-                |> List.Extra.unique
-                |> List.sort
-
-        roundInfos =
-            quiz.rounds
-                |> List.sortBy .number
-    in
-    section [ class "score-table-section" ]
-        [ h2 [] [ text "Detailed Scores" ]
-        , table [ class "score-table" ]
-            [ viewTableHeader rounds roundInfos
-            , viewTableBody activeTeams rounds quiz.scoreBoard.scores roundInfos
-            ]
-        ]
-
-
-viewTableHeader : List Int -> List Round -> Html msg
-viewTableHeader rounds roundInfos =
-    let
-        roundHeaders =
-            rounds
-                |> List.map
-                    (\roundNum ->
-                        let
-                            maxPoints =
-                                roundInfos
-                                    |> List.Extra.find (\r -> r.number == roundNum)
-                                    |> Maybe.map .displayMaxPoints
-                                    |> Maybe.withDefault 0
-                        in
-                        th [ class "round-header" ]
-                            [ text ("R" ++ String.fromInt roundNum)
-                            , Html.br [] []
-                            , Html.small [] [ text ("/" ++ formatPoints maxPoints) ]
-                            ]
-                    )
-
-        totalMaxPoints =
-            roundInfos |> List.map .displayMaxPoints |> List.sum
-    in
-    thead []
-        [ tr []
-            (th [ class "team-header" ] [ text "Team" ]
-                :: roundHeaders
-                ++ [ th [ class "total-header" ]
-                        [ text "Total"
-                        , Html.br [] []
-                        , Html.small [] [ text ("/" ++ formatPoints totalMaxPoints) ]
-                        ]
-                   ]
-            )
-        ]
-
-
-viewTableBody : List Team -> List Int -> List ScoreEntry -> List Round -> Html msg
-viewTableBody teams rounds scores roundInfos =
-    let
-        teamRows =
-            teams
-                |> List.map (viewTeamRow rounds scores roundInfos)
-                |> List.sortBy Tuple.first
-                |> List.reverse
-                |> List.map Tuple.second
-    in
-    tbody [] teamRows
-
-
-viewTeamRow : List Int -> List ScoreEntry -> List Round -> Team -> ( Float, Html msg )
-viewTeamRow rounds scores _ team =
-    let
-        roundScores =
-            rounds
-                |> List.map
-                    (\roundNum ->
-                        scores
-                            |> List.Extra.find (\s -> s.teamNumber == team.number && s.roundNumber == roundNum)
-                            |> Maybe.Extra.unwrap 0 .points
-                    )
-
-        total =
-            List.sum roundScores
-
-        cells =
-            roundScores
-                |> List.map
-                    (\pts ->
-                        td [ class "score-cell" ] [ text (formatPoints pts) ]
-                    )
-    in
-    ( total
-    , tr [ class "team-row" ]
-        (td [ class "team-name" ] [ text (teamName team) ]
-            :: cells
-            ++ [ td [ class "total-cell" ] [ text (formatPoints total) ] ]
-        )
-    )
-
-
-
--- HELPERS
 
 
 teamName : Team -> String
