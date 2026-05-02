@@ -9,8 +9,8 @@ import Chart.Attributes as CA
 import Chart.Events as CE
 import Chart.Item as CI
 import Date
-import Html exposing (Html, h1, h2, li, p, s, section, span, table, tbody, td, text, th, thead, tr, ul)
-import Html.Attributes exposing (attribute, class, style)
+import Html exposing (Html, a, h1, h2, li, p, s, section, span, table, tbody, td, text, th, thead, tr, ul)
+import Html.Attributes exposing (attribute, class, href, style)
 import List.Extra
 import Maybe.Extra
 import Pages.Public.Quiz.Page as Page
@@ -64,7 +64,7 @@ viewQuiz theme hovering quiz =
     in
     section [ class "quiz" ]
         [ viewHeader quiz
-        , viewRanking teamData
+        , viewRanking quiz.quizId teamData
         , viewProgressionChart theme teamData
         , viewCumulativeBarChart theme hovering teamData rounds
         , viewPerRoundBarChart theme hovering teamData rounds
@@ -137,8 +137,8 @@ computeRanking teamData =
         |> Tuple.second
 
 
-viewRanking : List TeamData -> Html msg
-viewRanking teamData =
+viewRanking : Int -> List TeamData -> Html msg
+viewRanking quizId teamData =
     let
         ranked =
             computeRanking teamData
@@ -159,13 +159,21 @@ viewRanking teamData =
                         (\r ->
                             tr []
                                 [ td [] [ text (String.fromInt r.rank) ]
-                                , td [] [ text (teamName r.team) ]
+                                , td []
+                                    [ a [ href (teamUrl quizId r.team.number) ]
+                                        [ text (teamName r.team) ]
+                                    ]
                                 , td [] [ text (formatPoints r.total) ]
                                 ]
                         )
                 )
             ]
         ]
+
+
+teamUrl : Int -> Int -> String
+teamUrl quizId teamNumber =
+    String.concat [ "/quizzes/", String.fromInt quizId, "/teams/", String.fromInt teamNumber ]
 
 
 viewProgressionChart : Theme -> List TeamData -> Html Page.Msg

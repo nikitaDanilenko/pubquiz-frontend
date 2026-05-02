@@ -11,6 +11,9 @@ import Pages.Public.Overview.View
 import Pages.Public.Quiz.Handler
 import Pages.Public.Quiz.Page
 import Pages.Public.Quiz.View
+import Pages.Public.Team.Handler
+import Pages.Public.Team.Page
+import Pages.Public.Team.View
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((</>), Parser)
 import Util.Theme as Theme exposing (Theme)
@@ -49,6 +52,7 @@ type Page
     = Landing
     | Overview Pages.Public.Overview.Page.Model
     | Quiz Pages.Public.Quiz.Page.Model
+    | Team Pages.Public.Team.Page.Model
     | NotFound
 
 
@@ -56,6 +60,8 @@ type Route
     = LandingRoute
     | OverviewRoute
     | QuizRoute Int
+    | TeamRoute Int Int
+    | TeamRouteLegacy Int Int String
 
 
 routeParser : Parser (Route -> a) a
@@ -63,6 +69,8 @@ routeParser =
     Parser.oneOf
         [ Parser.map LandingRoute Parser.top
         , Parser.map OverviewRoute (Parser.s "quizzes")
+        , Parser.map TeamRouteLegacy (Parser.s "quizzes" </> Parser.int </> Parser.s "teams" </> Parser.int </> Parser.string)
+        , Parser.map TeamRoute (Parser.s "quizzes" </> Parser.int </> Parser.s "teams" </> Parser.int)
         , Parser.map QuizRoute (Parser.s "quizzes" </> Parser.int)
         ]
 
@@ -109,6 +117,7 @@ type Msg
     | UrlChanged Url
     | OverviewMsg Pages.Public.Overview.Page.Msg
     | QuizMsg Pages.Public.Quiz.Page.Msg
+    | TeamMsg Pages.Public.Team.Page.Msg
     | ToggleTheme
 
 
@@ -142,6 +151,15 @@ update msg model =
             in
             ( { model | page = Quiz newQuizModel }
             , Cmd.map QuizMsg quizCmd
+            )
+
+        ( TeamMsg teamMsg, Team teamModel ) ->
+            let
+                ( newTeamModel, teamCmd ) =
+                    Pages.Public.Team.Handler.update teamMsg teamModel
+            in
+            ( { model | page = Team newTeamModel }
+            , Cmd.map TeamMsg teamCmd
             )
 
         ( ToggleTheme, _ ) ->
@@ -194,6 +212,27 @@ navigateTo maybeRoute model =
             , Cmd.map QuizMsg quizCmd
             )
 
+        Just (TeamRoute quizId teamNumber) ->
+            initTeamPage model quizId teamNumber
+
+        Just (TeamRouteLegacy quizId teamNumber _) ->
+            initTeamPage model quizId teamNumber
+
+
+initTeamPage : Model -> Int -> Int -> ( Model, Cmd Msg )
+initTeamPage model quizId teamNumber =
+    let
+        ( teamModel, teamCmd ) =
+            Pages.Public.Team.Handler.init
+                { quizId = quizId
+                , teamNumber = teamNumber
+                , apiBase = model.apiBase
+                }
+    in
+    ( { model | page = Team teamModel }
+    , Cmd.map TeamMsg teamCmd
+    )
+
 
 view : Model -> Browser.Document Msg
 view model =
@@ -232,6 +271,9 @@ viewPage theme page =
 
         Quiz quizModel ->
             Html.map QuizMsg (Pages.Public.Quiz.View.view theme quizModel)
+
+        Team teamModel ->
+            Html.map TeamMsg (Pages.Public.Team.View.view teamModel)
 
         NotFound ->
             viewNotFound

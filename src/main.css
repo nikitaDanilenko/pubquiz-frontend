@@ -115,6 +115,15 @@ img {
   text-align: right;
 }
 
+.ranking-table a {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.ranking-table a:hover {
+  text-decoration: underline;
+}
+
 .statistics-legend,
 .team-legend {
   display: flex;
@@ -299,4 +308,55 @@ img {
 
 .no-results {
   color: var(--color-text-muted);
+}
+
+/* Team view */
+.team-view {
+  padding-bottom: 32px;
+}
+
+.team-header {
+  margin-bottom: 24px;
+}
+
+.team-header h2 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.team-table {
+  margin: 0 auto;
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 500px;
+}
+
+.team-table th,
+.team-table td {
+  padding: 10px 12px;
+  text-align: right;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.team-table th {
+  color: var(--color-text-muted);
+  font-weight: normal;
+}
+
+.team-table td:first-child,
+.team-table th:first-child {
+  text-align: left;
+}
+
+.back-link {
+  margin-top: 32px;
+}
+
+.back-link a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.back-link a:hover {
+  text-decoration: underline;
 }
