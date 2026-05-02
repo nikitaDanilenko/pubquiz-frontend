@@ -241,7 +241,6 @@ viewLanding : Html msg
 viewLanding =
     section [ class "landing" ]
         [ h1 [] [ text "Pubquiz" ]
-        , p [] [ text "View quiz results." ]
         , a [ href "/quizzes", class "browse-link" ] [ text "Browse Quizzes" ]
         ]
 
