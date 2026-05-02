@@ -12,6 +12,7 @@ import Html.Attributes exposing (class)
 import List.Extra
 import Maybe.Extra
 import Pages.Public.Quiz.Page as Page
+import Util.Colors as Colors
 import Util.Tristate as Tristate
 
 
@@ -60,15 +61,11 @@ viewQuiz quiz =
     section [ class "quiz" ]
         [ viewHeader quiz
         , viewRanking teamData
-        , viewProgressionChart teamData rounds
+        , viewProgressionChart teamData
         , viewCumulativeBarChart teamData rounds
         , viewPerRoundBarChart teamData rounds
         , viewRoundStatisticsChart rounds scores
         ]
-
-
-
--- DATA PREPARATION
 
 
 type alias TeamData =
@@ -107,10 +104,6 @@ prepareTeamData teams rounds scores =
                 , total = total
                 }
             )
-
-
-
--- RANKING
 
 
 type alias RankedTeam =
@@ -172,8 +165,12 @@ type alias DataPoint =
     }
 
 
-viewProgressionChart : List TeamData -> List Round -> Html msg
-viewProgressionChart teamData _ =
+viewProgressionChart : List TeamData -> Html msg
+viewProgressionChart teamData =
+    let
+        totalTeams =
+            List.length teamData
+    in
     section [ class "chart progression-chart" ]
         [ h2 [] [ text "Progression" ]
         , C.chart
@@ -187,7 +184,7 @@ viewProgressionChart teamData _ =
                         |> List.indexedMap
                             (\i td ->
                                 C.series .x
-                                    [ C.interpolated .y [ CA.color (teamColor i) ] [ CA.circle ]
+                                    [ C.interpolated .y [ CA.color (teamColor totalTeams i) ] [ CA.circle ]
                                     ]
                                     (td.cumulativeScores |> List.indexedMap (\ri score -> { x = toFloat (ri + 1), y = score }))
                             )
@@ -196,12 +193,12 @@ viewProgressionChart teamData _ =
         ]
 
 
-
--- CHART 2: CUMULATIVE BAR CHART
-
-
 viewCumulativeBarChart : List TeamData -> List Round -> Html msg
 viewCumulativeBarChart teamData rounds =
+    let
+        totalTeams =
+            List.length teamData
+    in
     section [ class "chart cumulative-chart" ]
         [ h2 [] [ text "Cumulative Points by Round" ]
         , C.chart
@@ -216,7 +213,7 @@ viewCumulativeBarChart teamData rounds =
                     |> List.indexedMap
                         (\i _ ->
                             C.bar (.cumulativeScores >> List.Extra.getAt i >> Maybe.withDefault 0)
-                                [ CA.color (teamColor i) ]
+                                [ CA.color (teamColor totalTeams i) ]
                         )
                 )
                 (rounds
@@ -237,6 +234,10 @@ viewCumulativeBarChart teamData rounds =
 
 viewPerRoundBarChart : List TeamData -> List Round -> Html msg
 viewPerRoundBarChart teamData rounds =
+    let
+        totalTeams =
+            List.length teamData
+    in
     section [ class "chart per-round-chart" ]
         [ h2 [] [ text "Points per Round" ]
         , C.chart
@@ -251,7 +252,7 @@ viewPerRoundBarChart teamData rounds =
                     |> List.indexedMap
                         (\i _ ->
                             C.bar (.roundScores >> List.Extra.getAt i >> Maybe.withDefault 0)
-                                [ CA.color (teamColor i) ]
+                                [ CA.color (teamColor totalTeams i) ]
                         )
                 )
                 (rounds
@@ -264,10 +265,6 @@ viewPerRoundBarChart teamData rounds =
                 )
             ]
         ]
-
-
-
--- CHART 4: ROUND STATISTICS
 
 
 type alias RoundStats =
@@ -349,13 +346,13 @@ viewRoundStatisticsChart rounds scores =
             , C.yLabels [ CA.withGrid ]
             , C.bars
                 [ CA.roundTop 0.2 ]
-                [ C.bar .min [ CA.color "#e15759" ]
+                [ C.bar .min [ CA.color Colors.statisticsColors.min ]
                     |> C.named "Min"
-                , C.bar .average [ CA.color "#f28e2c" ]
+                , C.bar .average [ CA.color Colors.statisticsColors.average ]
                     |> C.named "Average"
-                , C.bar .median [ CA.color "#76b7b2" ]
+                , C.bar .median [ CA.color Colors.statisticsColors.median ]
                     |> C.named "Median"
-                , C.bar .max [ CA.color "#59a14f" ]
+                , C.bar .max [ CA.color Colors.statisticsColors.max ]
                     |> C.named "Max"
                 ]
                 stats
@@ -401,21 +398,6 @@ formatPoints points =
         String.fromFloat points
 
 
-teamColor : Int -> String
-teamColor index =
-    let
-        colors =
-            [ "#4e79a7"
-            , "#f28e2c"
-            , "#e15759"
-            , "#76b7b2"
-            , "#59a14f"
-            , "#edc949"
-            , "#af7aa1"
-            , "#ff9da7"
-            , "#9c755f"
-            , "#bab0ab"
-            ]
-    in
-    List.Extra.getAt (modBy (List.length colors) index) colors
-        |> Maybe.withDefault "#4e79a7"
+teamColor : Int -> Int -> String
+teamColor total =
+    Colors.interpolateColor total >> Colors.toHex
