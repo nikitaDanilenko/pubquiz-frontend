@@ -3,8 +3,7 @@ module Pages.Public.Team.Handler exposing (init, update)
 {-| Team detail page logic.
 -}
 
-import Api.Json
-import Http
+import Api.Api
 import Pages.Public.Team.Page as Page
 import Result.Extra
 import Util.Tristate as Tristate
@@ -16,7 +15,7 @@ init flags =
       , teamNumber = flags.teamNumber
       , quiz = Tristate.initial
       }
-    , fetchQuiz flags.apiBase flags.quizId
+    , fetchQuiz flags.quizId
     )
 
 
@@ -29,9 +28,9 @@ update msg model =
             )
 
 
-fetchQuiz : String -> Int -> Cmd Page.Msg
-fetchQuiz apiBase quizId =
-    Http.get
-        { url = String.concat [ apiBase, "/public/", String.fromInt quizId ]
-        , expect = Http.expectJson Page.GotQuiz Api.Json.decodeQuizActive
+fetchQuiz : Int -> Cmd Page.Msg
+fetchQuiz quizId =
+    Api.Api.publicQuizId
+        { toMsg = Page.GotQuiz
+        , params = { quizId = quizId }
         }

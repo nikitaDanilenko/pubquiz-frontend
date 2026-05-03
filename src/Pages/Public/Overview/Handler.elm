@@ -3,22 +3,20 @@ module Pages.Public.Overview.Handler exposing (init, update)
 {-| Quiz overview page logic.
 -}
 
-import Api.Json
-import Http
-import Json.Decode
+import Api.Api
 import Pages.Public.Overview.Page as Page
 import Result.Extra
 import Util.Tristate as Tristate
 
 
-init : Page.Flags -> ( Page.Model, Cmd Page.Msg )
-init flags =
+init : ( Page.Model, Cmd Page.Msg )
+init =
     ( { quizzes = Tristate.initial
       , searchText = ""
       , sortBy = Page.ByDate
       , sortDirection = Page.Descending
       }
-    , fetchQuizzes flags.apiBase
+    , fetchQuizzes
     )
 
 
@@ -46,9 +44,6 @@ update msg model =
             )
 
 
-fetchQuizzes : String -> Cmd Page.Msg
-fetchQuizzes apiBase =
-    Http.get
-        { url = String.concat [ apiBase, "/public" ]
-        , expect = Http.expectJson Page.GotQuizzes (Json.Decode.list Api.Json.decodeQuizSummary)
-        }
+fetchQuizzes : Cmd Page.Msg
+fetchQuizzes =
+    Api.Api.public { toMsg = Page.GotQuizzes }

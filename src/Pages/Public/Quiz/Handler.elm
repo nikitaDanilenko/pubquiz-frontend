@@ -3,8 +3,7 @@ module Pages.Public.Quiz.Handler exposing (init, update)
 {-| Quiz page logic.
 -}
 
-import Api.Json
-import Http
+import Api.Api
 import Pages.Public.Quiz.Page as Page
 import Result.Extra
 import Util.Tristate as Tristate
@@ -17,7 +16,7 @@ init flags =
       , hovering = []
       , statsHovering = []
       }
-    , fetchQuiz flags.apiBase flags.quizId
+    , fetchQuiz flags.quizId
     )
 
 
@@ -40,9 +39,9 @@ update msg model =
             )
 
 
-fetchQuiz : String -> Int -> Cmd Page.Msg
-fetchQuiz apiBase quizId =
-    Http.get
-        { url = apiBase ++ "/public/" ++ String.fromInt quizId
-        , expect = Http.expectJson Page.GotQuiz Api.Json.decodeQuizActive
+fetchQuiz : Int -> Cmd Page.Msg
+fetchQuiz quizId =
+    Api.Api.publicQuizId
+        { toMsg = Page.GotQuiz
+        , params = { quizId = quizId }
         }

@@ -9,8 +9,8 @@ module Pages.Public.Quiz.Page exposing
 
 import Api.Types exposing (QuizActive)
 import Chart.Item as CI
-import Http
 import Monocle.Lens exposing (Lens)
+import OpenApi.Common
 import Util.Tristate exposing (Tristate)
 
 
@@ -24,7 +24,7 @@ type alias StatsHovering =
 
 type alias Model =
     { quizId : Int
-    , quiz : Tristate Http.Error QuizActive
+    , quiz : Tristate (OpenApi.Common.Error () String) QuizActive
     , hovering : Hovering
     , statsHovering : StatsHovering
     }
@@ -32,7 +32,7 @@ type alias Model =
 
 lenses :
     { quizId : Lens Model Int
-    , quiz : Lens Model (Tristate Http.Error QuizActive)
+    , quiz : Lens Model (Tristate (OpenApi.Common.Error () String) QuizActive)
     , hovering : Lens Model Hovering
     , statsHovering : Lens Model StatsHovering
     }
@@ -45,12 +45,11 @@ lenses =
 
 
 type Msg
-    = GotQuiz (Result Http.Error QuizActive)
+    = GotQuiz (Result (OpenApi.Common.Error () String) QuizActive)
     | OnHover Hovering
     | OnStatsHover StatsHovering
 
 
 type alias Flags =
     { quizId : Int
-    , apiBase : String
     }

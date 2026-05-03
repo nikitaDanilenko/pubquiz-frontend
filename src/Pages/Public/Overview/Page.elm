@@ -1,6 +1,5 @@
 module Pages.Public.Overview.Page exposing
-    ( Flags
-    , Model
+    ( Model
     , Msg(..)
     , SortBy(..)
     , SortDirection(..)
@@ -11,13 +10,13 @@ module Pages.Public.Overview.Page exposing
 -}
 
 import Api.Types exposing (QuizSummary)
-import Http
 import Monocle.Lens exposing (Lens)
+import OpenApi.Common
 import Util.Tristate exposing (Tristate)
 
 
 type alias Model =
-    { quizzes : Tristate Http.Error (List QuizSummary)
+    { quizzes : Tristate (OpenApi.Common.Error () String) (List QuizSummary)
     , searchText : String
     , sortBy : SortBy
     , sortDirection : SortDirection
@@ -25,7 +24,7 @@ type alias Model =
 
 
 lenses :
-    { quizzes : Lens Model (Tristate Http.Error (List QuizSummary))
+    { quizzes : Lens Model (Tristate (OpenApi.Common.Error () String) (List QuizSummary))
     , searchText : Lens Model String
     , sortBy : Lens Model SortBy
     , sortDirection : Lens Model SortDirection
@@ -49,12 +48,7 @@ type SortDirection
 
 
 type Msg
-    = GotQuizzes (Result Http.Error (List QuizSummary))
+    = GotQuizzes (Result (OpenApi.Common.Error () String) (List QuizSummary))
     | SetSearchText String
     | SetSortBy SortBy
     | SetSortDirection SortDirection
-
-
-type alias Flags =
-    { apiBase : String
-    }

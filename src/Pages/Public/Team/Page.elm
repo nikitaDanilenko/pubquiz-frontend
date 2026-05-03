@@ -9,22 +9,22 @@ module Pages.Public.Team.Page exposing
 -}
 
 import Api.Types exposing (QuizActive)
-import Http
 import Monocle.Lens exposing (Lens)
+import OpenApi.Common
 import Util.Tristate exposing (Tristate)
 
 
 type alias Model =
     { quizId : Int
     , teamNumber : Int
-    , quiz : Tristate Http.Error QuizActive
+    , quiz : Tristate (OpenApi.Common.Error () String) QuizActive
     }
 
 
 lenses :
     { quizId : Lens Model Int
     , teamNumber : Lens Model Int
-    , quiz : Lens Model (Tristate Http.Error QuizActive)
+    , quiz : Lens Model (Tristate (OpenApi.Common.Error () String) QuizActive)
     }
 lenses =
     { quizId = Lens .quizId (\b a -> { a | quizId = b })
@@ -34,11 +34,10 @@ lenses =
 
 
 type Msg
-    = GotQuiz (Result Http.Error QuizActive)
+    = GotQuiz (Result (OpenApi.Common.Error () String) QuizActive)
 
 
 type alias Flags =
     { quizId : Int
     , teamNumber : Int
-    , apiBase : String
     }
