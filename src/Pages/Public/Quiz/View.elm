@@ -1,8 +1,5 @@
 module Pages.Public.Quiz.View exposing (view)
 
-{-| Quiz page view.
--}
-
 import Api.Types exposing (QuizActive, Round, ScoreEntry, Team)
 import Chart as C
 import Chart.Attributes as CA

@@ -1,8 +1,5 @@
 module Pages.Public.Overview.Handler exposing (init, update)
 
-{-| Quiz overview page logic.
--}
-
 import Api.Api
 import Pages.Public.Overview.Page as Page
 import Result.Extra

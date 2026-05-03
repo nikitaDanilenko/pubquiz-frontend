@@ -1,8 +1,5 @@
 module Pages.Public.Team.View exposing (view)
 
-{-| Team detail page view.
--}
-
 import Api.Types exposing (QuizActive, QuizIdentifier, Round, ScoreEntry, Team)
 import Date
 import Html exposing (Html, a, article, em, h1, h2, h3, p, section, small, text)

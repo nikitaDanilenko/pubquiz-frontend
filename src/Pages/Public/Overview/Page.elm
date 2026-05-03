@@ -6,9 +6,6 @@ module Pages.Public.Overview.Page exposing
     , lenses
     )
 
-{-| Quiz overview page state.
--}
-
 import Api.Types exposing (QuizSummary)
 import Monocle.Lens exposing (Lens)
 import OpenApi.Common

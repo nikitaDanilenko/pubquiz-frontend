@@ -1,8 +1,5 @@
 module Pages.Public.Quiz.Handler exposing (init, update)
 
-{-| Quiz page logic.
--}
-
 import Api.Api
 import Pages.Public.Quiz.Page as Page
 import Result.Extra

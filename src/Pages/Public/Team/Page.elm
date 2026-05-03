@@ -5,9 +5,6 @@ module Pages.Public.Team.Page exposing
     , lenses
     )
 
-{-| Team detail page state.
--}
-
 import Api.Types exposing (QuizActive)
 import Monocle.Lens exposing (Lens)
 import OpenApi.Common

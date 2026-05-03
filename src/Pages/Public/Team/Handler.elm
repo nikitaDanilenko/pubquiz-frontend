@@ -1,8 +1,5 @@
 module Pages.Public.Team.Handler exposing (init, update)
 
-{-| Team detail page logic.
--}
-
 import Api.Api
 import Pages.Public.Team.Page as Page
 import Result.Extra
