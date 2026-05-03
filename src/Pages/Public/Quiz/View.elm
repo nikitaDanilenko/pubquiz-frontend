@@ -69,6 +69,7 @@ viewQuiz theme hovering statsHovering quiz =
         , viewCumulativeBarChart theme hovering teamData rounds
         , viewPerRoundBarChart theme hovering teamData rounds
         , viewRoundStatisticsChart theme statsHovering rounds scores
+        , p [ class "quiz-link" ] [ a [ href "/quizzes" ] [ text "← All quizzes" ] ]
         ]
 
 
