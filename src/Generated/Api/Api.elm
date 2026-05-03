@@ -1,5 +1,10 @@
 module Api.Api exposing
-    ( backoffice, backofficeLogin, backofficeLoginTask, backofficeTask, public, publicQuizId, publicQuizIdTask
+    ( backoffice, backofficeLogin, backofficeLoginTask, backofficeQuizIdAddTeams, backofficeQuizIdAddTeamsTask
+    , backofficeQuizIdChangeSettings, backofficeQuizIdChangeSettingsTask, backofficeQuizIdCorrectScore
+    , backofficeQuizIdCorrectScoreTask, backofficeQuizIdLock, backofficeQuizIdLockTask
+    , backofficeQuizIdRecordRoundScores, backofficeQuizIdRecordRoundScoresTask, backofficeQuizIdRenameTeam
+    , backofficeQuizIdRenameTeamTask, backofficeQuizIdSetTeamActive, backofficeQuizIdSetTeamActiveTask
+    , backofficeQuizIdUnlock, backofficeQuizIdUnlockTask, backofficeTask, public, publicQuizId, publicQuizIdTask
     , publicTask
     )
 
@@ -8,7 +13,12 @@ module Api.Api exposing
 
 ## Operations
 
-@docs backoffice, backofficeLogin, backofficeLoginTask, backofficeTask, public, publicQuizId, publicQuizIdTask
+@docs backoffice, backofficeLogin, backofficeLoginTask, backofficeQuizIdAddTeams, backofficeQuizIdAddTeamsTask
+@docs backofficeQuizIdChangeSettings, backofficeQuizIdChangeSettingsTask, backofficeQuizIdCorrectScore
+@docs backofficeQuizIdCorrectScoreTask, backofficeQuizIdLock, backofficeQuizIdLockTask
+@docs backofficeQuizIdRecordRoundScores, backofficeQuizIdRecordRoundScoresTask, backofficeQuizIdRenameTeam
+@docs backofficeQuizIdRenameTeamTask, backofficeQuizIdSetTeamActive, backofficeQuizIdSetTeamActiveTask
+@docs backofficeQuizIdUnlock, backofficeQuizIdUnlockTask, backofficeTask, public, publicQuizId, publicQuizIdTask
 @docs publicTask
 
 -}
@@ -66,7 +76,7 @@ backofficeLogin config =
             OpenApi.Common.expectJsonCustom
                 config.toMsg
                 (Dict.fromList [ ( "400", Json.Decode.succeed () ) ])
-                Api.Json.decodeLoginResponse
+                (Json.Decode.succeed ())
         , body = Http.jsonBody (Api.Json.encodeLoginRequest config.body)
         , timeout = Nothing
         , tracker = Nothing
@@ -75,7 +85,7 @@ backofficeLogin config =
 
 backofficeLoginTask :
     { body : Api.Types.LoginRequest }
-    -> Task.Task (OpenApi.Common.Error () String) Api.Types.LoginResponse
+    -> Task.Task (OpenApi.Common.Error () String) ()
 backofficeLoginTask config =
     Http.task
         { url = Url.Builder.absolute [ "backoffice", "login" ] []
@@ -84,8 +94,562 @@ backofficeLoginTask config =
         , resolver =
             OpenApi.Common.jsonResolverCustom
                 (Dict.fromList [ ( "400", Json.Decode.succeed () ) ])
-                Api.Json.decodeLoginResponse
+                (Json.Decode.succeed ())
         , body = Http.jsonBody (Api.Json.encodeLoginRequest config.body)
+        , timeout = Nothing
+        }
+
+
+backofficeQuizIdAddTeams :
+    { toMsg :
+        Result (OpenApi.Common.Error Api.Types.BackofficeQuizIdAddTeams_Error String) ()
+        -> msg
+    , body : Api.Types.AddTeamsCommand
+    , params : { quizId : Int }
+    }
+    -> Cmd msg
+backofficeQuizIdAddTeams config =
+    Http.request
+        { url =
+            Url.Builder.absolute
+                [ "backoffice"
+                , String.fromInt config.params.quizId
+                , "add-teams"
+                ]
+                []
+        , method = "POST"
+        , headers = []
+        , expect =
+            OpenApi.Common.expectJsonCustom
+                config.toMsg
+                (Dict.fromList
+                    [ ( "400"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdAddTeams_400
+                            (Json.Decode.succeed ())
+                      )
+                    , ( "404"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdAddTeams_404
+                            (Json.Decode.succeed ())
+                      )
+                    ]
+                )
+                (Json.Decode.succeed ())
+        , body = Http.jsonBody (Api.Json.encodeAddTeamsCommand config.body)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+backofficeQuizIdAddTeamsTask :
+    { body : Api.Types.AddTeamsCommand, params : { quizId : Int } }
+    -> Task.Task (OpenApi.Common.Error Api.Types.BackofficeQuizIdAddTeams_Error String) ()
+backofficeQuizIdAddTeamsTask config =
+    Http.task
+        { url =
+            Url.Builder.absolute
+                [ "backoffice"
+                , String.fromInt config.params.quizId
+                , "add-teams"
+                ]
+                []
+        , method = "POST"
+        , headers = []
+        , resolver =
+            OpenApi.Common.jsonResolverCustom
+                (Dict.fromList
+                    [ ( "400"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdAddTeams_400
+                            (Json.Decode.succeed ())
+                      )
+                    , ( "404"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdAddTeams_404
+                            (Json.Decode.succeed ())
+                      )
+                    ]
+                )
+                (Json.Decode.succeed ())
+        , body = Http.jsonBody (Api.Json.encodeAddTeamsCommand config.body)
+        , timeout = Nothing
+        }
+
+
+backofficeQuizIdChangeSettings :
+    { toMsg :
+        Result (OpenApi.Common.Error Api.Types.BackofficeQuizIdChangeSettings_Error String) ()
+        -> msg
+    , body : Api.Types.ChangeSettingsCommand
+    , params : { quizId : Int }
+    }
+    -> Cmd msg
+backofficeQuizIdChangeSettings config =
+    Http.request
+        { url =
+            Url.Builder.absolute
+                [ "backoffice"
+                , String.fromInt config.params.quizId
+                , "change-settings"
+                ]
+                []
+        , method = "POST"
+        , headers = []
+        , expect =
+            OpenApi.Common.expectJsonCustom
+                config.toMsg
+                (Dict.fromList
+                    [ ( "400"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdChangeSettings_400
+                            (Json.Decode.succeed ())
+                      )
+                    , ( "404"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdChangeSettings_404
+                            (Json.Decode.succeed ())
+                      )
+                    ]
+                )
+                (Json.Decode.succeed ())
+        , body =
+            Http.jsonBody (Api.Json.encodeChangeSettingsCommand config.body)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+backofficeQuizIdChangeSettingsTask :
+    { body : Api.Types.ChangeSettingsCommand, params : { quizId : Int } }
+    -> Task.Task (OpenApi.Common.Error Api.Types.BackofficeQuizIdChangeSettings_Error String) ()
+backofficeQuizIdChangeSettingsTask config =
+    Http.task
+        { url =
+            Url.Builder.absolute
+                [ "backoffice"
+                , String.fromInt config.params.quizId
+                , "change-settings"
+                ]
+                []
+        , method = "POST"
+        , headers = []
+        , resolver =
+            OpenApi.Common.jsonResolverCustom
+                (Dict.fromList
+                    [ ( "400"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdChangeSettings_400
+                            (Json.Decode.succeed ())
+                      )
+                    , ( "404"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdChangeSettings_404
+                            (Json.Decode.succeed ())
+                      )
+                    ]
+                )
+                (Json.Decode.succeed ())
+        , body =
+            Http.jsonBody (Api.Json.encodeChangeSettingsCommand config.body)
+        , timeout = Nothing
+        }
+
+
+backofficeQuizIdCorrectScore :
+    { toMsg :
+        Result (OpenApi.Common.Error Api.Types.BackofficeQuizIdCorrectScore_Error String) ()
+        -> msg
+    , body : Api.Types.CorrectScoreCommand
+    , params : { quizId : Int }
+    }
+    -> Cmd msg
+backofficeQuizIdCorrectScore config =
+    Http.request
+        { url =
+            Url.Builder.absolute
+                [ "backoffice"
+                , String.fromInt config.params.quizId
+                , "correct-score"
+                ]
+                []
+        , method = "POST"
+        , headers = []
+        , expect =
+            OpenApi.Common.expectJsonCustom
+                config.toMsg
+                (Dict.fromList
+                    [ ( "400"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdCorrectScore_400
+                            (Json.Decode.succeed ())
+                      )
+                    , ( "404"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdCorrectScore_404
+                            (Json.Decode.succeed ())
+                      )
+                    ]
+                )
+                (Json.Decode.succeed ())
+        , body = Http.jsonBody (Api.Json.encodeCorrectScoreCommand config.body)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+backofficeQuizIdCorrectScoreTask :
+    { body : Api.Types.CorrectScoreCommand, params : { quizId : Int } }
+    -> Task.Task (OpenApi.Common.Error Api.Types.BackofficeQuizIdCorrectScore_Error String) ()
+backofficeQuizIdCorrectScoreTask config =
+    Http.task
+        { url =
+            Url.Builder.absolute
+                [ "backoffice"
+                , String.fromInt config.params.quizId
+                , "correct-score"
+                ]
+                []
+        , method = "POST"
+        , headers = []
+        , resolver =
+            OpenApi.Common.jsonResolverCustom
+                (Dict.fromList
+                    [ ( "400"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdCorrectScore_400
+                            (Json.Decode.succeed ())
+                      )
+                    , ( "404"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdCorrectScore_404
+                            (Json.Decode.succeed ())
+                      )
+                    ]
+                )
+                (Json.Decode.succeed ())
+        , body = Http.jsonBody (Api.Json.encodeCorrectScoreCommand config.body)
+        , timeout = Nothing
+        }
+
+
+backofficeQuizIdLock :
+    { toMsg : Result (OpenApi.Common.Error () String) () -> msg
+    , params : { quizId : Int }
+    }
+    -> Cmd msg
+backofficeQuizIdLock config =
+    Http.request
+        { url =
+            Url.Builder.absolute
+                [ "backoffice", String.fromInt config.params.quizId, "lock" ]
+                []
+        , method = "POST"
+        , headers = []
+        , expect =
+            OpenApi.Common.expectJsonCustom
+                config.toMsg
+                (Dict.fromList [ ( "404", Json.Decode.succeed () ) ])
+                (Json.Decode.succeed ())
+        , body = Http.emptyBody
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+backofficeQuizIdLockTask :
+    { params : { quizId : Int } }
+    -> Task.Task (OpenApi.Common.Error () String) ()
+backofficeQuizIdLockTask config =
+    Http.task
+        { url =
+            Url.Builder.absolute
+                [ "backoffice", String.fromInt config.params.quizId, "lock" ]
+                []
+        , method = "POST"
+        , headers = []
+        , resolver =
+            OpenApi.Common.jsonResolverCustom
+                (Dict.fromList [ ( "404", Json.Decode.succeed () ) ])
+                (Json.Decode.succeed ())
+        , body = Http.emptyBody
+        , timeout = Nothing
+        }
+
+
+backofficeQuizIdRecordRoundScores :
+    { toMsg :
+        Result (OpenApi.Common.Error Api.Types.BackofficeQuizIdRecordRoundScores_Error String) ()
+        -> msg
+    , body : Api.Types.RecordRoundScoresCommand
+    , params : { quizId : Int }
+    }
+    -> Cmd msg
+backofficeQuizIdRecordRoundScores config =
+    Http.request
+        { url =
+            Url.Builder.absolute
+                [ "backoffice"
+                , String.fromInt config.params.quizId
+                , "record-round-scores"
+                ]
+                []
+        , method = "POST"
+        , headers = []
+        , expect =
+            OpenApi.Common.expectJsonCustom
+                config.toMsg
+                (Dict.fromList
+                    [ ( "400"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdRecordRoundScores_400
+                            (Json.Decode.succeed ())
+                      )
+                    , ( "404"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdRecordRoundScores_404
+                            (Json.Decode.succeed ())
+                      )
+                    ]
+                )
+                (Json.Decode.succeed ())
+        , body =
+            Http.jsonBody (Api.Json.encodeRecordRoundScoresCommand config.body)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+backofficeQuizIdRecordRoundScoresTask :
+    { body : Api.Types.RecordRoundScoresCommand, params : { quizId : Int } }
+    -> Task.Task (OpenApi.Common.Error Api.Types.BackofficeQuizIdRecordRoundScores_Error String) ()
+backofficeQuizIdRecordRoundScoresTask config =
+    Http.task
+        { url =
+            Url.Builder.absolute
+                [ "backoffice"
+                , String.fromInt config.params.quizId
+                , "record-round-scores"
+                ]
+                []
+        , method = "POST"
+        , headers = []
+        , resolver =
+            OpenApi.Common.jsonResolverCustom
+                (Dict.fromList
+                    [ ( "400"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdRecordRoundScores_400
+                            (Json.Decode.succeed ())
+                      )
+                    , ( "404"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdRecordRoundScores_404
+                            (Json.Decode.succeed ())
+                      )
+                    ]
+                )
+                (Json.Decode.succeed ())
+        , body =
+            Http.jsonBody (Api.Json.encodeRecordRoundScoresCommand config.body)
+        , timeout = Nothing
+        }
+
+
+backofficeQuizIdRenameTeam :
+    { toMsg :
+        Result (OpenApi.Common.Error Api.Types.BackofficeQuizIdRenameTeam_Error String) ()
+        -> msg
+    , body : Api.Types.RenameTeamCommand
+    , params : { quizId : Int }
+    }
+    -> Cmd msg
+backofficeQuizIdRenameTeam config =
+    Http.request
+        { url =
+            Url.Builder.absolute
+                [ "backoffice"
+                , String.fromInt config.params.quizId
+                , "rename-team"
+                ]
+                []
+        , method = "POST"
+        , headers = []
+        , expect =
+            OpenApi.Common.expectJsonCustom
+                config.toMsg
+                (Dict.fromList
+                    [ ( "400"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdRenameTeam_400
+                            (Json.Decode.succeed ())
+                      )
+                    , ( "404"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdRenameTeam_404
+                            (Json.Decode.succeed ())
+                      )
+                    ]
+                )
+                (Json.Decode.succeed ())
+        , body = Http.jsonBody (Api.Json.encodeRenameTeamCommand config.body)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+backofficeQuizIdRenameTeamTask :
+    { body : Api.Types.RenameTeamCommand, params : { quizId : Int } }
+    -> Task.Task (OpenApi.Common.Error Api.Types.BackofficeQuizIdRenameTeam_Error String) ()
+backofficeQuizIdRenameTeamTask config =
+    Http.task
+        { url =
+            Url.Builder.absolute
+                [ "backoffice"
+                , String.fromInt config.params.quizId
+                , "rename-team"
+                ]
+                []
+        , method = "POST"
+        , headers = []
+        , resolver =
+            OpenApi.Common.jsonResolverCustom
+                (Dict.fromList
+                    [ ( "400"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdRenameTeam_400
+                            (Json.Decode.succeed ())
+                      )
+                    , ( "404"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdRenameTeam_404
+                            (Json.Decode.succeed ())
+                      )
+                    ]
+                )
+                (Json.Decode.succeed ())
+        , body = Http.jsonBody (Api.Json.encodeRenameTeamCommand config.body)
+        , timeout = Nothing
+        }
+
+
+backofficeQuizIdSetTeamActive :
+    { toMsg :
+        Result (OpenApi.Common.Error Api.Types.BackofficeQuizIdSetTeamActive_Error String) ()
+        -> msg
+    , body : Api.Types.SetTeamActiveCommand
+    , params : { quizId : Int }
+    }
+    -> Cmd msg
+backofficeQuizIdSetTeamActive config =
+    Http.request
+        { url =
+            Url.Builder.absolute
+                [ "backoffice"
+                , String.fromInt config.params.quizId
+                , "set-team-active"
+                ]
+                []
+        , method = "POST"
+        , headers = []
+        , expect =
+            OpenApi.Common.expectJsonCustom
+                config.toMsg
+                (Dict.fromList
+                    [ ( "400"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdSetTeamActive_400
+                            (Json.Decode.succeed ())
+                      )
+                    , ( "404"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdSetTeamActive_404
+                            (Json.Decode.succeed ())
+                      )
+                    ]
+                )
+                (Json.Decode.succeed ())
+        , body = Http.jsonBody (Api.Json.encodeSetTeamActiveCommand config.body)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+backofficeQuizIdSetTeamActiveTask :
+    { body : Api.Types.SetTeamActiveCommand, params : { quizId : Int } }
+    -> Task.Task (OpenApi.Common.Error Api.Types.BackofficeQuizIdSetTeamActive_Error String) ()
+backofficeQuizIdSetTeamActiveTask config =
+    Http.task
+        { url =
+            Url.Builder.absolute
+                [ "backoffice"
+                , String.fromInt config.params.quizId
+                , "set-team-active"
+                ]
+                []
+        , method = "POST"
+        , headers = []
+        , resolver =
+            OpenApi.Common.jsonResolverCustom
+                (Dict.fromList
+                    [ ( "400"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdSetTeamActive_400
+                            (Json.Decode.succeed ())
+                      )
+                    , ( "404"
+                      , Json.Decode.map
+                            Api.Types.BackofficeQuizIdSetTeamActive_404
+                            (Json.Decode.succeed ())
+                      )
+                    ]
+                )
+                (Json.Decode.succeed ())
+        , body = Http.jsonBody (Api.Json.encodeSetTeamActiveCommand config.body)
+        , timeout = Nothing
+        }
+
+
+backofficeQuizIdUnlock :
+    { toMsg : Result (OpenApi.Common.Error () String) () -> msg
+    , params : { quizId : Int }
+    }
+    -> Cmd msg
+backofficeQuizIdUnlock config =
+    Http.request
+        { url =
+            Url.Builder.absolute
+                [ "backoffice", String.fromInt config.params.quizId, "unlock" ]
+                []
+        , method = "POST"
+        , headers = []
+        , expect =
+            OpenApi.Common.expectJsonCustom
+                config.toMsg
+                (Dict.fromList [ ( "404", Json.Decode.succeed () ) ])
+                (Json.Decode.succeed ())
+        , body = Http.emptyBody
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+backofficeQuizIdUnlockTask :
+    { params : { quizId : Int } }
+    -> Task.Task (OpenApi.Common.Error () String) ()
+backofficeQuizIdUnlockTask config =
+    Http.task
+        { url =
+            Url.Builder.absolute
+                [ "backoffice", String.fromInt config.params.quizId, "unlock" ]
+                []
+        , method = "POST"
+        , headers = []
+        , resolver =
+            OpenApi.Common.jsonResolverCustom
+                (Dict.fromList [ ( "404", Json.Decode.succeed () ) ])
+                (Json.Decode.succeed ())
+        , body = Http.emptyBody
         , timeout = Nothing
         }
 
