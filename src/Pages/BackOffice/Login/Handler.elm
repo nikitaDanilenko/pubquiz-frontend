@@ -1,8 +1,5 @@
 module Pages.BackOffice.Login.Handler exposing (init, update)
 
-{-| Back office login page logic.
--}
-
 import Api.Api
 import Api.Types exposing (LoginRequest)
 import OpenApi.Common

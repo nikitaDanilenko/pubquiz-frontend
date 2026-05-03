@@ -4,10 +4,6 @@ module Pages.BackOffice.Login.Page exposing
     , lenses
     )
 
-{-| Back office login page types.
--}
-
-import Api.Types exposing (LoginResponse)
 import Monocle.Lens exposing (Lens)
 import OpenApi.Common
 
@@ -38,4 +34,4 @@ type Msg
     = SetUsername String
     | SetPassword String
     | Submit
-    | GotLoginResponse (Result (OpenApi.Common.Error () String) LoginResponse)
+    | GotLoginResponse (Result (OpenApi.Common.Error () String) ())
