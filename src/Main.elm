@@ -5,6 +5,9 @@ import Browser.Navigation as Nav
 import Html exposing (Html, a, button, div, h1, p, section, text)
 import Html.Attributes exposing (attribute, class, href)
 import Html.Events exposing (onClick)
+import Pages.BackOffice.Login.Handler
+import Pages.BackOffice.Login.Page
+import Pages.BackOffice.Login.View
 import Pages.Public.Overview.Handler
 import Pages.Public.Overview.Page
 import Pages.Public.Overview.View
@@ -23,8 +26,7 @@ port saveTheme : String -> Cmd msg
 
 
 type alias Flags =
-    { apiBase : String
-    , theme : String
+    { theme : String
     }
 
 
@@ -43,7 +45,6 @@ main =
 type alias Model =
     { key : Nav.Key
     , page : Page
-    , apiBase : String
     , theme : Theme
     }
 
@@ -53,6 +54,7 @@ type Page
     | Overview Pages.Public.Overview.Page.Model
     | Quiz Pages.Public.Quiz.Page.Model
     | Team Pages.Public.Team.Page.Model
+    | Login Pages.BackOffice.Login.Page.Model
     | NotFound
 
 
@@ -61,28 +63,36 @@ type Route
     | OverviewRoute
     | QuizRoute Int
     | TeamRoute Int Int
+    | LoginRoute
 
 
 routeParser : Parser (Route -> a) a
 routeParser =
     let
+        public =
+            "quizzes"
+
+        backOffice =
+            "backoffice"
+
         quizParser =
             -- The 'quizId' route is a legacy route that is supported so that old links are easy to redirect.
             Parser.oneOf
                 [ Parser.map QuizRoute (Parser.s "quizId" </> Parser.int) -- legacy route
-                , Parser.map QuizRoute (Parser.s "quizzes" </> Parser.int)
+                , Parser.map QuizRoute (Parser.s public </> Parser.int)
                 ]
 
         teamParser =
             -- The 'quizId/teamNumber' route is a legacy route that is supported so that old links are easy to redirect.
             Parser.oneOf
                 [ Parser.map (\quizId teamNumber _ -> TeamRoute quizId teamNumber) (Parser.s "quizId" </> Parser.int </> Parser.s "teamNumber" </> Parser.int </> Parser.s "teamCode" </> Parser.string)
-                , Parser.map TeamRoute (Parser.s "quizzes" </> Parser.int </> Parser.s "teams" </> Parser.int)
+                , Parser.map TeamRoute (Parser.s public </> Parser.int </> Parser.s "teams" </> Parser.int)
                 ]
     in
     Parser.oneOf
         [ Parser.map LandingRoute Parser.top
-        , Parser.map OverviewRoute (Parser.s "quizzes")
+        , Parser.map OverviewRoute (Parser.s public)
+        , Parser.map LoginRoute (Parser.s backOffice </> Parser.s "login")
         , teamParser
         , quizParser
         ]
@@ -118,7 +128,6 @@ init flags url key =
         model =
             { key = key
             , page = NotFound
-            , apiBase = flags.apiBase
             , theme = parseTheme flags.theme
             }
     in
@@ -131,6 +140,7 @@ type Msg
     | OverviewMsg Pages.Public.Overview.Page.Msg
     | QuizMsg Pages.Public.Quiz.Page.Msg
     | TeamMsg Pages.Public.Team.Page.Msg
+    | LoginMsg Pages.BackOffice.Login.Page.Msg
     | ToggleTheme
 
 
@@ -175,6 +185,21 @@ update msg model =
             , Cmd.map TeamMsg teamCmd
             )
 
+        ( LoginMsg loginMsg, Login loginModel ) ->
+            let
+                ( newLoginModel, loginCmd, loginSuccess ) =
+                    Pages.BackOffice.Login.Handler.update loginMsg loginModel
+            in
+            if loginSuccess then
+                ( model
+                , Nav.pushUrl model.key "/quizzes"
+                )
+
+            else
+                ( { model | page = Login newLoginModel }
+                , Cmd.map LoginMsg loginCmd
+                )
+
         ( ToggleTheme, _ ) ->
             let
                 newTheme =
@@ -206,8 +231,6 @@ navigateTo maybeRoute model =
             let
                 ( overviewModel, overviewCmd ) =
                     Pages.Public.Overview.Handler.init
-                        { apiBase = model.apiBase
-                        }
             in
             ( { model | page = Overview overviewModel }
             , Cmd.map OverviewMsg overviewCmd
@@ -218,7 +241,6 @@ navigateTo maybeRoute model =
                 ( quizModel, quizCmd ) =
                     Pages.Public.Quiz.Handler.init
                         { quizId = quizId
-                        , apiBase = model.apiBase
                         }
             in
             ( { model | page = Quiz quizModel }
@@ -228,6 +250,15 @@ navigateTo maybeRoute model =
         Just (TeamRoute quizId teamNumber) ->
             initTeamPage model quizId teamNumber
 
+        Just LoginRoute ->
+            let
+                ( loginModel, loginCmd ) =
+                    Pages.BackOffice.Login.Handler.init
+            in
+            ( { model | page = Login loginModel }
+            , Cmd.map LoginMsg loginCmd
+            )
+
 
 initTeamPage : Model -> Int -> Int -> ( Model, Cmd Msg )
 initTeamPage model quizId teamNumber =
@@ -236,7 +267,6 @@ initTeamPage model quizId teamNumber =
             Pages.Public.Team.Handler.init
                 { quizId = quizId
                 , teamNumber = teamNumber
-                , apiBase = model.apiBase
                 }
     in
     ( { model | page = Team teamModel }
@@ -286,6 +316,9 @@ viewPage theme page =
 
         Team teamModel ->
             Html.map TeamMsg (Pages.Public.Team.View.view teamModel)
+
+        Login loginModel ->
+            Html.map LoginMsg (Pages.BackOffice.Login.View.view loginModel)
 
         NotFound ->
             viewNotFound
