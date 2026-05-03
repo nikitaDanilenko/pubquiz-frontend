@@ -13,7 +13,6 @@ document.documentElement.setAttribute('data-theme', initialTheme);
 const app = Elm.Main.init({
   node: document.getElementById('root'),
   flags: {
-    apiBase: window.CONFIG?.apiBase || '',
     theme: initialTheme
   }
 });
