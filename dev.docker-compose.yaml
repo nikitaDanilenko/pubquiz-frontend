@@ -21,7 +21,6 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SERVER_PATH: /api
       PORT: 8080
       DATABASE_HOST: postgres
       DATABASE_NAME: pubquiz
@@ -29,10 +28,12 @@ services:
       DATABASE_PASSWORD: pubquiz
       DATABASE_PORT: 5432
       ORGANIZER_ADMIN_NAME: admin
-      ORGANIZER_ADMIN_HASH: "$$2a$$12$$x.gTHtEsgwTyAxDeWuyHXel4wSj3.tbPhpFj.iKInlCb5zfBRlPGO"
+      # Clear text: admin-password, + extra $ for escaping in docker-compose
+      ORGANIZER_ADMIN_HASH: "$$2a$$12$$lBcqLiXoYrYWbB9wBsGR1O4URhKqeKu7IPIeI/Tz20mmVxDO5QAla"
       ORGANIZER_USER_NAME: user
-      ORGANIZER_USER_HASH: "$$2a$$12$$Imca3zXFekaRMFLOcBlNhePaAtkIzd9iiif8nhN5tZ455h8fuRfrO"
-      JWT_SECRET: dev-jwt-secret
+      # Clear text: user-password, + extra $ for escaping in docker-compose
+      ORGANIZER_USER_HASH: "$$2a$$12$$39ibS7x8yf8f0vTERWD7Peh3tk.q3EsEX7kP4uwhYM/YODk/swXDC"
+      JWT_SECRET: dev-jwt-secret-that-is-at-least-32-characters-long
       JWT_EXPIRATION_SECONDS: 86400
     depends_on:
       postgres:
@@ -53,4 +54,3 @@ services:
 
 volumes:
   postgres_data:
-
