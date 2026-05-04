@@ -73,12 +73,17 @@ expectJsonCustom toMsg errorDecoders successDecoder =
                             Result.Err (UnknownBadStatus httpMetadata body)
 
                 Http.GoodStatus_ httpMetadata body ->
-                    case Json.Decode.decodeString successDecoder body of
-                        Result.Ok value ->
-                            Result.Ok value
+                    if httpMetadata.statusCode == 204 then
+                        Json.Decode.decodeString successDecoder "null"
+                            |> Result.mapError (\_ -> BadBody httpMetadata body)
 
-                        Result.Err error ->
-                            Result.Err (BadBody httpMetadata body)
+                    else
+                        case Json.Decode.decodeString successDecoder body of
+                            Result.Ok value ->
+                                Result.Ok value
+
+                            Result.Err error ->
+                                Result.Err (BadBody httpMetadata body)
         )
 
 
@@ -121,12 +126,17 @@ jsonResolverCustom errorDecoders successDecoder =
                             Result.Err (UnknownBadStatus httpMetadata body)
 
                 Http.GoodStatus_ httpMetadata body ->
-                    case Json.Decode.decodeString successDecoder body of
-                        Result.Ok value ->
-                            Result.Ok value
+                    if httpMetadata.statusCode == 204 then
+                        Json.Decode.decodeString successDecoder "null"
+                            |> Result.mapError (\_ -> BadBody httpMetadata body)
 
-                        Result.Err error ->
-                            Result.Err (BadBody httpMetadata body)
+                    else
+                        case Json.Decode.decodeString successDecoder body of
+                            Result.Ok value ->
+                                Result.Ok value
+
+                            Result.Err error ->
+                                Result.Err (BadBody httpMetadata body)
         )
 
 
