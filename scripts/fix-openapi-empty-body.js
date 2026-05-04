@@ -1,5 +1,5 @@
 // Post-processing fix for elm-open-api empty body bug
-// See: https://github.com/wolfadex/elm-open-api/issues/14
+// See: https://github.com/wolfadex/elm-open-api-cli/issues/302
 
 const fs = require("fs");
 
