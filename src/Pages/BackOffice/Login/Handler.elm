@@ -85,10 +85,15 @@ errorToString error =
                 String.concat [ "Error: ", String.fromInt status ]
 
         OpenApi.Common.UnknownBadStatus _ body ->
-            String.concat [ "Error: ", body ]
+            errorWith "bad status" body
 
         OpenApi.Common.BadErrorBody _ body ->
-            String.concat [ "Error: ", body ]
+            errorWith "bad error body" body
 
         OpenApi.Common.BadBody _ body ->
-            String.concat [ "Error: ", body ]
+            errorWith "bad body" body
+
+
+errorWith : String -> String -> String
+errorWith kind message =
+    String.concat [ "Error - ", kind, ": ", "'", message, "'" ]
