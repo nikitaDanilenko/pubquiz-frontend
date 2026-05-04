@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "generate-api": "dotenv -e .env -- sh -c 'elm-open-api \"$OPENAPI_URL\" --output-dir src/Generated --module-name Api'"
+    "generate-api": "bash scripts/generate-api.sh"
   },
   "devDependencies": {
-    "dotenv-cli": "^8.0.0",
     "elm-open-api": "^0.7.0"
   }
 }
