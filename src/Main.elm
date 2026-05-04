@@ -8,6 +8,9 @@ import Html.Events exposing (onClick)
 import Pages.BackOffice.Login.Handler
 import Pages.BackOffice.Login.Page
 import Pages.BackOffice.Login.View
+import Pages.BackOffice.Overview.Handler
+import Pages.BackOffice.Overview.Page
+import Pages.BackOffice.Overview.View
 import Pages.Public.Overview.Handler
 import Pages.Public.Overview.Page
 import Pages.Public.Overview.View
@@ -55,6 +58,7 @@ type Page
     | Quiz Pages.Public.Quiz.Page.Model
     | Team Pages.Public.Team.Page.Model
     | Login Pages.BackOffice.Login.Page.Model
+    | BackOfficeOverview Pages.BackOffice.Overview.Page.Model
     | NotFound
 
 
@@ -64,6 +68,7 @@ type Route
     | QuizRoute Int
     | TeamRoute Int Int
     | LoginRoute
+    | BackOfficeOverviewRoute
 
 
 routeParser : Parser (Route -> a) a
@@ -93,6 +98,7 @@ routeParser =
         [ Parser.map LandingRoute Parser.top
         , Parser.map OverviewRoute (Parser.s public)
         , Parser.map LoginRoute (Parser.s backOffice </> Parser.s "login")
+        , Parser.map BackOfficeOverviewRoute (Parser.s backOffice)
         , teamParser
         , quizParser
         ]
@@ -141,6 +147,7 @@ type Msg
     | QuizMsg Pages.Public.Quiz.Page.Msg
     | TeamMsg Pages.Public.Team.Page.Msg
     | LoginMsg Pages.BackOffice.Login.Page.Msg
+    | BackOfficeOverviewMsg Pages.BackOffice.Overview.Page.Msg
     | ToggleTheme
 
 
@@ -192,13 +199,22 @@ update msg model =
             in
             if loginSuccess then
                 ( model
-                , Nav.pushUrl model.key "/quizzes"
+                , Nav.pushUrl model.key "/backoffice"
                 )
 
             else
                 ( { model | page = Login newLoginModel }
                 , Cmd.map LoginMsg loginCmd
                 )
+
+        ( BackOfficeOverviewMsg backOfficeOverviewMsg, BackOfficeOverview backOfficeOverviewModel ) ->
+            let
+                ( newModel, cmd ) =
+                    Pages.BackOffice.Overview.Handler.update backOfficeOverviewMsg backOfficeOverviewModel
+            in
+            ( { model | page = BackOfficeOverview newModel }
+            , Cmd.map BackOfficeOverviewMsg cmd
+            )
 
         ( ToggleTheme, _ ) ->
             let
@@ -257,6 +273,15 @@ navigateTo maybeRoute model =
             in
             ( { model | page = Login loginModel }
             , Cmd.map LoginMsg loginCmd
+            )
+
+        Just BackOfficeOverviewRoute ->
+            let
+                ( backOfficeOverviewModel, backOfficeOverviewCmd ) =
+                    Pages.BackOffice.Overview.Handler.init
+            in
+            ( { model | page = BackOfficeOverview backOfficeOverviewModel }
+            , Cmd.map BackOfficeOverviewMsg backOfficeOverviewCmd
             )
 
 
@@ -319,6 +344,9 @@ viewPage theme page =
 
         Login loginModel ->
             Html.map LoginMsg (Pages.BackOffice.Login.View.view loginModel)
+
+        BackOfficeOverview backOfficeOverviewModel ->
+            Html.map BackOfficeOverviewMsg (Pages.BackOffice.Overview.View.view backOfficeOverviewModel)
 
         NotFound ->
             viewNotFound
