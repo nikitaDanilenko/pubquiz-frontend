@@ -5,6 +5,9 @@ import Browser.Navigation as Nav
 import Html exposing (Html, a, button, div, h1, p, section, text)
 import Html.Attributes exposing (attribute, class, href)
 import Html.Events exposing (onClick)
+import Pages.BackOffice.CreateQuiz.Handler
+import Pages.BackOffice.CreateQuiz.Page
+import Pages.BackOffice.CreateQuiz.View
 import Pages.BackOffice.Login.Handler
 import Pages.BackOffice.Login.Page
 import Pages.BackOffice.Login.View
@@ -59,6 +62,7 @@ type Page
     | Team Pages.Public.Team.Page.Model
     | Login Pages.BackOffice.Login.Page.Model
     | BackOfficeOverview Pages.BackOffice.Overview.Page.Model
+    | CreateQuiz Pages.BackOffice.CreateQuiz.Page.Model
     | NotFound
 
 
@@ -69,6 +73,7 @@ type Route
     | TeamRoute Int Int
     | LoginRoute
     | BackOfficeOverviewRoute
+    | CreateQuizRoute
 
 
 routeParser : Parser (Route -> a) a
@@ -98,6 +103,7 @@ routeParser =
         [ Parser.map LandingRoute Parser.top
         , Parser.map OverviewRoute (Parser.s public)
         , Parser.map LoginRoute (Parser.s backOffice </> Parser.s "login")
+        , Parser.map CreateQuizRoute (Parser.s backOffice </> Parser.s "create")
         , Parser.map BackOfficeOverviewRoute (Parser.s backOffice)
         , teamParser
         , quizParser
@@ -148,6 +154,7 @@ type Msg
     | TeamMsg Pages.Public.Team.Page.Msg
     | LoginMsg Pages.BackOffice.Login.Page.Msg
     | BackOfficeOverviewMsg Pages.BackOffice.Overview.Page.Msg
+    | CreateQuizMsg Pages.BackOffice.CreateQuiz.Page.Msg
     | ToggleTheme
 
 
@@ -215,6 +222,22 @@ update msg model =
             ( { model | page = BackOfficeOverview newModel }
             , Cmd.map BackOfficeOverviewMsg cmd
             )
+
+        ( CreateQuizMsg createQuizMsg, CreateQuiz createQuizModel ) ->
+            let
+                ( newModel, cmd, maybeQuizId ) =
+                    Pages.BackOffice.CreateQuiz.Handler.update createQuizMsg createQuizModel
+            in
+            case maybeQuizId of
+                Just quizId ->
+                    ( model
+                    , Nav.pushUrl model.key (String.concat [ "/backoffice/", String.fromInt quizId ])
+                    )
+
+                Nothing ->
+                    ( { model | page = CreateQuiz newModel }
+                    , Cmd.map CreateQuizMsg cmd
+                    )
 
         ( ToggleTheme, _ ) ->
             let
@@ -284,6 +307,15 @@ navigateTo maybeRoute model =
             , Cmd.map BackOfficeOverviewMsg backOfficeOverviewCmd
             )
 
+        Just CreateQuizRoute ->
+            let
+                ( createQuizModel, createQuizCmd ) =
+                    Pages.BackOffice.CreateQuiz.Handler.init
+            in
+            ( { model | page = CreateQuiz createQuizModel }
+            , Cmd.map CreateQuizMsg createQuizCmd
+            )
+
 
 initTeamPage : Model -> Int -> Int -> ( Model, Cmd Msg )
 initTeamPage model quizId teamNumber =
@@ -347,6 +379,9 @@ viewPage theme page =
 
         BackOfficeOverview backOfficeOverviewModel ->
             Html.map BackOfficeOverviewMsg (Pages.BackOffice.Overview.View.view backOfficeOverviewModel)
+
+        CreateQuiz createQuizModel ->
+            Html.map CreateQuizMsg (Pages.BackOffice.CreateQuiz.View.view createQuizModel)
 
         NotFound ->
             viewNotFound

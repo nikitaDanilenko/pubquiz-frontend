@@ -2,8 +2,8 @@ module Pages.BackOffice.Overview.View exposing (view)
 
 import Api.Types exposing (QuizIdentifier, QuizSummary)
 import Date
-import Html exposing (Html, a, button, h1, h2, li, p, section, text, ul)
-import Html.Attributes exposing (class, disabled, href)
+import Html exposing (Html, a, h1, h2, li, p, section, text, ul)
+import Html.Attributes exposing (class, href)
 import Pages.BackOffice.Overview.Page as Page
 import Util.Tristate as Tristate
 
@@ -55,7 +55,7 @@ viewOverview quizzes =
 
 viewCreateQuizButton : Html msg
 viewCreateQuizButton =
-    button [ class "create-quiz-button", disabled True ]
+    a [ class "create-quiz-button", href "/backoffice/create" ]
         [ text "Create Quiz" ]
 
 

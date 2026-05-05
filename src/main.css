@@ -512,3 +512,108 @@ img {
 .backoffice-overview .quiz-item a:hover {
   text-decoration: underline;
 }
+
+/* Create Quiz Page */
+.create-quiz {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 24px 0;
+}
+
+.create-quiz h1 {
+  margin-bottom: 24px;
+}
+
+.create-quiz-form {
+  text-align: left;
+}
+
+.form-field {
+  margin-bottom: 20px;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.form-field input {
+  width: 100%;
+  padding: 10px 12px;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  color: var(--color-text);
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.form-field input:focus {
+  outline: none;
+  border-color: var(--color-text);
+}
+
+.form-field input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.questions-per-round label {
+  margin-bottom: 12px;
+}
+
+.round-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.round-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.round-input label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.round-input input {
+  width: 100%;
+  padding: 8px 10px;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  color: var(--color-text);
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 12px 24px;
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.submit-button:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-error {
+  color: #dc3545;
+  text-align: center;
+  margin-top: 16px;
+}
