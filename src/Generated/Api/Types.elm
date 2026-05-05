@@ -1,7 +1,7 @@
 module Api.Types exposing
-    ( AddTeamsCommand, ChangeSettingsCommand, CorrectScoreCommand, Day, LoginRequest, QuizActive, QuizIdentifier
-    , QuizMetaData, QuizSettings, QuizSummary, RecordRoundScoresCommand, RenameTeamCommand, Round, ScoreBoard
-    , ScoreEntry, SetTeamActiveCommand, Team, TeamScore
+    ( AddTeamsCommand, AuthenticatedUser, ChangeSettingsCommand, CorrectScoreCommand, Day, LoginRequest
+    , QuizActive, QuizIdentifier, QuizMetaData, QuizSettings, QuizSummary, RecordRoundScoresCommand
+    , RenameTeamCommand, Round, ScoreBoard, ScoreEntry, SetTeamActiveCommand, Team, TeamScore
     , BackofficeQuizIdAddTeams_Error(..), BackofficeQuizIdChangeSettings_Error(..), BackofficeQuizIdCorrectScore_Error(..)
     , BackofficeQuizIdRecordRoundScores_Error(..), BackofficeQuizIdRenameTeam_Error(..)
     , BackofficeQuizIdSetTeamActive_Error(..)
@@ -12,9 +12,9 @@ module Api.Types exposing
 
 ## Aliases
 
-@docs AddTeamsCommand, ChangeSettingsCommand, CorrectScoreCommand, Day, LoginRequest, QuizActive, QuizIdentifier
-@docs QuizMetaData, QuizSettings, QuizSummary, RecordRoundScoresCommand, RenameTeamCommand, Round, ScoreBoard
-@docs ScoreEntry, SetTeamActiveCommand, Team, TeamScore
+@docs AddTeamsCommand, AuthenticatedUser, ChangeSettingsCommand, CorrectScoreCommand, Day, LoginRequest
+@docs QuizActive, QuizIdentifier, QuizMetaData, QuizSettings, QuizSummary, RecordRoundScoresCommand
+@docs RenameTeamCommand, Round, ScoreBoard, ScoreEntry, SetTeamActiveCommand, Team, TeamScore
 
 
 ## Errors
@@ -128,6 +128,10 @@ type alias CorrectScoreCommand =
 
 type alias ChangeSettingsCommand =
     { newIdentifier : QuizIdentifier }
+
+
+type alias AuthenticatedUser =
+    { isAdmin : Bool }
 
 
 type alias AddTeamsCommand =
