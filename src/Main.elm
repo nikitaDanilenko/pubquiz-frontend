@@ -1,10 +1,13 @@
 port module Main exposing (main)
 
+import Api.Api
+import Api.Types
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (Html, a, button, div, h1, p, section, text)
 import Html.Attributes exposing (attribute, class, href)
 import Html.Events exposing (onClick)
+import OpenApi.Common
 import Pages.BackOffice.CreateQuiz.Handler
 import Pages.BackOffice.CreateQuiz.Page
 import Pages.BackOffice.CreateQuiz.View
@@ -52,6 +55,8 @@ type alias Model =
     { key : Nav.Key
     , page : Page
     , theme : Theme
+    , authenticatedUser : Maybe Api.Types.AuthenticatedUser
+    , pendingRoute : Maybe Route
     }
 
 
@@ -141,14 +146,19 @@ init flags url key =
             { key = key
             , page = NotFound
             , theme = parseTheme flags.theme
+            , authenticatedUser = Nothing
+            , pendingRoute = parseUrl url
             }
     in
-    navigateTo (parseUrl url) model
+    ( model
+    , Api.Api.backofficeWhoami { toMsg = GotWhoami }
+    )
 
 
 type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url
+    | GotWhoami (Result (OpenApi.Common.Error Never String) Api.Types.AuthenticatedUser)
     | OverviewMsg Pages.Public.Overview.Page.Msg
     | QuizMsg Pages.Public.Quiz.Page.Msg
     | TeamMsg Pages.Public.Team.Page.Msg
@@ -171,6 +181,18 @@ update msg model =
 
         ( UrlChanged url, _ ) ->
             navigateTo (parseUrl url) model
+
+        ( GotWhoami result, _ ) ->
+            let
+                newModel =
+                    case result of
+                        Ok user ->
+                            { model | authenticatedUser = Just user }
+
+                        Err _ ->
+                            { model | authenticatedUser = Nothing }
+            in
+            navigateTo newModel.pendingRoute newModel
 
         ( OverviewMsg overviewMsg, Overview overviewModel ) ->
             let
@@ -205,8 +227,8 @@ update msg model =
                     Pages.BackOffice.Login.Handler.update loginMsg loginModel
             in
             if loginSuccess then
-                ( model
-                , Nav.pushUrl model.key "/backoffice"
+                ( { model | pendingRoute = Just BackOfficeOverviewRoute }
+                , Api.Api.backofficeWhoami { toMsg = GotWhoami }
                 )
 
             else
@@ -261,17 +283,17 @@ navigateTo : Maybe Route -> Model -> ( Model, Cmd Msg )
 navigateTo maybeRoute model =
     case maybeRoute of
         Nothing ->
-            ( { model | page = NotFound }, Cmd.none )
+            ( { model | page = NotFound, pendingRoute = Nothing }, Cmd.none )
 
         Just LandingRoute ->
-            ( { model | page = Landing }, Cmd.none )
+            ( { model | page = Landing, pendingRoute = Nothing }, Cmd.none )
 
         Just OverviewRoute ->
             let
                 ( overviewModel, overviewCmd ) =
                     Pages.Public.Overview.Handler.init
             in
-            ( { model | page = Overview overviewModel }
+            ( { model | page = Overview overviewModel, pendingRoute = Nothing }
             , Cmd.map OverviewMsg overviewCmd
             )
 
@@ -282,7 +304,7 @@ navigateTo maybeRoute model =
                         { quizId = quizId
                         }
             in
-            ( { model | page = Quiz quizModel }
+            ( { model | page = Quiz quizModel, pendingRoute = Nothing }
             , Cmd.map QuizMsg quizCmd
             )
 
@@ -294,27 +316,35 @@ navigateTo maybeRoute model =
                 ( loginModel, loginCmd ) =
                     Pages.BackOffice.Login.Handler.init
             in
-            ( { model | page = Login loginModel }
+            ( { model | page = Login loginModel, pendingRoute = Nothing }
             , Cmd.map LoginMsg loginCmd
             )
 
         Just BackOfficeOverviewRoute ->
-            let
-                ( backOfficeOverviewModel, backOfficeOverviewCmd ) =
-                    Pages.BackOffice.Overview.Handler.init
-            in
-            ( { model | page = BackOfficeOverview backOfficeOverviewModel }
-            , Cmd.map BackOfficeOverviewMsg backOfficeOverviewCmd
-            )
+            if model.authenticatedUser /= Nothing then
+                let
+                    ( backOfficeOverviewModel, backOfficeOverviewCmd ) =
+                        Pages.BackOffice.Overview.Handler.init
+                in
+                ( { model | page = BackOfficeOverview backOfficeOverviewModel, pendingRoute = Nothing }
+                , Cmd.map BackOfficeOverviewMsg backOfficeOverviewCmd
+                )
+
+            else
+                ( model, Nav.pushUrl model.key "/backoffice/login" )
 
         Just CreateQuizRoute ->
-            let
-                ( createQuizModel, createQuizCmd ) =
-                    Pages.BackOffice.CreateQuiz.Handler.init
-            in
-            ( { model | page = CreateQuiz createQuizModel }
-            , Cmd.map CreateQuizMsg createQuizCmd
-            )
+            if model.authenticatedUser /= Nothing then
+                let
+                    ( createQuizModel, createQuizCmd ) =
+                        Pages.BackOffice.CreateQuiz.Handler.init
+                in
+                ( { model | page = CreateQuiz createQuizModel, pendingRoute = Nothing }
+                , Cmd.map CreateQuizMsg createQuizCmd
+                )
+
+            else
+                ( model, Nav.pushUrl model.key "/backoffice/login" )
 
 
 initTeamPage : Model -> Int -> Int -> ( Model, Cmd Msg )
@@ -326,7 +356,7 @@ initTeamPage model quizId teamNumber =
                 , teamNumber = teamNumber
                 }
     in
-    ( { model | page = Team teamModel }
+    ( { model | page = Team teamModel, pendingRoute = Nothing }
     , Cmd.map TeamMsg teamCmd
     )
 
