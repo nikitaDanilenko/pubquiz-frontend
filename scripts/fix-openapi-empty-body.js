@@ -1,9 +1,10 @@
-// Post-processing fix for elm-open-api empty body bug
+// Post-processing fixes for elm-open-api
 // See: https://github.com/wolfadex/elm-open-api-cli/issues/302
 
 const fs = require("fs");
 
-const file = "src/Generated/OpenApi/Common.elm";
+// Fix 1: Empty body handling for 204 responses
+const commonFile = "src/Generated/OpenApi/Common.elm";
 
 const original = `Http.GoodStatus_ httpMetadata body ->
                     case Json.Decode.decodeString successDecoder body of
@@ -26,6 +27,6 @@ const fixed = `Http.GoodStatus_ httpMetadata body ->
                             Result.Err error ->
                                 Result.Err (BadBody httpMetadata body)`;
 
-let content = fs.readFileSync(file, "utf8");
-content = content.replaceAll(original, fixed);
-fs.writeFileSync(file, content);
+let commonContent = fs.readFileSync(commonFile, "utf8");
+commonContent = commonContent.replaceAll(original, fixed);
+fs.writeFileSync(commonFile, commonContent);
