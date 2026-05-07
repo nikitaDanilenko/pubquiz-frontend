@@ -9,7 +9,7 @@ module Pages.BackOffice.QuizEdit.Page exposing
 {-| Quiz Edit (Point Entry) page state.
 -}
 
-import Api.Types exposing (BackofficeQuizIdCorrectScore_Error, BackofficeQuizIdRecordRoundScores_Error, QuizActive)
+import Api.Types exposing (BackofficeQuizIdCorrectScore_Error, BackofficeQuizIdRecordRoundScores_Error, Quiz)
 import Dict exposing (Dict)
 import Monocle.Lens exposing (Lens)
 import OpenApi.Common
@@ -18,7 +18,7 @@ import Set exposing (Set)
 
 type alias Model =
     { quizId : Int
-    , quiz : Maybe QuizActive
+    , quiz : Maybe Quiz
     , expandedRound : Maybe Int
     , roundInputs : Dict Int RoundInput
     , completedRounds : Set Int
@@ -42,7 +42,7 @@ type RoundState
 
 lenses :
     { quizId : Lens Model Int
-    , quiz : Lens Model (Maybe QuizActive)
+    , quiz : Lens Model (Maybe Quiz)
     , expandedRound : Lens Model (Maybe Int)
     , roundInputs : Lens Model (Dict Int RoundInput)
     , completedRounds : Lens Model (Set Int)
@@ -65,7 +65,7 @@ lenses =
 
 
 type Msg
-    = GotQuiz (Result (OpenApi.Common.Error () String) QuizActive)
+    = GotQuiz (Result (OpenApi.Common.Error () String) Quiz)
     | ExpandRound Int
     | CollapseRound
     | SetScore Int Int String

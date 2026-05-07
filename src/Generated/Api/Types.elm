@@ -1,7 +1,7 @@
 module Api.Types exposing
-    ( AddTeamsCommand, AuthenticatedUser, ChangeSettingsCommand, CorrectScoreCommand, Day, LoginRequest
-    , QuizActive, QuizIdentifier, QuizMetaData, QuizSettings, QuizSummary, RecordRoundScoresCommand
-    , RenameTeamCommand, Round, ScoreBoard, ScoreEntry, SetTeamActiveCommand, Team, TeamScore
+    ( AddTeamsCommand, AuthenticatedUser, ChangeSettingsCommand, CorrectScoreCommand, Day, LoginRequest, Quiz
+    , QuizIdentifier, QuizMetaData, QuizSettings, QuizSummary, RecordRoundScoresCommand, RenameTeamCommand
+    , Round, ScoreBoard, ScoreEntry, SetTeamActiveCommand, Team, TeamScore
     , BackofficeQuizIdAddTeams_Error(..), BackofficeQuizIdChangeSettings_Error(..), BackofficeQuizIdCorrectScore_Error(..)
     , BackofficeQuizIdRecordRoundScores_Error(..), BackofficeQuizIdRenameTeam_Error(..)
     , BackofficeQuizIdSetTeamActive_Error(..)
@@ -12,9 +12,9 @@ module Api.Types exposing
 
 ## Aliases
 
-@docs AddTeamsCommand, AuthenticatedUser, ChangeSettingsCommand, CorrectScoreCommand, Day, LoginRequest
-@docs QuizActive, QuizIdentifier, QuizMetaData, QuizSettings, QuizSummary, RecordRoundScoresCommand
-@docs RenameTeamCommand, Round, ScoreBoard, ScoreEntry, SetTeamActiveCommand, Team, TeamScore
+@docs AddTeamsCommand, AuthenticatedUser, ChangeSettingsCommand, CorrectScoreCommand, Day, LoginRequest, Quiz
+@docs QuizIdentifier, QuizMetaData, QuizSettings, QuizSummary, RecordRoundScoresCommand, RenameTeamCommand
+@docs Round, ScoreBoard, ScoreEntry, SetTeamActiveCommand, Team, TeamScore
 
 
 ## Errors
@@ -90,14 +90,6 @@ type alias RecordRoundScoresCommand =
     { roundNumber : Int, scores : List TeamScore }
 
 
-type alias QuizActive =
-    { identifier : QuizIdentifier
-    , quizId : Int
-    , rounds : List Round
-    , scoreBoard : ScoreBoard
-    }
-
-
 type alias QuizSummary =
     { active : Bool, identifier : QuizIdentifier, quizId : Int }
 
@@ -112,6 +104,10 @@ type alias QuizMetaData =
 
 type alias QuizIdentifier =
     { date : Day, name : String, place : String }
+
+
+type alias Quiz =
+    { rounds : List Round, scoreBoard : ScoreBoard, summary : QuizSummary }
 
 
 type alias LoginRequest =

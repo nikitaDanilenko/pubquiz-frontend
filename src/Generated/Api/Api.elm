@@ -45,7 +45,7 @@ backoffice config =
             OpenApi.Common.expectJsonCustom
                 config.toMsg
                 (Dict.fromList [ ( "400", Json.Decode.succeed () ) ])
-                Api.Json.decodeQuizActive
+                Api.Json.decodeQuiz
         , body = Http.jsonBody (Api.Json.encodeQuizMetaData config.body)
         , timeout = Nothing
         , tracker = Nothing
@@ -56,7 +56,7 @@ backoffice config =
 -}
 backofficeTask :
     { body : Api.Types.QuizMetaData }
-    -> Task.Task (OpenApi.Common.Error () String) Api.Types.QuizActive
+    -> Task.Task (OpenApi.Common.Error () String) Api.Types.Quiz
 backofficeTask config =
     Http.task
         { url = Url.Builder.absolute [ "backoffice" ] []
@@ -65,7 +65,7 @@ backofficeTask config =
         , resolver =
             OpenApi.Common.jsonResolverCustom
                 (Dict.fromList [ ( "400", Json.Decode.succeed () ) ])
-                Api.Json.decodeQuizActive
+                Api.Json.decodeQuiz
         , body = Http.jsonBody (Api.Json.encodeQuizMetaData config.body)
         , timeout = Nothing
         }
@@ -757,8 +757,7 @@ publicTask config =
 
 
 publicQuizId :
-    { toMsg :
-        Result (OpenApi.Common.Error () String) Api.Types.QuizActive -> msg
+    { toMsg : Result (OpenApi.Common.Error () String) Api.Types.Quiz -> msg
     , params : { quizId : Int }
     }
     -> Cmd msg
@@ -774,7 +773,7 @@ publicQuizId config =
             OpenApi.Common.expectJsonCustom
                 config.toMsg
                 (Dict.fromList [ ( "404", Json.Decode.succeed () ) ])
-                Api.Json.decodeQuizActive
+                Api.Json.decodeQuiz
         , body = Http.emptyBody
         , timeout = Nothing
         , tracker = Nothing
@@ -783,7 +782,7 @@ publicQuizId config =
 
 publicQuizIdTask :
     { params : { quizId : Int } }
-    -> Task.Task (OpenApi.Common.Error () String) Api.Types.QuizActive
+    -> Task.Task (OpenApi.Common.Error () String) Api.Types.Quiz
 publicQuizIdTask config =
     Http.task
         { url =
@@ -795,7 +794,7 @@ publicQuizIdTask config =
         , resolver =
             OpenApi.Common.jsonResolverCustom
                 (Dict.fromList [ ( "404", Json.Decode.succeed () ) ])
-                Api.Json.decodeQuizActive
+                Api.Json.decodeQuiz
         , body = Http.emptyBody
         , timeout = Nothing
         }

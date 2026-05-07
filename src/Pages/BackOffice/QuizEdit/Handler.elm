@@ -4,7 +4,7 @@ module Pages.BackOffice.QuizEdit.Handler exposing (init, update)
 -}
 
 import Api.Api
-import Api.Types exposing (QuizActive, RecordRoundScoresCommand, TeamScore)
+import Api.Types exposing (Quiz, RecordRoundScoresCommand, TeamScore)
 import Dict exposing (Dict)
 import OpenApi.Common
 import Pages.BackOffice.QuizEdit.Page as Page
@@ -152,7 +152,7 @@ update msg model =
             )
 
 
-initRoundInputs : QuizActive -> Dict Int Page.RoundInput
+initRoundInputs : Quiz -> Dict Int Page.RoundInput
 initRoundInputs quiz =
     let
         teamNumbers =
@@ -181,7 +181,7 @@ initRoundInputs quiz =
         |> Dict.fromList
 
 
-getExistingScore : QuizActive -> Int -> Int -> Maybe Float
+getExistingScore : Quiz -> Int -> Int -> Maybe Float
 getExistingScore quiz roundNumber teamNumber =
     quiz.scoreBoard.scores
         |> List.filter (\s -> s.roundNumber == roundNumber && s.teamNumber == teamNumber)
@@ -189,7 +189,7 @@ getExistingScore quiz roundNumber teamNumber =
         |> Maybe.map .points
 
 
-detectCompletedRounds : QuizActive -> Set Int
+detectCompletedRounds : Quiz -> Set Int
 detectCompletedRounds quiz =
     let
         teamCount =
@@ -222,7 +222,7 @@ detectCompletedRounds quiz =
         |> Set.fromList
 
 
-findFirstIncompleteRound : QuizActive -> Set Int -> Maybe Int
+findFirstIncompleteRound : Quiz -> Set Int -> Maybe Int
 findFirstIncompleteRound quiz completedRounds =
     let
         incompleteRound =

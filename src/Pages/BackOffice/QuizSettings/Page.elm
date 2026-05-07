@@ -13,7 +13,7 @@ import Api.Types
         , BackofficeQuizIdChangeSettings_Error
         , BackofficeQuizIdRenameTeam_Error
         , BackofficeQuizIdSetTeamActive_Error
-        , QuizActive
+        , Quiz
         )
 import Dict exposing (Dict)
 import Monocle.Lens exposing (Lens)
@@ -22,7 +22,7 @@ import OpenApi.Common
 
 type alias Model =
     { quizId : Int
-    , quiz : Maybe QuizActive
+    , quiz : Maybe Quiz
     , name : String
     , date : String
     , place : String
@@ -37,7 +37,7 @@ type alias Model =
 
 lenses :
     { quizId : Lens Model Int
-    , quiz : Lens Model (Maybe QuizActive)
+    , quiz : Lens Model (Maybe Quiz)
     , name : Lens Model String
     , date : Lens Model String
     , place : Lens Model String
@@ -64,7 +64,7 @@ lenses =
 
 
 type Msg
-    = GotQuiz (Result (OpenApi.Common.Error () String) QuizActive)
+    = GotQuiz (Result (OpenApi.Common.Error () String) Quiz)
     | SetName String
     | SetDate String
     | SetPlace String

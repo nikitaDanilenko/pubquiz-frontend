@@ -3,7 +3,7 @@ module Pages.BackOffice.QuizSettings.View exposing (view)
 {-| Quiz Settings page view.
 -}
 
-import Api.Types exposing (QuizActive, Team)
+import Api.Types exposing (Quiz, Team)
 import Dict exposing (Dict)
 import Html exposing (Html, a, button, div, footer, h1, h2, header, input, label, li, nav, p, section, span, text, ul)
 import Html.Attributes exposing (checked, class, disabled, for, href, id, placeholder, type_, value)
@@ -25,7 +25,7 @@ viewHeader model =
         [ h1 []
             [ text
                 (model.quiz
-                    |> Maybe.map (\q -> String.concat [ q.identifier.name, " — Settings" ])
+                    |> Maybe.map (\q -> String.concat [ q.summary.identifier.name, " — Settings" ])
                     |> Maybe.withDefault "Loading..."
                 )
             ]
@@ -134,7 +134,7 @@ viewIdentifierSection model =
         ]
 
 
-viewTeamsSection : Page.Model -> QuizActive -> Html Page.Msg
+viewTeamsSection : Page.Model -> Quiz -> Html Page.Msg
 viewTeamsSection model quiz =
     section [ class "settings-section" ]
         [ h2 [] [ text "Teams" ]

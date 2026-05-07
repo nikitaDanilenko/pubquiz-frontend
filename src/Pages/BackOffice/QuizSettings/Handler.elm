@@ -4,7 +4,7 @@ module Pages.BackOffice.QuizSettings.Handler exposing (init, update)
 -}
 
 import Api.Api
-import Api.Types exposing (QuizActive, Team)
+import Api.Types exposing (Quiz, Team)
 import Date
 import Dict exposing (Dict)
 import OpenApi.Common
@@ -40,9 +40,9 @@ update msg model =
                 Ok quiz ->
                     ( { model
                         | quiz = Just quiz
-                        , name = quiz.identifier.name
-                        , date = Date.toIsoString quiz.identifier.date
-                        , place = quiz.identifier.place
+                        , name = quiz.summary.identifier.name
+                        , date = Date.toIsoString quiz.summary.identifier.date
+                        , place = quiz.summary.identifier.place
                         , teamNames = initTeamNames quiz.scoreBoard.teams
                         , isLoading = False
                       }
@@ -240,7 +240,7 @@ initTeamNames teams =
         |> Dict.fromList
 
 
-updateTeamName : Int -> String -> QuizActive -> QuizActive
+updateTeamName : Int -> String -> Quiz -> Quiz
 updateTeamName teamNumber newName quiz =
     let
         updatedTeams =
@@ -257,7 +257,7 @@ updateTeamName teamNumber newName quiz =
     { quiz | scoreBoard = { scores = quiz.scoreBoard.scores, teams = updatedTeams } }
 
 
-updateTeamActive : Int -> Bool -> QuizActive -> QuizActive
+updateTeamActive : Int -> Bool -> Quiz -> Quiz
 updateTeamActive teamNumber active quiz =
     let
         updatedTeams =

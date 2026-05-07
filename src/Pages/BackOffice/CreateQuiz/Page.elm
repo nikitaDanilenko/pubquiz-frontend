@@ -7,7 +7,7 @@ module Pages.BackOffice.CreateQuiz.Page exposing
 {-| Create Quiz page state.
 -}
 
-import Api.Types exposing (QuizActive)
+import Api.Types exposing (Quiz)
 import Monocle.Lens exposing (Lens)
 import OpenApi.Common
 
@@ -54,4 +54,4 @@ type Msg
     | SetQuestionsForRound Int String
     | SetNumberOfTeams String
     | Submit
-    | GotCreateResponse (Result (OpenApi.Common.Error () String) QuizActive)
+    | GotCreateResponse (Result (OpenApi.Common.Error () String) Quiz)

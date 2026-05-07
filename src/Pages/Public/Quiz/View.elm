@@ -1,6 +1,6 @@
 module Pages.Public.Quiz.View exposing (view)
 
-import Api.Types exposing (QuizActive, Round, ScoreEntry, Team)
+import Api.Types exposing (Quiz, Round, ScoreEntry, Team)
 import Chart as C
 import Chart.Attributes as CA
 import Chart.Events as CE
@@ -42,7 +42,7 @@ viewError _ =
         ]
 
 
-viewQuiz : Theme -> Page.Hovering -> Page.StatsHovering -> QuizActive -> Html Page.Msg
+viewQuiz : Theme -> Page.Hovering -> Page.StatsHovering -> Quiz -> Html Page.Msg
 viewQuiz theme hovering statsHovering quiz =
     let
         activeTeams =
@@ -61,7 +61,7 @@ viewQuiz theme hovering statsHovering quiz =
     in
     section [ class "quiz" ]
         [ viewHeader quiz
-        , viewRanking quiz.quizId teamData
+        , viewRanking quiz.summary.quizId teamData
         , viewProgressionChart theme teamData
         , viewCumulativeBarChart theme hovering teamData rounds
         , viewPerRoundBarChart theme hovering teamData rounds
@@ -407,11 +407,11 @@ legendItem colorKey label =
         [ text label ]
 
 
-viewHeader : QuizActive -> Html msg
+viewHeader : Quiz -> Html msg
 viewHeader quiz =
     let
         identifier =
-            quiz.identifier
+            quiz.summary.identifier
 
         dateStr =
             Date.format "d MMMM y" identifier.date

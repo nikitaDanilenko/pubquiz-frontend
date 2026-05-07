@@ -142,7 +142,7 @@ update msg model =
                 Ok quizActive ->
                     ( model |> Page.lenses.isSubmitting.set False
                     , Cmd.none
-                    , Just quizActive.quizId
+                    , Just quizActive.summary.quizId
                     )
 
                 Err error ->

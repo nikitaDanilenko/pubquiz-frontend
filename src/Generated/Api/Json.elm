@@ -1,12 +1,12 @@
 module Api.Json exposing
     ( encodeAddTeamsCommand, encodeAuthenticatedUser, encodeChangeSettingsCommand, encodeCorrectScoreCommand
-    , encodeDay, encodeLoginRequest, encodeQuizActive, encodeQuizIdentifier, encodeQuizMetaData
-    , encodeQuizSettings, encodeQuizSummary, encodeRecordRoundScoresCommand, encodeRenameTeamCommand
-    , encodeRound, encodeScoreBoard, encodeScoreEntry, encodeSetTeamActiveCommand, encodeTeam, encodeTeamScore
+    , encodeDay, encodeLoginRequest, encodeQuiz, encodeQuizIdentifier, encodeQuizMetaData, encodeQuizSettings
+    , encodeQuizSummary, encodeRecordRoundScoresCommand, encodeRenameTeamCommand, encodeRound, encodeScoreBoard
+    , encodeScoreEntry, encodeSetTeamActiveCommand, encodeTeam, encodeTeamScore
     , decodeAddTeamsCommand, decodeAuthenticatedUser, decodeChangeSettingsCommand, decodeCorrectScoreCommand
-    , decodeDay, decodeLoginRequest, decodeQuizActive, decodeQuizIdentifier, decodeQuizMetaData
-    , decodeQuizSettings, decodeQuizSummary, decodeRecordRoundScoresCommand, decodeRenameTeamCommand
-    , decodeRound, decodeScoreBoard, decodeScoreEntry, decodeSetTeamActiveCommand, decodeTeam, decodeTeamScore
+    , decodeDay, decodeLoginRequest, decodeQuiz, decodeQuizIdentifier, decodeQuizMetaData, decodeQuizSettings
+    , decodeQuizSummary, decodeRecordRoundScoresCommand, decodeRenameTeamCommand, decodeRound, decodeScoreBoard
+    , decodeScoreEntry, decodeSetTeamActiveCommand, decodeTeam, decodeTeamScore
     )
 
 {-|
@@ -15,17 +15,17 @@ module Api.Json exposing
 ## Encoders
 
 @docs encodeAddTeamsCommand, encodeAuthenticatedUser, encodeChangeSettingsCommand, encodeCorrectScoreCommand
-@docs encodeDay, encodeLoginRequest, encodeQuizActive, encodeQuizIdentifier, encodeQuizMetaData
-@docs encodeQuizSettings, encodeQuizSummary, encodeRecordRoundScoresCommand, encodeRenameTeamCommand
-@docs encodeRound, encodeScoreBoard, encodeScoreEntry, encodeSetTeamActiveCommand, encodeTeam, encodeTeamScore
+@docs encodeDay, encodeLoginRequest, encodeQuiz, encodeQuizIdentifier, encodeQuizMetaData, encodeQuizSettings
+@docs encodeQuizSummary, encodeRecordRoundScoresCommand, encodeRenameTeamCommand, encodeRound, encodeScoreBoard
+@docs encodeScoreEntry, encodeSetTeamActiveCommand, encodeTeam, encodeTeamScore
 
 
 ## Decoders
 
 @docs decodeAddTeamsCommand, decodeAuthenticatedUser, decodeChangeSettingsCommand, decodeCorrectScoreCommand
-@docs decodeDay, decodeLoginRequest, decodeQuizActive, decodeQuizIdentifier, decodeQuizMetaData
-@docs decodeQuizSettings, decodeQuizSummary, decodeRecordRoundScoresCommand, decodeRenameTeamCommand
-@docs decodeRound, decodeScoreBoard, decodeScoreEntry, decodeSetTeamActiveCommand, decodeTeam, decodeTeamScore
+@docs decodeDay, decodeLoginRequest, decodeQuiz, decodeQuizIdentifier, decodeQuizMetaData, decodeQuizSettings
+@docs decodeQuizSummary, decodeRecordRoundScoresCommand, decodeRenameTeamCommand, decodeRound, decodeScoreBoard
+@docs decodeScoreEntry, decodeSetTeamActiveCommand, decodeTeam, decodeTeamScore
 
 -}
 
@@ -231,44 +231,6 @@ encodeRecordRoundScoresCommand rec =
         ]
 
 
-decodeQuizActive : Json.Decode.Decoder Api.Types.QuizActive
-decodeQuizActive =
-    Json.Decode.succeed
-        (\identifier quizId rounds scoreBoard ->
-            { identifier = identifier
-            , quizId = quizId
-            , rounds = rounds
-            , scoreBoard = scoreBoard
-            }
-        )
-        |> OpenApi.Common.jsonDecodeAndMap
-            (Json.Decode.field "identifier" decodeQuizIdentifier)
-        |> OpenApi.Common.jsonDecodeAndMap
-            (Json.Decode.field "quizId" Json.Decode.int)
-        |> OpenApi.Common.jsonDecodeAndMap
-            (Json.Decode.field
-                "rounds"
-                (Json.Decode.list
-                    decodeRound
-                )
-            )
-        |> OpenApi.Common.jsonDecodeAndMap
-            (Json.Decode.field
-                "scoreBoard"
-                decodeScoreBoard
-            )
-
-
-encodeQuizActive : Api.Types.QuizActive -> Json.Encode.Value
-encodeQuizActive rec =
-    Json.Encode.object
-        [ ( "identifier", encodeQuizIdentifier rec.identifier )
-        , ( "quizId", Json.Encode.int rec.quizId )
-        , ( "rounds", Json.Encode.list encodeRound rec.rounds )
-        , ( "scoreBoard", encodeScoreBoard rec.scoreBoard )
-        ]
-
-
 decodeQuizSummary : Json.Decode.Decoder Api.Types.QuizSummary
 decodeQuizSummary =
     Json.Decode.succeed
@@ -369,6 +331,35 @@ encodeQuizIdentifier rec =
         [ ( "date", encodeDay rec.date )
         , ( "name", Json.Encode.string rec.name )
         , ( "place", Json.Encode.string rec.place )
+        ]
+
+
+decodeQuiz : Json.Decode.Decoder Api.Types.Quiz
+decodeQuiz =
+    Json.Decode.succeed
+        (\rounds scoreBoard summary ->
+            { rounds = rounds, scoreBoard = scoreBoard, summary = summary }
+        )
+        |> OpenApi.Common.jsonDecodeAndMap
+            (Json.Decode.field "rounds" (Json.Decode.list decodeRound))
+        |> OpenApi.Common.jsonDecodeAndMap
+            (Json.Decode.field
+                "scoreBoard"
+                decodeScoreBoard
+            )
+        |> OpenApi.Common.jsonDecodeAndMap
+            (Json.Decode.field
+                "summary"
+                decodeQuizSummary
+            )
+
+
+encodeQuiz : Api.Types.Quiz -> Json.Encode.Value
+encodeQuiz rec =
+    Json.Encode.object
+        [ ( "rounds", Json.Encode.list encodeRound rec.rounds )
+        , ( "scoreBoard", encodeScoreBoard rec.scoreBoard )
+        , ( "summary", encodeQuizSummary rec.summary )
         ]
 
 

@@ -1,6 +1,6 @@
 module Pages.Public.Team.View exposing (view)
 
-import Api.Types exposing (QuizActive, QuizIdentifier, Round, ScoreEntry, Team)
+import Api.Types exposing (Quiz, QuizIdentifier, Round, ScoreEntry, Team)
 import Date
 import Html exposing (Html, a, article, em, h1, h2, h3, p, section, small, text)
 import Html.Attributes exposing (class, href, style)
@@ -36,7 +36,7 @@ viewError _ =
         ]
 
 
-viewTeam : Int -> QuizActive -> Html msg
+viewTeam : Int -> Quiz -> Html msg
 viewTeam teamNumber quiz =
     let
         activeTeams =
@@ -76,10 +76,10 @@ viewTeam teamNumber quiz =
             roundData |> List.map .maxReachable |> List.sum
     in
     section [ class "team-view" ]
-        [ viewHeader quiz.identifier
+        [ viewHeader quiz.summary.identifier
         , viewTeamHeader teamColor team teamNumber totalReached totalReachable
         , viewRoundTable roundData
-        , viewBackLink quiz.quizId
+        , viewBackLink quiz.summary.quizId
         ]
 
 

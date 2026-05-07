@@ -3,7 +3,7 @@ module Pages.BackOffice.QuizEdit.View exposing (view)
 {-| Quiz Edit (Point Entry) page view.
 -}
 
-import Api.Types exposing (QuizActive, Round, Team)
+import Api.Types exposing (Quiz, Round, Team)
 import Dict exposing (Dict)
 import Html exposing (Html, a, article, button, div, footer, h1, h2, h3, header, input, label, li, nav, ol, p, section, span, text, ul)
 import Html.Attributes as Attr exposing (class, disabled, href, id, placeholder, step, type_, value)
@@ -27,7 +27,7 @@ viewHeader model =
         [ h1 []
             [ text
                 (model.quiz
-                    |> Maybe.map (\q -> q.identifier.name)
+                    |> Maybe.map (\q -> q.summary.identifier.name)
                     |> Maybe.withDefault "Loading..."
                 )
             ]
@@ -70,13 +70,13 @@ viewError maybeError =
             text ""
 
 
-viewRounds : Page.Model -> QuizActive -> Html Page.Msg
+viewRounds : Page.Model -> Quiz -> Html Page.Msg
 viewRounds model quiz =
     ol [ class "rounds-accordion" ]
         (List.map (viewRound model quiz) quiz.rounds)
 
 
-viewRound : Page.Model -> QuizActive -> Round -> Html Page.Msg
+viewRound : Page.Model -> Quiz -> Round -> Html Page.Msg
 viewRound model quiz round =
     let
         isExpanded =
@@ -198,7 +198,7 @@ getRoundSummary model round =
             ""
 
 
-viewRoundBody : Page.Model -> QuizActive -> Round -> Page.RoundState -> Html Page.Msg
+viewRoundBody : Page.Model -> Quiz -> Round -> Page.RoundState -> Html Page.Msg
 viewRoundBody model quiz round state =
     let
         isEditable =
