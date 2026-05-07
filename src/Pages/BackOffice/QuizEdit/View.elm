@@ -23,7 +23,7 @@ viewHeader model =
     let
         quizName =
             model.quiz
-                |> Maybe.map (\q -> q.summary.identifier.name)
+                |> Maybe.map (\q -> String.concat [ q.summary.identifier.name, " — Point Entry" ])
                 |> Maybe.withDefault "Loading..."
     in
     header [ class "quiz-edit-header" ]
@@ -243,7 +243,7 @@ viewTeamScore model round roundInput isEditable team =
             [ button
                 [ class "stepper decrement"
                 , onClick (Page.IncrementScore round.number team.number -0.5)
-                , disabled (not isEditable || model.isSubmitting)
+                , disabled (not isEditable || model.isSubmitting || model.isLocked)
                 ]
                 [ text "−½" ]
             , input
@@ -254,20 +254,20 @@ viewTeamScore model round roundInput isEditable team =
                 , placeholder "0"
                 , step "0.5"
                 , Attr.min "0"
-                , disabled (not isEditable || model.isSubmitting)
+                , disabled (not isEditable || model.isSubmitting || model.isLocked)
                 , onScoreKeydown round.number team.number
                 ]
                 []
             , button
                 [ class "stepper increment-half"
                 , onClick (Page.IncrementScore round.number team.number 0.5)
-                , disabled (not isEditable || model.isSubmitting)
+                , disabled (not isEditable || model.isSubmitting || model.isLocked)
                 ]
                 [ text "+½" ]
             , button
                 [ class "stepper increment-full"
                 , onClick (Page.IncrementScore round.number team.number 1)
-                , disabled (not isEditable || model.isSubmitting)
+                , disabled (not isEditable || model.isSubmitting || model.isLocked)
                 ]
                 [ text "+1" ]
             ]
@@ -282,7 +282,7 @@ viewRoundActions model round state =
                 [ button
                     [ class "button primary"
                     , onClick (Page.SubmitRound round.number)
-                    , disabled model.isSubmitting
+                    , disabled (model.isSubmitting || model.isLocked)
                     ]
                     [ text
                         (if model.isSubmitting then
@@ -295,7 +295,7 @@ viewRoundActions model round state =
                 , button
                     [ class "button secondary"
                     , onClick (Page.MarkRoundComplete round.number)
-                    , disabled model.isSubmitting
+                    , disabled (model.isSubmitting || model.isLocked)
                     ]
                     [ text "Mark Complete" ]
                 ]
@@ -304,6 +304,7 @@ viewRoundActions model round state =
                 [ button
                     [ class "button secondary"
                     , onClick (Page.EditCompletedRound round.number)
+                    , disabled model.isLocked
                     ]
                     [ text "Edit" ]
                 ]
@@ -312,7 +313,7 @@ viewRoundActions model round state =
                 [ button
                     [ class "button primary"
                     , onClick (Page.SubmitRound round.number)
-                    , disabled model.isSubmitting
+                    , disabled (model.isSubmitting || model.isLocked)
                     ]
                     [ text
                         (if model.isSubmitting then
@@ -325,7 +326,7 @@ viewRoundActions model round state =
                 , button
                     [ class "button secondary"
                     , onClick Page.CancelEdit
-                    , disabled model.isSubmitting
+                    , disabled (model.isSubmitting || model.isLocked)
                     ]
                     [ text "Cancel" ]
                 ]
@@ -333,11 +334,12 @@ viewRoundActions model round state =
 
 
 viewAddRound : Page.Model -> Html Page.Msg
-viewAddRound _ =
+viewAddRound model =
     footer [ class "add-round" ]
         [ button
             [ class "button secondary"
             , onClick Page.AddRound
+            , disabled model.isLocked
             ]
             [ text "+ Add Round" ]
         ]

@@ -18,6 +18,7 @@ init params =
       , additionalTeams = 1
       , isLoading = True
       , isSaving = False
+      , isLocked = False
       , error = Nothing
       , successMessage = Nothing
       }
@@ -41,6 +42,7 @@ update msg model =
                         , place = quiz.summary.identifier.place
                         , teamNames = initTeamNames quiz.scoreBoard.teams
                         , isLoading = False
+                        , isLocked = not quiz.summary.active
                       }
                     , Cmd.none
                     )
@@ -221,6 +223,60 @@ update msg model =
                     ( { model
                         | isSaving = False
                         , error = Just "Failed to add teams"
+                      }
+                    , Cmd.none
+                    )
+
+        Page.LockQuiz ->
+            ( { model | isSaving = True, error = Nothing, successMessage = Nothing }
+            , Api.Api.backofficeQuizIdLock
+                { params = { quizId = model.quizId }
+                , toMsg = Page.GotLockResponse
+                }
+            )
+
+        Page.GotLockResponse result ->
+            case result of
+                Ok _ ->
+                    ( { model
+                        | isSaving = False
+                        , isLocked = True
+                        , successMessage = Just "Quiz locked"
+                      }
+                    , Cmd.none
+                    )
+
+                Err _ ->
+                    ( { model
+                        | isSaving = False
+                        , error = Just "Failed to lock quiz"
+                      }
+                    , Cmd.none
+                    )
+
+        Page.UnlockQuiz ->
+            ( { model | isSaving = True, error = Nothing, successMessage = Nothing }
+            , Api.Api.backofficeQuizIdUnlock
+                { params = { quizId = model.quizId }
+                , toMsg = Page.GotUnlockResponse
+                }
+            )
+
+        Page.GotUnlockResponse result ->
+            case result of
+                Ok _ ->
+                    ( { model
+                        | isSaving = False
+                        , isLocked = False
+                        , successMessage = Just "Quiz unlocked"
+                      }
+                    , Cmd.none
+                    )
+
+                Err _ ->
+                    ( { model
+                        | isSaving = False
+                        , error = Just "Failed to unlock quiz"
                       }
                     , Cmd.none
                     )

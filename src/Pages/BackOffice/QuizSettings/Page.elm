@@ -27,6 +27,7 @@ type alias Model =
     , additionalTeams : Int
     , isLoading : Bool
     , isSaving : Bool
+    , isLocked : Bool
     , error : Maybe String
     , successMessage : Maybe String
     }
@@ -42,6 +43,7 @@ lenses :
     , additionalTeams : Lens Model Int
     , isLoading : Lens Model Bool
     , isSaving : Lens Model Bool
+    , isLocked : Lens Model Bool
     , error : Lens Model (Maybe String)
     , successMessage : Lens Model (Maybe String)
     }
@@ -55,6 +57,7 @@ lenses =
     , additionalTeams = Lens .additionalTeams (\b a -> { a | additionalTeams = b })
     , isLoading = Lens .isLoading (\b a -> { a | isLoading = b })
     , isSaving = Lens .isSaving (\b a -> { a | isSaving = b })
+    , isLocked = Lens .isLocked (\b a -> { a | isLocked = b })
     , error = Lens .error (\b a -> { a | error = b })
     , successMessage = Lens .successMessage (\b a -> { a | successMessage = b })
     }
@@ -75,4 +78,8 @@ type Msg
     | SetAdditionalTeams String
     | AddTeams
     | GotAddTeamsResponse (Result (OpenApi.Common.Error BackofficeQuizIdAddTeams_Error String) ())
+    | LockQuiz
+    | UnlockQuiz
+    | GotLockResponse (Result (OpenApi.Common.Error () String) ())
+    | GotUnlockResponse (Result (OpenApi.Common.Error () String) ())
     | GoToPointEntry

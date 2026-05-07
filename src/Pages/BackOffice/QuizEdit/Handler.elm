@@ -16,6 +16,7 @@ init params =
       , completedRounds = Set.empty
       , editingRound = Nothing
       , isSubmitting = False
+      , isLocked = False
       , error = Nothing
       , isLoading = True
       }
@@ -48,6 +49,7 @@ update msg model =
                         , completedRounds = completedRounds
                         , expandedRound = expandedRound
                         , isLoading = False
+                        , isLocked = not quiz.summary.active
                       }
                     , Cmd.none
                     )

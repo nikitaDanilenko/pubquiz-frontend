@@ -21,6 +21,7 @@ type alias Model =
     , completedRounds : Set Int
     , editingRound : Maybe Int
     , isSubmitting : Bool
+    , isLocked : Bool
     , error : Maybe String
     , isLoading : Bool
     }
@@ -45,6 +46,7 @@ lenses :
     , completedRounds : Lens Model (Set Int)
     , editingRound : Lens Model (Maybe Int)
     , isSubmitting : Lens Model Bool
+    , isLocked : Lens Model Bool
     , error : Lens Model (Maybe String)
     , isLoading : Lens Model Bool
     }
@@ -56,6 +58,7 @@ lenses =
     , completedRounds = Lens .completedRounds (\b a -> { a | completedRounds = b })
     , editingRound = Lens .editingRound (\b a -> { a | editingRound = b })
     , isSubmitting = Lens .isSubmitting (\b a -> { a | isSubmitting = b })
+    , isLocked = Lens .isLocked (\b a -> { a | isLocked = b })
     , error = Lens .error (\b a -> { a | error = b })
     , isLoading = Lens .isLoading (\b a -> { a | isLoading = b })
     }

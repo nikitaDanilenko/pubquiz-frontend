@@ -47,6 +47,7 @@ viewContent model =
             Just quiz ->
                 section [ class "quiz-settings-content" ]
                     [ viewMessages model
+                    , viewLockSection model
                     , viewIdentifierSection model
                     , viewTeamsSection model quiz
                     , viewAddTeamsSection model
@@ -86,7 +87,7 @@ viewIdentifierSection model =
                     , id "name"
                     , value model.name
                     , onInput Page.SetName
-                    , disabled model.isSaving
+                    , disabled (model.isSaving || model.isLocked)
                     ]
                     []
                 ]
@@ -97,7 +98,7 @@ viewIdentifierSection model =
                     , id "date"
                     , value model.date
                     , onInput Page.SetDate
-                    , disabled model.isSaving
+                    , disabled (model.isSaving || model.isLocked)
                     ]
                     []
                 ]
@@ -108,7 +109,7 @@ viewIdentifierSection model =
                     , id "place"
                     , value model.place
                     , onInput Page.SetPlace
-                    , disabled model.isSaving
+                    , disabled (model.isSaving || model.isLocked)
                     ]
                     []
                 ]
@@ -117,7 +118,7 @@ viewIdentifierSection model =
             [ button
                 [ class "button primary"
                 , onClick Page.SaveIdentifier
-                , disabled model.isSaving
+                , disabled (model.isSaving || model.isLocked)
                 ]
                 [ text (saveButtonLabel model.isSaving "Save Details") ]
             ]
@@ -156,13 +157,13 @@ viewTeamRow model team =
             , value teamName
             , onInput (Page.SetTeamName team.number)
             , placeholder (String.concat [ "Team ", String.fromInt team.number ])
-            , disabled model.isSaving
+            , disabled (model.isSaving || model.isLocked)
             ]
             []
         , button
             [ class "button small secondary"
             , onClick (Page.SaveTeamName team.number)
-            , disabled model.isSaving
+            , disabled (model.isSaving || model.isLocked)
             ]
             [ text "Save" ]
         , label [ class "toggle-label" ]
@@ -170,7 +171,7 @@ viewTeamRow model team =
                 [ type_ "checkbox"
                 , checked team.active
                 , onCheck (Page.ToggleTeamActive team.number)
-                , disabled model.isSaving
+                , disabled (model.isSaving || model.isLocked)
                 ]
                 []
             , span [] [ text "Active" ]
@@ -188,16 +189,50 @@ viewAddTeamsSection model =
                 , value (String.fromInt model.additionalTeams)
                 , onInput Page.SetAdditionalTeams
                 , Html.Attributes.min "1"
-                , disabled model.isSaving
+                , disabled (model.isSaving || model.isLocked)
                 ]
                 []
             , button
                 [ class "button primary"
                 , onClick Page.AddTeams
-                , disabled model.isSaving
+                , disabled (model.isSaving || model.isLocked)
                 ]
                 [ text (addTeamsButtonLabel model.isSaving model.additionalTeams) ]
             ]
+        ]
+
+
+viewLockSection : Page.Model -> Html Page.Msg
+viewLockSection model =
+    let
+        statusLabel =
+            if model.isLocked then
+                "Locked"
+
+            else
+                "Active"
+
+        lockButton =
+            if model.isLocked then
+                button
+                    [ class "button secondary"
+                    , onClick Page.UnlockQuiz
+                    , disabled model.isSaving
+                    ]
+                    [ text (saveButtonLabel model.isSaving "Unlock Quiz") ]
+
+            else
+                button
+                    [ class "button secondary"
+                    , onClick Page.LockQuiz
+                    , disabled model.isSaving
+                    ]
+                    [ text (saveButtonLabel model.isSaving "Lock Quiz") ]
+    in
+    section [ class "settings-section" ]
+        [ h2 [] [ text "Quiz Status" ]
+        , p [ class (String.concat [ "quiz-status ", statusLabel ]) ] [ text statusLabel ]
+        , footer [ class "section-actions" ] [ lockButton ]
         ]
 
 
