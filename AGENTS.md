@@ -32,6 +32,7 @@
 - Prefer `concat` over `++`, even for just two values
 - Prefer existing combinators to pattern matching
 - Don't inline functions with `let` expressions or pattern matching, extract in variables/functions instead
+  - In particular, in DOM code, keep DOM as declarative as possible, and extract all computations into variables/functions.
 
 ## Tooling
 
