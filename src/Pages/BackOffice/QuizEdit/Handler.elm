@@ -3,6 +3,7 @@ module Pages.BackOffice.QuizEdit.Handler exposing (init, update)
 import Api.Api
 import Api.Types exposing (Quiz, RecordRoundScoresCommand, TeamScore)
 import Dict exposing (Dict)
+import Maybe.Extra
 import Pages.BackOffice.QuizEdit.Page as Page
 import Set exposing (Set)
 
@@ -167,8 +168,7 @@ initRoundInputs quiz =
                             (\teamNumber ->
                                 ( teamNumber
                                 , getExistingScore quiz roundNumber teamNumber
-                                    |> Maybe.map String.fromFloat
-                                    |> Maybe.withDefault ""
+                                    |> Maybe.Extra.unwrap "" String.fromFloat
                                 )
                             )
                         |> Dict.fromList
@@ -225,14 +225,14 @@ findFirstIncompleteRound quiz completedRounds =
     let
         incompleteRound =
             quiz.rounds
-                |> List.map .number
-                |> List.filter (\n -> not (Set.member n completedRounds))
+                |> List.filter (\r -> not (Set.member r.number completedRounds))
                 |> List.head
+                |> Maybe.map .number
 
         firstRound =
             quiz.rounds
-                |> List.map .number
                 |> List.head
+                |> Maybe.map .number
     in
     case incompleteRound of
         Just n ->

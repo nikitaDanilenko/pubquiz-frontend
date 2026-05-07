@@ -5,6 +5,7 @@ import Dict exposing (Dict)
 import Html exposing (Html, a, button, div, footer, h1, h2, header, input, label, li, nav, p, section, span, text, ul)
 import Html.Attributes exposing (checked, class, disabled, for, href, id, placeholder, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
+import Maybe.Extra
 import Pages.BackOffice.QuizSettings.Page as Page
 
 
@@ -21,8 +22,7 @@ viewHeader model =
     let
         title =
             model.quiz
-                |> Maybe.map (\q -> String.concat [ q.summary.identifier.name, " — Settings" ])
-                |> Maybe.withDefault "Loading..."
+                |> Maybe.Extra.unwrap "Loading..." (\q -> String.concat [ q.summary.identifier.name, " — Settings" ])
     in
     header [ class "quiz-settings-header" ]
         [ h1 [] [ text title ]

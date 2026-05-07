@@ -104,7 +104,8 @@ viewTeamHeader color maybeTeam teamNumber reached reachable =
     let
         name =
             maybeTeam
-                |> Maybe.map
+                |> Maybe.Extra.unwrap
+                    (String.concat [ "Team ", String.fromInt teamNumber ])
                     (\t ->
                         if String.isEmpty t.name then
                             String.concat [ "Team ", String.fromInt t.number ]
@@ -112,7 +113,6 @@ viewTeamHeader color maybeTeam teamNumber reached reachable =
                         else
                             t.name
                     )
-                |> Maybe.withDefault (String.concat [ "Team ", String.fromInt teamNumber ])
     in
     section [ class "team-header" ]
         [ h2 [ style "color" color ]
@@ -167,8 +167,7 @@ computeRoundData teamNumber rounds scores activeTeams =
                     ownPoints =
                         roundScores
                             |> List.Extra.find (\s -> s.teamNumber == teamNumber)
-                            |> Maybe.map .points
-                            |> Maybe.withDefault 0
+                            |> Maybe.Extra.unwrap 0 .points
 
                     maxReached =
                         roundScores

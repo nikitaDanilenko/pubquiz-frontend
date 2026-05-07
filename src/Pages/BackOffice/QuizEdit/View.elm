@@ -6,6 +6,7 @@ import Html exposing (Html, a, button, div, footer, h1, h2, header, input, label
 import Html.Attributes as Attr exposing (class, disabled, href, placeholder, step, type_, value)
 import Html.Events exposing (onClick, onInput, preventDefaultOn)
 import Json.Decode as Decode
+import Maybe.Extra
 import Pages.BackOffice.QuizEdit.Page as Page
 import Set exposing (Set)
 
@@ -23,8 +24,7 @@ viewHeader model =
     let
         quizName =
             model.quiz
-                |> Maybe.map (\q -> String.concat [ q.summary.identifier.name, " — Point Entry" ])
-                |> Maybe.withDefault "Loading..."
+                |> Maybe.Extra.unwrap "Loading..." (\q -> String.concat [ q.summary.identifier.name, " — Point Entry" ])
     in
     header [ class "quiz-edit-header" ]
         [ h1 [] [ text quizName ]

@@ -32,6 +32,7 @@ import Pages.Public.Quiz.View
 import Pages.Public.Team.Handler
 import Pages.Public.Team.Page
 import Pages.Public.Team.View
+import Maybe.Extra
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((</>), Parser)
 import Util.Theme as Theme exposing (Theme)
@@ -396,8 +397,7 @@ navigateTo maybeRoute model =
                 let
                     isAdmin =
                         model.authenticatedUser
-                            |> Maybe.map .isAdmin
-                            |> Maybe.withDefault False
+                            |> Maybe.Extra.unwrap False .isAdmin
 
                     ( quizSettingsModel, quizSettingsCmd ) =
                         Pages.BackOffice.QuizSettings.Handler.init { quizId = quizId, isAdmin = isAdmin }
