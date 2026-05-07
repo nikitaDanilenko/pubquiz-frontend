@@ -6,9 +6,6 @@ module Pages.BackOffice.QuizEdit.Page exposing
     , lenses
     )
 
-{-| Quiz Edit (Point Entry) page state.
--}
-
 import Api.Types exposing (BackofficeQuizIdCorrectScore_Error, BackofficeQuizIdRecordRoundScores_Error, Quiz)
 import Dict exposing (Dict)
 import Monocle.Lens exposing (Lens)
@@ -72,7 +69,7 @@ type Msg
     | IncrementScore Int Int Float
     | MarkRoundComplete Int
     | EditCompletedRound Int
-    | CancelEdit Int
+    | CancelEdit
     | SubmitRound Int
     | GotSubmitResponse Int (Result (OpenApi.Common.Error BackofficeQuizIdRecordRoundScores_Error String) ())
     | GotCorrectResponse (Result (OpenApi.Common.Error BackofficeQuizIdCorrectScore_Error String) ())

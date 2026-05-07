@@ -1,12 +1,8 @@
 module Pages.BackOffice.QuizEdit.Handler exposing (init, update)
 
-{-| Quiz Edit (Point Entry) page logic.
--}
-
 import Api.Api
 import Api.Types exposing (Quiz, RecordRoundScoresCommand, TeamScore)
 import Dict exposing (Dict)
-import OpenApi.Common
 import Pages.BackOffice.QuizEdit.Page as Page
 import Set exposing (Set)
 
@@ -94,7 +90,7 @@ update msg model =
             , Cmd.none
             )
 
-        Page.CancelEdit roundNumber ->
+        Page.CancelEdit ->
             ( { model | editingRound = Nothing }
             , Cmd.none
             )
@@ -336,7 +332,7 @@ addNewRound model =
                     }
 
                 updatedQuiz =
-                    { quiz | rounds = quiz.rounds ++ [ newRound ] }
+                    { quiz | rounds = List.concat [ quiz.rounds, [ newRound ] ] }
             in
             { model
                 | quiz = Just updatedQuiz

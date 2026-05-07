@@ -1,12 +1,9 @@
 module Pages.BackOffice.QuizEdit.View exposing (view)
 
-{-| Quiz Edit (Point Entry) page view.
--}
-
 import Api.Types exposing (Quiz, Round, Team)
 import Dict exposing (Dict)
-import Html exposing (Html, a, article, button, div, footer, h1, h2, h3, header, input, label, li, nav, ol, p, section, span, text, ul)
-import Html.Attributes as Attr exposing (class, disabled, href, id, placeholder, step, type_, value)
+import Html exposing (Html, a, button, div, footer, h1, h2, header, input, label, li, nav, ol, p, section, span, text, ul)
+import Html.Attributes as Attr exposing (class, disabled, href, placeholder, step, type_, value)
 import Html.Events exposing (onClick, onInput, preventDefaultOn)
 import Json.Decode as Decode
 import Pages.BackOffice.QuizEdit.Page as Page
@@ -23,14 +20,14 @@ view model =
 
 viewHeader : Page.Model -> Html Page.Msg
 viewHeader model =
+    let
+        quizName =
+            model.quiz
+                |> Maybe.map (\q -> q.summary.identifier.name)
+                |> Maybe.withDefault "Loading..."
+    in
     header [ class "quiz-edit-header" ]
-        [ h1 []
-            [ text
-                (model.quiz
-                    |> Maybe.map (\q -> q.summary.identifier.name)
-                    |> Maybe.withDefault "Loading..."
-                )
-            ]
+        [ h1 [] [ text quizName ]
         , nav [ class "quiz-edit-actions" ]
             [ a
                 [ href (String.concat [ "/backoffice/", String.fromInt model.quizId, "/settings" ])
@@ -327,7 +324,7 @@ viewRoundActions model round state =
                     ]
                 , button
                     [ class "button secondary"
-                    , onClick (Page.CancelEdit round.number)
+                    , onClick Page.CancelEdit
                     , disabled model.isSubmitting
                     ]
                     [ text "Cancel" ]
@@ -336,7 +333,7 @@ viewRoundActions model round state =
 
 
 viewAddRound : Page.Model -> Html Page.Msg
-viewAddRound model =
+viewAddRound _ =
     footer [ class "add-round" ]
         [ button
             [ class "button secondary"

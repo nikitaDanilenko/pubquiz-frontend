@@ -1,8 +1,5 @@
 module Pages.BackOffice.QuizSettings.View exposing (view)
 
-{-| Quiz Settings page view.
--}
-
 import Api.Types exposing (Quiz, Team)
 import Dict exposing (Dict)
 import Html exposing (Html, a, button, div, footer, h1, h2, header, input, label, li, nav, p, section, span, text, ul)
@@ -21,14 +18,14 @@ view model =
 
 viewHeader : Page.Model -> Html Page.Msg
 viewHeader model =
+    let
+        title =
+            model.quiz
+                |> Maybe.map (\q -> String.concat [ q.summary.identifier.name, " — Settings" ])
+                |> Maybe.withDefault "Loading..."
+    in
     header [ class "quiz-settings-header" ]
-        [ h1 []
-            [ text
-                (model.quiz
-                    |> Maybe.map (\q -> String.concat [ q.summary.identifier.name, " — Settings" ])
-                    |> Maybe.withDefault "Loading..."
-                )
-            ]
+        [ h1 [] [ text title ]
         , nav [ class "quiz-settings-actions" ]
             [ a
                 [ href (String.concat [ "/backoffice/", String.fromInt model.quizId ])
@@ -61,7 +58,7 @@ viewContent model =
 
 viewMessages : Page.Model -> Html msg
 viewMessages model =
-    div [ class "messages" ]
+    section [ class "messages" ]
         [ case model.error of
             Just error ->
                 p [ class "form-error" ] [ text error ]
@@ -82,7 +79,7 @@ viewIdentifierSection model =
     section [ class "settings-section" ]
         [ h2 [] [ text "Quiz Details" ]
         , div [ class "form-fields" ]
-            [ div [ class "form-field" ]
+            [ p [ class "form-field" ]
                 [ label [ for "name" ] [ text "Name" ]
                 , input
                     [ type_ "text"
@@ -93,7 +90,7 @@ viewIdentifierSection model =
                     ]
                     []
                 ]
-            , div [ class "form-field" ]
+            , p [ class "form-field" ]
                 [ label [ for "date" ] [ text "Date" ]
                 , input
                     [ type_ "date"
@@ -104,7 +101,7 @@ viewIdentifierSection model =
                     ]
                     []
                 ]
-            , div [ class "form-field" ]
+            , p [ class "form-field" ]
                 [ label [ for "place" ] [ text "Place" ]
                 , input
                     [ type_ "text"
@@ -122,14 +119,7 @@ viewIdentifierSection model =
                 , onClick Page.SaveIdentifier
                 , disabled model.isSaving
                 ]
-                [ text
-                    (if model.isSaving then
-                        "Saving..."
-
-                     else
-                        "Save Details"
-                    )
-                ]
+                [ text (saveButtonLabel model.isSaving "Save Details") ]
             ]
         ]
 
@@ -149,19 +139,15 @@ viewTeamRow model team =
         teamName =
             Dict.get team.number model.teamNames
                 |> Maybe.withDefault team.name
-    in
-    li
-        [ class
-            (String.concat
-                [ "team-row"
-                , if team.active then
-                    ""
 
-                  else
-                    " inactive"
-                ]
-            )
-        ]
+        rowClass =
+            if team.active then
+                "team-row"
+
+            else
+                "team-row inactive"
+    in
+    li [ class rowClass ]
         [ span [ class "team-number" ]
             [ text (String.concat [ "#", String.fromInt team.number ]) ]
         , input
@@ -196,7 +182,7 @@ viewAddTeamsSection : Page.Model -> Html Page.Msg
 viewAddTeamsSection model =
     section [ class "settings-section" ]
         [ h2 [] [ text "Add Teams" ]
-        , div [ class "add-teams-form" ]
+        , section [ class "add-teams-form" ]
             [ input
                 [ type_ "number"
                 , value (String.fromInt model.additionalTeams)
@@ -210,13 +196,24 @@ viewAddTeamsSection model =
                 , onClick Page.AddTeams
                 , disabled model.isSaving
                 ]
-                [ text
-                    (if model.isSaving then
-                        "Adding..."
-
-                     else
-                        String.concat [ "Add ", String.fromInt model.additionalTeams, " Team(s)" ]
-                    )
-                ]
+                [ text (addTeamsButtonLabel model.isSaving model.additionalTeams) ]
             ]
         ]
+
+
+saveButtonLabel : Bool -> String -> String
+saveButtonLabel isSaving defaultLabel =
+    if isSaving then
+        "Saving..."
+
+    else
+        defaultLabel
+
+
+addTeamsButtonLabel : Bool -> Int -> String
+addTeamsButtonLabel isSaving count =
+    if isSaving then
+        "Adding..."
+
+    else
+        String.concat [ "Add ", String.fromInt count, " Team(s)" ]

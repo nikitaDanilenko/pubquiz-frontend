@@ -4,9 +4,6 @@ module Pages.BackOffice.QuizSettings.Page exposing
     , lenses
     )
 
-{-| Quiz Settings page state.
--}
-
 import Api.Types
     exposing
         ( BackofficeQuizIdAddTeams_Error
