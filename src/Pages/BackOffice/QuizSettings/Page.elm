@@ -25,6 +25,7 @@ type alias Model =
     , place : String
     , teamNames : Dict Int String
     , additionalTeams : Int
+    , isAdmin : Bool
     , isLoading : Bool
     , isSaving : Bool
     , isLocked : Bool
@@ -41,6 +42,7 @@ lenses :
     , place : Lens Model String
     , teamNames : Lens Model (Dict Int String)
     , additionalTeams : Lens Model Int
+    , isAdmin : Lens Model Bool
     , isLoading : Lens Model Bool
     , isSaving : Lens Model Bool
     , isLocked : Lens Model Bool
@@ -55,6 +57,7 @@ lenses =
     , place = Lens .place (\b a -> { a | place = b })
     , teamNames = Lens .teamNames (\b a -> { a | teamNames = b })
     , additionalTeams = Lens .additionalTeams (\b a -> { a | additionalTeams = b })
+    , isAdmin = Lens .isAdmin (\b a -> { a | isAdmin = b })
     , isLoading = Lens .isLoading (\b a -> { a | isLoading = b })
     , isSaving = Lens .isSaving (\b a -> { a | isSaving = b })
     , isLocked = Lens .isLocked (\b a -> { a | isLocked = b })

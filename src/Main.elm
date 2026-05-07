@@ -394,8 +394,13 @@ navigateTo maybeRoute model =
         Just (QuizSettingsRoute quizId) ->
             if model.authenticatedUser /= Nothing then
                 let
+                    isAdmin =
+                        model.authenticatedUser
+                            |> Maybe.map .isAdmin
+                            |> Maybe.withDefault False
+
                     ( quizSettingsModel, quizSettingsCmd ) =
-                        Pages.BackOffice.QuizSettings.Handler.init { quizId = quizId }
+                        Pages.BackOffice.QuizSettings.Handler.init { quizId = quizId, isAdmin = isAdmin }
                 in
                 ( { model | page = QuizSettings quizSettingsModel, pendingRoute = Nothing }
                 , Cmd.map QuizSettingsMsg quizSettingsCmd

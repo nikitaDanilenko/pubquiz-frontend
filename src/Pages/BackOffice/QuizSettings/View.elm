@@ -214,12 +214,16 @@ viewLockSection model =
 
         lockButton =
             if model.isLocked then
-                button
-                    [ class "button secondary"
-                    , onClick Page.UnlockQuiz
-                    , disabled model.isSaving
-                    ]
-                    [ text (saveButtonLabel model.isSaving "Unlock Quiz") ]
+                if model.isAdmin then
+                    button
+                        [ class "button secondary"
+                        , onClick Page.UnlockQuiz
+                        , disabled model.isSaving
+                        ]
+                        [ text (saveButtonLabel model.isSaving "Unlock Quiz") ]
+
+                else
+                    text ""
 
             else
                 button

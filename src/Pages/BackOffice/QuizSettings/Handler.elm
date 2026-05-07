@@ -7,7 +7,7 @@ import Dict exposing (Dict)
 import Pages.BackOffice.QuizSettings.Page as Page
 
 
-init : { quizId : Int } -> ( Page.Model, Cmd Page.Msg )
+init : { quizId : Int, isAdmin : Bool } -> ( Page.Model, Cmd Page.Msg )
 init params =
     ( { quizId = params.quizId
       , quiz = Nothing
@@ -16,6 +16,7 @@ init params =
       , place = ""
       , teamNames = Dict.empty
       , additionalTeams = 1
+      , isAdmin = params.isAdmin
       , isLoading = True
       , isSaving = False
       , isLocked = False
