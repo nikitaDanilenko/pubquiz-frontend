@@ -4,7 +4,6 @@ import Api.Api
 import Api.Types exposing (Quiz, Team)
 import Date
 import Dict exposing (Dict)
-import OpenApi.Common
 import Pages.BackOffice.QuizSettings.Page as Page
 
 
