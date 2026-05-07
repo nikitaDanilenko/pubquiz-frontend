@@ -17,6 +17,12 @@ import Pages.BackOffice.Login.View
 import Pages.BackOffice.Overview.Handler
 import Pages.BackOffice.Overview.Page
 import Pages.BackOffice.Overview.View
+import Pages.BackOffice.QuizEdit.Handler
+import Pages.BackOffice.QuizEdit.Page
+import Pages.BackOffice.QuizEdit.View
+import Pages.BackOffice.QuizSettings.Handler
+import Pages.BackOffice.QuizSettings.Page
+import Pages.BackOffice.QuizSettings.View
 import Pages.Public.Overview.Handler
 import Pages.Public.Overview.Page
 import Pages.Public.Overview.View
@@ -68,6 +74,8 @@ type Page
     | Login Pages.BackOffice.Login.Page.Model
     | BackOfficeOverview Pages.BackOffice.Overview.Page.Model
     | CreateQuiz Pages.BackOffice.CreateQuiz.Page.Model
+    | QuizEdit Pages.BackOffice.QuizEdit.Page.Model
+    | QuizSettings Pages.BackOffice.QuizSettings.Page.Model
     | NotFound
 
 
@@ -79,6 +87,8 @@ type Route
     | LoginRoute
     | BackOfficeOverviewRoute
     | CreateQuizRoute
+    | QuizEditRoute Int
+    | QuizSettingsRoute Int
 
 
 routeParser : Parser (Route -> a) a
@@ -109,6 +119,8 @@ routeParser =
         , Parser.map OverviewRoute (Parser.s public)
         , Parser.map LoginRoute (Parser.s backOffice </> Parser.s "login")
         , Parser.map CreateQuizRoute (Parser.s backOffice </> Parser.s "create")
+        , Parser.map QuizSettingsRoute (Parser.s backOffice </> Parser.int </> Parser.s "settings")
+        , Parser.map QuizEditRoute (Parser.s backOffice </> Parser.int)
         , Parser.map BackOfficeOverviewRoute (Parser.s backOffice)
         , teamParser
         , quizParser
@@ -165,6 +177,8 @@ type Msg
     | LoginMsg Pages.BackOffice.Login.Page.Msg
     | BackOfficeOverviewMsg Pages.BackOffice.Overview.Page.Msg
     | CreateQuizMsg Pages.BackOffice.CreateQuiz.Page.Msg
+    | QuizEditMsg Pages.BackOffice.QuizEdit.Page.Msg
+    | QuizSettingsMsg Pages.BackOffice.QuizSettings.Page.Msg
     | ToggleTheme
 
 
@@ -261,6 +275,24 @@ update msg model =
                     , Cmd.map CreateQuizMsg cmd
                     )
 
+        ( QuizEditMsg quizEditMsg, QuizEdit quizEditModel ) ->
+            let
+                ( newModel, cmd ) =
+                    Pages.BackOffice.QuizEdit.Handler.update quizEditMsg quizEditModel
+            in
+            ( { model | page = QuizEdit newModel }
+            , Cmd.map QuizEditMsg cmd
+            )
+
+        ( QuizSettingsMsg quizSettingsMsg, QuizSettings quizSettingsModel ) ->
+            let
+                ( newModel, cmd ) =
+                    Pages.BackOffice.QuizSettings.Handler.update quizSettingsMsg quizSettingsModel
+            in
+            ( { model | page = QuizSettings newModel }
+            , Cmd.map QuizSettingsMsg cmd
+            )
+
         ( ToggleTheme, _ ) ->
             let
                 newTheme =
@@ -346,6 +378,32 @@ navigateTo maybeRoute model =
             else
                 ( model, Nav.pushUrl model.key "/backoffice/login" )
 
+        Just (QuizEditRoute quizId) ->
+            if model.authenticatedUser /= Nothing then
+                let
+                    ( quizEditModel, quizEditCmd ) =
+                        Pages.BackOffice.QuizEdit.Handler.init { quizId = quizId }
+                in
+                ( { model | page = QuizEdit quizEditModel, pendingRoute = Nothing }
+                , Cmd.map QuizEditMsg quizEditCmd
+                )
+
+            else
+                ( model, Nav.pushUrl model.key "/backoffice/login" )
+
+        Just (QuizSettingsRoute quizId) ->
+            if model.authenticatedUser /= Nothing then
+                let
+                    ( quizSettingsModel, quizSettingsCmd ) =
+                        Pages.BackOffice.QuizSettings.Handler.init { quizId = quizId }
+                in
+                ( { model | page = QuizSettings quizSettingsModel, pendingRoute = Nothing }
+                , Cmd.map QuizSettingsMsg quizSettingsCmd
+                )
+
+            else
+                ( model, Nav.pushUrl model.key "/backoffice/login" )
+
 
 initTeamPage : Model -> Int -> Int -> ( Model, Cmd Msg )
 initTeamPage model quizId teamNumber =
@@ -412,6 +470,12 @@ viewPage theme page =
 
         CreateQuiz createQuizModel ->
             Html.map CreateQuizMsg (Pages.BackOffice.CreateQuiz.View.view createQuizModel)
+
+        QuizEdit quizEditModel ->
+            Html.map QuizEditMsg (Pages.BackOffice.QuizEdit.View.view quizEditModel)
+
+        QuizSettings quizSettingsModel ->
+            Html.map QuizSettingsMsg (Pages.BackOffice.QuizSettings.View.view quizSettingsModel)
 
         NotFound ->
             viewNotFound

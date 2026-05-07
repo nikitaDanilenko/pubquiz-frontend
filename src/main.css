@@ -617,3 +617,489 @@ img {
   text-align: center;
   margin-top: 16px;
 }
+
+/* Quiz Edit Page */
+.quiz-edit {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.quiz-edit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.quiz-edit-header h1 {
+  margin: 0;
+  text-align: left;
+}
+
+.quiz-edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.quiz-edit .button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.quiz-edit .button.primary {
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  border: none;
+}
+
+.quiz-edit .button.primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.quiz-edit .button.secondary {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.quiz-edit .button.secondary:hover:not(:disabled) {
+  background-color: var(--color-border);
+}
+
+.quiz-edit .button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quiz-edit .loading {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 40px;
+}
+
+/* Rounds Accordion */
+.rounds-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.round {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.round.complete {
+  border-color: #28a745;
+}
+
+.round.editing {
+  border-color: #ffc107;
+}
+
+.round-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: var(--color-surface);
+  cursor: pointer;
+  gap: 12px;
+  user-select: none;
+}
+
+.round-header:hover {
+  background-color: var(--color-border);
+}
+
+.round-header h2 {
+  margin: 0;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.round-header .max-points {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.round-header .round-summary {
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.round-header .expand-icon {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.status-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.status-icon.complete {
+  color: #28a745;
+}
+
+.status-icon.editing {
+  color: #ffc107;
+}
+
+.status-icon.draft {
+  color: var(--color-text-muted);
+}
+
+/* Round Body */
+.round-body {
+  padding: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.team-score {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.team-score.inactive {
+  opacity: 0.5;
+}
+
+.team-score label {
+  font-size: 14px;
+  text-align: left;
+  color: var(--color-text-muted);
+}
+
+.score-input-group {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+.score-input-group .score-input {
+  flex: 1;
+  min-width: 60px;
+  padding: 8px;
+  text-align: center;
+  font-size: 16px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border-radius: 0;
+}
+
+.score-input-group .score-input:disabled {
+  background-color: var(--color-surface);
+  cursor: not-allowed;
+}
+
+.score-input-group .stepper {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.score-input-group .stepper:hover:not(:disabled) {
+  background-color: var(--color-border);
+}
+
+.score-input-group .stepper:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.score-input-group .stepper.decrement {
+  border-radius: 4px 0 0 4px;
+  border-right: none;
+}
+
+.score-input-group .stepper.increment-half {
+  border-left: none;
+  border-right: none;
+}
+
+.score-input-group .stepper.increment-full {
+  border-radius: 0 4px 4px 0;
+  border-left: none;
+}
+
+/* Round Actions */
+.round-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Add Round */
+.add-round {
+  margin-top: 16px;
+  text-align: center;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 600px) {
+  .quiz-edit-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .teams-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .score-input-group .stepper {
+    padding: 12px 16px;
+  }
+
+  .round-actions {
+    flex-direction: column;
+  }
+
+  .round-actions .button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Quiz Settings Page */
+.quiz-settings {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.quiz-settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.quiz-settings-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.quiz-settings-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.quiz-settings .button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.quiz-settings .button.primary {
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  border: none;
+}
+
+.quiz-settings .button.primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.quiz-settings .button.secondary {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.quiz-settings .button.secondary:hover:not(:disabled) {
+  background-color: var(--color-border);
+}
+
+.quiz-settings .button.small {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.quiz-settings .button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quiz-settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settings-section {
+  background: var(--color-bg-secondary);
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+}
+
+.settings-section h2 {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  color: var(--color-text-primary);
+}
+
+.settings-section .form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-section .section-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Teams List */
+.teams-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.team-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--color-bg-tertiary);
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+}
+
+.team-row.inactive {
+  opacity: 0.6;
+}
+
+.team-row .team-number {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  min-width: 40px;
+}
+
+.team-row .team-name-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.team-row .team-name-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.team-row .toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.team-row .toggle-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* Add Teams Form */
+.add-teams-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.add-teams-form input[type="number"] {
+  width: 80px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+/* Messages */
+.messages {
+  min-height: 40px;
+}
+
+.form-success {
+  color: var(--color-success, #28a745);
+  background: var(--color-success-bg, #d4edda);
+  padding: 12px;
+  border-radius: 6px;
+  margin: 0;
+}
+
+/* Quiz Settings Mobile */
+@media (max-width: 600px) {
+  .quiz-settings-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .team-row {
+    flex-wrap: wrap;
+  }
+
+  .team-row .team-name-input {
+    order: 2;
+    flex-basis: 100%;
+    margin-top: 8px;
+  }
+
+  .team-row .button {
+    order: 3;
+  }
+
+  .team-row .toggle-label {
+    order: 4;
+    margin-left: auto;
+  }
+
+  .add-teams-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .add-teams-form input[type="number"] {
+    width: 100%;
+  }
+}
