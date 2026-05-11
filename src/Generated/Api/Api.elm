@@ -1,11 +1,11 @@
 module Api.Api exposing
-    ( backoffice, backofficeLogin, backofficeLoginTask, backofficeQuizIdAddTeams, backofficeQuizIdAddTeamsTask
-    , backofficeQuizIdChangeSettings, backofficeQuizIdChangeSettingsTask, backofficeQuizIdCorrectScore
-    , backofficeQuizIdCorrectScoreTask, backofficeQuizIdLock, backofficeQuizIdLockTask
-    , backofficeQuizIdRecordRoundScores, backofficeQuizIdRecordRoundScoresTask, backofficeQuizIdRenameTeam
-    , backofficeQuizIdRenameTeamTask, backofficeQuizIdSetTeamActive, backofficeQuizIdSetTeamActiveTask
-    , backofficeQuizIdUnlock, backofficeQuizIdUnlockTask, backofficeTask, backofficeWhoami, backofficeWhoamiTask
-    , public, publicQuizId, publicQuizIdTask, publicTask
+    ( backoffice, backofficeLogin, backofficeLoginTask, backofficeQuizIdChangeSettings
+    , backofficeQuizIdChangeSettingsTask, backofficeQuizIdCorrectScore, backofficeQuizIdCorrectScoreTask
+    , backofficeQuizIdLock, backofficeQuizIdLockTask, backofficeQuizIdRecordRoundScores
+    , backofficeQuizIdRecordRoundScoresTask, backofficeQuizIdRenameTeam, backofficeQuizIdRenameTeamTask
+    , backofficeQuizIdSetTeamActive, backofficeQuizIdSetTeamActiveTask, backofficeQuizIdUnlock
+    , backofficeQuizIdUnlockTask, backofficeTask, backofficeWhoami, backofficeWhoamiTask, public, publicQuizId
+    , publicQuizIdTask, publicTask
     )
 
 {-|
@@ -13,13 +13,13 @@ module Api.Api exposing
 
 ## Operations
 
-@docs backoffice, backofficeLogin, backofficeLoginTask, backofficeQuizIdAddTeams, backofficeQuizIdAddTeamsTask
-@docs backofficeQuizIdChangeSettings, backofficeQuizIdChangeSettingsTask, backofficeQuizIdCorrectScore
-@docs backofficeQuizIdCorrectScoreTask, backofficeQuizIdLock, backofficeQuizIdLockTask
-@docs backofficeQuizIdRecordRoundScores, backofficeQuizIdRecordRoundScoresTask, backofficeQuizIdRenameTeam
-@docs backofficeQuizIdRenameTeamTask, backofficeQuizIdSetTeamActive, backofficeQuizIdSetTeamActiveTask
-@docs backofficeQuizIdUnlock, backofficeQuizIdUnlockTask, backofficeTask, backofficeWhoami, backofficeWhoamiTask
-@docs public, publicQuizId, publicQuizIdTask, publicTask
+@docs backoffice, backofficeLogin, backofficeLoginTask, backofficeQuizIdChangeSettings
+@docs backofficeQuizIdChangeSettingsTask, backofficeQuizIdCorrectScore, backofficeQuizIdCorrectScoreTask
+@docs backofficeQuizIdLock, backofficeQuizIdLockTask, backofficeQuizIdRecordRoundScores
+@docs backofficeQuizIdRecordRoundScoresTask, backofficeQuizIdRenameTeam, backofficeQuizIdRenameTeamTask
+@docs backofficeQuizIdSetTeamActive, backofficeQuizIdSetTeamActiveTask, backofficeQuizIdUnlock
+@docs backofficeQuizIdUnlockTask, backofficeTask, backofficeWhoami, backofficeWhoamiTask, public, publicQuizId
+@docs publicQuizIdTask, publicTask
 
 -}
 
@@ -141,92 +141,11 @@ backofficeWhoamiTask config =
 
 {-| **Requires authentication.** Call `/backoffice/login` first; the returned cookie is sent automatically.
 -}
-backofficeQuizIdAddTeams :
-    { toMsg :
-        Result (OpenApi.Common.Error Api.Types.BackofficeQuizIdAddTeams_Error String) ()
-        -> msg
-    , body : Api.Types.AddTeamsCommand
-    , params : { quizId : Int }
-    }
-    -> Cmd msg
-backofficeQuizIdAddTeams config =
-    Http.request
-        { url =
-            Url.Builder.absolute
-                [ "backoffice"
-                , String.fromInt config.params.quizId
-                , "add-teams"
-                ]
-                []
-        , method = "POST"
-        , headers = []
-        , expect =
-            OpenApi.Common.expectJsonCustom
-                config.toMsg
-                (Dict.fromList
-                    [ ( "400"
-                      , Json.Decode.map
-                            Api.Types.BackofficeQuizIdAddTeams_400
-                            (Json.Decode.succeed ())
-                      )
-                    , ( "404"
-                      , Json.Decode.map
-                            Api.Types.BackofficeQuizIdAddTeams_404
-                            (Json.Decode.succeed ())
-                      )
-                    ]
-                )
-                (Json.Decode.succeed ())
-        , body = Http.jsonBody (Api.Json.encodeAddTeamsCommand config.body)
-        , timeout = Nothing
-        , tracker = Nothing
-        }
-
-
-{-| **Requires authentication.** Call `/backoffice/login` first; the returned cookie is sent automatically.
--}
-backofficeQuizIdAddTeamsTask :
-    { body : Api.Types.AddTeamsCommand, params : { quizId : Int } }
-    -> Task.Task (OpenApi.Common.Error Api.Types.BackofficeQuizIdAddTeams_Error String) ()
-backofficeQuizIdAddTeamsTask config =
-    Http.task
-        { url =
-            Url.Builder.absolute
-                [ "backoffice"
-                , String.fromInt config.params.quizId
-                , "add-teams"
-                ]
-                []
-        , method = "POST"
-        , headers = []
-        , resolver =
-            OpenApi.Common.jsonResolverCustom
-                (Dict.fromList
-                    [ ( "400"
-                      , Json.Decode.map
-                            Api.Types.BackofficeQuizIdAddTeams_400
-                            (Json.Decode.succeed ())
-                      )
-                    , ( "404"
-                      , Json.Decode.map
-                            Api.Types.BackofficeQuizIdAddTeams_404
-                            (Json.Decode.succeed ())
-                      )
-                    ]
-                )
-                (Json.Decode.succeed ())
-        , body = Http.jsonBody (Api.Json.encodeAddTeamsCommand config.body)
-        , timeout = Nothing
-        }
-
-
-{-| **Requires authentication.** Call `/backoffice/login` first; the returned cookie is sent automatically.
--}
 backofficeQuizIdChangeSettings :
     { toMsg :
         Result (OpenApi.Common.Error Api.Types.BackofficeQuizIdChangeSettings_Error String) ()
         -> msg
-    , body : Api.Types.ChangeSettingsCommand
+    , body : Api.Types.QuizMetaData
     , params : { quizId : Int }
     }
     -> Cmd msg
@@ -258,8 +177,7 @@ backofficeQuizIdChangeSettings config =
                     ]
                 )
                 (Json.Decode.succeed ())
-        , body =
-            Http.jsonBody (Api.Json.encodeChangeSettingsCommand config.body)
+        , body = Http.jsonBody (Api.Json.encodeQuizMetaData config.body)
         , timeout = Nothing
         , tracker = Nothing
         }
@@ -268,7 +186,7 @@ backofficeQuizIdChangeSettings config =
 {-| **Requires authentication.** Call `/backoffice/login` first; the returned cookie is sent automatically.
 -}
 backofficeQuizIdChangeSettingsTask :
-    { body : Api.Types.ChangeSettingsCommand, params : { quizId : Int } }
+    { body : Api.Types.QuizMetaData, params : { quizId : Int } }
     -> Task.Task (OpenApi.Common.Error Api.Types.BackofficeQuizIdChangeSettings_Error String) ()
 backofficeQuizIdChangeSettingsTask config =
     Http.task
@@ -297,8 +215,7 @@ backofficeQuizIdChangeSettingsTask config =
                     ]
                 )
                 (Json.Decode.succeed ())
-        , body =
-            Http.jsonBody (Api.Json.encodeChangeSettingsCommand config.body)
+        , body = Http.jsonBody (Api.Json.encodeQuizMetaData config.body)
         , timeout = Nothing
         }
 

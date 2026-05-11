@@ -1,8 +1,8 @@
 module Api.Types exposing
-    ( AddTeamsCommand, AuthenticatedUser, ChangeSettingsCommand, CorrectScoreCommand, Day, LoginRequest, Quiz
-    , QuizIdentifier, QuizMetaData, QuizSettings, QuizSummary, RecordRoundScoresCommand, RenameTeamCommand
-    , Round, ScoreBoard, ScoreEntry, SetTeamActiveCommand, Team, TeamScore
-    , BackofficeQuizIdAddTeams_Error(..), BackofficeQuizIdChangeSettings_Error(..), BackofficeQuizIdCorrectScore_Error(..)
+    ( AuthenticatedUser, CorrectScoreCommand, Day, LoginRequest, Quiz, QuizIdentifier, QuizMetaData
+    , QuizSettings, QuizSummary, RecordRoundScoresCommand, RenameTeamCommand, Round, ScoreBoard, ScoreEntry
+    , SetTeamActiveCommand, Team, TeamScore
+    , BackofficeQuizIdChangeSettings_Error(..), BackofficeQuizIdCorrectScore_Error(..)
     , BackofficeQuizIdRecordRoundScores_Error(..), BackofficeQuizIdRenameTeam_Error(..)
     , BackofficeQuizIdSetTeamActive_Error(..)
     )
@@ -12,25 +12,20 @@ module Api.Types exposing
 
 ## Aliases
 
-@docs AddTeamsCommand, AuthenticatedUser, ChangeSettingsCommand, CorrectScoreCommand, Day, LoginRequest, Quiz
-@docs QuizIdentifier, QuizMetaData, QuizSettings, QuizSummary, RecordRoundScoresCommand, RenameTeamCommand
-@docs Round, ScoreBoard, ScoreEntry, SetTeamActiveCommand, Team, TeamScore
+@docs AuthenticatedUser, CorrectScoreCommand, Day, LoginRequest, Quiz, QuizIdentifier, QuizMetaData
+@docs QuizSettings, QuizSummary, RecordRoundScoresCommand, RenameTeamCommand, Round, ScoreBoard, ScoreEntry
+@docs SetTeamActiveCommand, Team, TeamScore
 
 
 ## Errors
 
-@docs BackofficeQuizIdAddTeams_Error, BackofficeQuizIdChangeSettings_Error, BackofficeQuizIdCorrectScore_Error
+@docs BackofficeQuizIdChangeSettings_Error, BackofficeQuizIdCorrectScore_Error
 @docs BackofficeQuizIdRecordRoundScores_Error, BackofficeQuizIdRenameTeam_Error
 @docs BackofficeQuizIdSetTeamActive_Error
 
 -}
 
 import Date
-
-
-type BackofficeQuizIdAddTeams_Error
-    = BackofficeQuizIdAddTeams_400 ()
-    | BackofficeQuizIdAddTeams_404 ()
 
 
 type BackofficeQuizIdChangeSettings_Error
@@ -122,13 +117,5 @@ type alias CorrectScoreCommand =
     { points : Float, roundNumber : Int, teamNumber : Int }
 
 
-type alias ChangeSettingsCommand =
-    { newIdentifier : QuizIdentifier }
-
-
 type alias AuthenticatedUser =
     { isAdmin : Bool }
-
-
-type alias AddTeamsCommand =
-    { additionalTeams : Int }

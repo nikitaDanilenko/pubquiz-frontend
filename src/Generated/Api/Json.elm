@@ -1,12 +1,12 @@
 module Api.Json exposing
-    ( encodeAddTeamsCommand, encodeAuthenticatedUser, encodeChangeSettingsCommand, encodeCorrectScoreCommand
-    , encodeDay, encodeLoginRequest, encodeQuiz, encodeQuizIdentifier, encodeQuizMetaData, encodeQuizSettings
-    , encodeQuizSummary, encodeRecordRoundScoresCommand, encodeRenameTeamCommand, encodeRound, encodeScoreBoard
-    , encodeScoreEntry, encodeSetTeamActiveCommand, encodeTeam, encodeTeamScore
-    , decodeAddTeamsCommand, decodeAuthenticatedUser, decodeChangeSettingsCommand, decodeCorrectScoreCommand
-    , decodeDay, decodeLoginRequest, decodeQuiz, decodeQuizIdentifier, decodeQuizMetaData, decodeQuizSettings
-    , decodeQuizSummary, decodeRecordRoundScoresCommand, decodeRenameTeamCommand, decodeRound, decodeScoreBoard
-    , decodeScoreEntry, decodeSetTeamActiveCommand, decodeTeam, decodeTeamScore
+    ( encodeAuthenticatedUser, encodeCorrectScoreCommand, encodeDay, encodeLoginRequest, encodeQuiz
+    , encodeQuizIdentifier, encodeQuizMetaData, encodeQuizSettings, encodeQuizSummary
+    , encodeRecordRoundScoresCommand, encodeRenameTeamCommand, encodeRound, encodeScoreBoard, encodeScoreEntry
+    , encodeSetTeamActiveCommand, encodeTeam, encodeTeamScore
+    , decodeAuthenticatedUser, decodeCorrectScoreCommand, decodeDay, decodeLoginRequest, decodeQuiz
+    , decodeQuizIdentifier, decodeQuizMetaData, decodeQuizSettings, decodeQuizSummary
+    , decodeRecordRoundScoresCommand, decodeRenameTeamCommand, decodeRound, decodeScoreBoard, decodeScoreEntry
+    , decodeSetTeamActiveCommand, decodeTeam, decodeTeamScore
     )
 
 {-|
@@ -14,18 +14,18 @@ module Api.Json exposing
 
 ## Encoders
 
-@docs encodeAddTeamsCommand, encodeAuthenticatedUser, encodeChangeSettingsCommand, encodeCorrectScoreCommand
-@docs encodeDay, encodeLoginRequest, encodeQuiz, encodeQuizIdentifier, encodeQuizMetaData, encodeQuizSettings
-@docs encodeQuizSummary, encodeRecordRoundScoresCommand, encodeRenameTeamCommand, encodeRound, encodeScoreBoard
-@docs encodeScoreEntry, encodeSetTeamActiveCommand, encodeTeam, encodeTeamScore
+@docs encodeAuthenticatedUser, encodeCorrectScoreCommand, encodeDay, encodeLoginRequest, encodeQuiz
+@docs encodeQuizIdentifier, encodeQuizMetaData, encodeQuizSettings, encodeQuizSummary
+@docs encodeRecordRoundScoresCommand, encodeRenameTeamCommand, encodeRound, encodeScoreBoard, encodeScoreEntry
+@docs encodeSetTeamActiveCommand, encodeTeam, encodeTeamScore
 
 
 ## Decoders
 
-@docs decodeAddTeamsCommand, decodeAuthenticatedUser, decodeChangeSettingsCommand, decodeCorrectScoreCommand
-@docs decodeDay, decodeLoginRequest, decodeQuiz, decodeQuizIdentifier, decodeQuizMetaData, decodeQuizSettings
-@docs decodeQuizSummary, decodeRecordRoundScoresCommand, decodeRenameTeamCommand, decodeRound, decodeScoreBoard
-@docs decodeScoreEntry, decodeSetTeamActiveCommand, decodeTeam, decodeTeamScore
+@docs decodeAuthenticatedUser, decodeCorrectScoreCommand, decodeDay, decodeLoginRequest, decodeQuiz
+@docs decodeQuizIdentifier, decodeQuizMetaData, decodeQuizSettings, decodeQuizSummary
+@docs decodeRecordRoundScoresCommand, decodeRenameTeamCommand, decodeRound, decodeScoreBoard, decodeScoreEntry
+@docs decodeSetTeamActiveCommand, decodeTeam, decodeTeamScore
 
 -}
 
@@ -435,20 +435,6 @@ encodeCorrectScoreCommand rec =
         ]
 
 
-decodeChangeSettingsCommand : Json.Decode.Decoder Api.Types.ChangeSettingsCommand
-decodeChangeSettingsCommand =
-    Json.Decode.succeed
-        (\newIdentifier -> { newIdentifier = newIdentifier })
-        |> OpenApi.Common.jsonDecodeAndMap
-            (Json.Decode.field "newIdentifier" decodeQuizIdentifier)
-
-
-encodeChangeSettingsCommand : Api.Types.ChangeSettingsCommand -> Json.Encode.Value
-encodeChangeSettingsCommand rec =
-    Json.Encode.object
-        [ ( "newIdentifier", encodeQuizIdentifier rec.newIdentifier ) ]
-
-
 decodeAuthenticatedUser : Json.Decode.Decoder Api.Types.AuthenticatedUser
 decodeAuthenticatedUser =
     Json.Decode.succeed
@@ -463,17 +449,3 @@ decodeAuthenticatedUser =
 encodeAuthenticatedUser : Api.Types.AuthenticatedUser -> Json.Encode.Value
 encodeAuthenticatedUser rec =
     Json.Encode.object [ ( "isAdmin", Json.Encode.bool rec.isAdmin ) ]
-
-
-decodeAddTeamsCommand : Json.Decode.Decoder Api.Types.AddTeamsCommand
-decodeAddTeamsCommand =
-    Json.Decode.succeed
-        (\additionalTeams -> { additionalTeams = additionalTeams })
-        |> OpenApi.Common.jsonDecodeAndMap
-            (Json.Decode.field "additionalTeams" Json.Decode.int)
-
-
-encodeAddTeamsCommand : Api.Types.AddTeamsCommand -> Json.Encode.Value
-encodeAddTeamsCommand rec =
-    Json.Encode.object
-        [ ( "additionalTeams", Json.Encode.int rec.additionalTeams ) ]
