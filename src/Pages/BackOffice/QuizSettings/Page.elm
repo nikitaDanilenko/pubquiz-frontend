@@ -6,8 +6,7 @@ module Pages.BackOffice.QuizSettings.Page exposing
 
 import Api.Types
     exposing
-        ( BackofficeQuizIdAddTeams_Error
-        , BackofficeQuizIdChangeSettings_Error
+        ( BackofficeQuizIdChangeSettings_Error
         , BackofficeQuizIdRenameTeam_Error
         , BackofficeQuizIdSetTeamActive_Error
         , Quiz
@@ -24,7 +23,6 @@ type alias Model =
     , date : String
     , place : String
     , teamNames : Dict Int String
-    , additionalTeams : Int
     , isAdmin : Bool
     , isLoading : Bool
     , isSaving : Bool
@@ -41,7 +39,6 @@ lenses :
     , date : Lens Model String
     , place : Lens Model String
     , teamNames : Lens Model (Dict Int String)
-    , additionalTeams : Lens Model Int
     , isAdmin : Lens Model Bool
     , isLoading : Lens Model Bool
     , isSaving : Lens Model Bool
@@ -56,7 +53,6 @@ lenses =
     , date = Lens .date (\b a -> { a | date = b })
     , place = Lens .place (\b a -> { a | place = b })
     , teamNames = Lens .teamNames (\b a -> { a | teamNames = b })
-    , additionalTeams = Lens .additionalTeams (\b a -> { a | additionalTeams = b })
     , isAdmin = Lens .isAdmin (\b a -> { a | isAdmin = b })
     , isLoading = Lens .isLoading (\b a -> { a | isLoading = b })
     , isSaving = Lens .isSaving (\b a -> { a | isSaving = b })
@@ -78,9 +74,6 @@ type Msg
     | GotSaveTeamNameResponse Int (Result (OpenApi.Common.Error BackofficeQuizIdRenameTeam_Error String) ())
     | ToggleTeamActive Int Bool
     | GotToggleTeamActiveResponse Int Bool (Result (OpenApi.Common.Error BackofficeQuizIdSetTeamActive_Error String) ())
-    | SetAdditionalTeams String
-    | AddTeams
-    | GotAddTeamsResponse (Result (OpenApi.Common.Error BackofficeQuizIdAddTeams_Error String) ())
     | LockQuiz
     | UnlockQuiz
     | GotLockResponse (Result (OpenApi.Common.Error () String) ())

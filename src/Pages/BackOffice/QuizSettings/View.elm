@@ -55,7 +55,6 @@ viewContent model =
                     , viewLockSection model
                     , viewIdentifierSection model
                     , viewTeamsSection model quiz
-                    , viewAddTeamsSection model
                     ]
 
             Nothing ->
@@ -184,29 +183,6 @@ viewTeamRow model team =
         ]
 
 
-viewAddTeamsSection : Page.Model -> Html Page.Msg
-viewAddTeamsSection model =
-    section [ class "settings-section" ]
-        [ h2 [] [ text "Add Teams" ]
-        , section [ class "add-teams-form" ]
-            [ input
-                [ type_ "number"
-                , value (String.fromInt model.additionalTeams)
-                , onInput Page.SetAdditionalTeams
-                , Html.Attributes.min "1"
-                , disabled (model.isSaving || model.isLocked)
-                ]
-                []
-            , button
-                [ class "button primary"
-                , onClick Page.AddTeams
-                , disabled (model.isSaving || model.isLocked)
-                ]
-                [ text (addTeamsButtonLabel model.isSaving model.additionalTeams) ]
-            ]
-        ]
-
-
 viewLockSection : Page.Model -> Html Page.Msg
 viewLockSection model =
     let
@@ -254,10 +230,3 @@ saveButtonLabel isSaving defaultLabel =
         defaultLabel
 
 
-addTeamsButtonLabel : Bool -> Int -> String
-addTeamsButtonLabel isSaving count =
-    if isSaving then
-        "Adding..."
-
-    else
-        String.concat [ "Add ", String.fromInt count, " Team(s)" ]

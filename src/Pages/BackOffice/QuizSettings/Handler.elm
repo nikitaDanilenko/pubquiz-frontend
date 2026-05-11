@@ -15,7 +15,6 @@ init params =
       , date = ""
       , place = ""
       , teamNames = Dict.empty
-      , additionalTeams = 1
       , isAdmin = params.isAdmin
       , isLoading = True
       , isSaving = False
@@ -72,24 +71,29 @@ update msg model =
             )
 
         Page.SaveIdentifier ->
-            case Date.fromIsoString model.date of
-                Ok date ->
+            case ( Date.fromIsoString model.date, model.quiz ) of
+                ( Ok date, Just quiz ) ->
                     ( { model | isSaving = True, error = Nothing, successMessage = Nothing }
                     , Api.Api.backofficeQuizIdChangeSettings
                         { params = { quizId = model.quizId }
                         , toMsg = Page.GotSaveIdentifierResponse
                         , body =
-                            { newIdentifier =
-                                { name = model.name
-                                , date = date
-                                , place = model.place
+                            { identifier = { name = model.name, date = date, place = model.place }
+                            , settings =
+                                { numberOfTeams = List.length quiz.scoreBoard.teams
+                                , questionsPerRound = quiz.rounds |> List.sortBy .number |> List.map .numberOfQuestions
                                 }
                             }
                         }
                     )
 
-                Err _ ->
+                ( Err _, _ ) ->
                     ( { model | error = Just "Invalid date format" }
+                    , Cmd.none
+                    )
+
+                ( _, Nothing ) ->
+                    ( { model | error = Just "Quiz not loaded" }
                     , Cmd.none
                     )
 
@@ -186,44 +190,6 @@ update msg model =
                     ( { model
                         | isSaving = False
                         , error = Just "Failed to update team status"
-                      }
-                    , Cmd.none
-                    )
-
-        Page.SetAdditionalTeams input ->
-            let
-                value =
-                    String.toInt input
-                        |> Maybe.withDefault model.additionalTeams
-                        |> max 1
-            in
-            ( { model | additionalTeams = value }
-            , Cmd.none
-            )
-
-        Page.AddTeams ->
-            ( { model | isSaving = True, error = Nothing, successMessage = Nothing }
-            , Api.Api.backofficeQuizIdAddTeams
-                { params = { quizId = model.quizId }
-                , toMsg = Page.GotAddTeamsResponse
-                , body = { additionalTeams = model.additionalTeams }
-                }
-            )
-
-        Page.GotAddTeamsResponse result ->
-            case result of
-                Ok _ ->
-                    ( { model | isSaving = False, successMessage = Just "Teams added" }
-                    , Api.Api.publicQuizId
-                        { params = { quizId = model.quizId }
-                        , toMsg = Page.GotQuiz
-                        }
-                    )
-
-                Err _ ->
-                    ( { model
-                        | isSaving = False
-                        , error = Just "Failed to add teams"
                       }
                     , Cmd.none
                     )
