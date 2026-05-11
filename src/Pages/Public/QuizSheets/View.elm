@@ -161,6 +161,10 @@ teamLabel team =
         team.name
 
 
+
+-- todo: Remove?
+
+
 formatPoints : Float -> String
 formatPoints pts =
     if toFloat (Basics.round pts) == pts then
