@@ -105,7 +105,7 @@ viewRoundInput isDisabled index questionCount =
             , value (String.fromInt questionCount)
             , onInput (Page.SetQuestionsForRound index)
             , disabled isDisabled
-            , Attr.min "1"
+            , Attr.min "0"
             ]
             []
         ]
@@ -124,7 +124,6 @@ isValid model =
         , not (String.isEmpty model.place)
         , model.numberOfRounds > 0
         , List.length model.questionsPerRound == model.numberOfRounds
-        , List.all (\q -> q > 0) model.questionsPerRound
         , model.numberOfTeams > 0
         ]
 

@@ -73,8 +73,7 @@ update msg model =
 
                 newQuestionsPerRound =
                     if newRounds > currentLength then
-                        model.questionsPerRound
-                            |> List.append (List.repeat (newRounds - currentLength) defaultQuestionsPerRound)
+                        List.concat [ model.questionsPerRound, List.repeat (newRounds - currentLength) defaultQuestionsPerRound ]
 
                     else
                         List.take newRounds model.questionsPerRound
@@ -91,7 +90,7 @@ update msg model =
                 newValue =
                     String.toInt input
                         |> Maybe.withDefault defaultQuestionsPerRound
-                        |> max 1
+                        |> max 0
 
                 newList =
                     model.questionsPerRound
