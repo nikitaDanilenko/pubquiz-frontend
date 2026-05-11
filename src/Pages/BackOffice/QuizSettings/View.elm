@@ -32,6 +32,11 @@ viewHeader model =
                 , class "button primary"
                 ]
                 [ text "Point Entry" ]
+            , a
+                [ href (String.concat [ "/quizzes/", String.fromInt model.quizId, "/sheets" ])
+                , class "button secondary"
+                ]
+                [ text "Print Sheets" ]
             , a [ href "/backoffice", class "button secondary" ] [ text "Back" ]
             ]
         ]

@@ -23,6 +23,9 @@ import Pages.BackOffice.QuizEdit.View
 import Pages.BackOffice.QuizSettings.Handler
 import Pages.BackOffice.QuizSettings.Page
 import Pages.BackOffice.QuizSettings.View
+import Pages.Public.QuizSheets.Handler
+import Pages.Public.QuizSheets.Page
+import Pages.Public.QuizSheets.View
 import Pages.Public.Overview.Handler
 import Pages.Public.Overview.Page
 import Pages.Public.Overview.View
@@ -77,6 +80,7 @@ type Page
     | CreateQuiz Pages.BackOffice.CreateQuiz.Page.Model
     | QuizEdit Pages.BackOffice.QuizEdit.Page.Model
     | QuizSettings Pages.BackOffice.QuizSettings.Page.Model
+    | QuizSheets Pages.Public.QuizSheets.Page.Model
     | NotFound
 
 
@@ -90,6 +94,7 @@ type Route
     | CreateQuizRoute
     | QuizEditRoute Int
     | QuizSettingsRoute Int
+    | QuizSheetsRoute Int
 
 
 routeParser : Parser (Route -> a) a
@@ -123,6 +128,7 @@ routeParser =
         , Parser.map QuizSettingsRoute (Parser.s backOffice </> Parser.int </> Parser.s "settings")
         , Parser.map QuizEditRoute (Parser.s backOffice </> Parser.int)
         , Parser.map BackOfficeOverviewRoute (Parser.s backOffice)
+        , Parser.map QuizSheetsRoute (Parser.s public </> Parser.int </> Parser.s "sheets")
         , teamParser
         , quizParser
         ]
@@ -180,6 +186,7 @@ type Msg
     | CreateQuizMsg Pages.BackOffice.CreateQuiz.Page.Msg
     | QuizEditMsg Pages.BackOffice.QuizEdit.Page.Msg
     | QuizSettingsMsg Pages.BackOffice.QuizSettings.Page.Msg
+    | QuizSheetsMsg Pages.Public.QuizSheets.Page.Msg
     | ToggleTheme
 
 
@@ -292,6 +299,15 @@ update msg model =
             in
             ( { model | page = QuizSettings newModel }
             , Cmd.map QuizSettingsMsg cmd
+            )
+
+        ( QuizSheetsMsg quizSheetsMsg, QuizSheets quizSheetsModel ) ->
+            let
+                ( newModel, cmd ) =
+                    Pages.Public.QuizSheets.Handler.update quizSheetsMsg quizSheetsModel
+            in
+            ( { model | page = QuizSheets newModel }
+            , Cmd.map QuizSheetsMsg cmd
             )
 
         ( ToggleTheme, _ ) ->
@@ -409,6 +425,15 @@ navigateTo maybeRoute model =
             else
                 ( model, Nav.pushUrl model.key "/backoffice/login" )
 
+        Just (QuizSheetsRoute quizId) ->
+            let
+                ( quizSheetsModel, quizSheetsCmd ) =
+                    Pages.Public.QuizSheets.Handler.init { quizId = quizId }
+            in
+            ( { model | page = QuizSheets quizSheetsModel, pendingRoute = Nothing }
+            , Cmd.map QuizSheetsMsg quizSheetsCmd
+            )
+
 
 initTeamPage : Model -> Int -> Int -> ( Model, Cmd Msg )
 initTeamPage model quizId teamNumber =
@@ -481,6 +506,9 @@ viewPage theme page =
 
         QuizSettings quizSettingsModel ->
             Html.map QuizSettingsMsg (Pages.BackOffice.QuizSettings.View.view quizSettingsModel)
+
+        QuizSheets quizSheetsModel ->
+            Html.map QuizSheetsMsg (Pages.Public.QuizSheets.View.view quizSheetsModel)
 
         NotFound ->
             viewNotFound

@@ -1105,3 +1105,181 @@ img {
     width: 100%;
   }
 }
+
+/* ============================================================
+   Quiz Sheets (print-optimised)
+   ============================================================ */
+
+@page {
+  size: A4;
+  margin: 15mm 20mm;
+}
+
+@media print {
+  .theme-toggle {
+    display: none;
+  }
+
+  .quiz-sheets .organiser-note {
+    display: none;
+  }
+
+  .quiz-sheets .sheet.new-page {
+    page-break-before: always;
+  }
+
+  .quiz-sheets .sheet {
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+@media screen {
+  .quiz-sheets {
+    background: #e0e0e0;
+    padding: 20px;
+    min-height: 100vh;
+  }
+
+  .quiz-sheets .sheet {
+    background: white;
+    max-width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto 30px;
+    padding: 15mm 20mm;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .quiz-sheets .organiser-note {
+    max-width: 210mm;
+    margin: 0 auto 20px;
+    padding: 15px;
+    background: #fffbcc;
+    border: 1px solid #e6d86e;
+    border-radius: 4px;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+}
+
+.quiz-sheets {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 12pt;
+  line-height: 1.4;
+  color: #333;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.quiz-sheets .sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.quiz-sheets .sheet-hgroup h1 {
+  font-size: 24pt;
+  margin-bottom: 5px;
+}
+
+.quiz-sheets .sheet-hgroup p {
+  font-size: 14pt;
+  color: #666;
+}
+
+.quiz-sheets .sheet-hgroup time {
+  display: block;
+  font-size: 11pt;
+  color: #888;
+  margin-top: 5px;
+}
+
+.quiz-sheets .qr-placeholder {
+  width: 80px;
+  height: 80px;
+  border: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 8pt;
+  color: #999;
+  background: #f9f9f9;
+  text-align: center;
+  margin: 0;
+  gap: 4px;
+}
+
+.quiz-sheets .sheet-header-minimal {
+  margin-bottom: 12px;
+  font-size: 16pt;
+  font-weight: 600;
+}
+
+.quiz-sheets .round-section {
+  margin-bottom: 4px;
+  break-inside: avoid;
+}
+
+.quiz-sheets .round-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  background: #f0f0f0;
+  padding: 6px 12px;
+  margin-bottom: 4px;
+  border-left: 4px solid #333;
+}
+
+.quiz-sheets .round-section-header h2 {
+  font-size: 14pt;
+  font-weight: 600;
+}
+
+.quiz-sheets .round-section-header span {
+  font-size: 10pt;
+  color: #666;
+}
+
+.quiz-sheets .own-sheets-note {
+  padding: 8px 12px;
+  color: #888;
+  font-style: italic;
+  font-size: 11pt;
+}
+
+.quiz-sheets .answer-lines {
+  list-style: none;
+  padding: 0 10px;
+  margin: 0;
+}
+
+.quiz-sheets .answer-lines li {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px dotted #ccc;
+  min-height: 13mm;
+}
+
+.quiz-sheets .answer-lines li::before {
+  content: attr(value) ".";
+  width: 30px;
+  font-weight: 600;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.quiz-sheets .answer-lines .answer-space {
+  flex: 1;
+}
+
+.quiz-sheets .answer-lines input[type="checkbox"] {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-left: 8px;
+  cursor: pointer;
+}
+
