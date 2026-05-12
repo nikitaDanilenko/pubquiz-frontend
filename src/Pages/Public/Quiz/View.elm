@@ -188,7 +188,7 @@ viewProgressionChart theme teamData =
             , CA.margin { top = 10, bottom = 30, left = 40, right = 0 }
             ]
             (List.concat
-                [ [ C.xLabels [ CA.withGrid, CA.color (Theme.labelColor theme) ]
+                [ [ C.xLabels [ CA.ints, CA.withGrid, CA.color (Theme.labelColor theme) ]
                   , C.yLabels [ CA.withGrid, CA.ints, CA.color (Theme.labelColor theme) ]
                   ]
                 , teamData
@@ -227,13 +227,14 @@ viewCumulativeBarChart theme hovering teamData rounds =
             [ CA.height 300
             , CA.width 600
             , CA.margin { top = 10, bottom = 30, left = 40, right = 0 }
+            , CA.range [ CA.lowest 0.5 CA.orLower, CA.highest (toFloat (List.length rounds) + 0.5) CA.orHigher ]
             , CE.onMouseMove Page.OnHover (CE.getNearest CI.any)
             , CE.onMouseLeave (Page.OnHover [])
             ]
-            [ C.xLabels [ CA.noGrid, CA.color (Theme.labelColor theme) ]
+            [ C.xLabels [ CA.ints, CA.noGrid, CA.color (Theme.labelColor theme) ]
             , C.yLabels [ CA.withGrid, CA.ints, CA.color (Theme.labelColor theme) ]
             , C.bars
-                [ CA.roundTop 0.2 ]
+                [ CA.roundTop 0.2, CA.margin 0.05, CA.spacing 0.02 ]
                 (teamData
                     |> List.indexedMap
                         (\i td ->
@@ -276,13 +277,14 @@ viewPerRoundBarChart theme hovering teamData rounds =
             [ CA.height 300
             , CA.width 600
             , CA.margin { top = 10, bottom = 30, left = 40, right = 0 }
+            , CA.range [ CA.lowest 0.5 CA.orLower, CA.highest (toFloat (List.length rounds) + 0.5) CA.orHigher ]
             , CE.onMouseMove Page.OnHover (CE.getNearest CI.any)
             , CE.onMouseLeave (Page.OnHover [])
             ]
-            [ C.xLabels [ CA.noGrid, CA.color (Theme.labelColor theme) ]
+            [ C.xLabels [ CA.ints, CA.noGrid, CA.color (Theme.labelColor theme) ]
             , C.yLabels [ CA.withGrid, CA.ints, CA.color (Theme.labelColor theme) ]
             , C.bars
-                [ CA.roundTop 0.2 ]
+                [ CA.roundTop 0.2, CA.margin 0.05, CA.spacing 0.02 ]
                 (teamData
                     |> List.indexedMap
                         (\i td ->
@@ -363,13 +365,14 @@ viewRoundStatisticsChart theme hovering rounds scores =
             [ CA.height 300
             , CA.width 600
             , CA.margin { top = 10, bottom = 30, left = 40, right = 0 }
+            , CA.range [ CA.lowest 0.5 CA.orLower, CA.highest (toFloat (List.length rounds) + 0.5) CA.orHigher ]
             , CE.onMouseMove Page.OnStatsHover (CE.getNearest CI.any)
             , CE.onMouseLeave (Page.OnStatsHover [])
             ]
-            [ C.xLabels [ CA.noGrid, CA.color (Theme.labelColor theme) ]
+            [ C.xLabels [ CA.ints, CA.noGrid, CA.color (Theme.labelColor theme) ]
             , C.yLabels [ CA.withGrid, CA.ints, CA.color (Theme.labelColor theme) ]
             , C.bars
-                [ CA.roundTop 0.2 ]
+                [ CA.roundTop 0.2, CA.margin 0.05, CA.spacing 0.02 ]
                 [ C.bar .min [ CA.color Colors.statisticsColors.min ]
                     |> C.named "Min"
                 , C.bar .average [ CA.color Colors.statisticsColors.average ]
