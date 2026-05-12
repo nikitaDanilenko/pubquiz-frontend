@@ -331,6 +331,7 @@ addNewRound model =
                     { number = newRoundNumber
                     , displayMaxPoints = 10
                     , numberOfQuestions = 10
+                    , published = False
                     }
 
                 updatedQuiz =

@@ -74,7 +74,11 @@ type alias ScoreBoard =
 
 
 type alias Round =
-    { displayMaxPoints : Float, number : Int, numberOfQuestions : Int }
+    { displayMaxPoints : Float
+    , number : Int
+    , numberOfQuestions : Int
+    , published : Bool
+    }
 
 
 type alias RenameTeamCommand =

@@ -163,10 +163,11 @@ encodeScoreBoard rec =
 decodeRound : Json.Decode.Decoder Api.Types.Round
 decodeRound =
     Json.Decode.succeed
-        (\displayMaxPoints number numberOfQuestions ->
+        (\displayMaxPoints number numberOfQuestions published ->
             { displayMaxPoints = displayMaxPoints
             , number = number
             , numberOfQuestions = numberOfQuestions
+            , published = published
             }
         )
         |> OpenApi.Common.jsonDecodeAndMap
@@ -178,6 +179,11 @@ decodeRound =
                 "numberOfQuestions"
                 Json.Decode.int
             )
+        |> OpenApi.Common.jsonDecodeAndMap
+            (Json.Decode.field
+                "published"
+                Json.Decode.bool
+            )
 
 
 encodeRound : Api.Types.Round -> Json.Encode.Value
@@ -186,6 +192,7 @@ encodeRound rec =
         [ ( "displayMaxPoints", Json.Encode.float rec.displayMaxPoints )
         , ( "number", Json.Encode.int rec.number )
         , ( "numberOfQuestions", Json.Encode.int rec.numberOfQuestions )
+        , ( "published", Json.Encode.bool rec.published )
         ]
 
 

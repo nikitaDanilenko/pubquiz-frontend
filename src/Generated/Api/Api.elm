@@ -1,11 +1,13 @@
 module Api.Api exposing
     ( backoffice, backofficeLogin, backofficeLoginTask, backofficeQuizIdChangeSettings
     , backofficeQuizIdChangeSettingsTask, backofficeQuizIdCorrectScore, backofficeQuizIdCorrectScoreTask
-    , backofficeQuizIdLock, backofficeQuizIdLockTask, backofficeQuizIdRecordRoundScores
+    , backofficeQuizIdLock, backofficeQuizIdLockTask, backofficeQuizIdPublishRoundRoundNumber
+    , backofficeQuizIdPublishRoundRoundNumberTask, backofficeQuizIdRecordRoundScores
     , backofficeQuizIdRecordRoundScoresTask, backofficeQuizIdRenameTeam, backofficeQuizIdRenameTeamTask
     , backofficeQuizIdSetTeamActive, backofficeQuizIdSetTeamActiveTask, backofficeQuizIdUnlock
-    , backofficeQuizIdUnlockTask, backofficeTask, backofficeWhoami, backofficeWhoamiTask, public, publicQuizId
-    , publicQuizIdTask, publicTask
+    , backofficeQuizIdUnlockTask, backofficeQuizIdUnpublishRoundRoundNumber
+    , backofficeQuizIdUnpublishRoundRoundNumberTask, backofficeTask, backofficeWhoami, backofficeWhoamiTask
+    , public, publicQuizId, publicQuizIdTask, publicTask
     )
 
 {-|
@@ -15,11 +17,13 @@ module Api.Api exposing
 
 @docs backoffice, backofficeLogin, backofficeLoginTask, backofficeQuizIdChangeSettings
 @docs backofficeQuizIdChangeSettingsTask, backofficeQuizIdCorrectScore, backofficeQuizIdCorrectScoreTask
-@docs backofficeQuizIdLock, backofficeQuizIdLockTask, backofficeQuizIdRecordRoundScores
+@docs backofficeQuizIdLock, backofficeQuizIdLockTask, backofficeQuizIdPublishRoundRoundNumber
+@docs backofficeQuizIdPublishRoundRoundNumberTask, backofficeQuizIdRecordRoundScores
 @docs backofficeQuizIdRecordRoundScoresTask, backofficeQuizIdRenameTeam, backofficeQuizIdRenameTeamTask
 @docs backofficeQuizIdSetTeamActive, backofficeQuizIdSetTeamActiveTask, backofficeQuizIdUnlock
-@docs backofficeQuizIdUnlockTask, backofficeTask, backofficeWhoami, backofficeWhoamiTask, public, publicQuizId
-@docs publicQuizIdTask, publicTask
+@docs backofficeQuizIdUnlockTask, backofficeQuizIdUnpublishRoundRoundNumber
+@docs backofficeQuizIdUnpublishRoundRoundNumberTask, backofficeTask, backofficeWhoami, backofficeWhoamiTask
+@docs public, publicQuizId, publicQuizIdTask, publicTask
 
 -}
 
@@ -351,6 +355,62 @@ backofficeQuizIdLockTask config =
 
 {-| **Requires authentication.** Call `/backoffice/login` first; the returned cookie is sent automatically.
 -}
+backofficeQuizIdPublishRoundRoundNumber :
+    { toMsg : Result (OpenApi.Common.Error () String) () -> msg
+    , params : { quizId : Int, roundNumber : Int }
+    }
+    -> Cmd msg
+backofficeQuizIdPublishRoundRoundNumber config =
+    Http.request
+        { url =
+            Url.Builder.absolute
+                [ "backoffice"
+                , String.fromInt config.params.quizId
+                , "publish-round"
+                , String.fromInt config.params.roundNumber
+                ]
+                []
+        , method = "POST"
+        , headers = []
+        , expect =
+            OpenApi.Common.expectJsonCustom
+                config.toMsg
+                (Dict.fromList [ ( "404", Json.Decode.succeed () ) ])
+                (Json.Decode.succeed ())
+        , body = Http.emptyBody
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+{-| **Requires authentication.** Call `/backoffice/login` first; the returned cookie is sent automatically.
+-}
+backofficeQuizIdPublishRoundRoundNumberTask :
+    { params : { quizId : Int, roundNumber : Int } }
+    -> Task.Task (OpenApi.Common.Error () String) ()
+backofficeQuizIdPublishRoundRoundNumberTask config =
+    Http.task
+        { url =
+            Url.Builder.absolute
+                [ "backoffice"
+                , String.fromInt config.params.quizId
+                , "publish-round"
+                , String.fromInt config.params.roundNumber
+                ]
+                []
+        , method = "POST"
+        , headers = []
+        , resolver =
+            OpenApi.Common.jsonResolverCustom
+                (Dict.fromList [ ( "404", Json.Decode.succeed () ) ])
+                (Json.Decode.succeed ())
+        , body = Http.emptyBody
+        , timeout = Nothing
+        }
+
+
+{-| **Requires authentication.** Call `/backoffice/login` first; the returned cookie is sent automatically.
+-}
 backofficeQuizIdRecordRoundScores :
     { toMsg :
         Result (OpenApi.Common.Error Api.Types.BackofficeQuizIdRecordRoundScores_Error String) ()
@@ -630,6 +690,62 @@ backofficeQuizIdUnlockTask config =
         { url =
             Url.Builder.absolute
                 [ "backoffice", String.fromInt config.params.quizId, "unlock" ]
+                []
+        , method = "POST"
+        , headers = []
+        , resolver =
+            OpenApi.Common.jsonResolverCustom
+                (Dict.fromList [ ( "404", Json.Decode.succeed () ) ])
+                (Json.Decode.succeed ())
+        , body = Http.emptyBody
+        , timeout = Nothing
+        }
+
+
+{-| **Requires authentication.** Call `/backoffice/login` first; the returned cookie is sent automatically.
+-}
+backofficeQuizIdUnpublishRoundRoundNumber :
+    { toMsg : Result (OpenApi.Common.Error () String) () -> msg
+    , params : { quizId : Int, roundNumber : Int }
+    }
+    -> Cmd msg
+backofficeQuizIdUnpublishRoundRoundNumber config =
+    Http.request
+        { url =
+            Url.Builder.absolute
+                [ "backoffice"
+                , String.fromInt config.params.quizId
+                , "unpublish-round"
+                , String.fromInt config.params.roundNumber
+                ]
+                []
+        , method = "POST"
+        , headers = []
+        , expect =
+            OpenApi.Common.expectJsonCustom
+                config.toMsg
+                (Dict.fromList [ ( "404", Json.Decode.succeed () ) ])
+                (Json.Decode.succeed ())
+        , body = Http.emptyBody
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+{-| **Requires authentication.** Call `/backoffice/login` first; the returned cookie is sent automatically.
+-}
+backofficeQuizIdUnpublishRoundRoundNumberTask :
+    { params : { quizId : Int, roundNumber : Int } }
+    -> Task.Task (OpenApi.Common.Error () String) ()
+backofficeQuizIdUnpublishRoundRoundNumberTask config =
+    Http.task
+        { url =
+            Url.Builder.absolute
+                [ "backoffice"
+                , String.fromInt config.params.quizId
+                , "unpublish-round"
+                , String.fromInt config.params.roundNumber
+                ]
                 []
         , method = "POST"
         , headers = []
