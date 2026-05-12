@@ -43,7 +43,7 @@ viewSheets quiz =
                 |> List.sortBy .number
 
         sortedRounds =
-            List.sortBy .number quiz.rounds
+            quiz.rounds |> List.filter (\r -> r.numberOfQuestions > 0) |> List.sortBy .number
 
         roundPages =
             groupRoundsIntoPages sortedRounds
@@ -73,7 +73,6 @@ viewOrganiserNote =
     aside [ class "organiser-note" ]
         [ strong [] [ text "Organiser: " ]
         , text "Answer lines equal the number of questions configured per round. "
-        , text "Rounds with zero questions show a header only — participants bring own sheets. "
         , text "Press Ctrl+P / Cmd+P to print or save as PDF."
         ]
 
@@ -119,28 +118,10 @@ viewSheetHeader identifier page =
 viewRoundSection : Round -> Html msg
 viewRoundSection round =
     section [ class "round-section" ]
-        (header [ class "round-section-header" ]
-            [ h2 [] [ text (String.concat [ "Round ", String.fromInt round.number ]) ]
-            , if round.numberOfQuestions == 0 then
-                span [] [ text "own sheets" ]
-
-              else
-                text ""
-            ]
-            :: viewRoundBody round
-        )
-
-
-viewRoundBody : Round -> List (Html msg)
-viewRoundBody round =
-    if round.numberOfQuestions == 0 then
-        [ p [ class "own-sheets-note" ] [ text "Participants provide own sheets for this round." ] ]
-
-    else
-        [ ol [ class "answer-lines" ]
-            (List.range 1 round.numberOfQuestions
-                |> List.map viewAnswerLine
-            )
+        [ header [ class "round-section-header" ]
+            [ h2 [] [ text (String.concat [ "Round ", String.fromInt round.number ]) ] ]
+        , ol [ class "answer-lines" ]
+            (List.range 1 round.numberOfQuestions |> List.map viewAnswerLine)
         ]
 
 
