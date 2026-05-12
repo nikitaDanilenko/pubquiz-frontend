@@ -1,7 +1,7 @@
 module Pages.BackOffice.QuizSettings.Handler exposing (init, update)
 
 import Api.Api
-import Api.Types exposing (Quiz, Team)
+import Api.Types exposing (Quiz, Round, Team)
 import Date
 import Dict exposing (Dict)
 import Pages.BackOffice.QuizSettings.Page as Page
@@ -15,6 +15,7 @@ init params =
       , date = ""
       , place = ""
       , teamNames = Dict.empty
+      , questionsPerRound = Dict.empty
       , isAdmin = params.isAdmin
       , isLoading = True
       , isSaving = False
@@ -41,6 +42,7 @@ update msg model =
                         , date = Date.toIsoString quiz.summary.identifier.date
                         , place = quiz.summary.identifier.place
                         , teamNames = initTeamNames quiz.scoreBoard.teams
+                        , questionsPerRound = initQuestionsPerRound quiz
                         , isLoading = False
                         , isLocked = not quiz.summary.active
                       }
@@ -81,7 +83,10 @@ update msg model =
                             { identifier = { name = model.name, date = date, place = model.place }
                             , settings =
                                 { numberOfTeams = List.length quiz.scoreBoard.teams
-                                , questionsPerRound = quiz.rounds |> List.sortBy .number |> List.map .numberOfQuestions
+                                , questionsPerRound =
+                                    quiz.rounds
+                                        |> List.sortBy .number
+                                        |> List.map (\r -> Dict.get r.number model.questionsPerRound |> Maybe.withDefault r.numberOfQuestions)
                                 }
                             }
                         }
@@ -194,6 +199,15 @@ update msg model =
                     , Cmd.none
                     )
 
+        Page.SetQuestionsForRound roundNumber input ->
+            let
+                value =
+                    String.toInt input |> Maybe.withDefault 0 |> max 0
+            in
+            ( { model | questionsPerRound = Dict.insert roundNumber value model.questionsPerRound }
+            , Cmd.none
+            )
+
         Page.LockQuiz ->
             ( { model | isSaving = True, error = Nothing, successMessage = Nothing }
             , Api.Api.backofficeQuizIdLock
@@ -250,6 +264,13 @@ update msg model =
 
         Page.GoToPointEntry ->
             ( model, Cmd.none )
+
+
+initQuestionsPerRound : Quiz -> Dict Int Int
+initQuestionsPerRound quiz =
+    quiz.rounds
+        |> List.map (\r -> ( r.number, r.numberOfQuestions ))
+        |> Dict.fromList
 
 
 initTeamNames : List Team -> Dict Int String

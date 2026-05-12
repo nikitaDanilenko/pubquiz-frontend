@@ -1,9 +1,9 @@
 module Pages.BackOffice.QuizSettings.View exposing (view)
 
-import Api.Types exposing (Quiz, Team)
+import Api.Types exposing (Quiz, Round, Team)
 import Dict exposing (Dict)
 import Html exposing (Html, a, button, div, footer, h1, h2, header, input, label, li, nav, p, section, span, text, ul)
-import Html.Attributes exposing (checked, class, disabled, for, href, id, placeholder, type_, value)
+import Html.Attributes as Attr exposing (checked, class, disabled, for, href, id, placeholder, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
 import Maybe.Extra
 import Pages.BackOffice.QuizSettings.Page as Page
@@ -54,6 +54,7 @@ viewContent model =
                     [ viewMessages model
                     , viewLockSection model
                     , viewIdentifierSection model
+                    , viewRoundsSection model quiz
                     , viewTeamsSection model quiz
                     ]
 
@@ -126,6 +127,51 @@ viewIdentifierSection model =
                 ]
                 [ text (saveButtonLabel model.isSaving "Save Details") ]
             ]
+        ]
+
+
+viewRoundsSection : Page.Model -> Quiz -> Html Page.Msg
+viewRoundsSection model quiz =
+    section [ class "settings-section" ]
+        [ h2 [] [ text "Questions per Round" ]
+        , section [ class "round-inputs" ]
+            (quiz.rounds
+                |> List.sortBy .number
+                |> List.map (viewRoundRow model)
+            )
+        , footer [ class "section-actions" ]
+            [ button
+                [ class "button primary"
+                , onClick Page.SaveIdentifier
+                , disabled (model.isSaving || model.isLocked)
+                ]
+                [ text (saveButtonLabel model.isSaving "Save Rounds") ]
+            ]
+        ]
+
+
+viewRoundRow : Page.Model -> Round -> Html Page.Msg
+viewRoundRow model round =
+    let
+        rowId =
+            String.concat [ "round-", String.fromInt round.number ]
+
+        questionCount =
+            Dict.get round.number model.questionsPerRound
+                |> Maybe.withDefault round.numberOfQuestions
+    in
+    section [ class "round-input" ]
+        [ label [ for rowId ]
+            [ text (String.concat [ "Round ", String.fromInt round.number ]) ]
+        , input
+            [ type_ "number"
+            , id rowId
+            , value (String.fromInt questionCount)
+            , onInput (Page.SetQuestionsForRound round.number)
+            , Attr.min "0"
+            , disabled (model.isSaving || model.isLocked)
+            ]
+            []
         ]
 
 

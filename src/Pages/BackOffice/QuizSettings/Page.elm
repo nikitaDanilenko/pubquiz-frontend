@@ -23,6 +23,7 @@ type alias Model =
     , date : String
     , place : String
     , teamNames : Dict Int String
+    , questionsPerRound : Dict Int Int
     , isAdmin : Bool
     , isLoading : Bool
     , isSaving : Bool
@@ -39,6 +40,7 @@ lenses :
     , date : Lens Model String
     , place : Lens Model String
     , teamNames : Lens Model (Dict Int String)
+    , questionsPerRound : Lens Model (Dict Int Int)
     , isAdmin : Lens Model Bool
     , isLoading : Lens Model Bool
     , isSaving : Lens Model Bool
@@ -53,6 +55,7 @@ lenses =
     , date = Lens .date (\b a -> { a | date = b })
     , place = Lens .place (\b a -> { a | place = b })
     , teamNames = Lens .teamNames (\b a -> { a | teamNames = b })
+    , questionsPerRound = Lens .questionsPerRound (\b a -> { a | questionsPerRound = b })
     , isAdmin = Lens .isAdmin (\b a -> { a | isAdmin = b })
     , isLoading = Lens .isLoading (\b a -> { a | isLoading = b })
     , isSaving = Lens .isSaving (\b a -> { a | isSaving = b })
@@ -74,6 +77,7 @@ type Msg
     | GotSaveTeamNameResponse Int (Result (OpenApi.Common.Error BackofficeQuizIdRenameTeam_Error String) ())
     | ToggleTeamActive Int Bool
     | GotToggleTeamActiveResponse Int Bool (Result (OpenApi.Common.Error BackofficeQuizIdSetTeamActive_Error String) ())
+    | SetQuestionsForRound Int String
     | LockQuiz
     | UnlockQuiz
     | GotLockResponse (Result (OpenApi.Common.Error () String) ())
