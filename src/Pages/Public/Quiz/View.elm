@@ -51,7 +51,7 @@ viewQuiz theme hovering statsHovering quiz =
                 |> List.sortBy .number
 
         rounds =
-            quiz.rounds |> List.sortBy .number
+            quiz.rounds |> List.filter .published |> List.sortBy .number
 
         scores =
             quiz.scoreBoard.scores

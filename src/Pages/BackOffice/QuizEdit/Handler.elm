@@ -85,8 +85,21 @@ update msg model =
 
         Page.MarkRoundComplete roundNumber ->
             ( { model | completedRounds = Set.insert roundNumber model.completedRounds }
-            , Cmd.none
+            , Api.Api.backofficeQuizIdPublishRoundRoundNumber
+                { params = { quizId = model.quizId, roundNumber = roundNumber }
+                , toMsg = Page.GotPublishRoundResponse roundNumber
+                }
             )
+
+        Page.GotPublishRoundResponse _ result ->
+            case result of
+                Ok _ ->
+                    ( model, Cmd.none )
+
+                Err _ ->
+                    ( { model | error = Just "Failed to publish round" }
+                    , Cmd.none
+                    )
 
         Page.EditCompletedRound roundNumber ->
             ( { model | editingRound = Just roundNumber }

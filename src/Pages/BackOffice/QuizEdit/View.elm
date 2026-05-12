@@ -297,7 +297,7 @@ viewRoundActions model round state =
                     , onClick (Page.MarkRoundComplete round.number)
                     , disabled (model.isSubmitting || model.isLocked)
                     ]
-                    [ text "Mark Complete" ]
+                    [ text "Publish" ]
                 ]
 
             Page.Complete ->

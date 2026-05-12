@@ -61,7 +61,7 @@ viewTeam teamNumber quiz =
                 |> List.Extra.find (\t -> t.number == teamNumber)
 
         rounds =
-            quiz.rounds |> List.sortBy .number
+            quiz.rounds |> List.filter .published |> List.sortBy .number
 
         scores =
             quiz.scoreBoard.scores

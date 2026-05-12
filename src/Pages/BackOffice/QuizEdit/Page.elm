@@ -71,6 +71,7 @@ type Msg
     | SetScore Int Int String
     | IncrementScore Int Int Float
     | MarkRoundComplete Int
+    | GotPublishRoundResponse Int (Result (OpenApi.Common.Error () String) ())
     | EditCompletedRound Int
     | CancelEdit
     | SubmitRound Int
