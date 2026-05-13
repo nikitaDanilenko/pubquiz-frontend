@@ -2,8 +2,8 @@ module Pages.BackOffice.Login.Handler exposing (init, update)
 
 import Api.Api
 import Api.Types exposing (LoginRequest)
-import OpenApi.Common
 import Pages.BackOffice.Login.Page as Page
+import Util.Api
 
 
 init : ( Page.Model, Cmd Page.Msg )
@@ -51,7 +51,19 @@ update msg model =
                 Err error ->
                     ( model
                         |> Page.lenses.isSubmitting.set False
-                        |> Page.lenses.error.set (Just (errorToString error))
+                        |> Page.lenses.error.set
+                            (Just
+                                (Util.Api.errorToString
+                                    (\status ->
+                                        if status == 401 then
+                                            "Invalid username or password"
+
+                                        else
+                                            String.concat [ "Error: ", String.fromInt status ]
+                                    )
+                                    error
+                                )
+                            )
                     , Cmd.none
                     , False
                     )
@@ -65,35 +77,3 @@ login username password =
         }
 
 
-errorToString : OpenApi.Common.Error () String -> String
-errorToString error =
-    case error of
-        OpenApi.Common.BadUrl _ ->
-            "Invalid URL"
-
-        OpenApi.Common.Timeout ->
-            "Request timed out"
-
-        OpenApi.Common.NetworkError ->
-            "Network error"
-
-        OpenApi.Common.KnownBadStatus status _ ->
-            if status == 401 then
-                "Invalid username or password"
-
-            else
-                String.concat [ "Error: ", String.fromInt status ]
-
-        OpenApi.Common.UnknownBadStatus _ body ->
-            errorWith "bad status" body
-
-        OpenApi.Common.BadErrorBody _ body ->
-            errorWith "bad error body" body
-
-        OpenApi.Common.BadBody _ body ->
-            errorWith "bad body" body
-
-
-errorWith : String -> String -> String
-errorWith kind message =
-    String.concat [ "Error - ", kind, ": ", "'", message, "'" ]

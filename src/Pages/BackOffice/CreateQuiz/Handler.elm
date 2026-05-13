@@ -6,8 +6,9 @@ module Pages.BackOffice.CreateQuiz.Handler exposing (init, update)
 import Api.Api
 import Api.Types exposing (QuizIdentifier, QuizMetaData, QuizSettings)
 import Date
-import OpenApi.Common
+import List.Extra
 import Pages.BackOffice.CreateQuiz.Page as Page
+import Util.Api
 
 
 defaultQuestionsPerRound : Int
@@ -94,14 +95,7 @@ update msg model =
 
                 newList =
                     model.questionsPerRound
-                        |> List.indexedMap
-                            (\i v ->
-                                if i == roundIndex then
-                                    newValue
-
-                                else
-                                    v
-                            )
+                        |> List.Extra.setAt roundIndex newValue
             in
             ( Page.lenses.questionsPerRound.set newList model
             , Cmd.none
@@ -147,7 +141,7 @@ update msg model =
                 Err error ->
                     ( model
                         |> Page.lenses.isSubmitting.set False
-                        |> Page.lenses.error.set (Just (errorToString error))
+                        |> Page.lenses.error.set (Just (Util.Api.errorToString (\_ -> "Invalid quiz data") error))
                     , Cmd.none
                     , Nothing
                     )
@@ -164,26 +158,3 @@ createQuiz model date =
         }
 
 
-errorToString : OpenApi.Common.Error () String -> String
-errorToString error =
-    case error of
-        OpenApi.Common.BadUrl _ ->
-            "Invalid URL"
-
-        OpenApi.Common.Timeout ->
-            "Request timed out"
-
-        OpenApi.Common.NetworkError ->
-            "Network error"
-
-        OpenApi.Common.KnownBadStatus _ _ ->
-            "Invalid quiz data"
-
-        OpenApi.Common.UnknownBadStatus _ body ->
-            String.concat [ "Error: ", body ]
-
-        OpenApi.Common.BadErrorBody _ body ->
-            String.concat [ "Error: ", body ]
-
-        OpenApi.Common.BadBody _ body ->
-            String.concat [ "Error: ", body ]
