@@ -2,8 +2,8 @@ module Pages.BackOffice.QuizSettings.View exposing (view)
 
 import Api.Types exposing (Quiz, Round, Team)
 import Dict exposing (Dict)
-import Html exposing (Html, a, button, div, footer, h1, h2, header, input, label, li, nav, p, section, span, text, ul)
-import Html.Attributes as Attr exposing (checked, class, disabled, for, href, id, placeholder, type_, value)
+import Html exposing (Html, button, div, footer, h1, h2, header, input, label, li, p, section, span, text, ul)
+import Html.Attributes as Attr exposing (checked, class, disabled, for, id, placeholder, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
 import Maybe.Extra
 import Pages.BackOffice.QuizSettings.Page as Page
@@ -268,5 +268,3 @@ saveButtonLabel isSaving defaultLabel =
 
     else
         defaultLabel
-
-

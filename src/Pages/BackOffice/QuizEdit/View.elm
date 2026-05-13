@@ -2,8 +2,8 @@ module Pages.BackOffice.QuizEdit.View exposing (view)
 
 import Api.Types exposing (Quiz, Round, Team)
 import Dict exposing (Dict)
-import Html exposing (Html, a, button, div, footer, h1, h2, header, input, label, li, nav, ol, p, section, span, text, ul)
-import Html.Attributes as Attr exposing (class, disabled, href, placeholder, step, type_, value)
+import Html exposing (Html, button, div, footer, h1, h2, header, input, label, li, ol, p, section, span, text, ul)
+import Html.Attributes as Attr exposing (class, disabled, placeholder, step, type_, value)
 import Html.Events exposing (onClick, onInput, preventDefaultOn)
 import Json.Decode as Decode
 import Maybe.Extra
