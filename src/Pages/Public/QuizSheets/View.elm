@@ -5,6 +5,7 @@ import Date
 import Html exposing (Html, article, aside, div, figure, h1, h2, header, input, li, main_, ol, p, section, span, strong, text, time)
 import Html.Attributes exposing (attribute, class, type_)
 import Pages.Public.QuizSheets.Page as Page
+import QRCode
 
 
 view : Page.Model -> Html Page.Msg
@@ -23,7 +24,7 @@ view model =
                         section [ class "error" ] [ p [] [ text "Failed to load quiz." ] ]
 
                     Just quiz ->
-                        viewSheets quiz
+                        viewSheets model.baseUrl quiz
 
 
 type alias SheetPage =
@@ -34,8 +35,8 @@ type alias SheetPage =
     }
 
 
-viewSheets : Quiz -> Html msg
-viewSheets quiz =
+viewSheets : String -> Quiz -> Html msg
+viewSheets baseUrl quiz =
     let
         activeTeams =
             quiz.scoreBoard.teams
@@ -63,9 +64,12 @@ viewSheets quiz =
                                 )
                     )
                 |> List.concat
+
+        quizId =
+            quiz.summary.quizId
     in
     main_ [ class "quiz-sheets" ]
-        (viewOrganiserNote :: List.map (viewSheet quiz.summary.identifier) sheetPages)
+        (viewOrganiserNote :: List.map (viewSheet baseUrl quizId quiz.summary.identifier) sheetPages)
 
 
 viewOrganiserNote : Html msg
@@ -77,8 +81,8 @@ viewOrganiserNote =
         ]
 
 
-viewSheet : QuizIdentifier -> SheetPage -> Html msg
-viewSheet identifier page =
+viewSheet : String -> Int -> QuizIdentifier -> SheetPage -> Html msg
+viewSheet baseUrl quizId identifier page =
     article
         [ class
             (if page.isFirstOverall then
@@ -88,14 +92,18 @@ viewSheet identifier page =
                 "sheet new-page"
             )
         ]
-        (viewSheetHeader identifier page
+        (viewSheetHeader baseUrl quizId identifier page
             :: List.map viewRoundSection page.rounds
         )
 
 
-viewSheetHeader : QuizIdentifier -> SheetPage -> Html msg
-viewSheetHeader identifier page =
+viewSheetHeader : String -> Int -> QuizIdentifier -> SheetPage -> Html msg
+viewSheetHeader baseUrl quizId identifier page =
     if page.isFirstForTeam then
+        let
+            teamUrl =
+                String.concat [ baseUrl, "/quizzes/", String.fromInt quizId, "/teams/", String.fromInt page.team.number ]
+        in
         header [ class "sheet-header" ]
             [ div [ class "sheet-hgroup" ]
                 [ h1 [] [ text (teamLabel page.team) ]
@@ -103,8 +111,10 @@ viewSheetHeader identifier page =
                 , time [ attribute "datetime" (Date.format "yyyy-MM-dd" identifier.date) ]
                     [ text (Date.format "d MMMM y" identifier.date) ]
                 ]
-            , figure [ class "qr-placeholder" ]
-                [ text "[QR Code]"
+            , figure [ class "qr-code" ]
+                [ QRCode.fromString teamUrl
+                    |> Result.map (QRCode.toSvg [])
+                    |> Result.withDefault (text "")
                 , span [] [ text "Scan for live scores" ]
                 ]
             ]

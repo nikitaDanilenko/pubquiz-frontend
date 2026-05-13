@@ -9,6 +9,7 @@ type alias Model =
     , quiz : Maybe Quiz
     , isLoading : Bool
     , error : Maybe String
+    , baseUrl : String
     }
 
 

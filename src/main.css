@@ -1196,20 +1196,19 @@ img {
   margin-top: 5px;
 }
 
-.quiz-sheets .qr-placeholder {
-  width: 80px;
-  height: 80px;
-  border: 1px solid #ccc;
+.quiz-sheets .qr-code {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   font-size: 8pt;
   color: #999;
-  background: #f9f9f9;
-  text-align: center;
   margin: 0;
   gap: 4px;
+}
+
+.quiz-sheets .qr-code svg {
+  width: 25mm;
+  height: 25mm;
 }
 
 .quiz-sheets .sheet-header-minimal {

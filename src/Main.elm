@@ -46,6 +46,7 @@ port saveTheme : String -> Cmd msg
 
 type alias Flags =
     { theme : String
+    , baseUrl : String
     }
 
 
@@ -67,6 +68,7 @@ type alias Model =
     , theme : Theme
     , authenticatedUser : Maybe Api.Types.AuthenticatedUser
     , pendingRoute : Maybe Route
+    , baseUrl : String
     }
 
 
@@ -167,6 +169,7 @@ init flags url key =
             , theme = parseTheme flags.theme
             , authenticatedUser = Nothing
             , pendingRoute = parseUrl url
+            , baseUrl = flags.baseUrl
             }
     in
     ( model
@@ -428,7 +431,7 @@ navigateTo maybeRoute model =
         Just (QuizSheetsRoute quizId) ->
             let
                 ( quizSheetsModel, quizSheetsCmd ) =
-                    Pages.Public.QuizSheets.Handler.init { quizId = quizId }
+                    Pages.Public.QuizSheets.Handler.init { quizId = quizId, baseUrl = model.baseUrl }
             in
             ( { model | page = QuizSheets quizSheetsModel, pendingRoute = Nothing }
             , Cmd.map QuizSheetsMsg quizSheetsCmd

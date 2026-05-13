@@ -4,12 +4,13 @@ import Api.Api
 import Pages.Public.QuizSheets.Page as Page
 
 
-init : { quizId : Int } -> ( Page.Model, Cmd Page.Msg )
+init : { quizId : Int, baseUrl : String } -> ( Page.Model, Cmd Page.Msg )
 init params =
     ( { quizId = params.quizId
       , quiz = Nothing
       , isLoading = True
       , error = Nothing
+      , baseUrl = params.baseUrl
       }
     , Api.Api.publicQuizId
         { params = { quizId = params.quizId }
