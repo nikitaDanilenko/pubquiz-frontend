@@ -6,6 +6,7 @@ import Html exposing (Html, article, aside, div, figure, h1, h2, header, input, 
 import Html.Attributes exposing (attribute, class, type_)
 import Pages.Public.QuizSheets.Page as Page
 import QRCode
+import Result.Extra
 
 
 view : Page.Model -> Html Page.Msg
@@ -113,8 +114,7 @@ viewSheetHeader baseUrl quizId identifier page =
                 ]
             , figure [ class "qr-code" ]
                 [ QRCode.fromString teamUrl
-                    |> Result.map (QRCode.toSvg [])
-                    |> Result.withDefault (text "")
+                    |> Result.Extra.unwrap (text "") (QRCode.toSvg [])
                 , span [] [ text "Scan for live scores" ]
                 ]
             ]
