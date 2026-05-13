@@ -33,6 +33,12 @@
 - Prefer existing combinators to pattern matching
 - Don't inline functions with `let` expressions or pattern matching, extract in variables/functions instead
   - In particular, in DOM code, keep DOM as declarative as possible, and extract all computations into variables/functions.
+  - Never write `text (if … then … else …)` inline — extract the string to a named binding first.
+  - Never write `disabled (expr1 || expr2)` inline — extract as `isDisabled`.
+  - CSS class strings computed from conditionals must be named bindings, not inline `if` inside `class (…)`.
+- Never write nested `let … in let … in` blocks — merge all bindings into one `let` block.
+- Avoid matching a tuple just to short-circuit, then re-matching each field individually inside the branch. Match each field once in `let` bindings and guard with a derived boolean.
+- Extract repeated logic into a shared utility when the repetition represents a genuine domain concept (e.g. "active teams sorted by number", "team display name with fallback"). Do not extract just because code is identical — a one-line view helper used twice may not be worth a shared function.
 
 ## Tooling
 
