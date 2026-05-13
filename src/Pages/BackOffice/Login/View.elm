@@ -17,32 +17,16 @@ view model =
 
 viewForm : Page.Model -> Html Page.Msg
 viewForm model =
+    let
+        isDisabled =
+            model.isSubmitting || String.isEmpty model.username || String.isEmpty model.password
+    in
     form [ class "login-form", onSubmit Page.Submit ]
         [ label [ for "username" ] [ text "Username" ]
-        , input
-            [ type_ "text"
-            , id "username"
-            , placeholder "Username"
-            , value model.username
-            , onInput Page.SetUsername
-            , disabled model.isSubmitting
-            ]
-            []
+        , input [ type_ "text", id "username", placeholder "Username", value model.username, onInput Page.SetUsername, disabled model.isSubmitting ] []
         , label [ for "password" ] [ text "Password" ]
-        , input
-            [ type_ "password"
-            , id "password"
-            , placeholder "Password"
-            , value model.password
-            , onInput Page.SetPassword
-            , disabled model.isSubmitting
-            ]
-            []
-        , button
-            [ type_ "submit"
-            , class "login-button"
-            , disabled (model.isSubmitting || String.isEmpty model.username || String.isEmpty model.password)
-            ]
+        , input [ type_ "password", id "password", placeholder "Password", value model.password, onInput Page.SetPassword, disabled model.isSubmitting ] []
+        , button [ type_ "submit", class "login-button", disabled isDisabled ]
             [ text (buttonText model) ]
         ]
 

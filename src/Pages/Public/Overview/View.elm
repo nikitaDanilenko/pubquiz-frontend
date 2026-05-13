@@ -61,31 +61,19 @@ viewSortButtons : Page.Model -> Html Page.Msg
 viewSortButtons model =
     let
         sortByButton sortBy label =
-            button
-                [ class "sort-button"
-                , class
-                    (if model.sortBy == sortBy then
-                        "active"
-
-                     else
-                        ""
-                    )
-                , onClick (Page.SetSortBy sortBy)
-                ]
+            let
+                activeClass =
+                    if model.sortBy == sortBy then "active" else ""
+            in
+            button [ class "sort-button", class activeClass, onClick (Page.SetSortBy sortBy) ]
                 [ text label ]
 
         directionButton direction label =
-            button
-                [ class "sort-button"
-                , class
-                    (if model.sortDirection == direction then
-                        "active"
-
-                     else
-                        ""
-                    )
-                , onClick (Page.SetSortDirection direction)
-                ]
+            let
+                activeClass =
+                    if model.sortDirection == direction then "active" else ""
+            in
+            button [ class "sort-button", class activeClass, onClick (Page.SetSortDirection direction) ]
                 [ text label ]
     in
     nav [ class "sort-controls" ]

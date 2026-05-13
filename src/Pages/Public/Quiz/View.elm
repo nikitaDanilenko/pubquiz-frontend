@@ -246,7 +246,7 @@ viewCumulativeBarChart theme hovering teamData rounds =
                 roundData
             , C.each hovering <|
                 \_ item ->
-                    [ C.tooltip item [ CA.onTop ] [] [ Html.text (String.concat [ CI.getName item, ": ", formatPoints (CI.getY item) ]) ] ]
+                    [ C.tooltip item [ CA.onTop ] [] [ Html.text (tooltipLabel item) ] ]
             ]
         , viewTeamLegend teamData
         ]
@@ -296,7 +296,7 @@ viewPerRoundBarChart theme hovering teamData rounds =
                 roundData
             , C.each hovering <|
                 \_ item ->
-                    [ C.tooltip item [ CA.onTop ] [] [ Html.text (String.concat [ CI.getName item, ": ", formatPoints (CI.getY item) ]) ] ]
+                    [ C.tooltip item [ CA.onTop ] [] [ Html.text (tooltipLabel item) ] ]
             ]
         , viewTeamLegend teamData
         ]
@@ -385,7 +385,7 @@ viewRoundStatisticsChart theme hovering rounds scores =
                 stats
             , C.each hovering <|
                 \_ item ->
-                    [ C.tooltip item [ CA.onTop ] [] [ Html.text (String.concat [ CI.getName item, ": ", formatPoints (CI.getY item) ]) ] ]
+                    [ C.tooltip item [ CA.onTop ] [] [ Html.text (tooltipLabel item) ] ]
             ]
         , viewStatisticsLegend
         ]
@@ -436,6 +436,11 @@ teamName team =
 
     else
         team.name
+
+
+tooltipLabel : CI.One data CI.Any -> String
+tooltipLabel item =
+    String.concat [ CI.getName item, ": ", formatPoints (CI.getY item) ]
 
 
 formatPoints : Float -> String

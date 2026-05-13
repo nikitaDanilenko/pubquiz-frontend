@@ -1,8 +1,5 @@
 module Pages.BackOffice.CreateQuiz.Handler exposing (init, update)
 
-{-| Create Quiz page logic.
--}
-
 import Api.Api
 import Api.Types exposing (QuizIdentifier, QuizMetaData, QuizSettings)
 import Date

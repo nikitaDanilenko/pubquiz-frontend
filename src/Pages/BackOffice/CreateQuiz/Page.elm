@@ -4,9 +4,6 @@ module Pages.BackOffice.CreateQuiz.Page exposing
     , lenses
     )
 
-{-| Create Quiz page state.
--}
-
 import Api.Types exposing (Quiz)
 import Monocle.Lens exposing (Lens)
 import OpenApi.Common

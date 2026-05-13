@@ -2,7 +2,7 @@ module Pages.BackOffice.QuizSettings.View exposing (view)
 
 import Api.Types exposing (Quiz, Round, Team)
 import Dict exposing (Dict)
-import Html exposing (Html, button, div, footer, h1, h2, header, input, label, li, p, section, span, text, ul)
+import Html exposing (Html, button, footer, h1, h2, header, input, label, li, p, section, strong, text, ul)
 import Html.Attributes as Attr exposing (checked, class, disabled, for, id, placeholder, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
 import Maybe.Extra
@@ -76,48 +76,31 @@ viewMessages model =
 
 viewIdentifierSection : Page.Model -> Html Page.Msg
 viewIdentifierSection model =
+    let
+        isDisabled =
+            model.isSaving || model.isLocked
+    in
     section [ class "settings-section" ]
         [ h2 [] [ text "Quiz Details" ]
-        , div [ class "form-fields" ]
+        , section [ class "form-fields" ]
             [ p [ class "form-field" ]
                 [ label [ for "name" ] [ text "Name" ]
-                , input
-                    [ type_ "text"
-                    , id "name"
-                    , value model.name
-                    , onInput Page.SetName
-                    , disabled (model.isSaving || model.isLocked)
-                    ]
-                    []
+                , input [ type_ "text", id "name", value model.name, onInput Page.SetName, disabled isDisabled ] []
                 ]
             , p [ class "form-field" ]
                 [ label [ for "date" ] [ text "Date" ]
-                , input
-                    [ type_ "date"
-                    , id "date"
-                    , value model.date
-                    , onInput Page.SetDate
-                    , disabled (model.isSaving || model.isLocked)
-                    ]
-                    []
+                , input [ type_ "date", id "date", value model.date, onInput Page.SetDate, disabled isDisabled ] []
                 ]
             , p [ class "form-field" ]
                 [ label [ for "place" ] [ text "Place" ]
-                , input
-                    [ type_ "text"
-                    , id "place"
-                    , value model.place
-                    , onInput Page.SetPlace
-                    , disabled (model.isSaving || model.isLocked)
-                    ]
-                    []
+                , input [ type_ "text", id "place", value model.place, onInput Page.SetPlace, disabled isDisabled ] []
                 ]
             ]
         , footer [ class "section-actions" ]
             [ button
                 [ class "button primary"
                 , onClick Page.SaveIdentifier
-                , disabled (model.isSaving || model.isLocked)
+                , disabled isDisabled
                 ]
                 [ text (saveButtonLabel model.isSaving "Save Details") ]
             ]
@@ -154,16 +137,22 @@ viewRoundRow model round =
             Dict.get round.number model.questionsPerRound
                 |> Maybe.withDefault round.numberOfQuestions
     in
+    let
+        roundLabel =
+            String.concat [ "Round ", String.fromInt round.number ]
+
+        isDisabled =
+            model.isSaving || model.isLocked
+    in
     section [ class "round-input" ]
-        [ label [ for rowId ]
-            [ text (String.concat [ "Round ", String.fromInt round.number ]) ]
+        [ label [ for rowId ] [ text roundLabel ]
         , input
             [ type_ "number"
             , id rowId
             , value (String.fromInt questionCount)
             , onInput (Page.SetQuestionsForRound round.number)
             , Attr.min "0"
-            , disabled (model.isSaving || model.isLocked)
+            , disabled isDisabled
             ]
             []
         ]
@@ -191,23 +180,31 @@ viewTeamRow model team =
 
             else
                 "team-row inactive"
+
+        teamNumberLabel =
+            String.concat [ "#", String.fromInt team.number ]
+
+        defaultName =
+            String.concat [ "Team ", String.fromInt team.number ]
+
+        isDisabled =
+            model.isSaving || model.isLocked
     in
     li [ class rowClass ]
-        [ span [ class "team-number" ]
-            [ text (String.concat [ "#", String.fromInt team.number ]) ]
+        [ strong [ class "team-number" ] [ text teamNumberLabel ]
         , input
             [ type_ "text"
             , class "team-name-input"
             , value teamName
             , onInput (Page.SetTeamName team.number)
-            , placeholder (String.concat [ "Team ", String.fromInt team.number ])
-            , disabled (model.isSaving || model.isLocked)
+            , placeholder defaultName
+            , disabled isDisabled
             ]
             []
         , button
             [ class "button small secondary"
             , onClick (Page.SaveTeamName team.number)
-            , disabled (model.isSaving || model.isLocked)
+            , disabled isDisabled
             ]
             [ text "Save" ]
         , label [ class "toggle-label" ]
@@ -215,10 +212,10 @@ viewTeamRow model team =
                 [ type_ "checkbox"
                 , checked team.active
                 , onCheck (Page.ToggleTeamActive team.number)
-                , disabled (model.isSaving || model.isLocked)
+                , disabled isDisabled
                 ]
                 []
-            , span [] [ text "Active" ]
+            , text "Active"
             ]
         ]
 

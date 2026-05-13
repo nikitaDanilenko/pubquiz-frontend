@@ -1,8 +1,5 @@
 module Pages.BackOffice.CreateQuiz.View exposing (view)
 
-{-| Create Quiz page view.
--}
-
 import Html exposing (Html, button, form, h1, input, label, p, section, text)
 import Html.Attributes as Attr exposing (class, disabled, for, id, placeholder, type_, value)
 import Html.Events exposing (onInput, onSubmit)

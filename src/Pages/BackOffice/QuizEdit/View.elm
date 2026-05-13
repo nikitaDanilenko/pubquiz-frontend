@@ -2,7 +2,7 @@ module Pages.BackOffice.QuizEdit.View exposing (view)
 
 import Api.Types exposing (Quiz, Round, Team)
 import Dict exposing (Dict)
-import Html exposing (Html, button, div, footer, h1, h2, header, input, label, li, ol, p, section, span, text, ul)
+import Html exposing (Html, button, div, footer, h1, h2, header, input, label, li, ol, p, section, small, span, text, ul)
 import Html.Attributes as Attr exposing (class, disabled, placeholder, step, type_, value)
 import Html.Events exposing (onClick, onInput, preventDefaultOn)
 import Json.Decode as Decode
@@ -89,19 +89,11 @@ viewRound model quiz round =
             else
                 Page.Draft
     in
-    li
-        [ class
-            (String.join " "
-                [ "round"
-                , if isExpanded then
-                    "expanded"
-
-                  else
-                    "collapsed"
-                , roundStateClass roundState
-                ]
-            )
-        ]
+    let
+        roundClass =
+            String.join " " [ "round", if isExpanded then "expanded" else "collapsed", roundStateClass roundState ]
+    in
+    li [ class roundClass ]
         [ viewRoundHeader model round isExpanded isComplete isEditing
         , if isExpanded then
             viewRoundBody model quiz round roundState
@@ -146,26 +138,30 @@ viewRoundHeader model round isExpanded isComplete isEditing =
 
         summary =
             getRoundSummary model round
+
+        roundLabel =
+            String.concat [ "Round ", String.fromInt round.number ]
+
+        maxPointsLabel =
+            String.concat [ String.fromFloat round.displayMaxPoints, " points possible" ]
+
+        expandIconText =
+            if isExpanded then
+                "▼"
+
+            else
+                "▶"
     in
     header [ class "round-header", onClick headerAction ]
         [ statusIcon
-        , h2 [] [ text (String.concat [ "Round ", String.fromInt round.number ]) ]
-        , span [ class "max-points" ]
-            [ text (String.concat [ String.fromFloat round.displayMaxPoints, " points possible" ]) ]
+        , h2 [] [ text roundLabel ]
+        , small [ class "max-points" ] [ text maxPointsLabel ]
         , if not isExpanded && summary /= "" then
-            span [ class "round-summary" ] [ text summary ]
+            small [ class "round-summary" ] [ text summary ]
 
           else
             text ""
-        , span [ class "expand-icon" ]
-            [ text
-                (if isExpanded then
-                    "▼"
-
-                 else
-                    "▶"
-                )
-            ]
+        , span [ class "expand-icon" ] [ text expandIconText ]
         ]
 
 
@@ -219,25 +215,24 @@ viewTeamScore model round roundInput isEditable team =
 
             else
                 team.name
-    in
-    li
-        [ class
-            (String.concat
-                [ "team-score"
-                , if team.active then
-                    ""
 
-                  else
-                    " inactive"
-                ]
-            )
-        ]
+        teamClass =
+            if team.active then
+                "team-score"
+
+            else
+                "team-score inactive"
+
+        isDisabled =
+            not isEditable || model.isSubmitting || model.isLocked
+    in
+    li [ class teamClass ]
         [ label [] [ text teamLabel ]
         , div [ class "score-input-group" ]
             [ button
                 [ class "stepper decrement"
                 , onClick (Page.IncrementScore round.number team.number -0.5)
-                , disabled (not isEditable || model.isSubmitting || model.isLocked)
+                , disabled isDisabled
                 ]
                 [ text "−½" ]
             , input
@@ -248,7 +243,7 @@ viewTeamScore model round roundInput isEditable team =
                 , placeholder "0"
                 , step "0.5"
                 , Attr.min "0"
-                , disabled (not isEditable || model.isSubmitting || model.isLocked)
+                , disabled isDisabled
                 , onScoreKeydown round.number team.number
                 ]
                 []

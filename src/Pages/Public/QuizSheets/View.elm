@@ -2,7 +2,7 @@ module Pages.Public.QuizSheets.View exposing (view)
 
 import Api.Types exposing (Quiz, QuizIdentifier, Round, Team)
 import Date
-import Html exposing (Html, article, aside, div, figure, h1, h2, header, input, li, main_, ol, p, section, span, strong, text, time)
+import Html exposing (Html, article, aside, div, figcaption, figure, h1, h2, header, input, li, main_, ol, p, section, span, strong, text, time)
 import Html.Attributes exposing (attribute, class, type_)
 import Pages.Public.QuizSheets.Page as Page
 import QRCode
@@ -84,15 +84,15 @@ viewOrganiserNote =
 
 viewSheet : String -> Int -> QuizIdentifier -> SheetPage -> Html msg
 viewSheet baseUrl quizId identifier page =
-    article
-        [ class
-            (if page.isFirstOverall then
+    let
+        sheetClass =
+            if page.isFirstOverall then
                 "sheet"
 
-             else
+            else
                 "sheet new-page"
-            )
-        ]
+    in
+    article [ class sheetClass ]
         (viewSheetHeader baseUrl quizId identifier page
             :: List.map viewRoundSection page.rounds
         )
@@ -105,17 +105,26 @@ viewSheetHeader baseUrl quizId identifier page =
             teamUrl =
                 String.concat [ baseUrl, "/quizzes/", String.fromInt quizId, "/teams/", String.fromInt page.team.number ]
         in
+        let
+            quizLabel =
+                String.concat [ identifier.name, " — ", identifier.place ]
+
+            dateIso =
+                Date.format "yyyy-MM-dd" identifier.date
+
+            dateFormatted =
+                Date.format "d MMMM y" identifier.date
+        in
         header [ class "sheet-header" ]
             [ div [ class "sheet-hgroup" ]
                 [ h1 [] [ text (teamLabel page.team) ]
-                , p [] [ text (String.concat [ identifier.name, " — ", identifier.place ]) ]
-                , time [ attribute "datetime" (Date.format "yyyy-MM-dd" identifier.date) ]
-                    [ text (Date.format "d MMMM y" identifier.date) ]
+                , p [] [ text quizLabel ]
+                , time [ attribute "datetime" dateIso ] [ text dateFormatted ]
                 ]
             , figure [ class "qr-code" ]
                 [ QRCode.fromString teamUrl
                     |> Result.Extra.unwrap (text "") (QRCode.toSvg [])
-                , span [] [ text "Scan for live scores" ]
+                , figcaption [] [ text "Scan for live scores" ]
                 ]
             ]
 
