@@ -152,19 +152,6 @@ teamLabel team =
         team.name
 
 
-
--- todo: Remove?
-
-
-formatPoints : Float -> String
-formatPoints pts =
-    if toFloat (Basics.round pts) == pts then
-        String.fromInt (Basics.round pts)
-
-    else
-        String.fromFloat pts
-
-
 groupRoundsIntoPages : List Round -> List (List Round)
 groupRoundsIntoPages rounds =
     let
