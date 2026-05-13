@@ -7,6 +7,7 @@ import Html.Attributes as Attr exposing (checked, class, disabled, for, href, id
 import Html.Events exposing (onCheck, onClick, onInput)
 import Maybe.Extra
 import Pages.BackOffice.QuizSettings.Page as Page
+import Pages.BackOffice.Shared as Shared
 
 
 view : Page.Model -> Html Page.Msg
@@ -26,19 +27,7 @@ viewHeader model =
     in
     header [ class "quiz-settings-header" ]
         [ h1 [] [ text title ]
-        , nav [ class "quiz-settings-actions" ]
-            [ a
-                [ href (String.concat [ "/backoffice/", String.fromInt model.quizId ])
-                , class "button primary"
-                ]
-                [ text "Point Entry" ]
-            , a
-                [ href (String.concat [ "/quizzes/", String.fromInt model.quizId, "/sheets" ])
-                , class "button secondary"
-                ]
-                [ text "Print Sheets" ]
-            , a [ href "/backoffice", class "button secondary" ] [ text "Back" ]
-            ]
+        , Shared.viewQuizNav model.quizId Shared.Settings
         ]
 
 
@@ -64,20 +53,25 @@ viewContent model =
 
 viewMessages : Page.Model -> Html msg
 viewMessages model =
-    section [ class "messages" ]
-        [ case model.error of
-            Just error ->
-                p [ class "form-error" ] [ text error ]
+    case ( model.error, model.successMessage ) of
+        ( Nothing, Nothing ) ->
+            text ""
 
-            Nothing ->
-                text ""
-        , case model.successMessage of
-            Just msg ->
-                p [ class "form-success" ] [ text msg ]
+        _ ->
+            section [ class "messages" ]
+                [ case model.error of
+                    Just error ->
+                        p [ class "form-error" ] [ text error ]
 
-            Nothing ->
-                text ""
-        ]
+                    Nothing ->
+                        text ""
+                , case model.successMessage of
+                    Just msg ->
+                        p [ class "form-success" ] [ text msg ]
+
+                    Nothing ->
+                        text ""
+                ]
 
 
 viewIdentifierSection : Page.Model -> Html Page.Msg

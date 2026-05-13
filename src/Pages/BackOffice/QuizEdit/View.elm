@@ -8,6 +8,7 @@ import Html.Events exposing (onClick, onInput, preventDefaultOn)
 import Json.Decode as Decode
 import Maybe.Extra
 import Pages.BackOffice.QuizEdit.Page as Page
+import Pages.BackOffice.Shared as Shared
 import Set exposing (Set)
 
 
@@ -28,14 +29,7 @@ viewHeader model =
     in
     header [ class "quiz-edit-header" ]
         [ h1 [] [ text quizName ]
-        , nav [ class "quiz-edit-actions" ]
-            [ a
-                [ href (String.concat [ "/backoffice/", String.fromInt model.quizId, "/settings" ])
-                , class "button secondary"
-                ]
-                [ text "Settings" ]
-            , a [ href "/backoffice", class "button secondary" ] [ text "Back" ]
-            ]
+        , Shared.viewQuizNav model.quizId Shared.PointEntry
         ]
 
 

@@ -624,16 +624,16 @@ img {
 .quiz-edit {
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px 0;
+  padding: 20px 16px;
+  text-align: left;
 }
 
 .quiz-edit-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
 }
 
 .quiz-edit-header h1 {
@@ -641,8 +641,9 @@ img {
   text-align: left;
 }
 
-.quiz-edit-actions {
+.quiz-nav {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -691,6 +692,8 @@ img {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding: 0;
+  list-style: none;
 }
 
 .round {
@@ -867,11 +870,6 @@ img {
 
 /* Mobile Adjustments */
 @media (max-width: 600px) {
-  .quiz-edit-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .teams-grid {
     grid-template-columns: 1fr;
   }
@@ -895,15 +893,15 @@ img {
   max-width: 800px;
   margin: 0 auto;
   padding: 16px;
+  text-align: left;
 }
 
 .quiz-settings-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
 }
 
 .quiz-settings-header h1 {
@@ -911,10 +909,6 @@ img {
   font-size: 1.5rem;
 }
 
-.quiz-settings-actions {
-  display: flex;
-  gap: 8px;
-}
 
 .quiz-settings .button {
   padding: 8px 16px;
@@ -1059,7 +1053,6 @@ img {
 
 /* Messages */
 .messages {
-  min-height: 40px;
 }
 
 .form-success {
@@ -1072,11 +1065,6 @@ img {
 
 /* Quiz Settings Mobile */
 @media (max-width: 600px) {
-  .quiz-settings-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .team-row {
     flex-wrap: wrap;
   }
