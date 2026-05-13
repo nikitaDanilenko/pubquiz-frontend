@@ -3,6 +3,7 @@ module Pages.BackOffice.Login.View exposing (view)
 import Html exposing (Html, button, form, h1, input, label, p, section, text)
 import Html.Attributes exposing (class, disabled, for, id, placeholder, type_, value)
 import Html.Events exposing (onInput, onSubmit)
+import Maybe.Extra
 import Pages.BackOffice.Login.Page as Page
 
 
@@ -41,10 +42,5 @@ buttonText model =
 
 
 viewError : Maybe String -> Html msg
-viewError maybeError =
-    case maybeError of
-        Just error ->
-            p [ class "login-error" ] [ text error ]
-
-        Nothing ->
-            text ""
+viewError =
+    Maybe.Extra.unwrap (text "") (\error -> p [ class "login-error" ] [ text error ])

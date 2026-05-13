@@ -3,6 +3,7 @@ module Pages.BackOffice.CreateQuiz.View exposing (view)
 import Html exposing (Html, button, form, h1, input, label, p, section, text)
 import Html.Attributes as Attr exposing (class, disabled, for, id, placeholder, type_, value)
 import Html.Events exposing (onInput, onSubmit)
+import Maybe.Extra
 import Pages.BackOffice.CreateQuiz.Page as Page
 
 
@@ -17,6 +18,10 @@ view model =
 
 viewForm : Page.Model -> Html Page.Msg
 viewForm model =
+    let
+        isDisabled =
+            model.isSubmitting || not (isValid model)
+    in
     form [ class "create-quiz-form", onSubmit Page.Submit ]
         [ viewTextField "name" "Quiz Name" model.name Page.SetName model.isSubmitting
         , viewDateField "date" "Date" model.date Page.SetDate model.isSubmitting
@@ -24,11 +29,7 @@ viewForm model =
         , viewNumberField "rounds" "Number of Rounds" model.numberOfRounds Page.SetNumberOfRounds model.isSubmitting
         , viewQuestionsPerRound model
         , viewNumberField "teams" "Number of Teams" model.numberOfTeams Page.SetNumberOfTeams model.isSubmitting
-        , button
-            [ type_ "submit"
-            , class "submit-button"
-            , disabled (model.isSubmitting || not (isValid model))
-            ]
+        , button [ type_ "submit", class "submit-button", disabled isDisabled ]
             [ text (buttonText model) ]
         ]
 
@@ -135,10 +136,5 @@ buttonText model =
 
 
 viewError : Maybe String -> Html msg
-viewError maybeError =
-    case maybeError of
-        Just error ->
-            p [ class "form-error" ] [ text error ]
-
-        Nothing ->
-            text ""
+viewError =
+    Maybe.Extra.unwrap (text "") (\error -> p [ class "form-error" ] [ text error ])

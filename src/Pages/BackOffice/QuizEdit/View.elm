@@ -6,10 +6,12 @@ import Html exposing (Html, button, div, footer, h1, h2, header, input, label, l
 import Html.Attributes as Attr exposing (class, disabled, placeholder, step, type_, value)
 import Html.Events exposing (onClick, onInput, preventDefaultOn)
 import Json.Decode as Decode
+import List.Extra
 import Maybe.Extra
 import Pages.BackOffice.QuizEdit.Page as Page
 import Pages.BackOffice.Shared as Shared
 import Set exposing (Set)
+import Util.Team
 
 
 view : Page.Model -> Html Page.Msg
@@ -52,13 +54,8 @@ viewContent model =
 
 
 viewError : Maybe String -> Html msg
-viewError maybeError =
-    case maybeError of
-        Just error ->
-            p [ class "form-error" ] [ text error ]
-
-        Nothing ->
-            text ""
+viewError =
+    Maybe.Extra.unwrap (text "") (\error -> p [ class "form-error" ] [ text error ])
 
 
 viewRounds : Page.Model -> Quiz -> Html Page.Msg
@@ -88,10 +85,17 @@ viewRound model quiz round =
 
             else
                 Page.Draft
-    in
-    let
+
         roundClass =
-            String.join " " [ "round", if isExpanded then "expanded" else "collapsed", roundStateClass roundState ]
+            String.join " "
+                [ "round"
+                , if isExpanded then
+                    "expanded"
+
+                  else
+                    "collapsed"
+                , roundStateClass roundState
+                ]
     in
     li [ class roundClass ]
         [ viewRoundHeader model round isExpanded isComplete isEditing
@@ -173,8 +177,7 @@ getRoundSummary model round =
                 filledCount =
                     roundInput.scores
                         |> Dict.values
-                        |> List.filter (String.isEmpty >> not)
-                        |> List.length
+                        |> List.Extra.count (String.isEmpty >> not)
 
                 totalCount =
                     Dict.size roundInput.scores
@@ -210,11 +213,7 @@ viewTeamScore model round roundInput isEditable team =
                 |> Maybe.withDefault ""
 
         teamLabel =
-            if String.isEmpty team.name then
-                String.concat [ "Team ", String.fromInt team.number ]
-
-            else
-                team.name
+            Util.Team.teamName team
 
         teamClass =
             if team.active then
@@ -250,13 +249,13 @@ viewTeamScore model round roundInput isEditable team =
             , button
                 [ class "stepper increment-half"
                 , onClick (Page.IncrementScore round.number team.number 0.5)
-                , disabled (not isEditable || model.isSubmitting || model.isLocked)
+                , disabled isDisabled
                 ]
                 [ text "+½" ]
             , button
                 [ class "stepper increment-full"
                 , onClick (Page.IncrementScore round.number team.number 1)
-                , disabled (not isEditable || model.isSubmitting || model.isLocked)
+                , disabled isDisabled
                 ]
                 [ text "+1" ]
             ]
@@ -265,26 +264,42 @@ viewTeamScore model round roundInput isEditable team =
 
 viewRoundActions : Page.Model -> Round -> Page.RoundState -> Html Page.Msg
 viewRoundActions model round state =
+    let
+        isDisabled =
+            model.isSubmitting || model.isLocked
+
+        submitLabel =
+            case state of
+                Page.Draft ->
+                    if model.isSubmitting then
+                        "Submitting..."
+
+                    else
+                        "Submit Scores"
+
+                Page.Editing ->
+                    if model.isSubmitting then
+                        "Saving..."
+
+                    else
+                        "Save Changes"
+
+                Page.Complete ->
+                    ""
+    in
     footer [ class "round-actions" ]
         (case state of
             Page.Draft ->
                 [ button
                     [ class "button primary"
                     , onClick (Page.SubmitRound round.number)
-                    , disabled (model.isSubmitting || model.isLocked)
+                    , disabled isDisabled
                     ]
-                    [ text
-                        (if model.isSubmitting then
-                            "Submitting..."
-
-                         else
-                            "Submit Scores"
-                        )
-                    ]
+                    [ text submitLabel ]
                 , button
                     [ class "button secondary"
                     , onClick (Page.MarkRoundComplete round.number)
-                    , disabled (model.isSubmitting || model.isLocked)
+                    , disabled isDisabled
                     ]
                     [ text "Publish" ]
                 ]
@@ -302,20 +317,13 @@ viewRoundActions model round state =
                 [ button
                     [ class "button primary"
                     , onClick (Page.SubmitRound round.number)
-                    , disabled (model.isSubmitting || model.isLocked)
+                    , disabled isDisabled
                     ]
-                    [ text
-                        (if model.isSubmitting then
-                            "Saving..."
-
-                         else
-                            "Save Changes"
-                        )
-                    ]
+                    [ text submitLabel ]
                 , button
                     [ class "button secondary"
                     , onClick Page.CancelEdit
-                    , disabled (model.isSubmitting || model.isLocked)
+                    , disabled isDisabled
                     ]
                     [ text "Cancel" ]
                 ]

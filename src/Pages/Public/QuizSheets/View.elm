@@ -7,6 +7,7 @@ import Html.Attributes exposing (attribute, class, type_)
 import Pages.Public.QuizSheets.Page as Page
 import QRCode
 import Result.Extra
+import Util.Team
 
 
 view : Page.Model -> Html Page.Msg
@@ -40,9 +41,7 @@ viewSheets : String -> Quiz -> Html msg
 viewSheets baseUrl quiz =
     let
         activeTeams =
-            quiz.scoreBoard.teams
-                |> List.filter .active
-                |> List.sortBy .number
+            Util.Team.activeTeams quiz.scoreBoard.teams
 
         sortedRounds =
             quiz.rounds |> List.filter (\r -> r.numberOfQuestions > 0) |> List.sortBy .number
@@ -104,8 +103,7 @@ viewSheetHeader baseUrl quizId identifier page =
         let
             teamUrl =
                 String.concat [ baseUrl, "/quizzes/", String.fromInt quizId, "/teams/", String.fromInt page.team.number ]
-        in
-        let
+
             quizLabel =
                 String.concat [ identifier.name, " — ", identifier.place ]
 
@@ -117,7 +115,7 @@ viewSheetHeader baseUrl quizId identifier page =
         in
         header [ class "sheet-header" ]
             [ div [ class "sheet-hgroup" ]
-                [ h1 [] [ text (teamLabel page.team) ]
+                [ h1 [] [ text (Util.Team.teamName page.team) ]
                 , p [] [ text quizLabel ]
                 , time [ attribute "datetime" dateIso ] [ text dateFormatted ]
                 ]
@@ -130,7 +128,7 @@ viewSheetHeader baseUrl quizId identifier page =
 
     else
         header [ class "sheet-header-minimal" ]
-            [ h1 [] [ text (teamLabel page.team) ]
+            [ h1 [] [ text (Util.Team.teamName page.team) ]
             ]
 
 
@@ -150,15 +148,6 @@ viewAnswerLine n =
         [ span [ class "answer-space" ] []
         , input [ type_ "checkbox" ] []
         ]
-
-
-teamLabel : Team -> String
-teamLabel team =
-    if String.isEmpty team.name then
-        String.concat [ "Team ", String.fromInt team.number ]
-
-    else
-        team.name
 
 
 groupRoundsIntoPages : List Round -> List (List Round)

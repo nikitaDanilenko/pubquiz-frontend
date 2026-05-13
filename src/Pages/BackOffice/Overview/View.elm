@@ -13,7 +13,7 @@ view model =
     Tristate.fold
         { onInitial = viewLoading
         , onReady = viewOverview
-        , onFailed = viewError
+        , onFailed = always viewError
         }
         model.quizzes
 
@@ -25,8 +25,8 @@ viewLoading =
         ]
 
 
-viewError : a -> Html msg
-viewError _ =
+viewError : Html msg
+viewError =
     section [ class "error" ]
         [ h1 [] [ text "Error" ]
         , p [] [ text "Failed to load quizzes." ]
@@ -36,14 +36,11 @@ viewError _ =
 viewOverview : List QuizSummary -> Html Page.Msg
 viewOverview quizzes =
     let
-        ( active, locked ) =
-            List.partition .active quizzes
-
-        sortedActive =
-            active |> List.sortBy (\q -> Date.toRataDie q.identifier.date) |> List.reverse
-
-        sortedLocked =
-            locked |> List.sortBy (\q -> Date.toRataDie q.identifier.date) |> List.reverse
+        ( sortedActive, sortedLocked ) =
+            quizzes
+                |> List.sortBy (\q -> Date.toRataDie q.identifier.date)
+                |> List.reverse
+                |> List.partition .active
     in
     section [ class "backoffice-overview" ]
         [ h1 [] [ text "Back Office" ]

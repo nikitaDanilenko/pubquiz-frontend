@@ -53,25 +53,24 @@ viewContent model =
 
 viewMessages : Page.Model -> Html msg
 viewMessages model =
-    case ( model.error, model.successMessage ) of
-        ( Nothing, Nothing ) ->
-            text ""
+    let
+        errorView =
+            Maybe.Extra.unwrap (text "") (\e -> p [ class "form-error" ] [ text e ]) model.error
 
-        _ ->
-            section [ class "messages" ]
-                [ case model.error of
-                    Just error ->
-                        p [ class "form-error" ] [ text error ]
+        successView =
+            Maybe.Extra.unwrap (text "") (\m -> p [ class "form-success" ] [ text m ]) model.successMessage
 
-                    Nothing ->
-                        text ""
-                , case model.successMessage of
-                    Just msg ->
-                        p [ class "form-success" ] [ text msg ]
+        hasMessages =
+            Maybe.Extra.isJust model.error || Maybe.Extra.isJust model.successMessage
+    in
+    if hasMessages then
+        section [ class "messages" ]
+            [ errorView
+            , successView
+            ]
 
-                    Nothing ->
-                        text ""
-                ]
+    else
+        text ""
 
 
 viewIdentifierSection : Page.Model -> Html Page.Msg
@@ -109,6 +108,13 @@ viewIdentifierSection model =
 
 viewRoundsSection : Page.Model -> Quiz -> Html Page.Msg
 viewRoundsSection model quiz =
+    let
+        isDisabled =
+            model.isSaving || model.isLocked
+
+        buttonLabel =
+            saveButtonLabel model.isSaving "Save Rounds"
+    in
     section [ class "settings-section" ]
         [ h2 [] [ text "Questions per Round" ]
         , section [ class "round-inputs" ]
@@ -120,9 +126,9 @@ viewRoundsSection model quiz =
             [ button
                 [ class "button primary"
                 , onClick Page.SaveIdentifier
-                , disabled (model.isSaving || model.isLocked)
+                , disabled isDisabled
                 ]
-                [ text (saveButtonLabel model.isSaving "Save Rounds") ]
+                [ text buttonLabel ]
             ]
         ]
 
@@ -136,8 +142,7 @@ viewRoundRow model round =
         questionCount =
             Dict.get round.number model.questionsPerRound
                 |> Maybe.withDefault round.numberOfQuestions
-    in
-    let
+
         roundLabel =
             String.concat [ "Round ", String.fromInt round.number ]
 

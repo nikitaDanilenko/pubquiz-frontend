@@ -3,12 +3,7 @@ module Util.Tristate exposing
     , failed
     , fold
     , initial
-    , isFailed
-    , isInitial
-    , isReady
-    , mapReady
     , ready
-    , toMaybe
     , withDefault
     )
 
@@ -53,19 +48,6 @@ fold handlers tristate =
             handlers.onFailed error
 
 
-mapReady : (a -> b) -> Tristate error a -> Tristate error b
-mapReady f tristate =
-    case tristate of
-        Initial ->
-            Initial
-
-        Ready value ->
-            Ready (f value)
-
-        Failed error ->
-            Failed error
-
-
 withDefault : value -> Tristate error value -> value
 withDefault default tristate =
     case tristate of
@@ -74,43 +56,3 @@ withDefault default tristate =
 
         _ ->
             default
-
-
-isInitial : Tristate error value -> Bool
-isInitial tristate =
-    case tristate of
-        Initial ->
-            True
-
-        _ ->
-            False
-
-
-isReady : Tristate error value -> Bool
-isReady tristate =
-    case tristate of
-        Ready _ ->
-            True
-
-        _ ->
-            False
-
-
-isFailed : Tristate error value -> Bool
-isFailed tristate =
-    case tristate of
-        Failed _ ->
-            True
-
-        _ ->
-            False
-
-
-toMaybe : Tristate error value -> Maybe value
-toMaybe tristate =
-    case tristate of
-        Ready value ->
-            Just value
-
-        _ ->
-            Nothing

@@ -8,6 +8,8 @@ import List.Extra
 import Maybe.Extra
 import Pages.Public.Team.Page as Page
 import Util.Colors as Colors
+import Util.Round
+import Util.Team
 import Util.Tristate as Tristate
 
 
@@ -16,7 +18,7 @@ view model =
     Tristate.fold
         { onInitial = viewLoading
         , onReady = viewTeam model.teamNumber
-        , onFailed = viewError
+        , onFailed = always viewError
         }
         model.quiz
 
@@ -28,8 +30,8 @@ viewLoading =
         ]
 
 
-viewError : a -> Html msg
-viewError _ =
+viewError : Html msg
+viewError =
     section [ class "error" ]
         [ h1 [] [ text "Error" ]
         , p [] [ text "Failed to load team data." ]
@@ -40,9 +42,7 @@ viewTeam : Int -> Quiz -> Html msg
 viewTeam teamNumber quiz =
     let
         activeTeams =
-            quiz.scoreBoard.teams
-                |> List.filter .active
-                |> List.sortBy .number
+            Util.Team.activeTeams quiz.scoreBoard.teams
 
         totalTeams =
             List.length activeTeams
@@ -61,7 +61,7 @@ viewTeam teamNumber quiz =
                 |> List.Extra.find (\t -> t.number == teamNumber)
 
         rounds =
-            quiz.rounds |> List.filter .published |> List.sortBy .number
+            Util.Round.publishedRounds quiz.rounds
 
         scores =
             quiz.scoreBoard.scores

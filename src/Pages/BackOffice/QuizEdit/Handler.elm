@@ -247,12 +247,7 @@ findFirstIncompleteRound quiz completedRounds =
                 |> List.head
                 |> Maybe.map .number
     in
-    case incompleteRound of
-        Just n ->
-            Just n
-
-        Nothing ->
-            firstRound
+    Maybe.Extra.orElse firstRound incompleteRound
 
 
 updateScoreInput : Int -> Int -> String -> Page.Model -> Page.Model

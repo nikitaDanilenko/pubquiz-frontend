@@ -13,6 +13,8 @@ import Maybe.Extra
 import Pages.Public.Quiz.Page as Page
 import Stat
 import Util.Colors as Colors
+import Util.Round
+import Util.Team
 import Util.Theme as Theme exposing (Theme)
 import Util.Tristate as Tristate
 
@@ -22,7 +24,7 @@ view theme model =
     Tristate.fold
         { onInitial = viewLoading
         , onReady = viewQuiz theme model.hovering model.statsHovering
-        , onFailed = viewError
+        , onFailed = always viewError
         }
         model.quiz
 
@@ -34,8 +36,8 @@ viewLoading =
         ]
 
 
-viewError : a -> Html msg
-viewError _ =
+viewError : Html msg
+viewError =
     section [ class "error" ]
         [ h1 [] [ text "Error" ]
         , p [] [ text "Failed to load quiz. It may not exist or the server is unavailable." ]
@@ -46,12 +48,10 @@ viewQuiz : Theme -> Page.Hovering -> Page.StatsHovering -> Quiz -> Html Page.Msg
 viewQuiz theme hovering statsHovering quiz =
     let
         activeTeams =
-            quiz.scoreBoard.teams
-                |> List.filter .active
-                |> List.sortBy .number
+            Util.Team.activeTeams quiz.scoreBoard.teams
 
         rounds =
-            quiz.rounds |> List.filter .published |> List.sortBy .number
+            Util.Round.publishedRounds quiz.rounds
 
         scores =
             quiz.scoreBoard.scores
@@ -252,10 +252,6 @@ viewCumulativeBarChart theme hovering teamData rounds =
         ]
 
 
-
--- CHART 3: PER-ROUND BAR CHART
-
-
 viewPerRoundBarChart : Theme -> Page.Hovering -> List TeamData -> List Round -> Html Page.Msg
 viewPerRoundBarChart theme hovering teamData rounds =
     let
@@ -430,12 +426,8 @@ viewHeader quiz =
 
 
 teamName : Team -> String
-teamName team =
-    if String.isEmpty team.name then
-        String.concat [ "Team ", String.fromInt team.number ]
-
-    else
-        team.name
+teamName =
+    Util.Team.teamName
 
 
 tooltipLabel : CI.One data CI.Any -> String

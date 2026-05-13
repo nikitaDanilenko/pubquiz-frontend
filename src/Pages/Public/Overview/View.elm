@@ -14,7 +14,7 @@ view model =
     Tristate.fold
         { onInitial = viewLoading
         , onReady = viewOverview model
-        , onFailed = viewError
+        , onFailed = always viewError
         }
         model.quizzes
 
@@ -26,8 +26,8 @@ viewLoading =
         ]
 
 
-viewError : a -> Html msg
-viewError _ =
+viewError : Html msg
+viewError =
     section [ class "error" ]
         [ h1 [] [ text "Error" ]
         , p [] [ text "Failed to load quizzes." ]
@@ -63,7 +63,11 @@ viewSortButtons model =
         sortByButton sortBy label =
             let
                 activeClass =
-                    if model.sortBy == sortBy then "active" else ""
+                    if model.sortBy == sortBy then
+                        "active"
+
+                    else
+                        ""
             in
             button [ class "sort-button", class activeClass, onClick (Page.SetSortBy sortBy) ]
                 [ text label ]
@@ -71,7 +75,11 @@ viewSortButtons model =
         directionButton direction label =
             let
                 activeClass =
-                    if model.sortDirection == direction then "active" else ""
+                    if model.sortDirection == direction then
+                        "active"
+
+                    else
+                        ""
             in
             button [ class "sort-button", class activeClass, onClick (Page.SetSortDirection direction) ]
                 [ text label ]

@@ -1,13 +1,8 @@
-module Util.Colors exposing (interpolateColor, statisticsColors, teamColors, toHex)
+module Util.Colors exposing (interpolateColor, statisticsColors, toHex)
 
 import Color exposing (Color, rgb255)
 import Color.Convert
 import Color.Interpolate as Interpolate
-
-
-teamColors : Int -> List String
-teamColors count =
-    mkColors count |> List.map toHex
 
 
 statisticsColors :
@@ -49,12 +44,6 @@ lastColor =
 numberOfFixedColors : Int
 numberOfFixedColors =
     List.length fixedPalette
-
-
-mkColors : Int -> List Color
-mkColors total =
-    List.range 0 (total - 1)
-        |> List.map (colorForIndex total)
 
 
 colorForIndex : Int -> Int -> Color
