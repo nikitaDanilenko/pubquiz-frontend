@@ -93,6 +93,7 @@ viewOrganiserNote =
     aside [ class "organiser-note" ]
         [ strong [] [ text "Organiser: " ]
         , text "Answer lines equal the number of questions configured per round. "
+        , text "Optimized for two-sided printing. "
         , text "Press Ctrl+P / Cmd+P to print or save as PDF."
         ]
 
