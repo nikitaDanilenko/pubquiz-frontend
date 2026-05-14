@@ -1,6 +1,15 @@
 import './main.css';
 import { Elm } from './Main.elm';
 
+const raw = window.__BACK_END_PREFIX__ || "";
+const backEndPrefix = raw.startsWith("$") ? "" : raw;
+if (backEndPrefix) {
+  const origOpen = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+    return origOpen.call(this, method, backEndPrefix + url, ...rest);
+  };
+}
+
 const getInitialTheme = () => {
   const stored = localStorage.getItem('theme');
   if (stored) return stored;
