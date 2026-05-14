@@ -1,0 +1,92 @@
+name: Build and Publish
+
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  determine_changes:
+    name: Determine Changes and Version
+    runs-on: ubuntu-latest
+    outputs:
+      version-tag: ${{ steps.semantic-version.outputs.version_tag }}
+      version: ${{ steps.semantic-version.outputs.version }}
+      paths-changed: ${{ steps.paths.outputs.src }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        # Depth setting is necessary for the semantic-version action.
+        with:
+          fetch-depth: 0
+      - name: Determine version
+        id: semantic-version
+        uses: paulhatch/semantic-version@9f72830310d5ed81233b641ee59253644cd8a8fc # v6.0.2
+        with:
+          # Since version 6.0.0, the action uses conventional commits.
+          major_pattern: "/(major)/i"
+          minor_pattern: "/(minor)/i"
+      - name: Check changed paths
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+        id: paths
+        with:
+          filters: |
+            src:
+              - 'public/**'
+              - 'src/**'
+              - 'elm.json'
+              - 'elmapp.config.js'
+              - 'package.json'
+              - 'nginx.conf'
+              - 'Dockerfile'
+
+  create_new_release:
+    needs:
+      - determine_changes
+    name: Create New Release
+    runs-on: ubuntu-latest
+    if: ${{ needs.determine_changes.outputs.paths-changed == 'true' }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Publish new release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git tag "${{ needs.determine_changes.outputs.version-tag }}" "${{ github.sha }}"
+          git push origin "${{ needs.determine_changes.outputs.version-tag }}"
+          gh release create "${{ needs.determine_changes.outputs.version-tag }}" --generate-notes --verify-tag
+
+  build_and_publish:
+    needs:
+      - determine_changes
+    runs-on: ubuntu-latest
+    # The output is a string, hence the string comparison.
+    if: ${{ needs.determine_changes.outputs.paths-changed == 'true' }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+      - name: Log in to DockerHub
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        with:
+          username: ${{ vars.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+      - name: Set metadata
+        id: metadata
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
+        with:
+          images: nikitadanilenko/pubquiz-front-end
+          tags: |
+            type=sha
+            type=raw,value=latest
+            type=semver,pattern={{version}},value=${{ needs.determine_changes.outputs.version-tag }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
