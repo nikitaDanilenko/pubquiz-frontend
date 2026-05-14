@@ -3,6 +3,7 @@ FROM --platform=$BUILD_PLATFORM node:22-alpine AS build
 
 WORKDIR /app
 
+# The setting is necessary for 'create-elm-app'; outdated, but 'create-elm-app' is not updated (anymore).
 ENV NODE_OPTIONS=--openssl-legacy-provider
 
 RUN npm install -g create-elm-app
