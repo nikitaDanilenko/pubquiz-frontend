@@ -25,10 +25,8 @@ jobs:
         uses: paulhatch/semantic-version@9f72830310d5ed81233b641ee59253644cd8a8fc # v6.0.2
         with:
           # Since version 6.0.0, the action uses conventional commits.
-          major_pattern: "/(major)/"
-          major_regexp_flags: "i"
-          minor_pattern: "/(minor)/"
-          minor_regexp_flags: "i"
+          major_pattern: "/(major)/i"
+          minor_pattern: "/(minor)/i"
       - name: Check changed paths
         uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: paths
