@@ -78,6 +78,7 @@ type Msg
     | ToggleTeamActive Int Bool
     | GotToggleTeamActiveResponse Int Bool (Result (OpenApi.Common.Error BackofficeQuizIdSetTeamActive_Error String) ())
     | SetQuestionsForRound Int String
+    | AddRound
     | LockQuiz
     | UnlockQuiz
     | GotLockResponse (Result (OpenApi.Common.Error () String) ())
