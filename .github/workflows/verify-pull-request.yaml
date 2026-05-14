@@ -10,11 +10,6 @@ jobs:
       - name: Check out
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Set up Elm
-        uses: jorelali/setup-elm@e7598712b5d6fbb5c4245a6cd757555ac153048d # v6
-        with:
-          elm-version: 0.19.1
-
       - name: Install elm-test
         run: npm install elm-test -g
 
