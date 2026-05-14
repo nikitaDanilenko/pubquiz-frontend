@@ -24,6 +24,11 @@ toHex =
     Color.Convert.colorToHex
 
 
+{-| Rainbow progression. For more than seven colors, an interpolation is used between two adjacent colors.
+
+The result is particularly pretty for multiples of seven.
+
+-}
 fixedPalette : List Color
 fixedPalette =
     [ rgb255 255 99 132
