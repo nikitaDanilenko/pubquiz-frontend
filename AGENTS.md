@@ -11,7 +11,7 @@
   - "Build project" not "Building"
 - Prefer YAML dash syntax for arrays over JSON bracket syntax:
 
-  ```yaml
+  ```
   # Good
   branches:
     - main
