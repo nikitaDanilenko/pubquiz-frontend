@@ -1,0 +1,125 @@
+module Api.Types exposing
+    ( AuthenticatedUser, CorrectScoreCommand, Day, LoginRequest, Quiz, QuizIdentifier, QuizMetaData
+    , QuizSettings, QuizSummary, RecordRoundScoresCommand, RenameTeamCommand, Round, ScoreBoard, ScoreEntry
+    , SetTeamActiveCommand, Team, TeamScore
+    , BackofficeQuizIdChangeSettings_Error(..), BackofficeQuizIdCorrectScore_Error(..)
+    , BackofficeQuizIdRecordRoundScores_Error(..), BackofficeQuizIdRenameTeam_Error(..)
+    , BackofficeQuizIdSetTeamActive_Error(..)
+    )
+
+{-|
+
+
+## Aliases
+
+@docs AuthenticatedUser, CorrectScoreCommand, Day, LoginRequest, Quiz, QuizIdentifier, QuizMetaData
+@docs QuizSettings, QuizSummary, RecordRoundScoresCommand, RenameTeamCommand, Round, ScoreBoard, ScoreEntry
+@docs SetTeamActiveCommand, Team, TeamScore
+
+
+## Errors
+
+@docs BackofficeQuizIdChangeSettings_Error, BackofficeQuizIdCorrectScore_Error
+@docs BackofficeQuizIdRecordRoundScores_Error, BackofficeQuizIdRenameTeam_Error
+@docs BackofficeQuizIdSetTeamActive_Error
+
+-}
+
+import Date
+
+
+type BackofficeQuizIdChangeSettings_Error
+    = BackofficeQuizIdChangeSettings_400 ()
+    | BackofficeQuizIdChangeSettings_404 ()
+
+
+type BackofficeQuizIdCorrectScore_Error
+    = BackofficeQuizIdCorrectScore_400 ()
+    | BackofficeQuizIdCorrectScore_404 ()
+
+
+type BackofficeQuizIdRecordRoundScores_Error
+    = BackofficeQuizIdRecordRoundScores_400 ()
+    | BackofficeQuizIdRecordRoundScores_404 ()
+
+
+type BackofficeQuizIdRenameTeam_Error
+    = BackofficeQuizIdRenameTeam_400 ()
+    | BackofficeQuizIdRenameTeam_404 ()
+
+
+type BackofficeQuizIdSetTeamActive_Error
+    = BackofficeQuizIdSetTeamActive_400 ()
+    | BackofficeQuizIdSetTeamActive_404 ()
+
+
+type alias TeamScore =
+    { points : Float, teamNumber : Int }
+
+
+type alias Team =
+    { active : Bool, name : String, number : Int }
+
+
+type alias SetTeamActiveCommand =
+    { active : Bool, teamNumber : Int }
+
+
+type alias ScoreEntry =
+    { points : Float, roundNumber : Int, teamNumber : Int }
+
+
+type alias ScoreBoard =
+    { scores : List ScoreEntry, teams : List Team }
+
+
+type alias Round =
+    { displayMaxPoints : Float
+    , number : Int
+    , numberOfQuestions : Int
+    , published : Bool
+    }
+
+
+type alias RenameTeamCommand =
+    { newName : String, teamNumber : Int }
+
+
+type alias RecordRoundScoresCommand =
+    { roundNumber : Int, scores : List TeamScore }
+
+
+type alias QuizSummary =
+    { active : Bool, identifier : QuizIdentifier, quizId : Int }
+
+
+type alias QuizSettings =
+    { numberOfTeams : Int, questionsPerRound : List Int }
+
+
+type alias QuizMetaData =
+    { identifier : QuizIdentifier, settings : QuizSettings }
+
+
+type alias QuizIdentifier =
+    { date : Day, name : String, place : String }
+
+
+type alias Quiz =
+    { rounds : List Round, scoreBoard : ScoreBoard, summary : QuizSummary }
+
+
+type alias LoginRequest =
+    { password : String, username : String }
+
+
+type alias Day =
+    Date.Date
+
+
+type alias CorrectScoreCommand =
+    { points : Float, roundNumber : Int, teamNumber : Int }
+
+
+type alias AuthenticatedUser =
+    { isAdmin : Bool }

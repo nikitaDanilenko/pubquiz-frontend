@@ -1,0 +1,11 @@
+{
+  "name": "pubquiz-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "generate-api": "bash scripts/generate-api.sh"
+  },
+  "devDependencies": {
+    "elm-open-api": "^0.7.0"
+  }
+}

@@ -1,0 +1,85 @@
+module Pages.BackOffice.QuizSettings.Page exposing
+    ( Model
+    , Msg(..)
+    , lenses
+    )
+
+import Api.Types
+    exposing
+        ( BackofficeQuizIdChangeSettings_Error
+        , BackofficeQuizIdRenameTeam_Error
+        , BackofficeQuizIdSetTeamActive_Error
+        , Quiz
+        )
+import Dict exposing (Dict)
+import Monocle.Lens exposing (Lens)
+import OpenApi.Common
+
+
+type alias Model =
+    { quizId : Int
+    , quiz : Maybe Quiz
+    , name : String
+    , date : String
+    , place : String
+    , teamNames : Dict Int String
+    , questionsPerRound : Dict Int Int
+    , isAdmin : Bool
+    , isLoading : Bool
+    , isSaving : Bool
+    , isLocked : Bool
+    , error : Maybe String
+    , successMessage : Maybe String
+    }
+
+
+lenses :
+    { quizId : Lens Model Int
+    , quiz : Lens Model (Maybe Quiz)
+    , name : Lens Model String
+    , date : Lens Model String
+    , place : Lens Model String
+    , teamNames : Lens Model (Dict Int String)
+    , questionsPerRound : Lens Model (Dict Int Int)
+    , isAdmin : Lens Model Bool
+    , isLoading : Lens Model Bool
+    , isSaving : Lens Model Bool
+    , isLocked : Lens Model Bool
+    , error : Lens Model (Maybe String)
+    , successMessage : Lens Model (Maybe String)
+    }
+lenses =
+    { quizId = Lens .quizId (\b a -> { a | quizId = b })
+    , quiz = Lens .quiz (\b a -> { a | quiz = b })
+    , name = Lens .name (\b a -> { a | name = b })
+    , date = Lens .date (\b a -> { a | date = b })
+    , place = Lens .place (\b a -> { a | place = b })
+    , teamNames = Lens .teamNames (\b a -> { a | teamNames = b })
+    , questionsPerRound = Lens .questionsPerRound (\b a -> { a | questionsPerRound = b })
+    , isAdmin = Lens .isAdmin (\b a -> { a | isAdmin = b })
+    , isLoading = Lens .isLoading (\b a -> { a | isLoading = b })
+    , isSaving = Lens .isSaving (\b a -> { a | isSaving = b })
+    , isLocked = Lens .isLocked (\b a -> { a | isLocked = b })
+    , error = Lens .error (\b a -> { a | error = b })
+    , successMessage = Lens .successMessage (\b a -> { a | successMessage = b })
+    }
+
+
+type Msg
+    = GotQuiz (Result (OpenApi.Common.Error () String) Quiz)
+    | SetName String
+    | SetDate String
+    | SetPlace String
+    | SaveIdentifier
+    | GotSaveIdentifierResponse (Result (OpenApi.Common.Error BackofficeQuizIdChangeSettings_Error String) ())
+    | SetTeamName Int String
+    | SaveTeamName Int
+    | GotSaveTeamNameResponse Int (Result (OpenApi.Common.Error BackofficeQuizIdRenameTeam_Error String) ())
+    | ToggleTeamActive Int Bool
+    | GotToggleTeamActiveResponse Int Bool (Result (OpenApi.Common.Error BackofficeQuizIdSetTeamActive_Error String) ())
+    | SetQuestionsForRound Int String
+    | LockQuiz
+    | UnlockQuiz
+    | GotLockResponse (Result (OpenApi.Common.Error () String) ())
+    | GotUnlockResponse (Result (OpenApi.Common.Error () String) ())
+    | GoToPointEntry
