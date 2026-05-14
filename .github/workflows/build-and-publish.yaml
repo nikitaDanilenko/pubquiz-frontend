@@ -12,7 +12,8 @@ jobs:
     outputs:
       version-tag: ${{ steps.semantic-version.outputs.version_tag }}
       version: ${{ steps.semantic-version.outputs.version }}
-      paths-changed: ${{ steps.paths.outputs.src }}
+      src-changed: ${{ steps.paths.outputs.src }}
+      deployment-changed: ${{ steps.paths.outputs.deployment }}
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -41,13 +42,15 @@ jobs:
               - 'package.json'
               - 'nginx.conf'
               - 'Dockerfile'
+            deployment:
+              - 'deployment/**'
 
   create_new_release:
     needs:
       - determine_changes
     name: Create New Release
     runs-on: ubuntu-latest
-    if: ${{ needs.determine_changes.outputs.paths-changed == 'true' }}
+    if: ${{ needs.determine_changes.outputs.src-changed == 'true' }}
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -64,7 +67,7 @@ jobs:
       - determine_changes
     runs-on: ubuntu-latest
     # The output is a string, hence the string comparison.
-    if: ${{ needs.determine_changes.outputs.paths-changed == 'true' }}
+    if: ${{ needs.determine_changes.outputs.src-changed == 'true' }}
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -99,6 +102,9 @@ jobs:
       - build_and_publish
     name: Update GitOps Repository
     runs-on: ubuntu-latest
+    if: |
+      (needs.build_and_publish.result == 'success' || needs.build_and_publish.result == 'skipped') &&
+      (needs.determine_changes.outputs.src-changed == 'true' || needs.determine_changes.outputs.deployment-changed == 'true')
     steps:
       - name: Check out source repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

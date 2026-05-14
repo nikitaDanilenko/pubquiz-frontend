@@ -5,6 +5,7 @@ metadata:
   labels:
     {{- include "pubquiz-frontend.labels" . | nindent 4 }}
 spec:
+  # Redirects from the old approach without subdomains to the current one.
   redirectRegex:
     regex: "^https?://[^/]+/quizzes/([^/]+)/team/([^/]+)/code/[^/]+"
     replacement: "https://{{ .Values.ingress.host }}/quizzes/${1}/teams/${2}"
