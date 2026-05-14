@@ -16,7 +16,7 @@ jobs:
           elm-version: 0.19.1
 
       - name: Install elm-test
-        run: npm install -g elm-test@0.19.1-revision1
+        run: npm install elm-test -g
 
       - name: Run tests
         run: elm-test
