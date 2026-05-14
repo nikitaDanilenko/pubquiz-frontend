@@ -24,8 +24,10 @@ jobs:
         uses: paulhatch/semantic-version@9f72830310d5ed81233b641ee59253644cd8a8fc # v6.0.2
         with:
           # Since version 6.0.0, the action uses conventional commits.
-          major_pattern: "/(major)/i"
-          minor_pattern: "/(minor)/i"
+          major_pattern: "/(major)/"
+          major_regexp_flags: "i"
+          minor_pattern: "/(minor)/"
+          minor_regexp_flags: "i"
       - name: Check changed paths
         uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: paths
@@ -90,3 +92,66 @@ jobs:
           tags: ${{ steps.metadata.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  update_gitops:
+    needs:
+      - determine_changes
+      - build_and_publish
+    name: Update GitOps Repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          path: ${{ github.workspace }}/source
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        with:
+          client-id: ${{ vars.GITOPS_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.GITOPS_BOT_PRIVATE_KEY }}
+          owner: nikitaDanilenko
+          repositories: git-ops
+
+      - name: Check out GitOps repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: nikitaDanilenko/git-ops
+          token: ${{ steps.app-token.outputs.token }}
+          path: ${{ github.workspace }}/git-ops
+
+      - name: Update templates and image tag
+        run: |
+          # Careful: The target is called 'pubquiz' in GitOps, because it contains the entire application.
+          GITOPS_DIR="${{ github.workspace }}/git-ops/pubquiz"
+          SOURCE_DIR="${{ github.workspace }}/source/deployment"
+
+          mkdir -p "$GITOPS_DIR/templates/frontend"
+
+          rsync -av --delete "$SOURCE_DIR/templates/" "$GITOPS_DIR/templates/frontend/"
+
+          VERSION="${{ needs.determine_changes.outputs.version }}"
+          yq -i ".frontend.image.tag = \"$VERSION\"" "$GITOPS_DIR/values.yaml"
+
+      - name: Determine commit title
+        id: commit
+        run: echo "title=$(echo '${{ github.event.head_commit.message }}' | head -n 1)" >> $GITHUB_OUTPUT
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          path: ${{ github.workspace }}/git-ops
+          branch: deploy/pubquiz-frontend-${{ needs.determine_changes.outputs.version }}
+          delete-branch: true
+          title: "Deploy `pubquiz-frontend:${{ needs.determine_changes.outputs.version }}`"
+          body: |
+            Automated deployment PR for `pubquiz-frontend`.
+
+            **Version:** `${{ needs.determine_changes.outputs.version }}`
+            **Triggered by:** [${{ steps.commit.outputs.title }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+          commit-message: "Update pubquiz-frontend to ${{ needs.determine_changes.outputs.version }}"
+          labels: |
+            deployment
+            automated
