@@ -65,6 +65,7 @@ jobs:
   build_and_publish:
     needs:
       - determine_changes
+    name: Build and Publish Docker Image
     runs-on: ubuntu-latest
     # The output is a string, hence the string comparison.
     if: ${{ needs.determine_changes.outputs.src-changed == 'true' }}
@@ -103,7 +104,7 @@ jobs:
     name: Update GitOps Repository
     runs-on: ubuntu-latest
     if: |
-      (needs.build_and_publish.result == 'success' || needs.build_and_publish.result == 'skipped') &&
+      !failure() &&
       (needs.determine_changes.outputs.src-changed == 'true' || needs.determine_changes.outputs.deployment-changed == 'true')
     steps:
       - name: Check out source repository
