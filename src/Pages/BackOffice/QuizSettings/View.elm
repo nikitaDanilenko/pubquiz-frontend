@@ -1,6 +1,6 @@
 module Pages.BackOffice.QuizSettings.View exposing (view)
 
-import Api.Types exposing (Quiz, Round, Team)
+import Api.Types exposing (Quiz, Team)
 import Dict exposing (Dict)
 import Html exposing (Html, button, footer, h1, h2, header, input, label, li, p, section, strong, text, ul)
 import Html.Attributes as Attr exposing (checked, class, disabled, for, id, placeholder, type_, value)
@@ -43,7 +43,7 @@ viewContent model =
                     [ viewMessages model
                     , viewLockSection model
                     , viewIdentifierSection model
-                    , viewRoundsSection model quiz
+                    , viewRoundsSection model
                     , viewTeamsSection model quiz
                     ]
 
@@ -106,24 +106,32 @@ viewIdentifierSection model =
         ]
 
 
-viewRoundsSection : Page.Model -> Quiz -> Html Page.Msg
-viewRoundsSection model quiz =
+viewRoundsSection : Page.Model -> Html Page.Msg
+viewRoundsSection model =
     let
         isDisabled =
             model.isSaving || model.isLocked
 
         buttonLabel =
             saveButtonLabel model.isSaving "Save Rounds"
+
+        roundRows =
+            model.questionsPerRound
+                |> Dict.toList
+                |> List.sortBy Tuple.first
+                |> List.map (\( roundNumber, questionCount ) -> viewRoundRow model roundNumber questionCount)
     in
     section [ class "settings-section" ]
         [ h2 [] [ text "Questions per Round" ]
-        , section [ class "round-inputs" ]
-            (quiz.rounds
-                |> List.sortBy .number
-                |> List.map (viewRoundRow model)
-            )
+        , section [ class "round-inputs" ] roundRows
         , footer [ class "section-actions" ]
             [ button
+                [ class "button secondary"
+                , onClick Page.AddRound
+                , disabled isDisabled
+                ]
+                [ text "Add Round" ]
+            , button
                 [ class "button primary"
                 , onClick Page.SaveIdentifier
                 , disabled isDisabled
@@ -133,18 +141,14 @@ viewRoundsSection model quiz =
         ]
 
 
-viewRoundRow : Page.Model -> Round -> Html Page.Msg
-viewRoundRow model round =
+viewRoundRow : Page.Model -> Int -> Int -> Html Page.Msg
+viewRoundRow model roundNumber questionCount =
     let
         rowId =
-            String.concat [ "round-", String.fromInt round.number ]
-
-        questionCount =
-            Dict.get round.number model.questionsPerRound
-                |> Maybe.withDefault round.numberOfQuestions
+            String.concat [ "round-", String.fromInt roundNumber ]
 
         roundLabel =
-            String.concat [ "Round ", String.fromInt round.number ]
+            String.concat [ "Round ", String.fromInt roundNumber ]
 
         isDisabled =
             model.isSaving || model.isLocked
@@ -155,7 +159,7 @@ viewRoundRow model round =
             [ type_ "number"
             , id rowId
             , value (String.fromInt questionCount)
-            , onInput (Page.SetQuestionsForRound round.number)
+            , onInput (Page.SetQuestionsForRound roundNumber)
             , Attr.min "0"
             , disabled isDisabled
             ]

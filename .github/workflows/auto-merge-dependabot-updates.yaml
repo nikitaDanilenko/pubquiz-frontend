@@ -9,6 +9,9 @@ jobs:
 
   # Dependabot mostly concerns GitHub Actions, so we only auto-merge non-major updates.
   fetch_metadata:
+    permissions:
+      pull-requests: write
+      contents: write
     if: github.event.pull_request.user.login == 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
