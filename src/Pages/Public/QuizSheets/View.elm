@@ -37,6 +37,11 @@ type alias SheetPage =
     }
 
 
+type Sheet
+    = ContentSheet SheetPage
+    | BlankSheet
+
+
 viewSheets : String -> Quiz -> Html msg
 viewSheets baseUrl quiz =
     let
@@ -49,27 +54,38 @@ viewSheets baseUrl quiz =
         roundPages =
             groupRoundsIntoPages sortedRounds
 
-        sheetPages =
-            activeTeams
-                |> List.indexedMap
-                    (\teamIndex team ->
-                        roundPages
-                            |> List.indexedMap
-                                (\pageIndex rounds ->
+        needsBlankPage =
+            modBy 2 (List.length roundPages) == 1
+
+        teamSheets teamIndex team =
+            let
+                contentSheets =
+                    roundPages
+                        |> List.indexedMap
+                            (\pageIndex rounds ->
+                                ContentSheet
                                     { team = team
                                     , rounds = rounds
                                     , isFirstForTeam = pageIndex == 0
                                     , isFirstOverall = teamIndex == 0 && pageIndex == 0
                                     }
-                                )
-                    )
+                            )
+            in
+            if needsBlankPage then
+                contentSheets ++ [ BlankSheet ]
+            else
+                contentSheets
+
+        sheets =
+            activeTeams
+                |> List.indexedMap teamSheets
                 |> List.concat
 
         quizId =
             quiz.summary.quizId
     in
     main_ [ class "quiz-sheets" ]
-        (viewOrganiserNote :: List.map (viewSheet baseUrl quizId quiz.summary.identifier) sheetPages)
+        (viewOrganiserNote :: List.map (viewSheet baseUrl quizId quiz.summary.identifier) sheets)
 
 
 viewOrganiserNote : Html msg
@@ -77,24 +93,30 @@ viewOrganiserNote =
     aside [ class "organiser-note" ]
         [ strong [] [ text "Organiser: " ]
         , text "Answer lines equal the number of questions configured per round. "
+        , text "Optimized for two-sided printing. "
         , text "Press Ctrl+P / Cmd+P to print or save as PDF."
         ]
 
 
-viewSheet : String -> Int -> QuizIdentifier -> SheetPage -> Html msg
-viewSheet baseUrl quizId identifier page =
-    let
-        sheetClass =
-            if page.isFirstOverall then
-                "sheet"
+viewSheet : String -> Int -> QuizIdentifier -> Sheet -> Html msg
+viewSheet baseUrl quizId identifier sheet =
+    case sheet of
+        BlankSheet ->
+            article [ class "sheet new-page" ] []
 
-            else
-                "sheet new-page"
-    in
-    article [ class sheetClass ]
-        (viewSheetHeader baseUrl quizId identifier page
-            :: List.map viewRoundSection page.rounds
-        )
+        ContentSheet page ->
+            let
+                sheetClass =
+                    if page.isFirstOverall then
+                        "sheet"
+
+                    else
+                        "sheet new-page"
+            in
+            article [ class sheetClass ]
+                (viewSheetHeader baseUrl quizId identifier page
+                    :: List.map viewRoundSection page.rounds
+                )
 
 
 viewSheetHeader : String -> Int -> QuizIdentifier -> SheetPage -> Html msg

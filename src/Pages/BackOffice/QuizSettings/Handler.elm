@@ -84,9 +84,10 @@ update msg model =
                             , settings =
                                 { numberOfTeams = List.length quiz.scoreBoard.teams
                                 , questionsPerRound =
-                                    quiz.rounds
-                                        |> List.sortBy .number
-                                        |> List.map (\r -> Dict.get r.number model.questionsPerRound |> Maybe.withDefault r.numberOfQuestions)
+                                    model.questionsPerRound
+                                        |> Dict.toList
+                                        |> List.sortBy Tuple.first
+                                        |> List.map Tuple.second
                                 }
                             }
                         }
@@ -198,6 +199,19 @@ update msg model =
                       }
                     , Cmd.none
                     )
+
+        Page.AddRound ->
+            let
+                nextRound =
+                    model.questionsPerRound
+                        |> Dict.keys
+                        |> List.maximum
+                        |> Maybe.withDefault 0
+                        |> (+) 1
+            in
+            ( { model | questionsPerRound = Dict.insert nextRound 8 model.questionsPerRound }
+            , Cmd.none
+            )
 
         Page.SetQuestionsForRound roundNumber input ->
             let

@@ -1,5 +1,7 @@
 #!/bin/sh
 set -e
+# Handles the substitution for the BACK_END_PREFIX variable in the index.html file
+# See index.js for more details.
 envsubst '${BACK_END_PREFIX}' \
   < /usr/share/nginx/html/index.html \
   > /tmp/index.html
