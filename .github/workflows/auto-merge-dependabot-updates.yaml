@@ -8,7 +8,8 @@ on:
 jobs:
 
   # Dependabot mostly concerns GitHub Actions, so we only auto-merge non-major updates.
-  fetch_metadata:
+  auto_merge:
+    name: Auto-merge Dependabot PRs
     permissions:
       pull-requests: write
       contents: write
