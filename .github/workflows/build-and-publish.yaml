@@ -10,10 +10,13 @@ concurrency:
   cancel-in-progress: false
   queue: max
 
+permissions: {}
+
 jobs:
   determine_changes:
     name: Determine Changes and Version
     runs-on: ubuntu-latest
+    permissions: {}
     outputs:
       version-tag: ${{ steps.semantic-version.outputs.version_tag }}
       version: ${{ steps.semantic-version.outputs.version }}
@@ -25,6 +28,7 @@ jobs:
         # Depth setting is necessary for the semantic-version action.
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Determine version
         id: semantic-version
         uses: paulhatch/semantic-version@9f72830310d5ed81233b641ee59253644cd8a8fc # v6.0.2
@@ -54,16 +58,20 @@ jobs:
     name: Create New Release
     runs-on: ubuntu-latest
     if: ${{ needs.determine_changes.outputs.src-changed == 'true' }}
+    permissions:
+      contents: write
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Publish new release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION_TAG: ${{ needs.determine_changes.outputs.version-tag }}
+          COMMIT_SHA: ${{ github.sha }}
         run: |
-          git tag "${{ needs.determine_changes.outputs.version-tag }}" "${{ github.sha }}"
-          git push origin "${{ needs.determine_changes.outputs.version-tag }}"
-          gh release create "${{ needs.determine_changes.outputs.version-tag }}" --generate-notes --verify-tag
+          git tag "$VERSION_TAG" "$COMMIT_SHA"
+          git push origin "$VERSION_TAG"
+          gh release create "$VERSION_TAG" --generate-notes --verify-tag
 
   build_and_publish:
     needs:
@@ -72,9 +80,12 @@ jobs:
     runs-on: ubuntu-latest
     # The output is a string, hence the string comparison.
     if: ${{ needs.determine_changes.outputs.src-changed == 'true' }}
+    permissions: {}
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
       - name: Log in to DockerHub
@@ -109,11 +120,13 @@ jobs:
     if: |
       !failure() &&
       (needs.determine_changes.outputs.src-changed == 'true' || needs.determine_changes.outputs.deployment-changed == 'true')
+    permissions: {}
     steps:
       - name: Check out source repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: ${{ github.workspace }}/source
+          persist-credentials: false
 
       - name: Generate GitHub App token
         id: app-token
@@ -123,6 +136,8 @@ jobs:
           private-key: ${{ secrets.GITOPS_BOT_PRIVATE_KEY }}
           owner: nikitaDanilenko
           repositories: git-ops
+          permission-contents: write
+          permission-pull-requests: write
 
       - name: Check out GitOps repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -130,23 +145,26 @@ jobs:
           repository: nikitaDanilenko/git-ops
           token: ${{ steps.app-token.outputs.token }}
           path: ${{ github.workspace }}/git-ops
+          persist-credentials: false
 
       - name: Update templates and image tag
+        env:
+          GITOPS_DIR: ${{ github.workspace }}/git-ops/pubquiz
+          SOURCE_DIR: ${{ github.workspace }}/source/deployment
+          VERSION: ${{ needs.determine_changes.outputs.version }}
         run: |
           # Careful: The target is called 'pubquiz' in GitOps, because it contains the entire application.
-          GITOPS_DIR="${{ github.workspace }}/git-ops/pubquiz"
-          SOURCE_DIR="${{ github.workspace }}/source/deployment"
-
           mkdir -p "$GITOPS_DIR/templates/frontend"
 
           rsync -av --delete "$SOURCE_DIR/templates/" "$GITOPS_DIR/templates/frontend/"
 
-          VERSION="${{ needs.determine_changes.outputs.version }}"
           yq -i ".frontend.image.tag = \"$VERSION\"" "$GITOPS_DIR/values.yaml"
 
       - name: Determine commit title
         id: commit
-        run: echo "title=$(echo '${{ github.event.head_commit.message }}' | head -n 1)" >> $GITHUB_OUTPUT
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: echo "title=$(echo "$COMMIT_MSG" | head -n 1)" >> "$GITHUB_OUTPUT"
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
