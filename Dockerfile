@@ -1,5 +1,5 @@
 ARG BUILD_PLATFORM=linux/amd64
-FROM --platform=$BUILD_PLATFORM node:22-alpine AS build
+FROM --platform=$BUILD_PLATFORM node:24-alpine AS build
 
 WORKDIR /app
 
