@@ -6,6 +6,6 @@
     "generate-api": "bash scripts/generate-api.sh"
   },
   "devDependencies": {
-    "elm-open-api": "^0.7.0"
+    "elm-open-api": "^0.8.0"
   }
 }
